@@ -1,0 +1,16 @@
+type: struct
+fields:
+- metadata: {}
+  name: id
+  nullable: false
+  type: integer
+- metadata: {}
+  name: allow_contact
+  nullable: false
+  type: boolean
+- metadata: {}
+  name: _corrupt_record
+  nullable: true
+  type: string
+
+

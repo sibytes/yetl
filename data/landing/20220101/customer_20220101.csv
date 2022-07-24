@@ -1,0 +1,12 @@
+id,first_name,last_name,email,gender,job_title,amount
+1,"Davidde","Legier","dlegier0@mail.ru","Agender","Editor",86.5
+2,"Panchito","Scirman","pscirman1@kickstarter.com","Male","Junior Executive",36.18
+3,"Chic","Ickowics","cickowics2@booking.com","Male","Research Associate",35.54
+4,"Pascale","Jedrzaszkiewicz","pjedrzaszkiewicz3@auda.org.au","Male","Safety Technician IV",73.21
+5,"Sara","Whiterod","swhiterod4@hhs.gov","Female","Assistant Manager",47.85
+6,"Mariska","Antrum","mantrum5@nytimes.com","Female","Tax Accountant",16.37
+7,"Ingemar","Petrus","ipetrus6@blogspot.com","Male","Chief Design Engineer",49.02
+8,"Anstice","Hollingdale","ahollingdale7@yahoo.co.jp","Female","Cost Accountant",21.94
+9,"Chaunce","Holdforth","choldforth8@ca.gov","Non-binary","Chief Design Engineer",72.0
+10,"Blinni","Fenty","bfenty9@paginegialle.it","Female","Assistant Media Planner",38.98
+"eleven","Blinni","Fenty","bfenty9@paginegialle.it"

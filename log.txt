@@ -1,0 +1,67 @@
+INFO : 2022-07-14 07:23:22,893 : __main__ : main.py.<module>: line(40) : Executing pipeline test_customer_landing_to_rawdb
+INFO : 2022-07-14 07:23:22,893 : customer_landing_to_rawdb_csv : _config_provider.py.load_config: line(40) : Loading Dataflow configuration from file ./config/pipeline/local/config.yaml
+:: loading settings :: url = jar:file:/Users/shaunryan/opt/spark-3.2.1-bin-hadoop3.2/jars/ivy-2.5.0.jar!/org/apache/ivy/core/settings/ivysettings.xml
+INFO : 2022-07-14 07:23:27,628 : customer_landing_to_rawdb_csv : _context.py.__init__: line(46) : Setting application context spark logger at level ERROR
+INFO : 2022-07-14 07:23:27,631 : customer_landing_to_rawdb_csv : _factory.py.get_file_system_type: line(38) : Setting filestystem using protocol file:
+INFO : 2022-07-14 07:23:27,632 : customer_landing_to_rawdb_csv : _context.py.__init__: line(58) : Setting application context dataflow customer_landing_to_rawdb_csv
+INFO : 2022-07-14 07:23:27,632 : customer_landing_to_rawdb_csv : _config_provider.py.load_pipeline_config: line(28) : Loading Dataflow configuration from file ./config/pipeline/local/customer_landing_to_rawdb_csv.yaml
+INFO : 2022-07-14 07:23:27,645 : customer_landing_to_rawdb_csv : _reader.py.read: line(13) : Reading data for landing.customer from file:/Users/shaunryan/code/delta-lake-hacking/data/landing/20220101/customer_20220101.csv with options {'mode': 'PERMISSIVE', 'inferSchema': False, 'header': True} correlation_id=9e18d309-3b4e-4adc-a876-b18d50afa43e
+WARNING : 2022-07-14 07:23:32,485 : customer_landing_to_rawdb_csv : _source.py.handle_exceptions: line(26) : Writing 1 exception(s) from landing.customer to landing.exceptions delta table
+INFO : 2022-07-14 07:23:41,775 : customer_landing_to_rawdb_csv : _source.py._validate: line(60) : {
+    "validation": {
+        "schema_on_read": {
+            "landing.customer": {
+                "total_count": 11,
+                "valid_count": 10,
+                "exception_count": 1
+            }
+        }
+    }
+}
+INFO : 2022-07-14 07:23:41,778 : customer_landing_to_rawdb_csv : _reader.py.read: line(13) : Reading data for landing.customer_preferences from file:/Users/shaunryan/code/delta-lake-hacking/data/landing/20220101/customer_preferences_20220101.csv with options {'mode': 'PERMISSIVE', 'inferSchema': False, 'header': True} correlation_id=9e18d309-3b4e-4adc-a876-b18d50afa43e
+INFO : 2022-07-14 07:23:42,163 : customer_landing_to_rawdb_csv : _source.py._validate: line(60) : {
+    "validation": {
+        "schema_on_read": {
+            "landing.customer_preferences": {
+                "total_count": 10,
+                "valid_count": 10,
+                "exception_count": 0
+            }
+        }
+    }
+}
+INFO : 2022-07-14 07:23:42,163 : customer_landing_to_rawdb_csv : _delta_lake.py._create_database: line(25) : Creating database if not exists raw
+INFO : 2022-07-14 07:23:45,250 : customer_landing_to_rawdb_csv : _delta_lake.py.create_table: line(41) : Table already exists raw.customer at file:/Users/shaunryan/code/delta-lake-hacking/data/delta_lake/raw/customer
+INFO : 2022-07-14 07:23:45,250 : customer_landing_to_rawdb_csv : _delta_lake.py._create_database: line(25) : Creating database if not exists landing
+INFO : 2022-07-14 07:23:45,317 : customer_landing_to_rawdb_csv : _delta_lake.py.create_exception_table: line(54) : Table already exists landing.exceptions at file:/Users/shaunryan/code/delta-lake-hacking/data/delta_lake/exceptions/landing/exceptions
+INFO : 2022-07-14 07:23:45,318 : customer_landing_to_rawdb_csv : _delta_lake.py._create_database: line(25) : Creating database if not exists landing
+INFO : 2022-07-14 07:23:45,376 : customer_landing_to_rawdb_csv : _delta_lake.py.create_exception_table: line(54) : Table already exists landing.exceptions at file:/Users/shaunryan/code/delta-lake-hacking/data/delta_lake/exceptions/landing/exceptions
+INFO : 2022-07-14 07:23:45,376 : customer_landing_to_rawdb_csv : main.py.customer_landing_to_rawdb_csv: line(15) : Executing Dataflow customer_landing_to_rawdb_csv with timeslice=2022-01-01 00:00:00, retries=2
+INFO : 2022-07-14 07:23:45,376 : customer_landing_to_rawdb_csv : main.py.customer_landing_to_rawdb_csv: line(31) : Writing data to file:/Users/shaunryan/code/delta-lake-hacking/data/delta_lake/raw/customer
+INFO : 2022-07-14 07:23:50,612 : customer_landing_to_rawdb_csv : _delta_lake.py.get_audit: line(71) : Auditing database table raw.customer
+INFO : 2022-07-14 07:23:51,478 : customer_landing_to_rawdb_csv : _delta_lake.py.get_audits: line(85) : {
+    "raw.customer": {
+        "clusterId": null,
+        "engineInfo": "Apache-Spark/3.2.1 Delta-Lake/2.0.0rc1",
+        "isBlindAppend": false,
+        "isolationLevel": "Serializable",
+        "job": null,
+        "notebook": null,
+        "operation": "WRITE",
+        "operationMetrics": {
+            "numFiles": "1",
+            "numOutputBytes": "4919",
+            "numOutputRows": "11"
+        },
+        "operationParameters": {
+            "mode": "Overwrite",
+            "partitionBy": "[]"
+        },
+        "readVersion": 2,
+        "timestamp": "2022-07-14 07:23:48.466000",
+        "userId": null,
+        "userMetadata": null,
+        "userName": null,
+        "version": 3
+    }
+}
