@@ -48,9 +48,11 @@ def get_audits(context):
     context.log.info(results)
     return audit
 
+
 def alter_table_drop_constraint(database: str, table: str, name: str):
 
     return f"ALTER TABLE `{database}`.`{table}` DROP CONSTRAINT {name};"
+
 
 def alter_table_add_constraint(database: str, table: str, name: str, constraint: str):
 

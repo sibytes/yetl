@@ -11,15 +11,15 @@ README = (HERE / "README.md").read_text()
 
 # This call to setup() does all the work
 setup(
-    name="yetl-flow",
+    name="yetl",
     version="0.0.1",
-    description="spark project for processing messing about with delta",
+    description="yet another (spark) etl framework",
     long_description=README,
     long_description_content_type="text/markdown",
-    url="https://github.com/shaunryan/delta-lake-hacking/README.md",
+    url="https://github.com/sibytes/yetl/README.md",
     project_urls={
-        'GitHub': 'https://github.com/shaunryan/delta-lake-hacking',
-        'Documentation': 'https://github.com/shaunryan/delta-lake-hacking/README.md'
+        'GitHub': 'https://github.com/sibytes/yetl',
+        'Documentation': 'https://github.com/sibytes/yetl/README.md'
     },
     author="Shaun Ryan",
     author_email="shaun_chiburi@hotmail.com",

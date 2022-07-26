@@ -1,3 +1,4 @@
+from black import Mode
 from ._source import Source
 from pyspark.sql import functions as fn
 from pyspark.sql.types import StructType
@@ -24,13 +25,6 @@ class Reader(Source):
 
         self.auto_io = io_properties.get(AUTO_IO, True)
         self.options: dict = io_properties.get(OPTIONS)
-        try:
-            self.mode = self.options[MODE]
-        except KeyError as e:
-            msg = f"{MODE} is missing from the Destination Write configuration and is required."
-            context.log.error(msg)
-            raise Exception(msg) from e
-
         # set record exception handling state.
         # The following state routes schema row excpetions out into an exception delta table:
         # - mode=PERMISSIVE and _currupt_columns in the schema
@@ -39,6 +33,13 @@ class Reader(Source):
         self.has_bad_records_path, self.options = self._is_bad_records_path_set(
             self.options, self.datalake_protocol, self.datalake
         )
+
+        if not self.has_bad_records_path and not self.options.get(MODE):
+            self.context.log.warning(
+                f"badRecordsPath and mode option are not set, default to mode={PERMISSIVE} {CORRELATION_ID}={str(self.correlation_id)}"
+            )
+            self.options[MODE] = PERMISSIVE
+
         self._set_has_exceptions_table(config)
 
         self.database_table = f"{self.database}.{self.table}"
@@ -47,7 +48,7 @@ class Reader(Source):
 
         if self.auto_io:
             self.context.log.info(
-                f"auto_io = {self.auto_io} automatically creating or altering exception delta table {self.database}.{self.table}"
+                f"auto_io = {self.auto_io} automatically creating or altering exception delta table {self.database}.{self.table} {CORRELATION_ID}={str(self.correlation_id)}"
             )
             self.create_or_alter_table()
 
@@ -59,7 +60,7 @@ class Reader(Source):
         )
         if table_exists:
             self.context.log.info(
-                f"Exception table already exists {self.exceptions_database}.{self.exceptions_table} at {self.exceptions_path}"
+                f"Exception table already exists {self.exceptions_database}.{self.exceptions_table} at {self.exceptions_path} {CORRELATION_ID}={str(self.correlation_id)}"
             )
             self.initial_load = False
         else:
@@ -91,12 +92,19 @@ class Reader(Source):
     def _is_bad_records_path_set(
         self, options: dict, datalake_protocol: str, datalake: str
     ):
+
         has_bad_records_path = BAD_RECORDS_PATH in options
 
-        if has_bad_records_path:
+        if self.has_corrupt_column and has_bad_records_path:
+            has_bad_records_path = False
+            self.context.log.warning(
+                f"badRecordsPath and mode option is not supported together, default to mode={self.options.get(MODE)} {CORRELATION_ID}={str(self.correlation_id)}"
+            )
+
+        elif has_bad_records_path:
             bad_records_path = options[BAD_RECORDS_PATH]
             bad_records_path = builtin_funcs.execute_replacements(
-                self.bad_records_path, self
+                bad_records_path, self
             )
             options[
                 BAD_RECORDS_PATH
@@ -117,10 +125,18 @@ class Reader(Source):
             self.exceptions_path = f"{self.datalake_protocol}{self.datalake}/{exceptions_path}/{self.exceptions_database}/{self.exceptions_table}"
 
     def _is_corrupt_column_set(self, options: dict, schema: StructType):
-        return (
+
+        has_corrupt_column = (
             options.get(MODE, "").lower() == PERMISSIVE
             and CORRUPT_RECORD in schema.fieldNames()
         )
+
+        if self.options[MODE] == PERMISSIVE and not has_corrupt_column:
+            self.context.log.warnging(
+                f"mode={PERMISSIVE} and corrupt record is not set in the schema, schema on read corrupt records will be silently dropped."
+            )
+
+        return has_corrupt_column
 
     def _get_validation_exceptions_handler(self):
         def handle_exceptions(exceptions: DataFrame):
@@ -130,7 +146,7 @@ class Reader(Source):
                 if exceptions and exceptions_count > 0:
                     options = {MERGE_SCHEMA: True}
                     self.context.log.warning(
-                        f"Writing {exceptions_count} exception(s) from {self.database_table} to {self.exceptions_database_table} delta table"
+                        f"Writing {exceptions_count} exception(s) from {self.database_table} to {self.exceptions_database_table} delta table {CORRELATION_ID}={str(self.correlation_id)}"
                     )
                     exceptions.write.format(Format.DELTA.value).options(**options).mode(
                         APPEND
@@ -145,9 +161,13 @@ class Reader(Source):
         validator = None
 
         if self.has_bad_records_path:
+
             bad_records_path = self.options[BAD_RECORDS_PATH]
+            self.context.log.info(
+                f"Validating dataframe read using badRecordsPath at {bad_records_path} {CORRELATION_ID}={str(self.correlation_id)}"
+            )
             validator = BadRecordsPathSchemaOnRead(
-                self.data,
+                self.dataframe,
                 validation_handler,
                 self.database,
                 self.table,
@@ -156,6 +176,9 @@ class Reader(Source):
             )
 
         if self.has_corrupt_column:
+            self.context.log.info(
+                f"Validating dataframe read using PERMISSIVE corrupt column at {CORRUPT_RECORD} {CORRELATION_ID}={str(self.correlation_id)}"
+            )
             validator = PermissiveSchemaOnRead(
                 self.dataframe, validation_handler, self.database, self.table
             )
@@ -170,6 +193,9 @@ class Reader(Source):
         self.context.log.info(
             f"Reading data for {self.database_table} from {self.path} with options {self.options} {CORRELATION_ID}={str(self.correlation_id)}"
         )
+
+        self.context.log.debug(json.dumps(self.options, indent=4, default=str))
+
         df = (
             self.context.spark.read.format(self.format)
             .schema(self.schema)

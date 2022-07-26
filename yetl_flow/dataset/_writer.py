@@ -20,7 +20,6 @@ class Writer(Destination):
         self.table_dll = self._get_table_sql(config)
         self.context.log.debug(f"Writer table ddl = {self.table_dll}")
 
-
         self.auto_optimize = self._get_auto_optimize(config)
 
         # gets the read, write, etc options based on the type
@@ -45,14 +44,15 @@ class Writer(Destination):
             self._set_table_constraints(properties, config)
             self._set_table_properties(properties, config)
 
-
-    def _set_table_constraints(self, existing_constraints:dict, config:dict):
+    def _set_table_constraints(self, existing_constraints: dict, config: dict):
         _existing_constraints = {}
         if existing_constraints:
             _existing_constraints = existing_constraints.get(self.database_table)
             _existing_constraints = _existing_constraints.get("constraints")
 
-        self.column_constraints_ddl = self._get_check_constraints_sql(config, _existing_constraints)
+        self.column_constraints_ddl = self._get_check_constraints_sql(
+            config, _existing_constraints
+        )
         self.context.log.debug(
             f"Writer table check constraints ddl = {self.column_constraints_ddl}"
         )
@@ -64,13 +64,14 @@ class Writer(Destination):
                 for cc in self.column_constraints_ddl:
                     self.context.spark.sql(cc)
 
-
-    def _set_table_properties(self, existing_properties:dict, config:dict):
+    def _set_table_properties(self, existing_properties: dict, config: dict):
         _existing_properties = {}
         if existing_properties:
             _existing_properties = existing_properties.get(self.database_table)
             _existing_properties = _existing_properties.get("properties")
-        self.tbl_properties_ddl = self._get_table_properties_sql(config, _existing_properties)
+        self.tbl_properties_ddl = self._get_table_properties_sql(
+            config, _existing_properties
+        )
         self.context.log.debug(
             f"Writer table properties ddl = {self.tbl_properties_ddl}"
         )
@@ -100,7 +101,6 @@ class Writer(Destination):
 
         return properties
 
-
     def _get_auto_optimize(self, config: dict):
         return (
             config.get("table")
@@ -110,7 +110,9 @@ class Writer(Destination):
             .get("delta.autoOptimize.optimizeWrite")
         )
 
-    def _get_check_constraints_sql(self, config: dict, existing_constraints:dict=None):
+    def _get_check_constraints_sql(
+        self, config: dict, existing_constraints: dict = None
+    ):
         table = config.get("table")
         sql_drop_constraints = []
         sql_add_constraints = []
@@ -118,20 +120,18 @@ class Writer(Destination):
             check_constraints = table.get("check_constraints")
 
         if not check_constraints:
-            check_constraints = {}        
+            check_constraints = {}
 
         if existing_constraints:
-            for  name, constraint in existing_constraints.items():
+            for name, constraint in existing_constraints.items():
                 cc = check_constraints.get(name)
                 if cc != constraint:
                     sql_drop_constraints.append(
-                        dl.alter_table_drop_constraint(
-                            self.database, self.table, name
-                        )
+                        dl.alter_table_drop_constraint(self.database, self.table, name)
                     )
 
         if check_constraints:
-            for  name, constraint in check_constraints.items():
+            for name, constraint in check_constraints.items():
                 cc = existing_constraints.get(name)
                 if cc != constraint:
                     sql_drop_constraints.append(
@@ -142,9 +142,8 @@ class Writer(Destination):
 
         constraints = sql_drop_constraints + sql_add_constraints
         return constraints
-        
 
-    def _get_table_properties_sql(self, config: dict, existing_properties:dict=None):
+    def _get_table_properties_sql(self, config: dict, existing_properties: dict = None):
 
         table = config.get("table")
         if table:

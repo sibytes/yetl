@@ -19,8 +19,6 @@ class IValidator:
         self.exceptions_count = 0
         self.valid_count = 0
         self.total_count = 0
-        self.dataframe = dataframe
-        self.exceptions_handler = exceptions_handler
         self.database = database
         self.table = table
 
@@ -93,15 +91,14 @@ class BadRecordsPathSchemaOnRead(IValidator):
 
         self.total_count = self.dataframe.count()
         self.dataframe.cache()
-        self.valid_count = self.dataframe.count()
+        self.valid_count = self.dataframe.distinct().count()
 
         try:
             exceptions = self.spark.read.format(Format.Json.value).load(self.path)
             self.exceptions_count = exceptions.count()
+            self.exceptions_count = self.exceptions_handler(self.exceptions)
         except:
             exceptions = None
             self.exceptions_count = 0
-
-        self.exceptions_count = self.exceptions_handler(self.exceptions)
 
         return self.get_result()

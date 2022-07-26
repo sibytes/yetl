@@ -54,7 +54,6 @@ parso==0.8.3
 pathspec==0.9.0
 pexpect==4.8.0
 pickleshare==0.7.5
--e git+ssh://git@github.com/shaunryan/delta-lake-hacking.git@77dab727e48366b8fc6043132f89dd7adb500c94#egg=pipeline
 platformdirs==2.5.2
 pluggy==1.0.0
 prometheus-client==0.14.1
@@ -102,4 +101,6 @@ tzlocal==4.2
 urllib3==1.26.9
 wcwidth==0.2.5
 webencodings==0.5.1
+-e git+ssh://git@github.com/sibytes/yetl.git@b9f81bb3def0aeb0468c2764f2ee20a6b4368f56#egg=yetl
+-e git+ssh://git@github.com/sibytes/yetl.git@b9f81bb3def0aeb0468c2764f2ee20a6b4368f56#egg=yetl_flow
 zipp==3.8.0
