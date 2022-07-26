@@ -131,8 +131,8 @@ class Reader(Source):
             and CORRUPT_RECORD in schema.fieldNames()
         )
 
-        if self.options[MODE] == PERMISSIVE and not has_corrupt_column:
-            self.context.log.warnging(
+        if options.get(MODE, "").lower() == PERMISSIVE and not CORRUPT_RECORD in schema.fieldNames():
+            self.context.log.warning(
                 f"mode={PERMISSIVE} and corrupt record is not set in the schema, schema on read corrupt records will be silently dropped."
             )
 
