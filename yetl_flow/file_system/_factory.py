@@ -37,6 +37,8 @@ class _FileSystemFactory:
 
         if isinstance(config, dict):
 
+            # determine type from configuration
+
             datalake_protocol: str = config["datalake_protocol"]
             fs_type: FileSystemType = self._get_fs_type(datalake_protocol)
             if not fs_type:
@@ -48,14 +50,14 @@ class _FileSystemFactory:
             context.log.info(f"Setting filestystem using protocol {datalake_protocol}")
             context.log.debug(f"Setting FileSystemType using type {fs_type}")
             file_system: IFileSystem = self._file_system.get(fs_type)
+            return file_system(context, datalake_protocol)
 
         elif isinstance(config, FileSystemType):
-            file_system = config
+            # return based on the type asked for.
+            return file_system(context)
 
         else:
             raise Exception(f"FileSystemType cannot be produced using {type(config)}")
-
-        return file_system(context)
 
 
 factory = _FileSystemFactory()

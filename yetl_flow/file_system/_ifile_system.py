@@ -8,8 +8,9 @@ class FileFormat(Enum):
 
 
 class IFileSystem:
-    def __init__(self, context) -> None:
+    def __init__(self, context, datalake_protocol: str) -> None:
         self.context = context
+        self.datalake_protocol = datalake_protocol
 
     def rm(self, path: str, recurse=False) -> bool:
         """Removes a file or directory."""

@@ -7,8 +7,8 @@ import json
 
 
 class FileSystem(IFileSystem):
-    def __init__(self, context: str) -> None:
-        super().__init__(context)
+    def __init__(self, context: str, datalake_protocol: str = "file:") -> None:
+        super().__init__(context, datalake_protocol)
 
     def rm(self, path: str, recurse=False) -> bool:
         """Removes a file or directory."""
