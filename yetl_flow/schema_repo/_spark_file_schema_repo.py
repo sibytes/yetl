@@ -3,6 +3,7 @@ import yaml
 from ._ischema_repo import ISchemaRepo
 from pyspark.sql.types import StructType
 from ..file_system import FileFormat, IFileSystem
+import os
 
 
 class SparkFileSchemaRepo(ISchemaRepo):
@@ -33,10 +34,21 @@ class SparkFileSchemaRepo(ISchemaRepo):
         """Loads a spark from a yaml file and deserialises to a spark schema."""
 
         path = self._mkpath(database_name, table_name)
+        path = os.path.abspath(path)
+        self.context.log(f"Loading schema for dataset {database_name}.{table_name} from {path}")
 
         fs: IFileSystem = self.context.fs
         schema = fs.read_file(path, FileFormat.YAML)
+        if not schema:
+            msg = f"Failed to load schema for dataset {database_name}.{table_name} from {path}"
+            raise Exception(msg)
 
-        spark_schema = StructType.fromJson(schema)
+        msg = json.dumps(schema, indent=4, default=str)
+        self.context.log.debug(msg)
+
+        try:
+            spark_schema = StructType.fromJson(schema)
+        except:
+            msg = msg = f"Failed to deserialise spark schema to StructType for dataset {database_name}.{table_name} from {path}"
 
         return spark_schema
