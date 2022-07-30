@@ -6,7 +6,7 @@ import json
 
 _PIPELINE_ROOT = "./config/pipeline"
 _EXT = "yaml"
-_ENVIRONMENT = "ENVIRONMENT"
+_ENVIRONMENT = "YETL_ENVIRONMENT"
 _VAR_CWD = "{{cwd}}"
 
 
