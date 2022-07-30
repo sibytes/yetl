@@ -8,6 +8,7 @@ import uuid
 from .schema_repo import schema_repo_factory
 import json
 
+
 class Context:
     def __init__(
         self,
@@ -48,8 +49,9 @@ class Context:
         )
 
         # abstraction of the filesystem for driver file commands e.g. rm, ls, mv, cp
-        self.fs: IFileSystem = file_system_factory.get_file_system_type(self, config=config)
-
+        self.fs: IFileSystem = file_system_factory.get_file_system_type(
+            self, config=config
+        )
 
         # abstraction of the schema repo
         self.schema_repo_factory = schema_repo_factory

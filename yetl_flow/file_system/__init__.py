@@ -9,5 +9,5 @@ __all__ = [
     "IFileSystem",
     "file_system_factory",
     "FileFormat",
-    "FileSystemType"
+    "FileSystemType",
 ]

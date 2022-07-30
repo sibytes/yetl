@@ -2,11 +2,7 @@ import json
 import yaml
 from ._ischema_repo import ISchemaRepo
 from pyspark.sql.types import StructType
-from ..file_system import (
-    FileFormat, 
-    IFileSystem, 
-    file_system_factory, 
-    FileSystemType)
+from ..file_system import FileFormat, IFileSystem, file_system_factory, FileSystemType
 import os
 
 
@@ -47,9 +43,13 @@ class SparkFileSchemaRepo(ISchemaRepo):
         # fs: IFileSystem = self.context.fs
 
         # file system is working fine for databricks and vanilla spark deployments.
-        fs: IFileSystem = file_system_factory.get_file_system_type(self.context, FileSystemType.FILE)
+        fs: IFileSystem = file_system_factory.get_file_system_type(
+            self.context, FileSystemType.FILE
+        )
 
-        self.context.log.info(f"Loading schema for dataset {database_name}.{table_name} from {path} using {type(fs)}")
+        self.context.log.info(
+            f"Loading schema for dataset {database_name}.{table_name} from {path} using {type(fs)}"
+        )
         schema = fs.read_file(path, FileFormat.YAML)
         if not schema:
             msg = f"Failed to load schema for dataset {database_name}.{table_name} from {path}"
@@ -61,6 +61,8 @@ class SparkFileSchemaRepo(ISchemaRepo):
         try:
             spark_schema = StructType.fromJson(schema)
         except:
-            msg = msg = f"Failed to deserialise spark schema to StructType for dataset {database_name}.{table_name} from {path}"
+            msg = (
+                msg
+            ) = f"Failed to deserialise spark schema to StructType for dataset {database_name}.{table_name} from {path}"
 
         return spark_schema

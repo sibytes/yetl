@@ -31,7 +31,9 @@ class _FileSystemFactory:
         except:
             return None
 
-    def get_file_system_type(self, context, config:Union[dict, FileSystemType]) -> IFileSystem:
+    def get_file_system_type(
+        self, context, config: Union[dict, FileSystemType]
+    ) -> IFileSystem:
 
         if isinstance(config, dict):
 

@@ -93,20 +93,17 @@ class FileSystem(IFileSystem):
 
     def read_file(self, path: str, file_format: FileFormat) -> str:
 
-        print(path)
         with open(path, "r") as f:
             if file_format == FileFormat.JSON:
                 data = json.loads(f.read())
             elif file_format == FileFormat.YAML:
                 data = f.read()
-                print(path)
                 data = yaml.safe_load(data)
-                print(data)
             elif file_format == FileFormat.TEXT:
                 data = f.read()
             else:
                 raise Exception(
                     f"File format not supported {file_format} when reading file {path}"
                 )
-        print(data)
+
         return data
