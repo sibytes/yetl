@@ -1,5 +1,5 @@
 dataflow:
-  retries: 0
+  retries: 2
   retry_wait: 1
   enable_dataflow_types:
     - full_load
