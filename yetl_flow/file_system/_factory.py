@@ -55,7 +55,7 @@ class _FileSystemFactory:
         else:
             raise Exception(f"FileSystemType cannot be produced using {type(config)}")
 
-        return file_system(context, datalake_protocol)
+        return file_system(context)
 
 
 factory = _FileSystemFactory()

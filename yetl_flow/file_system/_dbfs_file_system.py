@@ -3,8 +3,8 @@ from ._ifile_system import IFileSystem, FileFormat
 
 
 class DbfsFileSystem(IFileSystem):
-    def __init__(self, context, datalake_protocol: str) -> None:
-        super().__init__(context, datalake_protocol)
+    def __init__(self, context: str) -> None:
+        super().__init__(context)
         self._fs = self._get_dbutils(context.spark).fs
 
     def _get_dbutils(self, spark: SparkSession):
