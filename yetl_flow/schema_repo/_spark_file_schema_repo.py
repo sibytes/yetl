@@ -35,7 +35,7 @@ class SparkFileSchemaRepo(ISchemaRepo):
 
         path = self._mkpath(database_name, table_name)
         path = os.path.abspath(path)
-        self.context.log(f"Loading schema for dataset {database_name}.{table_name} from {path}")
+        self.context.log.info(f"Loading schema for dataset {database_name}.{table_name} from {path}")
 
         fs: IFileSystem = self.context.fs
         schema = fs.read_file(path, FileFormat.YAML)
