@@ -54,6 +54,8 @@ class _FileSystemFactory:
 
         elif isinstance(config, FileSystemType):
             # return based on the type asked for.
+            context.log.debug(f"Setting FileSystemType using type {config}")
+            file_system: IFileSystem = self._file_system.get(config)
             return file_system(context)
 
         else:
