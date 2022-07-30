@@ -1,0 +1,70 @@
+dataflow:
+  retries: 2
+  retry_wait: 1
+  enable_dataflow_types:
+    - full_load
+    - partition_load
+    - merge_compare
+    - merge_cdc
+    - nuke 
+
+  landing:
+    customer:
+      path_date_format: "%Y%m%d"
+      file_date_format: "%Y%m%d"
+      format: json
+      path: yetl_data/landing/{{timeslice(path_date_format)}}/customer_{{timeslice(file_date_format)}}.jsonl
+      read:
+        options:
+          inferSchema: false
+          badRecordsPath: "yetl_data/exceptions/landing/customer/{{timeslice(path_date_format)}}"
+      exceptions:
+          path: "yetl_data/delta_lake/exceptions"
+          database: exceptions_landing
+          table: customer
+      thresholds:
+        warning:
+          min_rows: 1
+          max_rows: 1000
+          exception_count: 0
+          exception_percent: 0
+        error:
+          min_rows: 0
+          max_rows: 100000000
+          exception_count: 50
+          exception_percent: 80
+          
+    customer_preferences:
+      path_date_format: "%Y%m%d"
+      file_date_format: "%Y%m%d"
+      format: json
+      path: yetl_data/landing/{{timeslice(path_date_format)}}/customer_preferences_{{timeslice(file_date_format)}}.jsonl
+      read:
+        options:
+          inferSchema: false
+          badRecordsPath: "data/exceptions/landing/customer_preferences/{{timeslice(path_date_format)}}"
+      exceptions:
+          path: "yetl_data/delta_lake/exceptions"
+          database: exceptions_landing
+          table: customer_peferences
+      thresholds:
+        warning:
+          min_rows: 0
+          max_rows: 1000
+          exception_count: 0
+          exception_percent: 0
+        error:
+          min_rows: 0
+          max_rows: 100000000
+          exception_count: 50
+          exception_percent: 80
+
+
+  raw:
+    customer:
+      format: delta
+      path: yetl_data/delta_lake/raw/customer
+      write:
+        mode: overwrite
+        options:
+          mergeSchema: true
