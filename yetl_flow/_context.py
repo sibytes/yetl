@@ -50,10 +50,11 @@ class Context:
         # abstraction of the filesystem for driver file commands e.g. rm, ls, mv, cp
         self.fs: IFileSystem = file_system_factory.get_file_system_type(self, config)
 
-        raise Exception("wip")
+
         # abstraction of the schema repo
         self.schema_repo_factory = schema_repo_factory
 
+        raise Exception("wip")
         # Load and deserialise the spark dataflow configuration in to metaclasses (see dataset module)
         # The configuration file is loaded using the app name. This keeps intuitive tight
         # naming convention between datadlows and the config files that store them
