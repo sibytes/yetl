@@ -15,6 +15,7 @@ If this does not exist then it is defaulted to ./config/
 
 log_config_file = os.getenv("YETL", "./config/")
 log_config_file = f"{log_config_file}logging.yaml"
+log_config_file = os.path.abspath(log_config_file)
 
 # check that it exists
 if not os.path.exists(log_config_file):
@@ -27,6 +28,7 @@ with open(log_config_file, "r") as f:
     try:
         config = yaml.safe_load(f.read())
         logging.config.dictConfig(config)
+        print(config)
 
         # if it errors because of invalid yaml format then
         # provide details so the users can easily find and correct
