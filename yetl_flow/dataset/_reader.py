@@ -1,4 +1,3 @@
-from black import Mode
 from ._source import Source
 from pyspark.sql import functions as fn
 from pyspark.sql.types import StructType
