@@ -3,6 +3,7 @@ from enum import Enum
 from ._dbfs_file_system import DbfsFileSystem
 from ._file_system import FileSystem
 from ._ifile_system import IFileSystem
+from typing import Union
 import logging
 
 
@@ -30,21 +31,27 @@ class _FileSystemFactory:
         except:
             return None
 
-    def get_file_system_type(self, context, config: dict) -> IFileSystem:
+    def get_file_system_type(self, context, config:Union[dict, FileSystemType]) -> IFileSystem:
 
-        datalake_protocol: str = config["datalake_protocol"]
-        fs_type: FileSystemType = self._get_fs_type(datalake_protocol)
+        if isinstance(config, dict):
 
-        context.log.info(f"Setting filestystem using protocol {datalake_protocol}")
+            datalake_protocol: str = config["datalake_protocol"]
+            fs_type: FileSystemType = self._get_fs_type(datalake_protocol)
+            if not fs_type:
+                context.log.error(
+                    f"FileSystemType {fs_type.name} not registered in the file_system factory"
+                )
+                raise ValueError(fs_type)
 
-        context.log.debug(f"Setting FileSystemType using type {fs_type}")
-        file_system: IFileSystem = self._file_system.get(fs_type)
+            context.log.info(f"Setting filestystem using protocol {datalake_protocol}")
+            context.log.debug(f"Setting FileSystemType using type {fs_type}")
+            file_system: IFileSystem = self._file_system.get(fs_type)
 
-        if not file_system:
-            self._logger.error(
-                f"FileSystemType {fs_type.name} not registered in the file_system factory"
-            )
-            raise ValueError(fs_type)
+        elif isinstance(config, FileSystemType):
+            file_system = config
+
+        else:
+            raise Exception(f"FileSystemType cannot be produced using {type(config)}")
 
         return file_system(context, datalake_protocol)
 

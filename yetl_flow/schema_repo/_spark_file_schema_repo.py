@@ -2,7 +2,11 @@ import json
 import yaml
 from ._ischema_repo import ISchemaRepo
 from pyspark.sql.types import StructType
-from ..file_system import FileFormat, IFileSystem
+from ..file_system import (
+    FileFormat, 
+    IFileSystem, 
+    file_system_factory, 
+    FileSystemType)
 import os
 
 
@@ -35,7 +39,15 @@ class SparkFileSchemaRepo(ISchemaRepo):
 
         path = self._mkpath(database_name, table_name)
         path = os.path.abspath(path)
-        fs: IFileSystem = self.context.fs
+
+        # this was in thought that schema's could be maintain and loaded off DBFS for databricks
+        # it actually works much better using the local repo files
+        # maybe considered for a future use case - we need more configuration to set the schema store
+        # type, since it's explicitly hand in hand with databricks spark env.
+        # fs: IFileSystem = self.context.fs
+
+        # file system is working fine for databricks and vanilla spark deployments.
+        fs: IFileSystem = file_system_factory.get_file_system_type(self.context, FileSystemType.FILE)
 
         self.context.log.info(f"Loading schema for dataset {database_name}.{table_name} from {path} using {type(fs)}")
         schema = fs.read_file(path, FileFormat.YAML)

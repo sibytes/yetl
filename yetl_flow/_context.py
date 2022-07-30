@@ -48,7 +48,7 @@ class Context:
         )
 
         # abstraction of the filesystem for driver file commands e.g. rm, ls, mv, cp
-        self.fs: IFileSystem = file_system_factory.get_file_system_type(self, config)
+        self.fs: IFileSystem = file_system_factory.get_file_system_type(self, config=config)
 
 
         # abstraction of the schema repo
