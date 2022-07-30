@@ -54,7 +54,6 @@ class Context:
         # abstraction of the schema repo
         self.schema_repo_factory = schema_repo_factory
 
-        raise Exception("wip")
         # Load and deserialise the spark dataflow configuration in to metaclasses (see dataset module)
         # The configuration file is loaded using the app name. This keeps intuitive tight
         # naming convention between datadlows and the config files that store them
