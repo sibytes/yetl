@@ -6,7 +6,7 @@ from .file_system import file_system_factory, IFileSystem
 import logging
 import uuid
 from .schema_repo import schema_repo_factory
-
+import json
 
 class Context:
     def __init__(
@@ -50,6 +50,7 @@ class Context:
         # abstraction of the filesystem for driver file commands e.g. rm, ls, mv, cp
         self.fs: IFileSystem = file_system_factory.get_file_system_type(self, config)
 
+        raise Exception("wip")
         # abstraction of the schema repo
         self.schema_repo_factory = schema_repo_factory
 
@@ -71,7 +72,12 @@ class Context:
         return dataflow
 
     def _get_spark_context(self, app_name: str, config: dict):
+        self.log.info("Setting spark context")
         spark_config = config["spark"]
+
+        msg = json.dumps(spark_config, indent=4, default=str)
+        self.log.debug(msg)
+
         builder = SparkSession.builder
 
         for k, v in spark_config.items():

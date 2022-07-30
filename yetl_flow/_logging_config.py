@@ -13,7 +13,7 @@ location is taken from an envrionment variables called DATAPREPHOME.
 If this does not exist then it is defaulted to ./config/
 """
 
-log_config_file = os.getenv("YETL", "./config/")
+log_config_file = os.getenv("YETL_HOME", "./config/")
 log_config_file = f"{log_config_file}logging.yaml"
 log_config_file = os.path.abspath(log_config_file)
 

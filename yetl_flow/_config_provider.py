@@ -18,6 +18,7 @@ def _mkpath(name: str):
         env = "local"
 
     path = f"{_PIPELINE_ROOT}/{env}/{name}.{_EXT}"
+    path = os.path.abspath(path)
     return path
 
 
