@@ -1,10 +1,11 @@
-from yetl_flow import yetl_flow, IDataflow, Context, Timeslice, TimesliceUtcNow
+
+from yetl_flow import yetl_flow, IDataflow, Context, Timeslice, TimesliceUtcNow, AppendSave
 from pyspark.sql.functions import *
 import logging
 
 @yetl_flow(log_level="ERROR")
 def customer_landing_to_rawdb_csv(
-    context: Context, dataflow: IDataflow, timeslice: Timeslice=TimesliceUtcNow()
+    context: Context, dataflow: IDataflow, timeslice: Timeslice=TimesliceUtcNow(), save_type=None
 ) -> dict:
     """Load the demo customer data as is into a raw delta hive registered table.
 
@@ -26,7 +27,6 @@ def customer_landing_to_rawdb_csv(
     dataflow.destination_df("raw.customer", df)
 
 
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.info(f"Executing pipeline test_customer_landing_to_rawdb")
@@ -34,8 +34,10 @@ logger.info(f"Executing pipeline test_customer_landing_to_rawdb")
 # if timeslice not provided will default to utcnow
 timeslice = Timeslice(2022, 7, 11)
 results = customer_landing_to_rawdb_csv(
-    timeslice=timeslice
+    timeslice=timeslice,
+    save_type = AppendSave
 )
+
 # results = pipeline.test_customer_landing_to_rawdb_csv()
 
 

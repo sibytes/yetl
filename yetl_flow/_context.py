@@ -8,7 +8,8 @@ import uuid
 from .schema_repo import schema_repo_factory
 import json
 from ._timeslice import Timeslice, TimesliceUtcNow
-
+from .dataset import Save, DefaultSave
+from typing import Type
 
 class Context:
     def __init__(
@@ -18,6 +19,7 @@ class Context:
         name: str,
         spark: SparkSession = None,
         timeslice: datetime = None,
+        save_type: Type[Save] = DefaultSave
     ) -> None:
         self.correlation_id = uuid.uuid4()
         self.name = name
@@ -61,16 +63,16 @@ class Context:
         # The configuration file is loaded using the app name. This keeps intuitive tight
         # naming convention between datadlows and the config files that store them
         self.log.info(f"Setting application context dataflow {self.name}")
-        self.dataflow = self._get_deltalake_flow(self.app_name, self.name, config)
+        self.dataflow = self._get_deltalake_flow(self.app_name, self.name, config, save_type)
 
-    def _get_deltalake_flow(self, app_name: str, name: str, config: dict):
+    def _get_deltalake_flow(self, app_name: str, name: str, config: dict, save_type:Type[Save]):
 
         dataflow_config: dict = cp.load_pipeline_config(app_name, name)
         dataflow_config = dataflow_config.get("dataflow")
 
         self.log.debug("Deserializing configuration into Dataflow")
 
-        dataflow = Dataflow(self, config, dataflow_config)
+        dataflow = Dataflow(self, config, dataflow_config, save_type)
 
         return dataflow
 

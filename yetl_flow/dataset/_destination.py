@@ -1,5 +1,6 @@
 from ._dataset import Dataset
 from pyspark.sql import DataFrame
+from ._save import DefaultSave
 
 
 class Destination(Dataset):
@@ -12,7 +13,7 @@ class Destination(Dataset):
         self.dataframe: DataFrame
 
     def write(self):
-        pass
+        super().write()
 
     def is_source(self):
         return False

@@ -6,6 +6,7 @@ from .. import _delta_lake as dl
 from pyspark.sql import DataFrame
 from typing import ChainMap
 
+
 #  make_check_constraints_sql, create_table, make_check_table_properties_sql, get_table_properties, table_exists
 
 
@@ -182,12 +183,7 @@ class Writer(Destination):
     def write(self):
         self.context.log.info(f"Writing data to {self.database_table} at {self.path}")
         if self.dataframe:
-            (
-                self.dataframe.write.format(self.format)
-                .options(**self.options)
-                .mode(self.mode)
-                .save(self.path)
-            )
+            (super().write())
             if self.auto_optimize:
                 self.context.spark.sql(f"OPTIMIZE `{self.database}`.`{self.table}`")
         else:

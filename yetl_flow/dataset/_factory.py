@@ -1,5 +1,7 @@
 from enum import Enum
+from typing import Type
 from ._dataset import Dataset
+from ._save import Save, DefaultSave, AppendSave
 from ._reader import Reader
 from ._writer import Writer
 from ._stream_reader import StreamReader
@@ -31,7 +33,12 @@ class _DatasetFactory:
             return None
 
     def get_dataset_type(
-        self, context, database: str, table: str, dataset_config: dict
+        self,
+        context,
+        database: str,
+        table: str,
+        dataset_config: dict,
+        save_type: Type[Save] = DefaultSave,
     ) -> Dataset:
 
         type: IOType = next(
@@ -45,15 +52,25 @@ class _DatasetFactory:
         )
 
         self._logger.info(f"Get {type.name} from factory dataset")
-        dataset: Dataset = self._dataset.get(type)
+        dataset_class = self._dataset.get(type)
 
-        if not dataset:
+        # TODO: fix this
+        if type == IOType.WRITE:
+
+            class InjectDestination(dataset_class, save_type):
+                pass
+
+            dataset_class = InjectDestination
+
+        if not dataset_class:
             self._logger.error(
                 f"IOType {type.name} not registered in the dataset factory dataset"
             )
             raise ValueError(type)
 
-        return dataset(context, database, table, dataset_config, type.name.lower())
+        return dataset_class(
+            context, database, table, dataset_config, type.name.lower()
+        )
 
 
 factory = _DatasetFactory()

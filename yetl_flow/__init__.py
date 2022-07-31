@@ -1,4 +1,14 @@
-from .dataset import Reader, Writer, StreamReader, StreamWriter
+from .dataset import (
+    Reader,
+    Writer,
+    StreamReader,
+    StreamWriter,
+    MergeSave,
+    AppendSave,
+    OverwriteSave,
+    IgnoreSave,
+    ErrorIfExistsSave,
+)
 from .dataflow import IDataflow
 from ._framework import yetl_flow
 from ._context import Context
@@ -16,4 +26,9 @@ __all__ = [
     "Timeslice",
     "TimesliceUtcNow",
     "TimesliceNow",
+    "MergeSave",
+    "AppendSave",
+    "OverwriteSave",
+    "IgnoreSave",
+    "ErrorIfExistsSave",
 ]

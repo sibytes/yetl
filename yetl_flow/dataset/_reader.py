@@ -210,6 +210,5 @@ class Reader(Source):
         )
 
         self.dataframe = df
-        df.show()
         self.validation_result = self.validate()
         return self.dataframe

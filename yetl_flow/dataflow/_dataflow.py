@@ -1,8 +1,8 @@
 from pyspark.sql import DataFrame
 from ..dataset import Dataset, Source, Destination
 from ._i_dataflow import IDataflow
-from ..dataset import dataset_factory
-
+from ..dataset import dataset_factory, Save, DefaultSave
+from typing import Type
 from enum import Enum
 
 
@@ -23,9 +23,15 @@ class DataFlowType(Enum):
 
 
 class Dataflow(IDataflow):
-    def __init__(self, context, config: dict, dataflow_config: dict) -> None:
+    def __init__(
+        self,
+        context,
+        config: dict,
+        dataflow_config: dict,
+        save_type: Type[Save] = DefaultSave,
+    ) -> None:
 
-        super().__init__(context, config, dataflow_config)
+        super().__init__(context, config, dataflow_config, save_type)
 
         for database, v in dataflow_config.items():
             for table, v in v.items():
@@ -35,7 +41,9 @@ class Dataflow(IDataflow):
                 v["deltalake_schema_repo"] = self._deltalake_schema_repo
                 v["correlation_id"] = self.context.correlation_id
                 v["timeslice"] = self.context.timeslice
-                md = dataset_factory.get_dataset_type(self.context, database, table, v)
+                md = dataset_factory.get_dataset_type(
+                    self.context, database, table, v, save_type
+                )
                 self.log.debug(
                     f"Deserialized {database}.{table} configuration into {type(md)}"
                 )
@@ -66,6 +74,7 @@ class Dataflow(IDataflow):
     def destination_df(self, database_table: str, dataframe: DataFrame):
 
         dst: Destination = self.destinations[database_table]
+
         dst.dataframe = dataframe
         if dst.auto_io:
             dst.write()

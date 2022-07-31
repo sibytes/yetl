@@ -1,11 +1,18 @@
-from ..dataset import Dataset
+from ..dataset import Dataset, Save, DefaultSave
+from typing import Type
 from abc import ABC, abstractmethod
 from pyspark.sql import DataFrame
 import json
 
 
 class IDataflow(ABC):
-    def __init__(self, context, config: dict, dataflow_config: dict) -> None:
+    def __init__(
+        self,
+        context,
+        config: dict,
+        dataflow_config: dict,
+        save_type: Type[Save] = DefaultSave,
+    ) -> None:
 
         self.log = context.log
         self.log.debug("initialise dataflow with config")
