@@ -1,11 +1,10 @@
-from yetl_flow import yetl_flow, IDataflow, Context
+from yetl_flow import yetl_flow, IDataflow, Context, Timeslice
 from pyspark.sql.functions import *
 import logging
-from datetime import datetime
 
 @yetl_flow(log_level="ERROR")
 def customer_landing_to_rawdb_csv(
-    context: Context, dataflow: IDataflow, timeslice: datetime, timeslice_mask: str
+    context: Context, dataflow: IDataflow, timeslice: Timeslice
 ) -> dict:
     """Load the demo customer data as is into a raw delta hive registered table.
 
@@ -32,15 +31,25 @@ def customer_landing_to_rawdb_csv(
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
-
 logger.info(f"Executing pipeline test_customer_landing_to_rawdb")
 
-timeslice = datetime(2022, 1, 1, 0, 0, 0, 0)
-timeslice_mask = "*/*/*"
+timeslice = Timeslice(2022, '*', '*')
 results = customer_landing_to_rawdb_csv(
-    timeslice=timeslice, timeslice_mask=timeslice_mask
+    timeslice=timeslice
 )
 # results = pipeline.test_customer_landing_to_rawdb_csv()
 
 
+
+
+
+
+
+
+
+
+
+
+# timeslice = Timeslice(2022, '*', )
+# format = "%Y/%m/%d"
+# print(timeslice.strftime(format))

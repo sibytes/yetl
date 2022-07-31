@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Literal, Union
 
+
+_WILDCARD = "*"
 Wildcard = Literal["*"]
 
 _UNSUPPORTED_FORMAT_CODES = [
@@ -22,28 +24,38 @@ _UNSUPPORTED_FORMAT_CODES = [
 ]
 
 
-class Timestamp:
+class Timeslice:
     def __init__(
         self,
-        year: Union[int, Wildcard, None] = None,
-        month: Union[int, Wildcard, None] = None,
-        day: Union[int, Wildcard, None] = None,
-        hour: Union[int, Wildcard, None] = None,
-        minutue: Union[int, Wildcard, None] = None,
-        second: Union[int, Wildcard, None] = None,
-        microsecond: Union[int, Wildcard, None] = None,
+        year: Union[int, Wildcard],
+        month: Union[int, Wildcard] = None,
+        day: Union[int, Wildcard] = None,
+        hour: Union[int, Wildcard] = 0,
+        minute: Union[int, Wildcard] = 0,
+        second: Union[int, Wildcard] = 0,
+        microsecond: Union[int, Wildcard] = 0
     ) -> None:
 
-        self.year = year
-        self.month = month
-        self.day = day
-        self.hour = hour
-        self.minutue = minutue
-        self.second = second
-        self.microsecond = microsecond
+
+        self.year = self._wildcard_check(year)
+        self.month = self._wildcard_check(month)
+        self.day = self._wildcard_check(day) 
+        self.hour = self._wildcard_check(hour) 
+        self.minutue = self._wildcard_check(minute)
+        self.second = self._wildcard_check(second) 
+        self.microsecond = self._wildcard_check(microsecond) 
+    
+    def _wildcard_check(self, value:Union[int, Wildcard]):
+        if isinstance(value, int):
+            return value
+        if isinstance(value, str) and value == _WILDCARD:
+            return value
+        else:
+            raise Exception(f"Timeslice parameters must be an int or '{_WILDCARD}'")
 
     def strftime(self, format: str):
-        """
+        """ This will format and return the timeslice using python format codes. Only a subset of format codes are suppoered by design
+
         %d - Day of the month as a zero-padded decimal number.
         %m - Month as a zero-padded decimal number.
         %y - Year without century as a zero-padded decimal number.
@@ -95,27 +107,44 @@ class Timestamp:
                 f"Timeslice does not contain month (month=None) failed to format timeslice with FormatCode = %m"
             )
 
-        if not self.year and any(fmt_code in format for fmt_code in ["%y", "%y"]):
-            raise Exception(
-                f"Timeslice does not contain year (year=None) failed to format timeslice with FormatCode in [%y, %Y]"
-            )
+        format, year = self._format_wildcard(format, self.year, ['%y','%Y'], 1900)
+        format, month = self._format_wildcard(format, self.month, '%m', 1)
+        format, day = self._format_wildcard(format, self.day, '%d', 1)
 
-        if not self.hour and "%H" in format:
-            raise Exception(
-                f"Timeslice does not contain hour (hour=None) failed to format timeslice with FormatCode = %H"
-            )
+        format, hour = self._format_wildcard(format, self.hour, '%H')
+        format, minutue = self._format_wildcard(format, self.minutue, '%M')
+        format, second = self._format_wildcard(format, self.second, '%S')
+        format, microsecond = self._format_wildcard(format, self.microsecond, '%f')
+        
 
-        if not self.minutue and "%M" in format:
-            raise Exception(
-                f"Timeslice does not contain minute (minute=None) failed to format timeslice with FormatCode = %M"
-            )
+        timeslice = datetime(year, month, day, hour, minutue, second, microsecond)
 
-        if not self.second and "%S" in format:
-            raise Exception(
-                f"Timeslice does not contain second (second=None) failed to format timeslice with FormatCode = %S"
-            )
+        formatted = timeslice.strftime(format)
+        return formatted
 
-        if not self.microsecond and "%f" in format:
-            raise Exception(
-                f"Timeslice does not contain microsecond (microsecond=None) failed to format timeslice with FormatCode = %f"
-            )
+
+    def _format_wildcard(self, format:str, datepart:Union[int, Wildcard], format_code:Union[list, str], default=0):
+
+        if datepart == _WILDCARD:
+            if isinstance(format_code, str):
+                format = format.replace(format_code, f'%{_WILDCARD}')
+            elif isinstance(format_code, list):
+                for f in format_code:
+                    format = format.replace(f, f'%{_WILDCARD}')
+            datepart = default
+
+        return format, datepart
+
+
+class TimesliceLocalNow(Timeslice):
+
+    def __init__(self) -> None:
+        now = datetime.now()
+        super().__init__(now.year, now.month, now.day, now.hour, now.minute, now.second, now.microsecond)
+
+
+class TimesliceUtcNow(Timeslice):
+
+    def __init__(self) -> None:
+        now = datetime.utcnow()
+        super().__init__(now.year, now.month, now.day, now.hour, now.minute, now.second, now.microsecond)

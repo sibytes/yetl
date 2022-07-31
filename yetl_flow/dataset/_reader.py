@@ -205,10 +205,11 @@ class Reader(Source):
             .load(self.path)
             .withColumn(CORRELATION_ID, fn.lit(str(self.correlation_id)))
             .withColumn(LOAD_TIMESTAMP, fn.current_timestamp())
-            .withColumn(TIMESLICE, fn.lit(self.timeslice))
+            # .withColumn(TIMESLICE, fn.lit(self.timeslice)) # TODO: fix injection of time slice lineage.
             .withColumn(FILENAME, fn.input_file_name())
         )
 
         self.dataframe = df
+        df.show()
         self.validation_result = self.validate()
         return self.dataframe

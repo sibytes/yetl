@@ -2,6 +2,8 @@ from .dataset import Reader, Writer, StreamReader, StreamWriter
 from .dataflow import IDataflow
 from ._framework import yetl_flow
 from ._context import Context
+from ._timeslice import Timeslice
+
 
 __all__ = [
     "Reader",
@@ -11,4 +13,5 @@ __all__ = [
     "yetl_flow",
     "Context",
     "IDataflow",
+    "Timeslice"
 ]

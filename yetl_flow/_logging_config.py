@@ -28,7 +28,6 @@ with open(log_config_file, "r") as f:
     try:
         config = yaml.safe_load(f.read())
         logging.config.dictConfig(config)
-        print(config)
 
         # if it errors because of invalid yaml format then
         # provide details so the users can easily find and correct

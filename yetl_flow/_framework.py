@@ -20,7 +20,6 @@ def yetl_flow(name: str = None, app_name: str = None, log_level="INFO"):
 
             spark = kwargs.get("spark")
             timeslice = kwargs.get("timeslice")
-            timeslice_mask = kwargs.get("timeslice_mask")
 
             # create the context for the pipeline to run
             context = Context(app_name, log_level, _name, spark, timeslice)

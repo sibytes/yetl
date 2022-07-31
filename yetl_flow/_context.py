@@ -7,6 +7,7 @@ import logging
 import uuid
 from .schema_repo import schema_repo_factory
 import json
+from ._timeslice import Timeslice, TimesliceUtcNow
 
 
 class Context:
@@ -25,9 +26,9 @@ class Context:
         if not app_name:
             self.app_name = self.name
 
-        self.timeslice = timeslice
+        self.timeslice:Timeslice = timeslice
         if not self.timeslice:
-            self.timeslice = datetime.now()
+            self.timeslice = TimesliceUtcNow()
 
         self.log = logging.getLogger(self.app_name)
         self.log_level = log_level
