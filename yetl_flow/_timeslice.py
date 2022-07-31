@@ -136,7 +136,7 @@ class Timeslice:
         return format, datepart
 
 
-class TimesliceLocalNow(Timeslice):
+class TimesliceNow(Timeslice):
 
     def __init__(self) -> None:
         now = datetime.now()
