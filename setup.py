@@ -30,6 +30,6 @@ setup(
         "Programming Language :: Python :: 3.8",
     ],
     packages=["yetl_flow"],
-    install_requires=["pyyaml","pyspark"],
+    install_requires=["pyyaml","pyspark","regex"],
     zip_safe=False
 )
