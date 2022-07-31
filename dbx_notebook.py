@@ -3,14 +3,13 @@
 
 # COMMAND ----------
 
-from yetl_flow import yetl_flow, IDataflow, Context
+from yetl_flow import yetl_flow, IDataflow, Context, Timeslice
 from pyspark.sql.functions import *
 import logging
-from datetime import datetime
 
 @yetl_flow()
 def customer_landing_to_rawdb_csv(
-    context: Context, dataflow: IDataflow, timeslice: datetime, timeslice_mask: str
+    context: Context, dataflow: IDataflow, timeslice: Timeslice
 ):
     context.log.info(
         f"Executing Dataflow {context.app_name} with timeslice={timeslice}, retries={dataflow.retries}"
@@ -26,11 +25,9 @@ def customer_landing_to_rawdb_csv(
     dataflow.destination_df("raw.customer", df)
 
 
-timeslice = datetime(2022, 1, 1, 0, 0, 0, 0)
-# timeslice = datetime(2022, 7, 11, 0, 0, 0, 0)
-timeslice_mask = "*/*/*"
+timeslice = Timeslice(2022, '*', '*')
 results = customer_landing_to_rawdb_csv(
-    timeslice=timeslice, timeslice_mask=timeslice_mask
+    timeslice=timeslice
 )
 
 
