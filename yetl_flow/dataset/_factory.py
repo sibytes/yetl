@@ -54,7 +54,7 @@ class _DatasetFactory:
         self._logger.info(f"Get {type.name} from factory dataset")
         dataset_class = self._dataset.get(type)
 
-        # TODO: fix this
+        # TODO: fix this - need to register save types and lose the if
         if type == IOType.WRITE:
 
             class InjectDestination(dataset_class, save_type):
