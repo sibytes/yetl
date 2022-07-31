@@ -24,7 +24,9 @@ class Save(ABC):
 
 class DefaultSave(Save):
     def write(self):
-        self.context.log.info("Writer saving using the DefaultSave which is the configured save.")
+        self.context.log.info(
+            f"Writer saving using the DefaultSave which is the configured save = {self.mode}."
+        )
         (
             self.dataframe.write.format(self.format)
             .options(**self.options)
@@ -35,7 +37,9 @@ class DefaultSave(Save):
 
 class ErrorIfExistsSave(Save):
     def write(self):
-        self.context.log.info("Writer saving using the ErrorIfExistsSave which is an injected save.")
+        self.context.log.info(
+            "Writer saving using the ErrorIfExistsSave which is an injected save."
+        )
         (
             self.dataframe.write.format(self.format)
             .options(**self.options)
@@ -46,7 +50,9 @@ class ErrorIfExistsSave(Save):
 
 class AppendSave(Save):
     def write(self):
-        self.context.log.info("Writer saving using the AppendSave which is an injected save.")
+        self.context.log.info(
+            "Writer saving using the AppendSave which is an injected save."
+        )
         (
             self.dataframe.write.format(self.format)
             .options(**self.options)
@@ -57,7 +63,9 @@ class AppendSave(Save):
 
 class OverwriteSave(Save):
     def write(self):
-        self.context.log.info("Writer saving using the OverwriteSave which is an injected save.")
+        self.context.log.info(
+            "Writer saving using the OverwriteSave which is an injected save."
+        )
         (
             self.dataframe.write.format(self.format)
             .options(**self.options)
@@ -68,7 +76,9 @@ class OverwriteSave(Save):
 
 class IgnoreSave(Save):
     def write(self):
-        self.context.log.info("Writer saving using the IgnoreSave which is an injected save.")
+        self.context.log.info(
+            "Writer saving using the IgnoreSave which is an injected save."
+        )
         (
             self.dataframe.write.format(self.format)
             .options(**self.options)
@@ -79,5 +89,7 @@ class IgnoreSave(Save):
 
 class MergeSave(Save):
     def write(self):
-        self.context.log.info("Writer saving using the MergeSave which is an injected save.")
+        self.context.log.info(
+            "Writer saving using the MergeSave which is an injected save."
+        )
         raise NotImplementedError()

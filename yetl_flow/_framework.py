@@ -5,6 +5,7 @@ import time
 from typing import Type
 from .dataset import Save, DefaultSave
 
+
 class YetlFlowException(Exception):
     def __init__(self, message):
         super().__init__(message)
@@ -21,7 +22,7 @@ def yetl_flow(name: str = None, app_name: str = None, log_level="INFO"):
 
             spark = kwargs.get("spark")
             timeslice = kwargs.get("timeslice")
-            save_type:Type[Save] = kwargs.get("save_type", DefaultSave)
+            save_type: Type[Save] = kwargs.get("save_type", DefaultSave)
 
             # create the context for the pipeline to run
             context = Context(app_name, log_level, _name, spark, timeslice, save_type)

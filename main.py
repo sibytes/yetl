@@ -1,5 +1,5 @@
 
-from yetl_flow import yetl_flow, IDataflow, Context, Timeslice, TimesliceUtcNow, AppendSave
+from yetl_flow import yetl_flow, IDataflow, Context, Timeslice, TimesliceUtcNow, OverwriteSave
 from pyspark.sql.functions import *
 import logging
 
@@ -31,11 +31,17 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.info(f"Executing pipeline test_customer_landing_to_rawdb")
 
-# if timeslice not provided will default to utcnow
-timeslice = Timeslice(2022, 7, 11)
+# incremental load
+# timeslice = Timeslice(2022, 7, 12)
+# results = customer_landing_to_rawdb_csv(
+#     timeslice=timeslice
+# )
+
+# reload load
+timeslice = Timeslice(2022, '*', '*')
 results = customer_landing_to_rawdb_csv(
     timeslice=timeslice,
-    save_type = AppendSave
+    save_type = OverwriteSave
 )
 
 # results = pipeline.test_customer_landing_to_rawdb_csv()

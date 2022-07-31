@@ -65,6 +65,6 @@ dataflow:
       format: delta
       path: yetl_data/delta_lake/raw/customer
       write:
-        mode: overwrite
+        mode: append
         options:
           mergeSchema: true
