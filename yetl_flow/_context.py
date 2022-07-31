@@ -26,7 +26,7 @@ class Context:
         if not app_name:
             self.app_name = self.name
 
-        self.timeslice:Timeslice = timeslice
+        self.timeslice: Timeslice = timeslice
         if not self.timeslice:
             self.timeslice = TimesliceUtcNow()
 

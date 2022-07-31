@@ -15,5 +15,5 @@ __all__ = [
     "IDataflow",
     "Timeslice",
     "TimesliceUtcNow",
-    "TimesliceNow"
+    "TimesliceNow",
 ]

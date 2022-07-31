@@ -33,19 +33,18 @@ class Timeslice:
         hour: Union[int, Wildcard] = 0,
         minute: Union[int, Wildcard] = 0,
         second: Union[int, Wildcard] = 0,
-        microsecond: Union[int, Wildcard] = 0
+        microsecond: Union[int, Wildcard] = 0,
     ) -> None:
-
 
         self.year = self._wildcard_check(year)
         self.month = self._wildcard_check(month)
-        self.day = self._wildcard_check(day) 
-        self.hour = self._wildcard_check(hour) 
+        self.day = self._wildcard_check(day)
+        self.hour = self._wildcard_check(hour)
         self.minutue = self._wildcard_check(minute)
-        self.second = self._wildcard_check(second) 
-        self.microsecond = self._wildcard_check(microsecond) 
-    
-    def _wildcard_check(self, value:Union[int, Wildcard]):
+        self.second = self._wildcard_check(second)
+        self.microsecond = self._wildcard_check(microsecond)
+
+    def _wildcard_check(self, value: Union[int, Wildcard]):
         if isinstance(value, int):
             return value
         if isinstance(value, str) and value == _WILDCARD:
@@ -54,7 +53,7 @@ class Timeslice:
             raise Exception(f"Timeslice parameters must be an int or '{_WILDCARD}'")
 
     def strftime(self, format: str):
-        """ This will format and return the timeslice using python format codes. Only a subset of format codes are suppoered by design
+        """This will format and return the timeslice using python format codes. Only a subset of format codes are suppoered by design
 
         %d - Day of the month as a zero-padded decimal number.
         %m - Month as a zero-padded decimal number.
@@ -107,44 +106,65 @@ class Timeslice:
                 f"Timeslice does not contain month (month=None) failed to format timeslice with FormatCode = %m"
             )
 
-        format, year = self._format_wildcard(format, self.year, ['%y','%Y'], 1900)
-        format, month = self._format_wildcard(format, self.month, '%m', 1)
-        format, day = self._format_wildcard(format, self.day, '%d', 1)
+        format, year = self._format_wildcard(format, self.year, ["%y", "%Y"], 1900)
+        format, month = self._format_wildcard(format, self.month, "%m", 1)
+        format, day = self._format_wildcard(format, self.day, "%d", 1)
 
-        format, hour = self._format_wildcard(format, self.hour, '%H')
-        format, minutue = self._format_wildcard(format, self.minutue, '%M')
-        format, second = self._format_wildcard(format, self.second, '%S')
-        format, microsecond = self._format_wildcard(format, self.microsecond, '%f')
-        
+        format, hour = self._format_wildcard(format, self.hour, "%H")
+        format, minutue = self._format_wildcard(format, self.minutue, "%M")
+        format, second = self._format_wildcard(format, self.second, "%S")
+        format, microsecond = self._format_wildcard(format, self.microsecond, "%f")
 
         timeslice = datetime(year, month, day, hour, minutue, second, microsecond)
 
         formatted = timeslice.strftime(format)
         return formatted
 
-
-    def _format_wildcard(self, format:str, datepart:Union[int, Wildcard], format_code:Union[list, str], default=0):
+    def _format_wildcard(
+        self,
+        format: str,
+        datepart: Union[int, Wildcard],
+        format_code: Union[list, str],
+        default=0,
+    ):
 
         if datepart == _WILDCARD:
             if isinstance(format_code, str):
-                format = format.replace(format_code, f'%{_WILDCARD}')
+                format = format.replace(format_code, f"%{_WILDCARD}")
             elif isinstance(format_code, list):
                 for f in format_code:
-                    format = format.replace(f, f'%{_WILDCARD}')
+                    format = format.replace(f, f"%{_WILDCARD}")
             datepart = default
 
         return format, datepart
 
+    def __str__(self) -> str:
+        return self.strftime("%Y-%m-%d %H:%M:%S.%f")
+
 
 class TimesliceNow(Timeslice):
-
     def __init__(self) -> None:
         now = datetime.now()
-        super().__init__(now.year, now.month, now.day, now.hour, now.minute, now.second, now.microsecond)
+        super().__init__(
+            now.year,
+            now.month,
+            now.day,
+            now.hour,
+            now.minute,
+            now.second,
+            now.microsecond,
+        )
 
 
 class TimesliceUtcNow(Timeslice):
-
     def __init__(self) -> None:
         now = datetime.utcnow()
-        super().__init__(now.year, now.month, now.day, now.hour, now.minute, now.second, now.microsecond)
+        super().__init__(
+            now.year,
+            now.month,
+            now.day,
+            now.hour,
+            now.minute,
+            now.second,
+            now.microsecond,
+        )

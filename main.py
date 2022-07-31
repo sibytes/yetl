@@ -11,9 +11,7 @@ def customer_landing_to_rawdb_csv(
     this is a test pipeline that can be run just to check everything is setup and configured
     correctly.
     """
-    context.log.info(
-        f"Executing Dataflow {context.app_name} with timeslice={timeslice}, retries={dataflow.retries}"
-    )
+    context.log.info(f"Executing Dataflow {context.app_name} with timeslice={timeslice} retries={dataflow.retries}")
 
     # the config for this dataflow has 2 landing sources that are joined
     # and written to delta table
@@ -34,7 +32,7 @@ logger.setLevel(logging.INFO)
 logger.info(f"Executing pipeline test_customer_landing_to_rawdb")
 
 # if timeslice not provided will default to utcnow
-timeslice = Timeslice(2022, '*', '*')
+timeslice = Timeslice(2022, 7, 11)
 results = customer_landing_to_rawdb_csv(
     timeslice=timeslice
 )
@@ -42,15 +40,3 @@ results = customer_landing_to_rawdb_csv(
 
 
 
-
-
-
-
-
-
-
-
-
-# timeslice = Timeslice(2022, '*', )
-# format = "%Y/%m/%d"
-# print(timeslice.strftime(format))
