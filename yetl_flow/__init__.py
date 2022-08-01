@@ -8,6 +8,7 @@ from .dataset import (
     OverwriteSave,
     IgnoreSave,
     ErrorIfExistsSave,
+    Save,
 )
 from .dataflow import IDataflow
 from ._framework import yetl_flow
@@ -31,4 +32,5 @@ __all__ = [
     "OverwriteSave",
     "IgnoreSave",
     "ErrorIfExistsSave",
+    "Save",
 ]

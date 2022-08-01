@@ -23,16 +23,31 @@ def yetl_flow(name: str = None, app_name: str = None, log_level="INFO"):
             spark = kwargs.get("spark")
             timeslice = kwargs.get("timeslice")
             save_type: Type[Save] = kwargs.get("save_type", DefaultSave)
+            if "timeslice" in kwargs.keys():
+                del kwargs["timeslice"]
+            if "save_type" in kwargs.keys():
+                del kwargs["save_type"]
 
             # create the context for the pipeline to run
             context = Context(app_name, log_level, _name, spark, timeslice, save_type)
 
             # run the pipeline
             yetl_flow_exception = None
+            context.log.info(
+                f"""Executing Dataflow {context.app_name} with:
+                timeslice={timeslice} 
+                retries={context.dataflow.retries} 
+                save_type={save_type.__name__}"""
+            )
             while context.dataflow.retries >= 0:
                 try:
                     function(
-                        context=context, dataflow=context.dataflow, *args, **kwargs
+                        context=context,
+                        dataflow=context.dataflow,
+                        timeslice=timeslice,
+                        save_type=save_type,
+                        *args,
+                        **kwargs,
                     )
                     break
                 except Exception as e:

@@ -1,19 +1,18 @@
-INFO : 2022-07-31 23:31:02,679 : __main__ : main.py.<module>: line(32) : Executing pipeline test_customer_landing_to_rawdb
-INFO : 2022-07-31 23:31:02,679 : customer_landing_to_rawdb_csv : _config_provider.py.load_config: line(41) : Loading Dataflow configuration from file /Users/shaunryan/AzureDevOps/yetl/config/pipeline/local/config.yaml
-INFO : 2022-07-31 23:31:02,681 : customer_landing_to_rawdb_csv : _context.py._get_spark_context: line(85) : Setting spark context
+INFO : 2022-08-01 22:11:18,588 : customer_landing_to_rawdb_csv : _config_provider.py.load_config: line(41) : Loading Dataflow configuration from file /Users/shaunryan/AzureDevOps/yetl/config/pipeline/local/config.yaml
+INFO : 2022-08-01 22:11:18,589 : customer_landing_to_rawdb_csv : _context.py._get_spark_context: line(85) : Setting spark context
 :: loading settings :: url = jar:file:/Users/shaunryan/opt/spark-3.2.1-bin-hadoop3.2/jars/ivy-2.5.0.jar!/org/apache/ivy/core/settings/ivysettings.xml
-INFO : 2022-07-31 23:31:07,632 : customer_landing_to_rawdb_csv : _context.py.__init__: line(50) : Setting application context spark logger at level ERROR
-INFO : 2022-07-31 23:31:07,635 : customer_landing_to_rawdb_csv : _factory.py.get_file_system_type: line(50) : Setting filestystem using protocol file:
-INFO : 2022-07-31 23:31:07,635 : customer_landing_to_rawdb_csv : _context.py.__init__: line(66) : Setting application context dataflow customer_landing_to_rawdb_csv
-INFO : 2022-07-31 23:31:07,636 : customer_landing_to_rawdb_csv : _config_provider.py.load_pipeline_config: line(29) : Loading Dataflow configuration from file /Users/shaunryan/AzureDevOps/yetl/config/pipeline/local/customer_landing_to_rawdb_csv.yaml
-INFO : 2022-07-31 23:31:07,652 : customer_landing_to_rawdb_csv : _factory.py.get_schema_repo_type: line(39) : Setting up schema repo on spark_schema_file 
-INFO : 2022-07-31 23:31:07,652 : customer_landing_to_rawdb_csv : _spark_file_schema_repo.py.load_schema: line(50) : Loading schema for dataset landing.customer from /Users/shaunryan/AzureDevOps/yetl/config/schema/spark/landing/customer.yaml using <class 'yetl_flow.file_system._file_system.FileSystem'>
-INFO : 2022-07-31 23:31:07,656 : customer_landing_to_rawdb_csv : _reader.py.__init__: line(49) : auto_io = True automatically creating or altering exception delta table landing.customer _correlation_id=1c1fed38-e29b-4922-ab4a-23d792f48b3d
-INFO : 2022-07-31 23:31:07,656 : customer_landing_to_rawdb_csv : _delta_lake.py.create_database: line(27) : Creating database if not exists `landing`
-INFO : 2022-07-31 23:31:14,824 : customer_landing_to_rawdb_csv : _reader.py.create_or_alter_table: line(61) : Exception table already exists landing.exceptions at file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/exceptions/landing/exceptions _correlation_id=1c1fed38-e29b-4922-ab4a-23d792f48b3d
-INFO : 2022-07-31 23:31:14,824 : customer_landing_to_rawdb_csv : _reader.py.read: line(195) : Reading data for landing.customer from file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_2022**.csv with options {'mode': 'PERMISSIVE', 'inferSchema': False, 'header': True} _correlation_id=1c1fed38-e29b-4922-ab4a-23d792f48b3d
-INFO : 2022-07-31 23:31:15,327 : customer_landing_to_rawdb_csv : _reader.py.validate: line(181) : Validating dataframe read using PERMISSIVE corrupt column at _corrupt_record _correlation_id=1c1fed38-e29b-4922-ab4a-23d792f48b3d
-INFO : 2022-07-31 23:31:16,470 : customer_landing_to_rawdb_csv : _reader.py.validate: line(192) : {
+INFO : 2022-08-01 22:11:23,001 : customer_landing_to_rawdb_csv : _context.py.__init__: line(50) : Setting application context spark logger at level ERROR
+INFO : 2022-08-01 22:11:23,004 : customer_landing_to_rawdb_csv : _factory.py.get_file_system_type: line(50) : Setting filestystem using protocol file:
+INFO : 2022-08-01 22:11:23,004 : customer_landing_to_rawdb_csv : _context.py.__init__: line(66) : Setting application context dataflow customer_landing_to_rawdb_csv
+INFO : 2022-08-01 22:11:23,004 : customer_landing_to_rawdb_csv : _config_provider.py.load_pipeline_config: line(29) : Loading Dataflow configuration from file /Users/shaunryan/AzureDevOps/yetl/config/pipeline/local/customer_landing_to_rawdb_csv.yaml
+INFO : 2022-08-01 22:11:23,021 : customer_landing_to_rawdb_csv : _factory.py.get_schema_repo_type: line(39) : Setting up schema repo on spark_schema_file 
+INFO : 2022-08-01 22:11:23,022 : customer_landing_to_rawdb_csv : _spark_file_schema_repo.py.load_schema: line(50) : Loading schema for dataset landing.customer from /Users/shaunryan/AzureDevOps/yetl/config/schema/spark/landing/customer.yaml using <class 'yetl_flow.file_system._file_system.FileSystem'>
+INFO : 2022-08-01 22:11:23,026 : customer_landing_to_rawdb_csv : _reader.py.__init__: line(49) : auto_io = True automatically creating or altering exception delta table landing.customer _correlation_id=0faeea8d-4207-4376-81bb-feb6fdcac549
+INFO : 2022-08-01 22:11:23,026 : customer_landing_to_rawdb_csv : _delta_lake.py.create_database: line(27) : Creating database if not exists `landing`
+INFO : 2022-08-01 22:11:29,903 : customer_landing_to_rawdb_csv : _reader.py.create_or_alter_table: line(61) : Exception table already exists landing.exceptions at file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/exceptions/landing/exceptions _correlation_id=0faeea8d-4207-4376-81bb-feb6fdcac549
+INFO : 2022-08-01 22:11:29,904 : customer_landing_to_rawdb_csv : _reader.py.read: line(195) : Reading data for landing.customer from file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_2022**.csv with options {'mode': 'PERMISSIVE', 'inferSchema': False, 'header': True} _correlation_id=0faeea8d-4207-4376-81bb-feb6fdcac549
+INFO : 2022-08-01 22:11:30,272 : customer_landing_to_rawdb_csv : _reader.py.validate: line(181) : Validating dataframe read using PERMISSIVE corrupt column at _corrupt_record _correlation_id=0faeea8d-4207-4376-81bb-feb6fdcac549
+INFO : 2022-08-01 22:11:31,540 : customer_landing_to_rawdb_csv : _reader.py.validate: line(192) : {
     "validation": {
         "schema_on_read": {
             "landing.customer": {
@@ -24,14 +23,14 @@ INFO : 2022-07-31 23:31:16,470 : customer_landing_to_rawdb_csv : _reader.py.vali
         }
     }
 }
-INFO : 2022-07-31 23:31:16,471 : customer_landing_to_rawdb_csv : _factory.py.get_schema_repo_type: line(39) : Setting up schema repo on spark_schema_file 
-INFO : 2022-07-31 23:31:16,471 : customer_landing_to_rawdb_csv : _spark_file_schema_repo.py.load_schema: line(50) : Loading schema for dataset landing.customer_preferences from /Users/shaunryan/AzureDevOps/yetl/config/schema/spark/landing/customer_preferences.yaml using <class 'yetl_flow.file_system._file_system.FileSystem'>
-INFO : 2022-07-31 23:31:16,473 : customer_landing_to_rawdb_csv : _reader.py.__init__: line(49) : auto_io = True automatically creating or altering exception delta table landing.customer_preferences _correlation_id=1c1fed38-e29b-4922-ab4a-23d792f48b3d
-INFO : 2022-07-31 23:31:16,473 : customer_landing_to_rawdb_csv : _delta_lake.py.create_database: line(27) : Creating database if not exists `landing`
-INFO : 2022-07-31 23:31:16,679 : customer_landing_to_rawdb_csv : _reader.py.create_or_alter_table: line(61) : Exception table already exists landing.exceptions at file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/exceptions/landing/exceptions _correlation_id=1c1fed38-e29b-4922-ab4a-23d792f48b3d
-INFO : 2022-07-31 23:31:16,679 : customer_landing_to_rawdb_csv : _reader.py.read: line(195) : Reading data for landing.customer_preferences from file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_preferences_2022**.csv with options {'mode': 'PERMISSIVE', 'inferSchema': False, 'header': True} _correlation_id=1c1fed38-e29b-4922-ab4a-23d792f48b3d
-INFO : 2022-07-31 23:31:16,778 : customer_landing_to_rawdb_csv : _reader.py.validate: line(181) : Validating dataframe read using PERMISSIVE corrupt column at _corrupt_record _correlation_id=1c1fed38-e29b-4922-ab4a-23d792f48b3d
-INFO : 2022-07-31 23:31:17,352 : customer_landing_to_rawdb_csv : _reader.py.validate: line(192) : {
+INFO : 2022-08-01 22:11:31,540 : customer_landing_to_rawdb_csv : _factory.py.get_schema_repo_type: line(39) : Setting up schema repo on spark_schema_file 
+INFO : 2022-08-01 22:11:31,540 : customer_landing_to_rawdb_csv : _spark_file_schema_repo.py.load_schema: line(50) : Loading schema for dataset landing.customer_preferences from /Users/shaunryan/AzureDevOps/yetl/config/schema/spark/landing/customer_preferences.yaml using <class 'yetl_flow.file_system._file_system.FileSystem'>
+INFO : 2022-08-01 22:11:31,543 : customer_landing_to_rawdb_csv : _reader.py.__init__: line(49) : auto_io = True automatically creating or altering exception delta table landing.customer_preferences _correlation_id=0faeea8d-4207-4376-81bb-feb6fdcac549
+INFO : 2022-08-01 22:11:31,543 : customer_landing_to_rawdb_csv : _delta_lake.py.create_database: line(27) : Creating database if not exists `landing`
+INFO : 2022-08-01 22:11:31,671 : customer_landing_to_rawdb_csv : _reader.py.create_or_alter_table: line(61) : Exception table already exists landing.exceptions at file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/exceptions/landing/exceptions _correlation_id=0faeea8d-4207-4376-81bb-feb6fdcac549
+INFO : 2022-08-01 22:11:31,672 : customer_landing_to_rawdb_csv : _reader.py.read: line(195) : Reading data for landing.customer_preferences from file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_preferences_2022**.csv with options {'mode': 'PERMISSIVE', 'inferSchema': False, 'header': True} _correlation_id=0faeea8d-4207-4376-81bb-feb6fdcac549
+INFO : 2022-08-01 22:11:31,719 : customer_landing_to_rawdb_csv : _reader.py.validate: line(181) : Validating dataframe read using PERMISSIVE corrupt column at _corrupt_record _correlation_id=0faeea8d-4207-4376-81bb-feb6fdcac549
+INFO : 2022-08-01 22:11:32,309 : customer_landing_to_rawdb_csv : _reader.py.validate: line(192) : {
     "validation": {
         "schema_on_read": {
             "landing.customer_preferences": {
@@ -42,13 +41,13 @@ INFO : 2022-07-31 23:31:17,352 : customer_landing_to_rawdb_csv : _reader.py.vali
         }
     }
 }
-INFO : 2022-07-31 23:31:17,353 : customer_landing_to_rawdb_csv : _factory.py.get_schema_repo_type: line(39) : Setting up schema repo on deltalake_sql_file 
-INFO : 2022-07-31 23:31:17,353 : customer_landing_to_rawdb_csv : _deltalake_sql_file.py.load_schema: line(43) : Loading schema for dataset raw.customer from ./config/schema/deltalake/raw/customer.sql using <class 'yetl_flow.file_system._file_system.FileSystem'>
-INFO : 2022-07-31 23:31:17,353 : customer_landing_to_rawdb_csv : _writer.py.__init__: line(40) : auto_io = True automatically creating or altering delta table raw.customer
-INFO : 2022-07-31 23:31:17,353 : customer_landing_to_rawdb_csv : _delta_lake.py.create_database: line(27) : Creating database if not exists `raw`
-INFO : 2022-07-31 23:31:17,462 : customer_landing_to_rawdb_csv : _writer.py.create_or_alter_table: line(88) : Table already exists raw.customer at file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/raw/customer
-INFO : 2022-07-31 23:31:17,462 : customer_landing_to_rawdb_csv : _delta_lake.py.get_table_properties: line(69) : getting existing table properties for table raw.customer
-INFO : 2022-07-31 23:31:24,526 : customer_landing_to_rawdb_csv : _delta_lake.py.get_table_properties: line(91) : {
+INFO : 2022-08-01 22:11:32,310 : customer_landing_to_rawdb_csv : _factory.py.get_schema_repo_type: line(39) : Setting up schema repo on deltalake_sql_file 
+INFO : 2022-08-01 22:11:32,310 : customer_landing_to_rawdb_csv : _deltalake_sql_file.py.load_schema: line(43) : Loading schema for dataset raw.customer from ./config/schema/deltalake/raw/customer.sql using <class 'yetl_flow.file_system._file_system.FileSystem'>
+INFO : 2022-08-01 22:11:32,310 : customer_landing_to_rawdb_csv : _writer.py.__init__: line(40) : auto_io = True automatically creating or altering delta table raw.customer
+INFO : 2022-08-01 22:11:32,310 : customer_landing_to_rawdb_csv : _delta_lake.py.create_database: line(27) : Creating database if not exists `raw`
+INFO : 2022-08-01 22:11:32,420 : customer_landing_to_rawdb_csv : _writer.py.create_or_alter_table: line(88) : Table already exists raw.customer at file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/raw/customer
+INFO : 2022-08-01 22:11:32,420 : customer_landing_to_rawdb_csv : _delta_lake.py.get_table_properties: line(69) : getting existing table properties for table raw.customer
+INFO : 2022-08-01 22:11:40,283 : customer_landing_to_rawdb_csv : _delta_lake.py.get_table_properties: line(91) : {
     "raw.customer": {
         "constraints": {
             "amount_lower_bound": "amount > - 1000",
@@ -71,11 +70,15 @@ INFO : 2022-07-31 23:31:24,526 : customer_landing_to_rawdb_csv : _delta_lake.py.
         }
     }
 }
-INFO : 2022-07-31 23:31:34,103 : customer_landing_to_rawdb_csv : main.py.customer_landing_to_rawdb_csv: line(15) : Executing Dataflow customer_landing_to_rawdb_csv with timeslice=2022-*-* 00:00:00.000000 retries=2
-INFO : 2022-07-31 23:31:34,124 : customer_landing_to_rawdb_csv : _writer.py.write: line(184) : Writing data to raw.customer at file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/raw/customer
-INFO : 2022-07-31 23:31:34,124 : customer_landing_to_rawdb_csv : _save.py.write: line(66) : Writer saving using the OverwriteSave which is an injected save.
-INFO : 2022-07-31 23:31:37,059 : customer_landing_to_rawdb_csv : _delta_lake.py.get_audit: line(34) : Auditing database table raw.customer
-INFO : 2022-07-31 23:31:37,643 : customer_landing_to_rawdb_csv : _delta_lake.py.get_audits: line(48) : {
+INFO : 2022-08-01 22:11:50,672 : customer_landing_to_rawdb_csv : _framework.py.wrap_function: line(36) : Executing Dataflow customer_landing_to_rawdb_csv with:
+                timeslice=2022-*-* 00:00:00.000000 
+                retries=2 
+                save_type=OverwriteSave
+INFO : 2022-08-01 22:11:50,672 : customer_landing_to_rawdb_csv : main.py.customer_landing_to_rawdb_csv: line(29) : Joining customers with customer_preferences
+INFO : 2022-08-01 22:11:50,690 : customer_landing_to_rawdb_csv : _writer.py.write: line(184) : Writing data to raw.customer at file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/raw/customer
+INFO : 2022-08-01 22:11:50,690 : customer_landing_to_rawdb_csv : _save.py.write: line(66) : Writer saving using the OverwriteSave which is an injected save.
+INFO : 2022-08-01 22:11:54,378 : customer_landing_to_rawdb_csv : _delta_lake.py.get_audit: line(34) : Auditing database table raw.customer
+INFO : 2022-08-01 22:11:55,015 : customer_landing_to_rawdb_csv : _delta_lake.py.get_audits: line(48) : {
     "raw.customer": {
         "clusterId": null,
         "engineInfo": "Apache-Spark/3.2.1 Delta-Lake/2.0.0",
@@ -86,18 +89,18 @@ INFO : 2022-07-31 23:31:37,643 : customer_landing_to_rawdb_csv : _delta_lake.py.
         "operation": "WRITE",
         "operationMetrics": {
             "numFiles": "1",
-            "numOutputBytes": "4820",
+            "numOutputBytes": "4821",
             "numOutputRows": "20"
         },
         "operationParameters": {
             "mode": "Overwrite",
             "partitionBy": "[]"
         },
-        "readVersion": 11,
-        "timestamp": "2022-07-31 23:31:35.005000",
+        "readVersion": 15,
+        "timestamp": "2022-08-01 22:11:52.033000",
         "userId": null,
         "userMetadata": null,
         "userName": null,
-        "version": 12
+        "version": 16
     }
 }
