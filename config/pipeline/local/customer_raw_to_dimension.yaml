@@ -1,0 +1,125 @@
+dataflow:
+  retries: 2
+  retry_wait: 1
+  enable_dataflow_types:
+    - full_load
+    - partition_load
+    - merge_compare
+    - merge_cdc
+    - nuke 
+
+
+  raw:
+    customer:
+      table:
+      timeslice_format: "%Y%m%d"
+      format: delta
+      sql:
+        # datasets that have auto_io will automatically action the read.
+        # where it is false the dataframe can be retrieved in the user implemented
+        # dataflow and handled manually as desired.
+        # auto: false # does auto make sense on a sql read?
+        name: dim_customer
+        type: dataframe
+        # type: view
+        # type: temp_view
+        # inline or separate file.
+        sql: |
+          SELECT
+            id            ,
+            first_name    ,
+            last_name     ,
+            email         ,
+            gender        ,
+            job_title     ,
+            amount        ,
+            allow_contact ,
+            current_timestamp() as from_datetime,
+            to_timestamp('9999-12-31 23:59:59.999') as to_datetime,
+            true as current,
+            cast(null as datetime) as deleted_datetime  
+          FROM {{database_name}}.{{table_name}}
+          WHERE _TIMESLICE = {{timeslice}}
+        # sql: ./config/schema/sql
+      exceptions:
+          path: "data/delta_lake/exceptions"
+          database: raw
+          table: exceptions
+      thresholds:
+        warning:
+          min_rows: 1
+          max_rows: 1000
+          exception_count: 0
+          exception_percent: 0
+        error:
+          min_rows: 0
+          max_rows: 100000000
+          exception_count: 50
+          exception_percent: 80
+
+  dw:
+    dim_customer:
+      table:
+        # table ddl is optional to provide full flexbility of how you can manaage the datalake (house)
+        # it can be declared inline or via sql include files. If not provided an empty schema table is
+        # created and merge schema (if false) is flipped to true on the initial load.
+
+        # ddl: |
+        #   CREATE TABLE {{database_name}}.{{table_name}}
+        #   (
+        #     id            integer not null,
+        #     first_name    string not null,
+        #     last_name     string,
+        #     email         string,
+        #     gender        string,
+        #     job_title     string,
+        #     amount        double,
+        #     allow_contact boolean,
+        #     from_date     datetime,
+        #     to_date       datetime,
+        #     current       boolean,
+        #     deleted_date  datetime
+        #   )
+        #   USING DELTA LOCATION '{{path}}';
+
+        ddl: ./config/schema/deltalake
+
+
+        # https://docs.databricks.com/delta/table-properties.html
+        # https://docs.delta.io/2.0.0/table-properties.html
+        properties:
+          delta.appendOnly: false
+          delta.checkpoint.writeStatsAsJson: true
+          # delta.checkpoint.writeStatsAsStruct: None # Not Supported
+          # delta.columnMapping.mode: true # not released yet
+          
+          # delta.autoOptimize.autoCompact: true        # Databricks, but supported by yetl
+          # delta.autoOptimize.optimizeWrite: true      # Databricks, but supported by yetl
+          # delta.targetFileSize: 104857600             # Databricks only
+          # delta.autoCompact.maxFileSize: 134217728    # Databricks only
+          # delta.isolationLevel:  WriteSerializable    # Databricks only
+          # delta.setTransactionRetentionDuration: None # Databricks only
+          # delta.targetFileSize: None                  # Databricks only
+          # delta.tuneFileSizesForRewrites: None        # Databricks only
+          # delta.schema.autoMerge.enabled: false       # Databricms only, best to set this in the options but can be set on a table.
+          delta.compatibility.symlinkFormatManifest.enabled: false
+          delta.dataSkippingNumIndexedCols: -1
+          delta.logRetentionDuration: interval 30 days
+          delta.deletedFileRetentionDuration: interval 1 week
+          delta.enableChangeDataFeed: true
+          delta.minReaderVersion: 1
+          delta.minWriterVersion: 2
+          delta.randomizeFilePrefixes: false
+          delta.randomPrefixLength: 2
+
+        # table constraints can be declared inline or via a SQL include file on the ddl
+        check_constraints:
+          amount_lower_bound: "amount > -1000"
+          amount_upper_bound: "amount < 10000"
+      
+      format: delta
+      path: data/delta_lake/dw/dim_customer
+      write:
+        mode: merge #might need merge_scd_type_2
+        options:
+          mergeSchema: true
