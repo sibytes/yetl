@@ -2,6 +2,8 @@
 
 # YETL
 
+`pip install yetl-flow`
+
 Website & Docs: [Yet (another Apache Spark) ETL Framework](https://www.yetl.io/)
 
 
