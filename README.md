@@ -67,7 +67,7 @@ results = customer_landing_to_rawdb_csv(
 ## Dependencies & Setup
 
 This is a spark application with DeltaLake it requires following dependencies installed in order to run locally:
-- [Java Runtime 11]()
+- [Java Runtime 11](https://openjdk.org/install/)
 - [Apache Spark 3.2.2 hadoop3.2](https://spark.apache.org/downloads.html)
 
 Ensure that the spark home path and is added to youy path is set Eg:
