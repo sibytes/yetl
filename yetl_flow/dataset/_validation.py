@@ -94,10 +94,13 @@ class BadRecordsPathSchemaOnRead(IValidator):
         self.valid_count = self.dataframe.distinct().count()
 
         try:
+            print(f"XXXXXXXXXX -> loading exception from {self.path}")
             exceptions = self.spark.read.format(Format.Json.value).load(self.path)
             self.exceptions_count = exceptions.count()
             self.exceptions_count = self.exceptions_handler(self.exceptions)
-        except:
+        except Exception as e:
+            if self.total_count != self.valid_count:
+                raise Exception(f"Failed to read exception records at path {self.path}") from e
             exceptions = None
             self.exceptions_count = 0
 
