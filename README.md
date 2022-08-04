@@ -113,6 +113,6 @@ There is a CI build configured for this repo that builds on main origin and publ
 
 # Change Log
 
-Version: 0.0.5
+Version: 0.0.6
 
 -  [Fix Reader Bad Records](https://github.com/sibytes/yetl/issues/1]) - Support exceptions handling for badrecordspath defined in the configuration e.g. [landing.customer.read.badRecordsPath](https://github.com/sibytes/yetl/blob/main/config/pipeline/dbx_dev/customer_landing_to_rawdb_csv.yaml). Only supported in databricks runtime environment.
