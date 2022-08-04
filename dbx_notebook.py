@@ -38,7 +38,7 @@ def customer_landing_to_rawdb_csv(
 
 
 # if timeslice isn't provided will default to TimesliceUtcNow
-timeslice = Timeslice(2022, 1, 1)
+timeslice = Timeslice(2022, '*', '*')
 results = customer_landing_to_rawdb_csv(
     timeslice=timeslice
 )

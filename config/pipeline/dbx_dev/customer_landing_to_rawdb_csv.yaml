@@ -27,7 +27,7 @@ dataflow:
         # dataflow and handled manually as desired.
         auto: true
         options:
-#           mode: PERMISSIVE
+          mode: PERMISSIVE
           # if infer schema if true the schema will be ingored, generally speaking this is a bad approach for prod pipelines
           # however if you set to true you have to do the work of creating the schema and placing into the schema repo
           # So! if inferSchema is false which is the default for this framework and there isn't one, the 1st time
@@ -35,7 +35,7 @@ dataflow:
           # it gives you a starter schema to refine.
           inferSchema: false
           header: true
-          badRecordsPath: "yetl_data/exceptions/landing/customer/{{timeslice(path_date_format)}}"
+#           badRecordsPath: "yetl_data/exceptions/landing/customer/{{timeslice(path_date_format)}}"
       exceptions:
           path: "yetl_data/delta_lake/exceptions"
           database: landing
