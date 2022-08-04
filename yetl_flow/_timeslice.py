@@ -130,10 +130,10 @@ class Timeslice:
 
         if datepart == _WILDCARD:
             if isinstance(format_code, str):
-                format = format.replace(format_code, f"%{_WILDCARD}")
+                format = format.replace(format_code, f"{_WILDCARD}")
             elif isinstance(format_code, list):
                 for f in format_code:
-                    format = format.replace(f, f"%{_WILDCARD}")
+                    format = format.replace(f, f"{_WILDCARD}")
             datepart = default
 
         return format, datepart

@@ -1,18 +1,379 @@
-INFO : 2022-08-01 22:11:18,588 : customer_landing_to_rawdb_csv : _config_provider.py.load_config: line(41) : Loading Dataflow configuration from file /Users/shaunryan/AzureDevOps/yetl/config/pipeline/local/config.yaml
-INFO : 2022-08-01 22:11:18,589 : customer_landing_to_rawdb_csv : _context.py._get_spark_context: line(85) : Setting spark context
+INFO : 2022-08-04 22:22:05,062 : customer_landing_to_rawdb_csv : _config_provider.py.load_config: line(41) : Loading Dataflow configuration from file /Users/shaunryan/AzureDevOps/yetl/config/pipeline/local/config.yaml
+DEBUG : 2022-08-04 22:22:05,064 : customer_landing_to_rawdb_csv : _config_provider.py.load_config: line(47) : {
+    "datalake": "/Users/shaunryan/AzureDevOps/yetl",
+    "datalake_protocol": "file:",
+    "deltalake_schema_repo": {
+        "deltalake_sql_file": {
+            "deltalake_schema_root": "./config/schema/deltalake"
+        }
+    },
+    "spark": {
+        "spark.databricks.delta.allowArbitraryProperties.enabled": true,
+        "spark.master": "local"
+    },
+    "spark_schema_repo": {
+        "spark_schema_file": {
+            "spark_schema_root": "./config/schema/spark"
+        }
+    }
+}
+INFO : 2022-08-04 22:22:05,064 : customer_landing_to_rawdb_csv : _context.py._get_spark_context: line(85) : Setting spark context
+DEBUG : 2022-08-04 22:22:05,064 : customer_landing_to_rawdb_csv : _context.py._get_spark_context: line(89) : {
+    "spark.master": "local",
+    "spark.databricks.delta.allowArbitraryProperties.enabled": true
+}
 :: loading settings :: url = jar:file:/Users/shaunryan/opt/spark-3.2.1-bin-hadoop3.2/jars/ivy-2.5.0.jar!/org/apache/ivy/core/settings/ivysettings.xml
-INFO : 2022-08-01 22:11:23,001 : customer_landing_to_rawdb_csv : _context.py.__init__: line(50) : Setting application context spark logger at level ERROR
-INFO : 2022-08-01 22:11:23,004 : customer_landing_to_rawdb_csv : _factory.py.get_file_system_type: line(50) : Setting filestystem using protocol file:
-INFO : 2022-08-01 22:11:23,004 : customer_landing_to_rawdb_csv : _context.py.__init__: line(66) : Setting application context dataflow customer_landing_to_rawdb_csv
-INFO : 2022-08-01 22:11:23,004 : customer_landing_to_rawdb_csv : _config_provider.py.load_pipeline_config: line(29) : Loading Dataflow configuration from file /Users/shaunryan/AzureDevOps/yetl/config/pipeline/local/customer_landing_to_rawdb_csv.yaml
-INFO : 2022-08-01 22:11:23,021 : customer_landing_to_rawdb_csv : _factory.py.get_schema_repo_type: line(39) : Setting up schema repo on spark_schema_file 
-INFO : 2022-08-01 22:11:23,022 : customer_landing_to_rawdb_csv : _spark_file_schema_repo.py.load_schema: line(50) : Loading schema for dataset landing.customer from /Users/shaunryan/AzureDevOps/yetl/config/schema/spark/landing/customer.yaml using <class 'yetl_flow.file_system._file_system.FileSystem'>
-INFO : 2022-08-01 22:11:23,026 : customer_landing_to_rawdb_csv : _reader.py.__init__: line(49) : auto_io = True automatically creating or altering exception delta table landing.customer _correlation_id=0faeea8d-4207-4376-81bb-feb6fdcac549
-INFO : 2022-08-01 22:11:23,026 : customer_landing_to_rawdb_csv : _delta_lake.py.create_database: line(27) : Creating database if not exists `landing`
-INFO : 2022-08-01 22:11:29,903 : customer_landing_to_rawdb_csv : _reader.py.create_or_alter_table: line(61) : Exception table already exists landing.exceptions at file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/exceptions/landing/exceptions _correlation_id=0faeea8d-4207-4376-81bb-feb6fdcac549
-INFO : 2022-08-01 22:11:29,904 : customer_landing_to_rawdb_csv : _reader.py.read: line(195) : Reading data for landing.customer from file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_2022**.csv with options {'mode': 'PERMISSIVE', 'inferSchema': False, 'header': True} _correlation_id=0faeea8d-4207-4376-81bb-feb6fdcac549
-INFO : 2022-08-01 22:11:30,272 : customer_landing_to_rawdb_csv : _reader.py.validate: line(181) : Validating dataframe read using PERMISSIVE corrupt column at _corrupt_record _correlation_id=0faeea8d-4207-4376-81bb-feb6fdcac549
-INFO : 2022-08-01 22:11:31,540 : customer_landing_to_rawdb_csv : _reader.py.validate: line(192) : {
+INFO : 2022-08-04 22:22:11,965 : customer_landing_to_rawdb_csv : _context.py.__init__: line(50) : Setting application context spark logger at level ERROR
+INFO : 2022-08-04 22:22:11,968 : customer_landing_to_rawdb_csv : _factory.py.get_file_system_type: line(50) : Setting filestystem using protocol file:
+DEBUG : 2022-08-04 22:22:11,968 : customer_landing_to_rawdb_csv : _factory.py.get_file_system_type: line(51) : Setting FileSystemType using type FileSystemType.FILE
+INFO : 2022-08-04 22:22:11,968 : customer_landing_to_rawdb_csv : _context.py.__init__: line(66) : Setting application context dataflow customer_landing_to_rawdb_csv
+INFO : 2022-08-04 22:22:11,968 : customer_landing_to_rawdb_csv : _config_provider.py.load_pipeline_config: line(29) : Loading Dataflow configuration from file /Users/shaunryan/AzureDevOps/yetl/config/pipeline/local/customer_landing_to_rawdb_csv.yaml
+DEBUG : 2022-08-04 22:22:11,987 : customer_landing_to_rawdb_csv : _config_provider.py.load_pipeline_config: line(33) : {
+    "dataflow": {
+        "enable_dataflow_types": [
+            "full_load",
+            "partition_load",
+            "merge_compare",
+            "merge_cdc",
+            "nuke"
+        ],
+        "landing": {
+            "customer": {
+                "exceptions": {
+                    "database": "landing",
+                    "path": "data/delta_lake/exceptions",
+                    "table": "exceptions"
+                },
+                "file_date_format": "%Y%m%d",
+                "format": "csv",
+                "path": "data/landing/{{timeslice(path_date_format)}}/customer_{{timeslice(file_date_format)}}.csv",
+                "path_date_format": "%Y%m%d",
+                "read": {
+                    "auto": true,
+                    "options": {
+                        "header": true,
+                        "inferSchema": false,
+                        "mode": "PERMISSIVE"
+                    }
+                },
+                "table": {
+                    "properties": {
+                        "yetl.lineagecolumn.correlation_id": "_CORRELATION_ID",
+                        "yetl.lineagecolumn.filename": "_FILENAME",
+                        "yetl.lineagecolumn.loadtimestamp": "_LOAD_TIMESTAMP",
+                        "yetl.lineagecolumn.timeslice": "_TIMESLICE"
+                    }
+                },
+                "thresholds": {
+                    "error": {
+                        "exception_count": 50,
+                        "exception_percent": 80,
+                        "max_rows": 100000000,
+                        "min_rows": 0
+                    },
+                    "warning": {
+                        "exception_count": 0,
+                        "exception_percent": 0,
+                        "max_rows": 1000,
+                        "min_rows": 1
+                    }
+                }
+            },
+            "customer_preferences": {
+                "exceptions": {
+                    "database": "landing",
+                    "path": "data/delta_lake/exceptions",
+                    "table": "exceptions"
+                },
+                "file_date_format": "%Y%m%d",
+                "format": "csv",
+                "path": "data/landing/{{timeslice(path_date_format)}}/customer_preferences_{{timeslice(file_date_format)}}.csv",
+                "path_date_format": "%Y%m%d",
+                "read": {
+                    "options": {
+                        "header": true,
+                        "inferSchema": false,
+                        "mode": "PERMISSIVE"
+                    }
+                },
+                "table": {
+                    "properties": {
+                        "yetl.lineagecolumn.correlation_id": "_CORRELATION_ID",
+                        "yetl.lineagecolumn.filename": "_FILENAME",
+                        "yetl.lineagecolumn.loadtimestamp": "_LOAD_TIMESTAMP",
+                        "yetl.lineagecolumn.timeslice": "_TIMESLICE"
+                    }
+                },
+                "thresholds": {
+                    "error": {
+                        "exception_count": 50,
+                        "exception_percent": 80,
+                        "max_rows": 100000000,
+                        "min_rows": 0
+                    },
+                    "warning": {
+                        "exception_count": 0,
+                        "exception_percent": 0,
+                        "max_rows": 1000,
+                        "min_rows": 0
+                    }
+                }
+            }
+        },
+        "raw": {
+            "customer": {
+                "format": "delta",
+                "path": "data/delta_lake/raw/customer",
+                "table": {
+                    "check_constraints": {
+                        "amount_lower_bound": "amount > -1000",
+                        "amount_upper_bound": "amount < 10000"
+                    },
+                    "ddl": "./config/schema/deltalake",
+                    "properties": {
+                        "delta.appendOnly": false,
+                        "delta.checkpoint.writeStatsAsJson": true,
+                        "delta.compatibility.symlinkFormatManifest.enabled": false,
+                        "delta.dataSkippingNumIndexedCols": -1,
+                        "delta.deletedFileRetentionDuration": "interval 1 week",
+                        "delta.enableChangeDataFeed": true,
+                        "delta.logRetentionDuration": "interval 30 days",
+                        "delta.minReaderVersion": 1,
+                        "delta.minWriterVersion": 2,
+                        "delta.randomPrefixLength": 2,
+                        "delta.randomizeFilePrefixes": false
+                    }
+                },
+                "write": {
+                    "mode": "append",
+                    "options": {
+                        "mergeSchema": true
+                    }
+                }
+            }
+        },
+        "retries": 2,
+        "retry_wait": 1
+    }
+}
+DEBUG : 2022-08-04 22:22:11,988 : customer_landing_to_rawdb_csv : _context.py._get_deltalake_flow: line(78) : Deserializing configuration into Dataflow
+DEBUG : 2022-08-04 22:22:11,988 : customer_landing_to_rawdb_csv : _i_dataflow.py.__init__: line(18) : initialise dataflow with config
+DEBUG : 2022-08-04 22:22:11,988 : customer_landing_to_rawdb_csv : _i_dataflow.py.__init__: line(19) : {
+    "datalake": "/Users/shaunryan/AzureDevOps/yetl",
+    "datalake_protocol": "file:",
+    "spark": {
+        "spark.master": "local",
+        "spark.databricks.delta.allowArbitraryProperties.enabled": true
+    },
+    "spark_schema_repo": {
+        "spark_schema_file": {
+            "spark_schema_root": "./config/schema/spark"
+        }
+    },
+    "deltalake_schema_repo": {
+        "deltalake_sql_file": {
+            "deltalake_schema_root": "./config/schema/deltalake"
+        }
+    }
+}
+DEBUG : 2022-08-04 22:22:11,988 : customer_landing_to_rawdb_csv : _i_dataflow.py.__init__: line(21) : initialise dataflow with dataflow_config
+DEBUG : 2022-08-04 22:22:11,988 : customer_landing_to_rawdb_csv : _i_dataflow.py.__init__: line(22) : {
+    "retries": 2,
+    "retry_wait": 1,
+    "enable_dataflow_types": [
+        "full_load",
+        "partition_load",
+        "merge_compare",
+        "merge_cdc",
+        "nuke"
+    ],
+    "landing": {
+        "customer": {
+            "table": {
+                "properties": {
+                    "yetl.lineagecolumn.loadtimestamp": "_LOAD_TIMESTAMP",
+                    "yetl.lineagecolumn.timeslice": "_TIMESLICE",
+                    "yetl.lineagecolumn.correlation_id": "_CORRELATION_ID",
+                    "yetl.lineagecolumn.filename": "_FILENAME"
+                }
+            },
+            "path_date_format": "%Y%m%d",
+            "file_date_format": "%Y%m%d",
+            "format": "csv",
+            "path": "data/landing/{{timeslice(path_date_format)}}/customer_{{timeslice(file_date_format)}}.csv",
+            "read": {
+                "auto": true,
+                "options": {
+                    "mode": "PERMISSIVE",
+                    "inferSchema": false,
+                    "header": true
+                }
+            },
+            "exceptions": {
+                "path": "data/delta_lake/exceptions",
+                "database": "landing",
+                "table": "exceptions"
+            },
+            "thresholds": {
+                "warning": {
+                    "min_rows": 1,
+                    "max_rows": 1000,
+                    "exception_count": 0,
+                    "exception_percent": 0
+                },
+                "error": {
+                    "min_rows": 0,
+                    "max_rows": 100000000,
+                    "exception_count": 50,
+                    "exception_percent": 80
+                }
+            }
+        },
+        "customer_preferences": {
+            "table": {
+                "properties": {
+                    "yetl.lineagecolumn.loadtimestamp": "_LOAD_TIMESTAMP",
+                    "yetl.lineagecolumn.timeslice": "_TIMESLICE",
+                    "yetl.lineagecolumn.correlation_id": "_CORRELATION_ID",
+                    "yetl.lineagecolumn.filename": "_FILENAME"
+                }
+            },
+            "path_date_format": "%Y%m%d",
+            "file_date_format": "%Y%m%d",
+            "format": "csv",
+            "path": "data/landing/{{timeslice(path_date_format)}}/customer_preferences_{{timeslice(file_date_format)}}.csv",
+            "read": {
+                "options": {
+                    "mode": "PERMISSIVE",
+                    "inferSchema": false,
+                    "header": true
+                }
+            },
+            "exceptions": {
+                "path": "data/delta_lake/exceptions",
+                "database": "landing",
+                "table": "exceptions"
+            },
+            "thresholds": {
+                "warning": {
+                    "min_rows": 0,
+                    "max_rows": 1000,
+                    "exception_count": 0,
+                    "exception_percent": 0
+                },
+                "error": {
+                    "min_rows": 0,
+                    "max_rows": 100000000,
+                    "exception_count": 50,
+                    "exception_percent": 80
+                }
+            }
+        }
+    },
+    "raw": {
+        "customer": {
+            "table": {
+                "ddl": "./config/schema/deltalake",
+                "properties": {
+                    "delta.appendOnly": false,
+                    "delta.checkpoint.writeStatsAsJson": true,
+                    "delta.compatibility.symlinkFormatManifest.enabled": false,
+                    "delta.dataSkippingNumIndexedCols": -1,
+                    "delta.logRetentionDuration": "interval 30 days",
+                    "delta.deletedFileRetentionDuration": "interval 1 week",
+                    "delta.enableChangeDataFeed": true,
+                    "delta.minReaderVersion": 1,
+                    "delta.minWriterVersion": 2,
+                    "delta.randomizeFilePrefixes": false,
+                    "delta.randomPrefixLength": 2
+                },
+                "check_constraints": {
+                    "amount_lower_bound": "amount > -1000",
+                    "amount_upper_bound": "amount < 10000"
+                }
+            },
+            "format": "delta",
+            "path": "data/delta_lake/raw/customer",
+            "write": {
+                "mode": "append",
+                "options": {
+                    "mergeSchema": true
+                }
+            }
+        }
+    }
+}
+INFO : 2022-08-04 22:22:11,990 : customer_landing_to_rawdb_csv : _factory.py.get_schema_repo_type: line(39) : Setting up schema repo on spark_schema_file 
+DEBUG : 2022-08-04 22:22:11,990 : customer_landing_to_rawdb_csv : _factory.py.get_schema_repo_type: line(41) : Setting SchemaRepoType using type SchemaRepoType.SPARK_SCHEMA_FILE
+DEBUG : 2022-08-04 22:22:11,990 : customer_landing_to_rawdb_csv : _factory.py.get_file_system_type: line(57) : Setting FileSystemType using type FileSystemType.FILE
+INFO : 2022-08-04 22:22:11,990 : customer_landing_to_rawdb_csv : _spark_file_schema_repo.py.load_schema: line(50) : Loading schema for dataset landing.customer from /Users/shaunryan/AzureDevOps/yetl/config/schema/spark/landing/customer.yaml using <class 'yetl_flow.file_system._file_system.FileSystem'>
+DEBUG : 2022-08-04 22:22:11,995 : customer_landing_to_rawdb_csv : _spark_file_schema_repo.py.load_schema: line(59) : {
+    "type": "struct",
+    "fields": [
+        {
+            "metadata": {},
+            "name": "id",
+            "nullable": false,
+            "type": "integer"
+        },
+        {
+            "metadata": {},
+            "name": "first_name",
+            "nullable": false,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "last_name",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "email",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "gender",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "job_title",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "amount",
+            "nullable": true,
+            "type": "double"
+        },
+        {
+            "metadata": {},
+            "name": "_corrupt_record",
+            "nullable": true,
+            "type": "string"
+        }
+    ]
+}
+INFO : 2022-08-04 22:22:11,995 : customer_landing_to_rawdb_csv : _reader.py.__init__: line(49) : auto_io = True automatically creating or altering exception delta table landing.customer _correlation_id=8be517d5-4258-4940-aba8-e8270991fe7b
+INFO : 2022-08-04 22:22:11,995 : customer_landing_to_rawdb_csv : _delta_lake.py.create_database: line(27) : Creating database if not exists `landing`
+DEBUG : 2022-08-04 22:22:11,995 : customer_landing_to_rawdb_csv : _delta_lake.py.create_database: line(29) : CREATE DATABASE IF NOT EXISTS landing
+INFO : 2022-08-04 22:22:22,119 : customer_landing_to_rawdb_csv : _delta_lake.py.create_table: line(16) : Creating table if not exists landing.exceptions at file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/exceptions/landing/exceptions
+DEBUG : 2022-08-04 22:22:31,367 : customer_landing_to_rawdb_csv : _dataflow.py.__init__: line(47) : Deserialized landing.customer configuration into <class 'yetl_flow.dataset._reader.Reader'>
+DEBUG : 2022-08-04 22:22:31,367 : customer_landing_to_rawdb_csv : _dataflow.py.append: line(55) : Appending source landing.customer as <class 'yetl_flow.dataset._reader.Reader'> to dataflow
+INFO : 2022-08-04 22:22:31,367 : customer_landing_to_rawdb_csv : _reader.py.read: line(195) : Reading data for landing.customer from file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_2022**.csv with options {'mode': 'PERMISSIVE', 'inferSchema': False, 'header': True} _correlation_id=8be517d5-4258-4940-aba8-e8270991fe7b
+DEBUG : 2022-08-04 22:22:31,367 : customer_landing_to_rawdb_csv : _reader.py.read: line(199) : {
+    "mode": "PERMISSIVE",
+    "inferSchema": false,
+    "header": true
+}
+INFO : 2022-08-04 22:22:31,542 : customer_landing_to_rawdb_csv : _reader.py.validate: line(181) : Validating dataframe read using PERMISSIVE corrupt column at _corrupt_record _correlation_id=8be517d5-4258-4940-aba8-e8270991fe7b
+INFO : 2022-08-04 22:22:32,248 : customer_landing_to_rawdb_csv : _reader.py.validate: line(192) : {
     "validation": {
         "schema_on_read": {
             "landing.customer": {
@@ -23,14 +384,47 @@ INFO : 2022-08-01 22:11:31,540 : customer_landing_to_rawdb_csv : _reader.py.vali
         }
     }
 }
-INFO : 2022-08-01 22:11:31,540 : customer_landing_to_rawdb_csv : _factory.py.get_schema_repo_type: line(39) : Setting up schema repo on spark_schema_file 
-INFO : 2022-08-01 22:11:31,540 : customer_landing_to_rawdb_csv : _spark_file_schema_repo.py.load_schema: line(50) : Loading schema for dataset landing.customer_preferences from /Users/shaunryan/AzureDevOps/yetl/config/schema/spark/landing/customer_preferences.yaml using <class 'yetl_flow.file_system._file_system.FileSystem'>
-INFO : 2022-08-01 22:11:31,543 : customer_landing_to_rawdb_csv : _reader.py.__init__: line(49) : auto_io = True automatically creating or altering exception delta table landing.customer_preferences _correlation_id=0faeea8d-4207-4376-81bb-feb6fdcac549
-INFO : 2022-08-01 22:11:31,543 : customer_landing_to_rawdb_csv : _delta_lake.py.create_database: line(27) : Creating database if not exists `landing`
-INFO : 2022-08-01 22:11:31,671 : customer_landing_to_rawdb_csv : _reader.py.create_or_alter_table: line(61) : Exception table already exists landing.exceptions at file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/exceptions/landing/exceptions _correlation_id=0faeea8d-4207-4376-81bb-feb6fdcac549
-INFO : 2022-08-01 22:11:31,672 : customer_landing_to_rawdb_csv : _reader.py.read: line(195) : Reading data for landing.customer_preferences from file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_preferences_2022**.csv with options {'mode': 'PERMISSIVE', 'inferSchema': False, 'header': True} _correlation_id=0faeea8d-4207-4376-81bb-feb6fdcac549
-INFO : 2022-08-01 22:11:31,719 : customer_landing_to_rawdb_csv : _reader.py.validate: line(181) : Validating dataframe read using PERMISSIVE corrupt column at _corrupt_record _correlation_id=0faeea8d-4207-4376-81bb-feb6fdcac549
-INFO : 2022-08-01 22:11:32,309 : customer_landing_to_rawdb_csv : _reader.py.validate: line(192) : {
+INFO : 2022-08-04 22:22:32,248 : customer_landing_to_rawdb_csv : _factory.py.get_schema_repo_type: line(39) : Setting up schema repo on spark_schema_file 
+DEBUG : 2022-08-04 22:22:32,248 : customer_landing_to_rawdb_csv : _factory.py.get_schema_repo_type: line(41) : Setting SchemaRepoType using type SchemaRepoType.SPARK_SCHEMA_FILE
+DEBUG : 2022-08-04 22:22:32,248 : customer_landing_to_rawdb_csv : _factory.py.get_file_system_type: line(57) : Setting FileSystemType using type FileSystemType.FILE
+INFO : 2022-08-04 22:22:32,248 : customer_landing_to_rawdb_csv : _spark_file_schema_repo.py.load_schema: line(50) : Loading schema for dataset landing.customer_preferences from /Users/shaunryan/AzureDevOps/yetl/config/schema/spark/landing/customer_preferences.yaml using <class 'yetl_flow.file_system._file_system.FileSystem'>
+DEBUG : 2022-08-04 22:22:32,252 : customer_landing_to_rawdb_csv : _spark_file_schema_repo.py.load_schema: line(59) : {
+    "type": "struct",
+    "fields": [
+        {
+            "metadata": {},
+            "name": "id",
+            "nullable": false,
+            "type": "integer"
+        },
+        {
+            "metadata": {},
+            "name": "allow_contact",
+            "nullable": false,
+            "type": "boolean"
+        },
+        {
+            "metadata": {},
+            "name": "_corrupt_record",
+            "nullable": true,
+            "type": "string"
+        }
+    ]
+}
+INFO : 2022-08-04 22:22:32,252 : customer_landing_to_rawdb_csv : _reader.py.__init__: line(49) : auto_io = True automatically creating or altering exception delta table landing.customer_preferences _correlation_id=8be517d5-4258-4940-aba8-e8270991fe7b
+INFO : 2022-08-04 22:22:32,252 : customer_landing_to_rawdb_csv : _delta_lake.py.create_database: line(27) : Creating database if not exists `landing`
+DEBUG : 2022-08-04 22:22:32,252 : customer_landing_to_rawdb_csv : _delta_lake.py.create_database: line(29) : CREATE DATABASE IF NOT EXISTS landing
+INFO : 2022-08-04 22:22:32,390 : customer_landing_to_rawdb_csv : _reader.py.create_or_alter_table: line(61) : Exception table already exists landing.exceptions at file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/exceptions/landing/exceptions _correlation_id=8be517d5-4258-4940-aba8-e8270991fe7b
+DEBUG : 2022-08-04 22:22:32,390 : customer_landing_to_rawdb_csv : _dataflow.py.__init__: line(47) : Deserialized landing.customer_preferences configuration into <class 'yetl_flow.dataset._reader.Reader'>
+DEBUG : 2022-08-04 22:22:32,390 : customer_landing_to_rawdb_csv : _dataflow.py.append: line(55) : Appending source landing.customer_preferences as <class 'yetl_flow.dataset._reader.Reader'> to dataflow
+INFO : 2022-08-04 22:22:32,390 : customer_landing_to_rawdb_csv : _reader.py.read: line(195) : Reading data for landing.customer_preferences from file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_preferences_2022**.csv with options {'mode': 'PERMISSIVE', 'inferSchema': False, 'header': True} _correlation_id=8be517d5-4258-4940-aba8-e8270991fe7b
+DEBUG : 2022-08-04 22:22:32,390 : customer_landing_to_rawdb_csv : _reader.py.read: line(199) : {
+    "mode": "PERMISSIVE",
+    "inferSchema": false,
+    "header": true
+}
+INFO : 2022-08-04 22:22:32,423 : customer_landing_to_rawdb_csv : _reader.py.validate: line(181) : Validating dataframe read using PERMISSIVE corrupt column at _corrupt_record _correlation_id=8be517d5-4258-4940-aba8-e8270991fe7b
+INFO : 2022-08-04 22:22:32,868 : customer_landing_to_rawdb_csv : _reader.py.validate: line(192) : {
     "validation": {
         "schema_on_read": {
             "landing.customer_preferences": {
@@ -41,44 +435,41 @@ INFO : 2022-08-01 22:11:32,309 : customer_landing_to_rawdb_csv : _reader.py.vali
         }
     }
 }
-INFO : 2022-08-01 22:11:32,310 : customer_landing_to_rawdb_csv : _factory.py.get_schema_repo_type: line(39) : Setting up schema repo on deltalake_sql_file 
-INFO : 2022-08-01 22:11:32,310 : customer_landing_to_rawdb_csv : _deltalake_sql_file.py.load_schema: line(43) : Loading schema for dataset raw.customer from ./config/schema/deltalake/raw/customer.sql using <class 'yetl_flow.file_system._file_system.FileSystem'>
-INFO : 2022-08-01 22:11:32,310 : customer_landing_to_rawdb_csv : _writer.py.__init__: line(40) : auto_io = True automatically creating or altering delta table raw.customer
-INFO : 2022-08-01 22:11:32,310 : customer_landing_to_rawdb_csv : _delta_lake.py.create_database: line(27) : Creating database if not exists `raw`
-INFO : 2022-08-01 22:11:32,420 : customer_landing_to_rawdb_csv : _writer.py.create_or_alter_table: line(88) : Table already exists raw.customer at file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/raw/customer
-INFO : 2022-08-01 22:11:32,420 : customer_landing_to_rawdb_csv : _delta_lake.py.get_table_properties: line(69) : getting existing table properties for table raw.customer
-INFO : 2022-08-01 22:11:40,283 : customer_landing_to_rawdb_csv : _delta_lake.py.get_table_properties: line(91) : {
-    "raw.customer": {
-        "constraints": {
-            "amount_lower_bound": "amount > - 1000",
-            "amount_upper_bound": "amount < 10000"
-        },
-        "properties": {
-            "Type": "EXTERNAL",
-            "delta.appendOnly": "False",
-            "delta.checkpoint.writeStatsAsJson": "True",
-            "delta.compatibility.symlinkFormatManifest.enabled": "False",
-            "delta.dataSkippingNumIndexedCols": "-1",
-            "delta.deletedFileRetentionDuration": "interval 1 week",
-            "delta.enableChangeDataFeed": "True",
-            "delta.logRetentionDuration": "interval 30 days",
-            "delta.minReaderVersion": "1",
-            "delta.minWriterVersion": "4",
-            "delta.randomPrefixLength": "2",
-            "delta.randomizeFilePrefixes": "False",
-            "external": "true"
-        }
-    }
-}
-INFO : 2022-08-01 22:11:50,672 : customer_landing_to_rawdb_csv : _framework.py.wrap_function: line(36) : Executing Dataflow customer_landing_to_rawdb_csv with:
+INFO : 2022-08-04 22:22:32,868 : customer_landing_to_rawdb_csv : _factory.py.get_schema_repo_type: line(39) : Setting up schema repo on deltalake_sql_file 
+DEBUG : 2022-08-04 22:22:32,868 : customer_landing_to_rawdb_csv : _factory.py.get_schema_repo_type: line(41) : Setting SchemaRepoType using type SchemaRepoType.DELTALAKE_SQL_FILE
+DEBUG : 2022-08-04 22:22:32,868 : customer_landing_to_rawdb_csv : _factory.py.get_file_system_type: line(57) : Setting FileSystemType using type FileSystemType.FILE
+INFO : 2022-08-04 22:22:32,868 : customer_landing_to_rawdb_csv : _deltalake_sql_file.py.load_schema: line(43) : Loading schema for dataset raw.customer from ./config/schema/deltalake/raw/customer.sql using <class 'yetl_flow.file_system._file_system.FileSystem'>
+DEBUG : 2022-08-04 22:22:32,869 : customer_landing_to_rawdb_csv : _deltalake_sql_file.py.load_schema: line(53) : "CREATE TABLE {{database_name}}.{{table_name}}\n(\n    id            integer not null,\n    first_name    string not null,\n    last_name     string,\n    email         string,\n    gender        string,\n    job_title     string,\n    amount        double,\n    allow_contact boolean\n)\nUSING DELTA LOCATION '{{path}}';"
+DEBUG : 2022-08-04 22:22:32,869 : customer_landing_to_rawdb_csv : _writer.py.__init__: line(22) : Writer table ddl = CREATE TABLE raw.customer
+(
+    id            integer not null,
+    first_name    string not null,
+    last_name     string,
+    email         string,
+    gender        string,
+    job_title     string,
+    amount        double,
+    allow_contact boolean
+)
+USING DELTA LOCATION 'file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/raw/customer';
+INFO : 2022-08-04 22:22:32,869 : customer_landing_to_rawdb_csv : _writer.py.__init__: line(40) : auto_io = True automatically creating or altering delta table raw.customer
+INFO : 2022-08-04 22:22:32,869 : customer_landing_to_rawdb_csv : _delta_lake.py.create_database: line(27) : Creating database if not exists `raw`
+DEBUG : 2022-08-04 22:22:32,869 : customer_landing_to_rawdb_csv : _delta_lake.py.create_database: line(29) : CREATE DATABASE IF NOT EXISTS raw
+INFO : 2022-08-04 22:22:32,964 : customer_landing_to_rawdb_csv : _delta_lake.py.create_table: line(16) : Creating table if not exists raw.customer at file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/raw/customer
+DEBUG : 2022-08-04 22:22:36,226 : customer_landing_to_rawdb_csv : _writer.py._set_table_constraints: line(57) : Writer table check constraints ddl = ['ALTER TABLE `raw`.`customer` ADD CONSTRAINT amount_lower_bound CHECK (amount > -1000);', 'ALTER TABLE `raw`.`customer` ADD CONSTRAINT amount_upper_bound CHECK (amount < 10000);']
+DEBUG : 2022-08-04 22:22:43,756 : customer_landing_to_rawdb_csv : _writer.py._set_table_properties: line(76) : Writer table properties ddl = ALTER TABLE `raw`.`customer` SET TBLPROPERTIES ('delta.appendOnly' = 'False', 'delta.checkpoint.writeStatsAsJson' = 'True', 'delta.compatibility.symlinkFormatManifest.enabled' = 'False', 'delta.dataSkippingNumIndexedCols' = '-1', 'delta.logRetentionDuration' = 'interval 30 days', 'delta.deletedFileRetentionDuration' = 'interval 1 week', 'delta.enableChangeDataFeed' = 'True', 'delta.minReaderVersion' = '1', 'delta.minWriterVersion' = '2', 'delta.randomizeFilePrefixes' = 'False', 'delta.randomPrefixLength' = '2');
+DEBUG : 2022-08-04 22:22:45,974 : customer_landing_to_rawdb_csv : _dataflow.py.__init__: line(47) : Deserialized raw.customer configuration into <class 'yetl_flow.dataset._factory._DatasetFactory.get_dataset_type.<locals>.InjectDestination'>
+DEBUG : 2022-08-04 22:22:45,974 : customer_landing_to_rawdb_csv : _dataflow.py.append: line(64) : Appending destination raw.customer as <class 'yetl_flow.dataset._factory._DatasetFactory.get_dataset_type.<locals>.InjectDestination'> to dataflow
+INFO : 2022-08-04 22:22:45,974 : customer_landing_to_rawdb_csv : _framework.py.wrap_function: line(36) : Executing Dataflow customer_landing_to_rawdb_csv with:
                 timeslice=2022-*-* 00:00:00.000000 
                 retries=2 
                 save_type=OverwriteSave
-INFO : 2022-08-01 22:11:50,672 : customer_landing_to_rawdb_csv : main.py.customer_landing_to_rawdb_csv: line(29) : Joining customers with customer_preferences
-INFO : 2022-08-01 22:11:50,690 : customer_landing_to_rawdb_csv : _writer.py.write: line(184) : Writing data to raw.customer at file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/raw/customer
-INFO : 2022-08-01 22:11:50,690 : customer_landing_to_rawdb_csv : _save.py.write: line(66) : Writer saving using the OverwriteSave which is an injected save.
-INFO : 2022-08-01 22:11:54,378 : customer_landing_to_rawdb_csv : _delta_lake.py.get_audit: line(34) : Auditing database table raw.customer
-INFO : 2022-08-01 22:11:55,015 : customer_landing_to_rawdb_csv : _delta_lake.py.get_audits: line(48) : {
+INFO : 2022-08-04 22:22:45,974 : customer_landing_to_rawdb_csv : main.py.customer_landing_to_rawdb_csv: line(28) : Joining customers with customer_preferences
+INFO : 2022-08-04 22:22:45,994 : customer_landing_to_rawdb_csv : _writer.py.write: line(184) : Writing data to raw.customer at file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/raw/customer
+INFO : 2022-08-04 22:22:45,994 : customer_landing_to_rawdb_csv : _save.py.write: line(66) : Writer saving using the OverwriteSave which is an injected save.
+INFO : 2022-08-04 22:22:50,067 : customer_landing_to_rawdb_csv : _delta_lake.py.get_audit: line(34) : Auditing database table raw.customer
+DEBUG : 2022-08-04 22:22:50,067 : customer_landing_to_rawdb_csv : _delta_lake.py.get_audit: line(36) : DESCRIBE HISTORY raw.customer
+INFO : 2022-08-04 22:22:50,791 : customer_landing_to_rawdb_csv : _delta_lake.py.get_audits: line(48) : {
     "raw.customer": {
         "clusterId": null,
         "engineInfo": "Apache-Spark/3.2.1 Delta-Lake/2.0.0",
@@ -96,11 +487,11 @@ INFO : 2022-08-01 22:11:55,015 : customer_landing_to_rawdb_csv : _delta_lake.py.
             "mode": "Overwrite",
             "partitionBy": "[]"
         },
-        "readVersion": 15,
-        "timestamp": "2022-08-01 22:11:52.033000",
+        "readVersion": 3,
+        "timestamp": "2022-08-04 22:22:48.171000",
         "userId": null,
         "userMetadata": null,
         "userName": null,
-        "version": 16
+        "version": 4
     }
 }
