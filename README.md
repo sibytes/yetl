@@ -7,7 +7,7 @@ Website & Docs: [Yet (another Apache Spark) ETL Framework](https://www.yetl.io/)
 
 Example:
 
-Define a dataflow:
+## Define a dataflow
 
 ```
 
@@ -44,7 +44,7 @@ def customer_landing_to_rawdb_csv(
     dataflow.destination_df("raw.customer", df)
 ```
 
-Run an incremental load:
+## Run an incremental load:
 
 ```
 timeslice = Timeslice(2022, 7, 12)
@@ -53,7 +53,7 @@ results = customer_landing_to_rawdb_csv(
 )
 ```
 
-Run a full load:
+## Run a full load:
 
 ```
 results = customer_landing_to_rawdb_csv(
