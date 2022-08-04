@@ -11,7 +11,7 @@ README = (HERE / "README.md").read_text()
 
 # This call to setup() does all the work
 setup(
-    name="yetl",
+    name="yetl-framework",
     version="0.0.1",
     description="yet (another spark) etl framework",
     long_description=README,
