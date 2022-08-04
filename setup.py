@@ -13,16 +13,10 @@ README = (HERE / "README.md").read_text()
 setup(
     name="yetl",
     version="0.0.1",
-    description="yet another (spark) etl framework",
+    description="yet (another spark) etl framework",
     long_description=README,
     long_description_content_type="text/markdown",
-    url="https://github.com/sibytes/yetl/README.md",
-    project_urls={
-        'GitHub': 'https://github.com/sibytes/yetl',
-        'Documentation': 'https://github.com/sibytes/yetl/README.md'
-    },
-    author="Shaun Ryan",
-    author_email="shaun_chiburi@hotmail.com",
+    url="https://www.yetl.io/",
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",

@@ -1,11 +1,66 @@
 <img src="https://img.shields.io/badge/Python-v3.8-blue">
 
-# Messing About with Delta Lake Open Source
+# YETL
 
-The configuration is held in `./config` see the configuration section below.
+Website & Docs: [Yet (another Apache Spark) ETL Framework](https://www.yetl.io/)
 
-This is test rig for messing about the open source delta lake locally with a local installation on spark.
-This is mac setup with vscode. Windows may not work with these instructions.
+
+Example:
+
+Define a dataflow:
+
+```
+
+from yetl_flow import yetl_flow, IDataflow, Context, Timeslice, TimesliceUtcNow, OverwriteSave, Save
+from pyspark.sql.functions import *
+from typing import Type
+
+@yetl_flow(log_level="ERROR")
+def customer_landing_to_rawdb_csv(
+    context: Context, 
+    dataflow: IDataflow, 
+    timeslice: Timeslice = TimesliceUtcNow(), 
+    save_type: Type[Save] = None
+) -> dict:
+    """Load the demo customer data as is into a raw delta hive registered table.
+
+    this is a test pipeline that can be run just to check everything is setup and configured
+    correctly.
+    """
+
+    
+
+    # the config for this dataflow has 2 landing sources that are joined
+    # and written to delta table
+    # delta tables are automatically created and if configured schema exceptions
+    # are loaded syphened into a schema exception table
+    df_cust = dataflow.source_df("landing.customer")
+    df_prefs = dataflow.source_df("landing.customer_preferences")
+
+    context.log.info("Joining customers with customer_preferences")
+    df = df_cust.join(df_prefs, "id", "inner")
+    df = df_cust
+
+    dataflow.destination_df("raw.customer", df)
+```
+
+Run an incremental load:
+
+```
+timeslice = Timeslice(2022, 7, 12)
+results = customer_landing_to_rawdb_csv(
+    timeslice = Timeslice(2022, 7, 12)
+)
+```
+
+Run a full load:
+
+```
+results = customer_landing_to_rawdb_csv(
+    timeslice = Timeslice(2022, '*', '*'),
+    save_type = OverwriteSave
+)
+```
 
 ## Dependencies & Setup
 
@@ -42,57 +97,13 @@ pip install -r requirements.txt
 pip install --editable .
 ```
 
-## Running
 
-It can be executed in vscode by hitting F5 with the settings in .vscode.
-It will load the data using spark into a raw delta table called `raw.customer` persisted into the hive metastore.
+## Build
 
-For the entry point see `main.py` that calls into the module `pipeline`
+Build python wheel:
 
-## Explore the Result
-
-Run `pyspark` in the project root and explore the data in `raw.customer`
 ```
-df = spark.sql("SHOW SCHEMAS")
-df.show()
-df = spark.sql("SELECT * FROM raw.customer")
-df.show()
+python setup.py sdist bdist_wheel
 ```
 
-The landing source data can be found here, this is persisted in git:
-```
-./data/landing
-```
-
-The deltalake data can be found here, this is NOT persisted in git and is removed by cleanup:
-```
-./data/delta_lake
-```
-
-## Cleaning Up
-The local environment setup can be restored to it's originating state by executing:
-```
-sh cleanup.sh
-```
-
-## Testing
-
-Testing place holder for anything you might want to write tests for:
-```
-pytest
-```
-
-# Configuration
-
-Load schema's are abstracted into config settings that can be found here `./config`:
-
-- [config/schema/customer.yaml](config/schema/customer.yaml) is the source data spark schema
-
-Load configurations are abstracted into config settings that can be found here `./config/[ENV]`. For example the `local` configuration:
-- [config/pipeline/local/config.yaml](config/pipeline/local/config.yaml) is the general local configuration for the spark project
-- [config/pipeline/local/customer_landing_to_raw.yaml](config/pipeline/local/customer_landing_to_raw.yaml) is the local pipeline configuration for loading raw
-
-The ENV can be set in the [.env](.env) file for development and in an environment variable for operation:
-```
-ENVIRONMENT=local
-```
+There is a CI build configured for this repo that builds on main origin and publishes to PyPi.

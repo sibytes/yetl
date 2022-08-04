@@ -1,7 +1,6 @@
 
 from yetl_flow import yetl_flow, IDataflow, Context, Timeslice, TimesliceUtcNow, OverwriteSave, Save
 from pyspark.sql.functions import *
-import logging
 from typing import Type
 
 @yetl_flow(log_level="ERROR")
