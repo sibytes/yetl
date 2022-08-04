@@ -107,7 +107,7 @@ class BadRecordsPathSchemaOnRead(IValidator):
                 .withColumn(DATABASE, fn.lit(self.database))
                 .withColumn(TABLE, fn.lit(self.table))
             )
-            exceptions.show()
+            # TODO: after reading the json files then clean them up since there is no lineage for them to be useful.
             self.exceptions_count = self.exceptions_handler(exceptions)
         except Exception as e:
             if self.total_count != self.valid_count:
