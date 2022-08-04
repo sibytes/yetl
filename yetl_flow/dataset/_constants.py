@@ -16,6 +16,9 @@ NAME = "name"
 REPLACE = "replace"
 ARGS = "args"
 AUTO_IO = "auto_io"
+TIMESTAMP = "timestamp"
+INFER_SCHEMA = "inferSchema"
+RECURSIVE_FILE_LOOKUP = "recursiveFileLookup"
 
 # lineage columns
 CORRELATION_ID = "_correlation_id"

@@ -2,7 +2,7 @@ from pyspark.sql.dataframe import DataFrame
 from pyspark.sql import functions as fn
 from pyspark.sql import SparkSession
 from typing import Callable
-from ._constants import Format, CORRUPT_RECORD, DATABASE, TABLE
+from ._constants import *
 
 
 class IValidator:
@@ -59,7 +59,7 @@ class PermissiveSchemaOnRead(IValidator):
 
         self.exceptions = (
             self.dataframe.where(f"{CORRUPT_RECORD} IS NOT NULL")
-            .withColumn("timestamp", fn.current_timestamp())
+            .withColumn(TIMESTAMP, fn.current_timestamp())
             .withColumn(DATABASE, fn.lit(self.database))
             .withColumn(TABLE, fn.lit(self.table))
         )
@@ -93,17 +93,17 @@ class BadRecordsPathSchemaOnRead(IValidator):
         self.dataframe.cache()
         self.valid_count = self.dataframe.distinct().count()
         options = {
-            "inferSchema": True,
-            "recursiveFileLookup": True
+            INFER_SCHEMA: True,
+            RECURSIVE_FILE_LOOKUP: True
         }
         # try:
         exceptions = (
             self.spark
             .read
-            .format(Format.Json.value.lower())
+            .format(Format.JSON.name.lower())
             .options(**options)
             .load(self.path)
-            .withColumn("timestamp", fn.current_timestamp())
+            .withColumn(TIMESTAMP, fn.current_timestamp())
             .withColumn(DATABASE, fn.lit(self.database))
             .withColumn(TABLE, fn.lit(self.table))
         )
