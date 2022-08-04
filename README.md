@@ -22,13 +22,7 @@ def customer_landing_to_rawdb_csv(
     timeslice: Timeslice = TimesliceUtcNow(), 
     save_type: Type[Save] = None
 ) -> dict:
-    """Load the demo customer data as is into a raw delta hive registered table.
-
-    this is a test pipeline that can be run just to check everything is setup and configured
-    correctly.
-    """
-
-    
+    """Load the demo customer data as is into a raw delta hive registered table."""
 
     # the config for this dataflow has 2 landing sources that are joined
     # and written to delta table
