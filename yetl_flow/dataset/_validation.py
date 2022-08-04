@@ -108,7 +108,7 @@ class BadRecordsPathSchemaOnRead(IValidator):
             .withColumn(TABLE, fn.lit(self.table))
         )
         exceptions.show()
-        self.exceptions_count = self.exceptions_handler(self.exceptions)
+        self.exceptions_count = self.exceptions_handler(exceptions)
         # except Exception as e:
         #     if self.total_count != self.valid_count:
         #         raise Exception(f"Failed to read exception records at path {self.path}") from e
