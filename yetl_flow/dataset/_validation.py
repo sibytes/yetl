@@ -96,24 +96,23 @@ class BadRecordsPathSchemaOnRead(IValidator):
             "inferSchema": True,
             "recursiveFileLookup": True
         }
-        try:
-            exceptions = (
-                self.spark
-                .read
-                .format(Format.Json.value)
-                .options(**options)
-                .load(self.path)
-                .withColumn("timestamp", fn.current_timestamp())
-                .withColumn(DATABASE, fn.lit(self.database))
-                .withColumn(TABLE, fn.lit(self.table))
-            )
-            display(exceptions)
-            self.exceptions_count = exceptions.count()
-            self.exceptions_count = self.exceptions_handler(self.exceptions)
-        except Exception as e:
-            if self.total_count != self.valid_count:
-                raise Exception(f"Failed to read exception records at path {self.path}") from e
-            exceptions = None
-            self.exceptions_count = 0
+        # try:
+        exceptions = (
+            self.spark
+            .read
+            .format(Format.Json.value)
+            .options(**options)
+            .load(self.path)
+            .withColumn("timestamp", fn.current_timestamp())
+            .withColumn(DATABASE, fn.lit(self.database))
+            .withColumn(TABLE, fn.lit(self.table))
+        )
+        self.exceptions_count = exceptions.count()
+        self.exceptions_count = self.exceptions_handler(self.exceptions)
+        # except Exception as e:
+        #     if self.total_count != self.valid_count:
+        #         raise Exception(f"Failed to read exception records at path {self.path}") from e
+        #     exceptions = None
+        #     self.exceptions_count = 0
 
         return self.get_result()
