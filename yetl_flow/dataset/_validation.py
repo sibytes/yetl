@@ -100,7 +100,7 @@ class BadRecordsPathSchemaOnRead(IValidator):
         exceptions = (
             self.spark
             .read
-            .format(Format.Json.value)
+            .format(Format.Json.value.lower())
             .options(**options)
             .load(self.path)
             .withColumn("timestamp", fn.current_timestamp())
