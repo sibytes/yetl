@@ -9,7 +9,7 @@ Example:
 
 ## Define a dataflow
 
-```
+```python
 
 from yetl_flow import yetl_flow, IDataflow, Context, Timeslice, TimesliceUtcNow, OverwriteSave, Save
 from pyspark.sql.functions import *
@@ -40,7 +40,7 @@ def customer_landing_to_rawdb_csv(
 
 ## Run an incremental load:
 
-```
+```python
 timeslice = Timeslice(2022, 7, 12)
 results = customer_landing_to_rawdb_csv(
     timeslice = Timeslice(2022, 7, 12)
@@ -49,7 +49,7 @@ results = customer_landing_to_rawdb_csv(
 
 ## Run a full load:
 
-```
+```python
 results = customer_landing_to_rawdb_csv(
     timeslice = Timeslice(2022, '*', '*'),
     save_type = OverwriteSave
