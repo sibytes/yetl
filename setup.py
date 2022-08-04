@@ -17,6 +17,10 @@ setup(
     long_description=README,
     long_description_content_type="text/markdown",
     url="https://www.yetl.io/",
+    project_urls={
+        'GitHub': 'https://github.com/sibytes/yetl',
+        'Documentation': 'https://www.yetl.io/'
+    },
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",
