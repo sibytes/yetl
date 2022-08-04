@@ -92,10 +92,21 @@ class BadRecordsPathSchemaOnRead(IValidator):
         self.total_count = self.dataframe.count()
         self.dataframe.cache()
         self.valid_count = self.dataframe.distinct().count()
-
+        options = {
+            "inferSchema": True,
+            "recursiveFileLookup": True
+        }
         try:
-            print(f"XXXXXXXXXX -> loading exception from {self.path}")
-            exceptions = self.spark.read.format(Format.Json.value).load(self.path)
+            exceptions = (
+                self.spark
+                .read
+                .format(Format.Json.value)
+                .options(**options)
+                .load(self.path)
+                .withColumn("timestamp", fn.current_timestamp())
+                .withColumn(DATABASE, fn.lit(self.database))
+                .withColumn(TABLE, fn.lit(self.table))
+            )
             self.exceptions_count = exceptions.count()
             self.exceptions_count = self.exceptions_handler(self.exceptions)
         except Exception as e:
