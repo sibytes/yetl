@@ -60,9 +60,10 @@ class SparkFileSchemaRepo(ISchemaRepo):
 
         try:
             spark_schema = StructType.fromJson(schema)
-        except:
+        except Exception as e:
             msg = (
                 msg
             ) = f"Failed to deserialise spark schema to StructType for dataset {database_name}.{table_name} from {path}"
+            raise Exception(msg) from e
 
         return spark_schema

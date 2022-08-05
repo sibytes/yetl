@@ -1,0 +1,12 @@
+extract_date,load_flag,id,first_name,last_name,email,gender,job_title,amount
+"2008-01-03 00:00:00","I",15,"Sara","Whiterod","swhiterod4@hhs.gov","Female","Assistant Manager",47.85
+"2008-01-03 00:00:00","I",16,"Mariska","Antrum","mantrum5@nytimes.com","Female","Tax Accountant",16.37
+"2008-01-03 00:00:00","I",17,"Ingemar","Petrus","ipetrus6@blogspot.com","Male","Chief Design Engineer",49.02
+"2008-01-03 00:00:00","U",11,"Tom","Jerry","dlegier0@mail.ru","Agender","Editor",86.5
+"2008-01-03 00:00:00","U",12,"Panchito","Scirman","pscirman1@failedstarter.com","Male","Junior Executive",36.18
+"2008-01-03 00:00:00","D",13,"Chic","Ickowics","cickowics2@booking.com","Male","Research Associate",100.00
+"2008-01-03 00:00:00","U",1,"Davidde","Legier","dlegier0@mail.ru","Agender","Super Villain",86.5
+"2008-01-03 00:00:00","I",3,"Chic","Ickowics","wowiback@booking.com","Male","Research Associate",35.54
+"2008-01-03 00:00:00","U",8,"Anstice","Hollingdale Sauce","ahollingdale7@yahoo.co.jp","Female","Cost Accountant",21.94
+"2008-01-03 00:00:00","D",9,"Chaunce","Holdforth","choldforth8@ca.gov","Non-binary","Chief Design Engineer",72.0
+"2008-01-03 00:00:00","U",10,"Blinni","Blimey","bfenty9@paginegialle.it","Female","Assistant Media Planner",38.98
