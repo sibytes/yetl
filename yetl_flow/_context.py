@@ -10,7 +10,7 @@ import json
 from ._timeslice import Timeslice, TimesliceUtcNow
 from .dataset import Save, DefaultSave
 from typing import Type
-
+from delta import configure_spark_with_delta_pip
 
 class Context:
     def __init__(
@@ -93,7 +93,10 @@ class Context:
         for k, v in spark_config.items():
             builder = builder.config(k, v)
 
-        spark = builder.appName(app_name).getOrCreate()
+        builder.appName(app_name)
+        spark = configure_spark_with_delta_pip(builder).getOrCreate()
+
+        # spark = builder.appName(app_name).getOrCreate()
 
         return spark
 

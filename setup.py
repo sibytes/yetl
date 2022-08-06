@@ -28,6 +28,6 @@ setup(
         "Programming Language :: Python :: 3.8",
     ],
     packages=["yetl_flow"],
-    install_requires=["pyyaml","pyspark","regex"],
+    install_requires=["pyyaml","pyspark","regex",'delta-spark'],
     zip_safe=False
 )

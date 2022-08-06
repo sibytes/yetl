@@ -3,6 +3,9 @@ datalake_protocol: "file:"
 spark:
   spark.master: local
   spark.databricks.delta.allowArbitraryProperties.enabled: true
+  spark.jars.packages: io.delta:delta-core_2.12:2.0.0
+  park.sql.extensions: io.delta.sql.DeltaSparkSessionExtension
+  spark.sql.catalog.spark_catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
 
 spark_schema_repo:
   spark_schema_file:
