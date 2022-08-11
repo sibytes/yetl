@@ -127,3 +127,7 @@ Version: 0.0.7
 Version: 0.0.8
 
 - Including all packages in distribution.
+
+Version: 0.0.9
+
+- [Clean Up BadRecords JSON Files](https://github.com/orgs/sibytes/projects/2) Automatically remove json schema exception files created by the BadRecordsPath exception handler after they are loaded into a delta table.

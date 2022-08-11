@@ -1,6 +1,7 @@
 from pyspark.sql.dataframe import DataFrame
 from pyspark.sql import functions as fn
 from pyspark.sql import SparkSession
+from pyspark.sql.utils import AnalysisException
 from typing import Callable
 from ._constants import *
 
@@ -8,11 +9,13 @@ from ._constants import *
 class IValidator:
     def __init__(
         self,
+        context,
         dataframe: DataFrame,
         exceptions_handler: Callable[[DataFrame], int],
         database: str,
         table: str,
     ) -> None:
+        self.context = context
         self.dataframe = dataframe
         self.exceptions_handler = exceptions_handler
         self.exceptions = None
@@ -43,12 +46,13 @@ class IValidator:
 class PermissiveSchemaOnRead(IValidator):
     def __init__(
         self,
+        context,
         dataframe: DataFrame,
         exceptions_handler: Callable[[DataFrame], int],
         database: str,
         table: str,
     ) -> None:
-        super().__init__(dataframe, exceptions_handler, database, table)
+        super().__init__(context, dataframe, exceptions_handler, database, table)
         self.database = database
         self.table = table
 
@@ -76,6 +80,7 @@ class PermissiveSchemaOnRead(IValidator):
 class BadRecordsPathSchemaOnRead(IValidator):
     def __init__(
         self,
+        context,
         dataframe: DataFrame,
         exceptions_handler: Callable[[DataFrame], int],
         database: str,
@@ -83,7 +88,7 @@ class BadRecordsPathSchemaOnRead(IValidator):
         bad_records_path: str,
         spark: SparkSession,
     ) -> None:
-        super().__init__(dataframe, exceptions_handler, database, table)
+        super().__init__(context, dataframe, exceptions_handler, database, table)
         self.path = bad_records_path
         self.spark = spark
 
@@ -92,26 +97,34 @@ class BadRecordsPathSchemaOnRead(IValidator):
         self.total_count = self.dataframe.count()
         self.dataframe.cache()
         self.valid_count = self.dataframe.distinct().count()
+        self.exceptions_count = self.total_count - self.valid_count
         options = {
             INFER_SCHEMA: True,
             RECURSIVE_FILE_LOOKUP: True
         }
         try:
-            exceptions = (
-                self.spark
-                .read
-                .format(Format.JSON.name.lower())
-                .options(**options)
-                .load(self.path)
-                .withColumn(TIMESTAMP, fn.current_timestamp())
-                .withColumn(DATABASE, fn.lit(self.database))
-                .withColumn(TABLE, fn.lit(self.table))
-            )
-            # TODO: after reading the json files then clean them up since there is no lineage for them to be useful.
-            self.exceptions_count = self.exceptions_handler(exceptions)
-        except Exception as e:
-            if self.total_count != self.valid_count:
-                raise Exception(f"Failed to read exception records at path {self.path}") from e
+            self.context.log.info(f"{self.exceptions_count} schema on read exceptions found for dataset {self.table}")
+            if self.exceptions_count > 0:
+                self.context.log.info(f"Try loading {self.exceptions_count} exceptions for dataset {self.table} from {self.path}")
+                exceptions = (
+                    self.spark
+                    .read
+                    .format(Format.JSON.name.lower())
+                    .options(**options)
+                    .load(self.path)
+                    .withColumn(TIMESTAMP, fn.current_timestamp())
+                    .withColumn(DATABASE, fn.lit(self.database))
+                    .withColumn(TABLE, fn.lit(self.table))
+                )
+                self.exceptions_count = self.exceptions_handler(exceptions)
+                self.context.log.info(f"Deleting exceptions for dataset {self.table} from {self.path}")
+                self.context.fs.rm(self.path, True)
+                
+        except AnalysisException as e:
+            if self.exceptions_count > 0:
+                msg = f"There are {self.exceptions_count} exceptions but dataset for table {self.table} failed to load from path {self.table}"
+                self.context.log.error(msg)
+                raise Exception(msg) from e
             exceptions = None
             self.exceptions_count = 0
 

@@ -169,6 +169,7 @@ class Reader(Source):
                 f"Validating dataframe read using badRecordsPath at {bad_records_path} {CORRELATION_ID}={str(self.correlation_id)}"
             )
             validator = BadRecordsPathSchemaOnRead(
+                self.context,
                 self.dataframe,
                 validation_handler,
                 self.database,
@@ -182,7 +183,7 @@ class Reader(Source):
                 f"Validating dataframe read using PERMISSIVE corrupt column at {CORRUPT_RECORD} {CORRELATION_ID}={str(self.correlation_id)}"
             )
             validator = PermissiveSchemaOnRead(
-                self.dataframe, validation_handler, self.database, self.table
+                self.context, self.dataframe, validation_handler, self.database, self.table
             )
             self.dataframe = self.dataframe.drop(CORRUPT_RECORD)
 

@@ -9,7 +9,7 @@
             "name": "Python: Main",
             "type": "python",
             "request": "launch",
-            "program": "cdc_main.py",
+            "program": "main.py",
             "console": "integratedTerminal",
             "envFile": "${workspaceFolder}/.env",
             "env": {  }
