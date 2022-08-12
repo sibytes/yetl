@@ -113,21 +113,25 @@ python setup.py sdist bdist_wheel
 There is a CI build configured for this repo that builds on main origin and publishes to PyPi.
 
 
-# Change Log
+# Releases
 
-Version: 0.0.6
+Version: 0.0.10
 
--  [Fix Reader Bad Records](https://github.com/sibytes/yetl/issues/1) - Support exceptions handling for badrecordspath defined in the configuration e.g. [landing.customer.read.badRecordsPath](https://github.com/sibytes/yetl/blob/main/config/pipeline/dbx_dev/customer_landing_to_rawdb_csv.yaml). Only supported in databricks runtime environment.
+- [Fix YAML Schema Format Error when Dataflow Retries are Set to 0](https://github.com/orgs/sibytes/projects/2/views/1). Fixed dictionary extraction bug for setting retries and retry_wait to zero.
+
+Version: 0.0.9
+
+- [Clean Up BadRecords JSON Files](https://github.com/orgs/sibytes/projects/2) Automatically remove json schema exception files created by the BadRecordsPath exception handler after they are loaded into a delta table.
+
+Version: 0.0.8
+
+- Including all packages in distribution.
 
 Version: 0.0.7
 
 - [Fix the Timeslice on Wildcard Loads](https://github.com/sibytes/yetl/issues/37) - wildcard format not working on databricks. Inserting %* instead of *.
 - Yetl CDC Pattern example and tests
 
-Version: 0.0.8
+Version: 0.0.6
 
-- Including all packages in distribution.
-
-Version: 0.0.9
-
-- [Clean Up BadRecords JSON Files](https://github.com/orgs/sibytes/projects/2) Automatically remove json schema exception files created by the BadRecordsPath exception handler after they are loaded into a delta table.
+-  [Fix Reader Bad Records](https://github.com/sibytes/yetl/issues/1) - Support exceptions handling for badrecordspath defined in the configuration e.g. [landing.customer.read.badRecordsPath](https://github.com/sibytes/yetl/blob/main/config/pipeline/dbx_dev/customer_landing_to_rawdb_csv.yaml). Only supported in databricks runtime environment.

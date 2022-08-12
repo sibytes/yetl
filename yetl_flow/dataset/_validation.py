@@ -98,18 +98,17 @@ class BadRecordsPathSchemaOnRead(IValidator):
         self.dataframe.cache()
         self.valid_count = self.dataframe.distinct().count()
         self.exceptions_count = self.total_count - self.valid_count
-        options = {
-            INFER_SCHEMA: True,
-            RECURSIVE_FILE_LOOKUP: True
-        }
+        options = {INFER_SCHEMA: True, RECURSIVE_FILE_LOOKUP: True}
         try:
-            self.context.log.info(f"{self.exceptions_count} schema on read exceptions found for dataset {self.table}")
+            self.context.log.info(
+                f"{self.exceptions_count} schema on read exceptions found for dataset {self.table}"
+            )
             if self.exceptions_count > 0:
-                self.context.log.info(f"Try loading {self.exceptions_count} exceptions for dataset {self.table} from {self.path}")
+                self.context.log.info(
+                    f"Try loading {self.exceptions_count} exceptions for dataset {self.table} from {self.path}"
+                )
                 exceptions = (
-                    self.spark
-                    .read
-                    .format(Format.JSON.name.lower())
+                    self.spark.read.format(Format.JSON.name.lower())
                     .options(**options)
                     .load(self.path)
                     .withColumn(TIMESTAMP, fn.current_timestamp())
@@ -117,9 +116,11 @@ class BadRecordsPathSchemaOnRead(IValidator):
                     .withColumn(TABLE, fn.lit(self.table))
                 )
                 self.exceptions_count = self.exceptions_handler(exceptions)
-                self.context.log.info(f"Deleting exceptions for dataset {self.table} from {self.path}")
+                self.context.log.info(
+                    f"Deleting exceptions for dataset {self.table} from {self.path}"
+                )
                 self.context.fs.rm(self.path, True)
-                
+
         except AnalysisException as e:
             if self.exceptions_count > 0:
                 msg = f"There are {self.exceptions_count} exceptions but dataset for table {self.table} failed to load from path {self.table}"

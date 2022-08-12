@@ -18,8 +18,8 @@ setup(
     long_description_content_type="text/markdown",
     url="https://www.yetl.io/",
     project_urls={
-        'GitHub': 'https://github.com/sibytes/yetl',
-        'Documentation': 'https://www.yetl.io/'
+        "GitHub": "https://github.com/sibytes/yetl",
+        "Documentation": "https://www.yetl.io/",
     },
     license="MIT",
     classifiers=[
@@ -28,6 +28,6 @@ setup(
         "Programming Language :: Python :: 3.8",
     ],
     packages=find_packages(),
-    install_requires=["pyyaml","pyspark","regex",'delta-spark'],
-    zip_safe=False
+    install_requires=["pyyaml", "pyspark", "regex", "delta-spark"],
+    zip_safe=False,
 )

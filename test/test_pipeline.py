@@ -4,6 +4,7 @@ from pyspark.sql.functions import *
 import logging
 from datetime import datetime
 
+
 @yetl_flow(log_level="ERROR", auto_read=True)
 def customer_landing_to_rawdb_csv(
     context: Context, dataflow: IDataflow, timeslice: datetime, timeslice_mask: str
@@ -33,11 +34,8 @@ def customer_landing_to_rawdb_csv(
     (df.write.format(dst.format).options(**dst.options).mode(dst.mode).save(dst.path))
 
 
-
 def test_integration():
-    """Bare bones integration test until the project refactoring settles down
-    
-    """
+    """Bare bones integration test until the project refactoring settles down"""
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     logger.info(f"Executing pipeline test_customer_landing_to_rawdb")
