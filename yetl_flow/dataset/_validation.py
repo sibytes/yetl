@@ -69,7 +69,9 @@ class PermissiveSchemaOnRead(IValidator):
         )
 
         self.exceptions_count = self.exceptions.count()
-        self.dataframe = self.dataframe.where(f"{CORRUPT_RECORD} IS NULL")
+        self.dataframe = self.dataframe.where(f"{CORRUPT_RECORD} IS NULL").drop(
+            CORRUPT_RECORD
+        )
 
         self.valid_count = self.dataframe.count()
         self.exceptions_count = self.exceptions_handler(self.exceptions)

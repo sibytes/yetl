@@ -2,6 +2,7 @@ datalake: "/mnt/datalake"
 datalake_protocol: "dbfs:"
 spark:
   spark.master: local
+  spark.databricks.delta.allowArbitraryProperties.enabled: true
 
 spark_schema_repo:
   spark_schema_file:

@@ -11,6 +11,7 @@ from ._timeslice import Timeslice, TimesliceUtcNow
 from .dataset import Save, DefaultSave
 from typing import Type
 from delta import configure_spark_with_delta_pip
+from .metadata_repo import metadata_repo_factory, IMetadataRepo
 
 
 class Context:
@@ -56,6 +57,11 @@ class Context:
         # abstraction of the filesystem for driver file commands e.g. rm, ls, mv, cp
         self.fs: IFileSystem = file_system_factory.get_file_system_type(
             self, config=config
+        )
+
+        # abstraction of the metadata repo for saving yetl dataflow lineage.
+        self.metadata_repo: IMetadataRepo = (
+            metadata_repo_factory.get_metadata_repo_type(self, config=config)
         )
 
         # abstraction of the schema repo

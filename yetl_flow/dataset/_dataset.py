@@ -2,6 +2,7 @@ from pyspark.sql.types import StructType
 from ._constants import *
 from . import _builtin_functions as builtin_funcs
 from ..schema_repo import ISchemaRepo
+import uuid
 
 
 class Dataset:
@@ -9,6 +10,7 @@ class Dataset:
         self, context, database: str, table: str, dataset: dict, io_type: str
     ) -> None:
 
+        self.id = uuid.uuid4()
         self.datalake = dataset["datalake"]
         self.datalake_protocol = context.fs.datalake_protocol
         self.context = context
@@ -54,3 +56,7 @@ class Dataset:
 
     def is_destination(self):
         pass
+
+    def save_metadata(self):
+
+        self.context.metadata_provider.save()

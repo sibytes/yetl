@@ -1,22 +1,23 @@
 dataflow:
   retries: 0
   retry_wait: 1
-  enable_dataflow_types:
-    - full_load
-    - partition_load
-    - merge_compare
-    - merge_cdc
-    - nuke 
+  # enable_dataflow_types:
+  #   - full_load
+  #   - partition_load
+  #   - merge_compare
+  #   - merge_cdc
+  #   - nuke 
 
 
   landing:
     customer:
       table:
-        properties:
-          yetl.lineagecolumn.loadtimestamp: _LOAD_TIMESTAMP
-          yetl.lineagecolumn.timeslice: _TIMESLICE
-          yetl.lineagecolumn.correlation_id: _CORRELATION_ID
-          yetl.lineagecolumn.filename: _FILENAME
+          #### YETL TABLE PROPERTIES ####
+
+          # builds a struct of metadata lineage and adds it the data in a column
+          # called _yetl_lineage
+          yetl.lineageEnabled: true
+
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: csv
@@ -27,7 +28,7 @@ dataflow:
         # dataflow and handled manually as desired.
         auto: true
         options:
-          # mode: PERMISSIVE
+          mode: PERMISSIVE
           # if infer schema if true the schema will be ingored, generally speaking this is a bad approach for prod pipelines
           # however if you set to true you have to do the work of creating the schema and placing into the schema repo
           # So! if inferSchema is false which is the default for this framework and there isn't one, the 1st time
@@ -35,11 +36,12 @@ dataflow:
           # it gives you a starter schema to refine.
           inferSchema: false
           header: true
-          badRecordsPath: "data/exceptions/landing/customer/{{timeslice(path_date_format)}}"
+          # badRecordsPath: "data/exceptions/landing/customer/{{timeslice(path_date_format)}}"
       exceptions:
           path: "data/delta_lake/exceptions"
           database: landing
           table: exceptions
+
       thresholds:
         warning:
           min_rows: 1
@@ -54,11 +56,12 @@ dataflow:
           
     customer_preferences:
       table:
-        properties:
-          yetl.lineagecolumn.loadtimestamp: _LOAD_TIMESTAMP
-          yetl.lineagecolumn.timeslice: _TIMESLICE
-          yetl.lineagecolumn.correlation_id: _CORRELATION_ID
-          yetl.lineagecolumn.filename: _FILENAME
+          #### YETL TABLE PROPERTIES ####
+
+          # builds a struct of metadata lineage and adds it the data in a column
+          # called _yetl_lineage
+          yetl.lineageEnabled: true
+
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: csv
@@ -88,6 +91,15 @@ dataflow:
   raw:
     customer:
       table:
+        # defining a partition key here is an option if
+        # we haven't defined the table using DDL with a partition key
+        # if you define it in the dll statement and here, then
+        # yetl will default to the dll definition and throw a warning.
+        # IMPORTANT NOTE: if you change the partition key on existing table
+        # the yetl will repartition the table ONLY IF the data flow property
+        # yetl.allowRepartitioning: true
+        partition_by:
+          - _PARTITION_KEY
         # table ddl is optional to provide full flexbility of how you can manaage the datalake (house)
         # it can be declared inline or via sql include files. If not provided an empty schema table is
         # created and merge schema (if false) is flipped to true on the initial load.
@@ -102,7 +114,8 @@ dataflow:
         #     gender        string,
         #     job_title     string,
         #     amount        double,
-        #     allow_contact boolean
+        #     allow_contact boolean,
+        #     _PARTITION_KEY int
         #   )
         #   USING DELTA LOCATION '{{path}}';
 
@@ -112,6 +125,21 @@ dataflow:
         # https://docs.databricks.com/delta/table-properties.html
         # https://docs.delta.io/2.0.0/table-properties.html
         properties:
+
+          #### YETL TABLE PROPERTIES ####
+
+          # allow yetl to repartition a table when the partitions are changed
+          # If this is set to false and the partitions are changed then yetl will throw an exception
+          yetl.allowRepartitioning: true
+          # builds a struct of metadata lineage and adds it the data in a column
+          # called _yetl_lineage
+          yetl.lineageEnabled: true
+
+          #### DELTA LAKE TABLE PROPERTIES ####
+
+          # https://docs.databricks.com/delta/table-properties.html
+          # https://docs.delta.io/2.0.0/table-properties.html
+
           delta.appendOnly: false
           delta.checkpoint.writeStatsAsJson: true
           # delta.checkpoint.writeStatsAsStruct: None # Not Supported

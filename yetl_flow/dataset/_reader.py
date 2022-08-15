@@ -1,3 +1,4 @@
+from locale import D_FMT
 from ._source import Source
 from pyspark.sql import functions as fn
 from pyspark.sql.types import StructType
@@ -189,7 +190,7 @@ class Reader(Source):
                 self.database,
                 self.table,
             )
-            self.dataframe = self.dataframe.drop(CORRUPT_RECORD)
+            # self.dataframe = self.dataframe.drop(CORRUPT_RECORD)
 
         if validator:
             validation = validator.validate()
@@ -209,11 +210,35 @@ class Reader(Source):
             .options(**self.options)
             .load(self.path)
             .withColumn(CORRELATION_ID, fn.lit(str(self.correlation_id)))
-            .withColumn(LOAD_TIMESTAMP, fn.current_timestamp())
-            # .withColumn(TIMESLICE, fn.lit(self.timeslice)) # TODO: fix injection of time slice lineage.
-            .withColumn(FILENAME, fn.input_file_name())
+            # .withColumn("_yetl_lineage",
+            #     fn.struct(
+            #         fn.struct(
+            #             fn.lit(str(self.id)).alias("id"),
+            #             fn.lit(self.table).alias("database"),
+            #             fn.lit(self.table).alias("table"),
+            #             fn.current_timestamp().alias(LOAD_TIMESTAMP),
+            #             fn.input_file_name().alias(FILENAME),
+            #             # TODO: needs to be fixed to put in the data timeslice not the load timeslice
+            #             # fn.lit(self.timeslice).alias(TIMESLICE)
+            #         ).alias(f"{self.database}.{self.table}")
+            #     )
+            # )
+            # .withColumn("_yetl_lineage_index",
+            #     fn.struct(
+            #         fn.struct(
+            #             fn.lit(f"{self.database}.{self.table}").alias(str(self.id)),
+            #             fn.array(fn.array()).alias("depends_on_id")
+            #         )
+            #     )
+            # )
         )
 
-        self.dataframe = df
+        self.context.log.debug(
+            f"Reordering sys_columns to end for {self.database_table} from {self.path} {CORRELATION_ID}={str(self.correlation_id)}"
+        )
+        sys_columns = [c for c in df.columns if c.startswith("_")]
+        data_columns = [c for c in df.columns if not c.startswith("_")]
+        data_columns = data_columns + sys_columns
+        self.dataframe = df.select(*data_columns)
         self.validation_result = self.validate()
         return self.dataframe
