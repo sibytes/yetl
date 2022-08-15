@@ -1,6 +1,6 @@
 from ._imetadata_repo import IMetadataRepo
 from uuid import UUID
-
+from ..dataset import Dataset
 
 class MetadataDeltalake(IMetadataRepo):
 
@@ -18,8 +18,8 @@ class MetadataDeltalake(IMetadataRepo):
         _config = config["metadata_deltalake"]
 
         self.database = _config.get(self._ROOT, self._DEFUALT_DATABSE)
-        self.dataset_table = _config.get(self._DATASET, self._DEFAULT_DATASET_TABLE)
-        self.index_table = _config.get(self._INDEX, self._DEFAULT_INDEX_TABLE)
+        self.dataset_table = _config.get(self._DATASET ,self._DEFAULT_DATASET_TABLE)
+        self.index_table = _config.get(self._INDEX ,self._DEFAULT_INDEX_TABLE)
 
-    def save(self, correlation_id: UUID, metadata: dict):
-        return super().save(correlation_id, metadata)
+    def save(self, dataset: Dataset):
+        return super().save(dataset)

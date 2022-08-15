@@ -242,3 +242,6 @@ class Reader(Source):
         self.dataframe = df.select(*data_columns)
         self.validation_result = self.validate()
         return self.dataframe
+
+    def save_metadata(self):
+        self.context.metdata_repo.save(self)

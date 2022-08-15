@@ -17,24 +17,26 @@ class _MetadataRepoFactory:
         self._metadata_repo = {}
 
     def register_metadata_repo_type(
-        self, sr_type: MetadataRepoType, metadata_repo_type: type
+        self, mr_type: MetadataRepoType, metadata_repo_type: type
     ):
         self._logger.debug(
             f"Register metadata repo type {metadata_repo_type} as {type}"
         )
-        self._metadata_repo[sr_type] = metadata_repo_type
+        self._metadata_repo[mr_type] = metadata_repo_type
 
-    def _get_sr_type(self, name: str):
+    def _get_mr_type(self, name: str):
         try:
-            if MetadataRepoType[name] in MetadataRepoType:
-                return MetadataRepoType[name]
+            if MetadataRepoType[name.upper()] in MetadataRepoType:
+                return MetadataRepoType[name.upper()]
         except:
             return None
 
     def get_metadata_repo_type(self, context, config: dict) -> IMetadataRepo:
 
-        metadata_repo_store: str = next(iter(config))
-        mr_type: MetadataRepoType = self._get_sr_type(metadata_repo_store)
+        # default to file metadata repo
+        _config = config.get("metadata_repo","metadata_file")
+        metadata_repo_store: str = next(iter(_config))
+        mr_type: MetadataRepoType = self._get_mr_type(metadata_repo_store)
 
         context.log.info(f"Setting up metadata repo on {metadata_repo_store} ")
 
@@ -47,7 +49,7 @@ class _MetadataRepoFactory:
             )
             raise ValueError(mr_type)
 
-        return metadata_repo(context, config)
+        return metadata_repo(context, _config)
 
 
 factory = _MetadataRepoFactory()

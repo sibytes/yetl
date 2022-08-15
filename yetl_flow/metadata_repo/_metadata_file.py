@@ -1,5 +1,7 @@
 from ._imetadata_repo import IMetadataRepo
 from uuid import UUID
+from ..dataset import Dataset
+from datetime import datetime
 
 
 class MetadataFile(IMetadataRepo):
@@ -21,5 +23,39 @@ class MetadataFile(IMetadataRepo):
         )
         self.index_filename = _config.get(self._INDEX, self._DEFAULT_INDEX_FILENAME)
 
-    def save(self, correlation_id: UUID, metadata: dict):
-        return super().save(correlation_id, metadata)
+    def _get_metadata(self,  dataset: Dataset):
+        metadata = {
+           "id" : dataset.id,
+           "database": dataset.database,
+           "table": dataset.table,
+           "load_timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+           "load_timestamp_utc": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+           "filename": dataset.path,
+           "timeslice": ""
+
+        }
+
+    def save(self, dataset: Dataset):
+        metadata = self._get_metadata(dataset)
+
+            # .withColumn("_yetl_lineage",
+            #     fn.struct(
+            #         fn.struct(
+            #             fn.lit(str(self.id)).alias("id"),
+            #             fn.lit(self.table).alias("database"),
+            #             fn.lit(self.table).alias("table"),
+            #             fn.current_timestamp().alias(LOAD_TIMESTAMP),
+            #             fn.input_file_name().alias(FILENAME),
+            #             # TODO: needs to be fixed to put in the data timeslice not the load timeslice
+            #             # fn.lit(self.timeslice).alias(TIMESLICE)
+            #         ).alias(f"{self.database}.{self.table}")
+            #     )
+            # )
+            # .withColumn("_yetl_lineage_index",
+            #     fn.struct(
+            #         fn.struct(
+            #             fn.lit(f"{self.database}.{self.table}").alias(str(self.id)),
+            #             fn.array(fn.array()).alias("depends_on_id")
+            #         )
+            #     )
+            # )
