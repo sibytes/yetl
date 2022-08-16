@@ -34,7 +34,7 @@ class _MetadataRepoFactory:
     def get_metadata_repo_type(self, context, config: dict) -> IMetadataRepo:
 
         # default to file metadata repo
-        _config = config.get("metadata_repo","metadata_file")
+        _config = config.get("metadata_repo", "metadata_file")
         metadata_repo_store: str = next(iter(_config))
         mr_type: MetadataRepoType = self._get_mr_type(metadata_repo_store)
 
