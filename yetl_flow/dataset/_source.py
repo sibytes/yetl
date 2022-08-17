@@ -24,3 +24,6 @@ class Source(Dataset):
 
     def is_destination(self):
         return False
+
+    def save_metadata(self):
+        self.context.metadata_repo.save(self)

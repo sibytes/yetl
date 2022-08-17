@@ -1,0 +1,72 @@
+{
+  "e9a2ddbc-388e-420d-b424-e573f3425669": {
+    "263e1d41-75ca-40e4-9116-2f00a2b554db": {
+      "correlation_id": "e9a2ddbc-388e-420d-b424-e573f3425669",
+      "database": "landing",
+      "table": "customer_preferences",
+      "load_timestamp": "2022-08-17 11:37:00",
+      "load_timestamp_utc": "2022-08-17 10:37:00",
+      "path": "file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_preferences_2022**.csv",
+      "from_timeslice": "2022-01-01 00:00:00.000",
+      "to_timeslice": "2023-01-01 00:00:00.000",
+      "validation": {
+        "schema_on_read": {
+          "total_count": 20,
+          "valid_count": 20,
+          "exception_count": 0
+        }
+      }
+    },
+    "df8f7d54-8642-4708-9611-ca47438d174f": {
+      "correlation_id": "e9a2ddbc-388e-420d-b424-e573f3425669",
+      "database": "landing",
+      "table": "customer",
+      "load_timestamp": "2022-08-17 11:36:59",
+      "load_timestamp_utc": "2022-08-17 10:36:59",
+      "path": "file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_2022**.csv",
+      "from_timeslice": "2022-01-01 00:00:00.000",
+      "to_timeslice": "2023-01-01 00:00:00.000",
+      "validation": {
+        "schema_on_read": {
+          "total_count": 20,
+          "valid_count": 20,
+          "exception_count": 0
+        }
+      }
+    },
+    "2660589c-3260-4083-b643-2972e9ecfe14": {
+      "correlation_id": "e9a2ddbc-388e-420d-b424-e573f3425669",
+      "database": "raw",
+      "table": "customer",
+      "load_timestamp": "2022-08-17 11:37:11",
+      "load_timestamp_utc": "2022-08-17 10:37:11",
+      "path": "file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/raw/customer",
+      "from_timeslice": "2022-01-01 00:00:00.000",
+      "to_timeslice": "2023-01-01 00:00:00.000",
+      "delta_lake": {
+        "clusterId": null,
+        "engineInfo": "Apache-Spark/3.2.1 Delta-Lake/2.0.0",
+        "isBlindAppend": false,
+        "isolationLevel": "Serializable",
+        "job": null,
+        "notebook": null,
+        "operation": "WRITE",
+        "operationMetrics": {
+          "numFiles": "1",
+          "numOutputBytes": "4164",
+          "numOutputRows": "20"
+        },
+        "operationParameters": {
+          "mode": "Overwrite",
+          "partitionBy": "[]"
+        },
+        "readVersion": 7,
+        "timestamp": "2022-08-17 11:48:18.239000",
+        "userId": null,
+        "userMetadata": null,
+        "userName": null,
+        "version": 8
+      }
+    }
+  }
+}

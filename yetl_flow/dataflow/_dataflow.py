@@ -74,13 +74,6 @@ class Dataflow(IDataflow):
     def destination_df(self, database_table: str, dataframe: DataFrame):
 
         dst: Destination = self.destinations[database_table]
-        # remove a re-add the _correlation_id since there will be dupplicate columns
-        # when dataframe is built from multiple sources.
-        dataframe = (
-            dataframe.drop("_correlation_id")
-            .withColumn("_correlation_id", fn.lit(str(dst.correlation_id)))
-        )
-        
         dst.dataframe = dataframe
         if dst.auto_io:
             dst.write()

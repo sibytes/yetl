@@ -58,5 +58,4 @@ class Dataset:
         pass
 
     def save_metadata(self):
-
-        self.context.metadata_provider.save()
+        self.context.metadata_repo.save(self)

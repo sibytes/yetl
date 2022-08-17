@@ -22,7 +22,14 @@ class IMetadataRepo:
         return metadata
 
     def _get_index(self, dataset: Dataset):
-        index = {str(dataset.id): {"depends_on": []}}
+
+        depends_on_ids = []
+        # add the source dataset id's into the attribute list
+        if dataset.is_destination():
+            sources:dict = self.context.dataflow.sources
+            depends_on_ids = [str(v.id) for k, v in sources.items()]
+
+        index = {str(dataset.id): {"depends_on": depends_on_ids}}
         return index
 
 
