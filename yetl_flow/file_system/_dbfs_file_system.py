@@ -45,3 +45,7 @@ class DbfsFileSystem(IFileSystem):
 
     def append_file(self, path: str, data: dict, file_format: FileFormat):
         raise NotImplementedError()
+
+    def write_file(self, path: str, data: dict, file_format: FileFormat):
+        raise NotImplementedError()
+        

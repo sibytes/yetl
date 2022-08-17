@@ -1,6 +1,7 @@
 from enum import Enum
 
 
+
 class FileFormat(Enum):
     TEXT = 1
     JSON = 2
@@ -45,4 +46,10 @@ class IFileSystem:
         pass
 
     def append_file(self, path: str, data: dict, file_format: FileFormat):
+        pass
+
+    def write_file(self, path: str, data: dict, file_format: FileFormat):
+        pass
+
+    def exists(self, path:str)->bool:
         pass

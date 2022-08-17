@@ -22,8 +22,8 @@ deltalake_schema_repo:
 metadata_repo:
   metadata_file:
     metadata_root: ./config/runs
-    metadata_dataset: dataset.jsonl
-    metadata_index: index.jsonl
+    metadata_dataset: dataset.json
+    metadata_index: index.json
 
   # metadata_deltalake:
   #   metadata_database: yetl
