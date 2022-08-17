@@ -14,7 +14,7 @@ class IMetadataRepo:
                 "table": dataset.table,
                 "load_timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "load_timestamp_utc": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
-                "filename": dataset.path,
+                "path": dataset.path,
                 "timeslice": "",
             }
         }

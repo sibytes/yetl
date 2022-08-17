@@ -1,4 +1,4 @@
-from pyspark.sql import DataFrame
+from pyspark.sql import DataFrame, functions as fn
 from ..dataset import Dataset, Source, Destination
 from ._i_dataflow import IDataflow
 from ..dataset import dataset_factory, Save, DefaultSave
@@ -74,7 +74,11 @@ class Dataflow(IDataflow):
     def destination_df(self, database_table: str, dataframe: DataFrame):
 
         dst: Destination = self.destinations[database_table]
-
+        dataframe = (
+            dataframe.drop("_correlation_id")
+            .withColumn("_correlation_id", fn.lit(str(dst.correlation_id)))
+        )
+        
         dst.dataframe = dataframe
         if dst.auto_io:
             dst.write()

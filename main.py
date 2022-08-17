@@ -33,7 +33,7 @@ def customer_landing_to_rawdb_csv(
 
     context.log.info("Joining customers with customer_preferences")
     df = df_cust.join(df_prefs, "id", "inner")
-    df = df.withColumn("_PARTITION_KEY", lit(2022))
+    df = df.withColumn("_partition_key", lit(2022))
 
     dataflow.destination_df("raw.customer", df)
 

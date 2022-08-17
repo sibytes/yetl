@@ -8,7 +8,8 @@ CREATE TABLE {{database_name}}.{{table_name}}
     job_title     string,
     amount        double,
     allow_contact boolean,
-    _PARTITION_KEY int
+    _partition_key int,
+    _correlation_id string
 )
 USING DELTA LOCATION '{{path}}';
 -- PARTITION BY ()
