@@ -93,12 +93,12 @@ dataflow:
       table:
         # defining a partition key here is an option if
         # we haven't defined the table using DDL with a partition key
-        # if you define it in the dll statement and here, then
-        # yetl will default to the dll definition and throw a warning.
+        # if you define it in the ddl statement (PARTITIONED_BY) and here, then
+        # yetl will default to the ddl definition and throw a warning.
         # IMPORTANT NOTE: if you change the partition key on existing table
         # the yetl will repartition the table ONLY IF the data flow property
         # yetl.allowRepartitioning: true
-        partition_by:
+        partitioned_by:
           - _PARTITION_KEY
         # table ddl is optional to provide full flexbility of how you can manaage the datalake (house)
         # it can be declared inline or via sql include files. If not provided an empty schema table is
@@ -118,7 +118,8 @@ dataflow:
         #     _partition_key int,
         #     _correlation_id string
         #   )
-        #   USING DELTA LOCATION '{{path}}';
+        #   USING DELTA LOCATION '{{path}}'
+        #   PARTITIONED_BY (_partition_key);
 
         ddl: ./config/schema/deltalake
 
