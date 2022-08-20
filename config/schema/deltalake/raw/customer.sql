@@ -9,7 +9,7 @@ CREATE TABLE {{database_name}}.{{table_name}}
     amount        double,
     allow_contact boolean,
     _partition_key int,
-    _correlation_id string
+    _context_id string
 )
 USING DELTA LOCATION '{{path}}'
 PARTITIONED BY (_partition_key);

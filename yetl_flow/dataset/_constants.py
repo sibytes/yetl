@@ -21,7 +21,7 @@ INFER_SCHEMA = "inferSchema"
 RECURSIVE_FILE_LOOKUP = "recursiveFileLookup"
 
 # lineage columns
-CORRELATION_ID = "_correlation_id"
+CONTEXT_ID = "_context_id"
 LOAD_TIMESTAMP = "_load_timestamp"
 TIMESLICE = "_timeslice"
 FILENAME = "_filename"

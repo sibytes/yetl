@@ -39,7 +39,7 @@ class Dataflow(IDataflow):
                 v["datalake_protocol"] = self.datalake_protocol
                 v["spark_schema_repo"] = self._spark_schema_repo
                 v["deltalake_schema_repo"] = self._deltalake_schema_repo
-                v["correlation_id"] = self.context.correlation_id
+                v["context_id"] = self.context.context_id
                 v["timeslice"] = self.context.timeslice
                 md = dataset_factory.get_dataset_type(
                     self.context, database, table, v, save_type

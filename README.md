@@ -118,6 +118,12 @@ There is a CI build configured for this repo that builds on main origin and publ
 Version: 0.0.10
 
 - [Fix YAML Schema Format Error when Dataflow Retries are Set to 0](https://github.com/orgs/sibytes/projects/2/views/1). Fixed dictionary extraction bug for setting retries and retry_wait to zero.
+- Added partition sql support
+- Fixed constraints synchronisation to drop and create more efficiently
+- Refined, refactored and fixed lineage
+- Added file lineage logging
+- Add file lineage logging
+
 
 Version: 0.0.9
 

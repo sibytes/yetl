@@ -4,6 +4,7 @@ from ._save import DefaultSave
 from pyspark.sql import functions as fn
 from ._constants import *
 
+
 class Destination(Dataset):
     def __init__(
         self, context, database: str, table: str, dataset: dict, io_type: str
@@ -16,13 +17,12 @@ class Destination(Dataset):
     def write(self):
 
         self.context.log.debug(
-            f"Reordering sys_columns to end for {self.database_table} from {self.path} {CORRELATION_ID}={str(self.correlation_id)}"
+            f"Reordering sys_columns to end for {self.database_table} from {self.path} {CONTEXT_ID}={str(self.context_id)}"
         )
-        # remove a re-add the _correlation_id since there will be dupplicate columns
+        # remove a re-add the _context_id since there will be dupplicate columns
         # when dataframe is built from multiple sources.
-        self.dataframe = (
-            self.dataframe.drop(CORRELATION_ID)
-            .withColumn(CORRELATION_ID, fn.lit(str(self.correlation_id)))
+        self.dataframe = self.dataframe.drop(CONTEXT_ID).withColumn(
+            CONTEXT_ID, fn.lit(str(self.context_id))
         )
         sys_columns = [c for c in self.dataframe.columns if c.startswith("_")]
         data_columns = [c for c in self.dataframe.columns if not c.startswith("_")]

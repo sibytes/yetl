@@ -116,7 +116,7 @@ dataflow:
         #     amount        double,
         #     allow_contact boolean,
         #     _partition_key int,
-        #     _correlation_id string
+        #     _context_id string
         #   )
         #   USING DELTA LOCATION '{{path}}'
         #   PARTITIONED_BY (_partition_key);
@@ -168,7 +168,7 @@ dataflow:
 
         # table constraints can be declared inline or via a SQL include file on the ddl
         check_constraints:
-          amount_lower_bound: "amount > -1000"
+          amount_lower_bound: "amount > -2000"
           amount_upper_bound: "amount < 10000"
       
       format: delta

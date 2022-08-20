@@ -24,7 +24,7 @@ class Context:
         timeslice: datetime = None,
         save_type: Type[Save] = DefaultSave,
     ) -> None:
-        self.correlation_id = uuid.uuid4()
+        self.context_id = uuid.uuid4()
         self.name = name
         self.app_name = app_name
 

@@ -115,34 +115,51 @@ class Writer(Destination):
         self, config: dict, existing_constraints: dict = None
     ):
         table = config.get("table")
-        sql_drop_constraints = []
-        sql_add_constraints = []
+        sql_constraints = []
         if table:
             check_constraints = table.get("check_constraints")
 
         if not check_constraints:
             check_constraints = {}
 
+        # if the existing constraint is not defined in the config constraints
+        # and it is different then drop it and recreate
         if existing_constraints:
-            for name, constraint in existing_constraints.items():
-                cc = check_constraints.get(name)
-                if cc != constraint:
-                    sql_drop_constraints.append(
+            for name, existing_constraint in existing_constraints.items():
+                defined_constraint = check_constraints.get(name)
+
+                # if the existing constraint is not defined in the config constraints then drop it
+                if not defined_constraint:
+                    sql_constraints.append(
                         dl.alter_table_drop_constraint(self.database, self.table, name)
                     )
-
-        if check_constraints:
-            for name, constraint in check_constraints.items():
-                cc = existing_constraints.get(name)
-                if cc != constraint:
-                    sql_drop_constraints.append(
+                # if the existing constraint is defined and it is different then drop and add it
+                elif (
+                    defined_constraint.replace(" ", "").lower()
+                    != existing_constraint.replace(" ", "").lower()
+                ):
+                    sql_constraints.append(
+                        dl.alter_table_drop_constraint(self.database, self.table, name)
+                    )
+                    sql_constraints.append(
                         dl.alter_table_add_constraint(
-                            self.database, self.table, name, constraint
+                            self.database, self.table, name, defined_constraint
                         )
                     )
 
-        constraints = sql_drop_constraints + sql_add_constraints
-        return constraints
+        # the constraint is defined but doesn't exist on the table yet so
+        # add the constraint
+        if check_constraints:
+            for name, defined_constraint in check_constraints.items():
+                existing_constraint = existing_constraints.get(name)
+                if not existing_constraint:
+                    sql_constraints.append(
+                        dl.alter_table_add_constraint(
+                            self.database, self.table, name, defined_constraint
+                        )
+                    )
+
+        return sql_constraints
 
     def _get_table_properties_sql(self, config: dict, existing_properties: dict = None):
 

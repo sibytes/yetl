@@ -21,7 +21,7 @@ class Dataset:
         self.file_date_format = dataset.get("file_date_format")
         self._path = self._get_path(dataset)
         self._path = builtin_funcs.execute_replacements(self._path, self)
-        self.correlation_id = dataset.get("correlation_id")
+        self.context_id = dataset.get("context_id")
         self.timeslice = dataset.get("timeslice")
 
         # default format to delta if not

@@ -1,7 +1,7 @@
 {
   "e9a2ddbc-388e-420d-b424-e573f3425669": {
     "263e1d41-75ca-40e4-9116-2f00a2b554db": {
-      "correlation_id": "e9a2ddbc-388e-420d-b424-e573f3425669",
+      "context_id": "e9a2ddbc-388e-420d-b424-e573f3425669",
       "database": "landing",
       "table": "customer_preferences",
       "load_timestamp": "2022-08-17 11:37:00",
@@ -18,7 +18,7 @@
       }
     },
     "df8f7d54-8642-4708-9611-ca47438d174f": {
-      "correlation_id": "e9a2ddbc-388e-420d-b424-e573f3425669",
+      "context_id": "e9a2ddbc-388e-420d-b424-e573f3425669",
       "database": "landing",
       "table": "customer",
       "load_timestamp": "2022-08-17 11:36:59",
@@ -35,7 +35,7 @@
       }
     },
     "2660589c-3260-4083-b643-2972e9ecfe14": {
-      "correlation_id": "e9a2ddbc-388e-420d-b424-e573f3425669",
+      "context_id": "e9a2ddbc-388e-420d-b424-e573f3425669",
       "database": "raw",
       "table": "customer",
       "load_timestamp": "2022-08-17 11:37:11",
