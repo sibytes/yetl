@@ -14,8 +14,7 @@ dataflow:
       table:
           #### YETL TABLE PROPERTIES ####
 
-          # builds a struct of metadata lineage and adds it the data in a column
-          # called _yetl_lineage
+          # logs the etl metadata to the configured metadata provider.
           yetl.lineageEnabled: true
 
       path_date_format: "%Y%m%d"
@@ -93,13 +92,13 @@ dataflow:
       table:
         # defining a partition key here is an option if
         # we haven't defined the table using DDL with a partition key
-        # if you define it in the ddl statement (PARTITIONED_BY) and here, then
+        # if you define it in the ddl statement (PARTITIONED BY) and here, then
         # yetl will default to the ddl definition and throw a warning.
         # IMPORTANT NOTE: if you change the partition key on existing table
         # the yetl will repartition the table ONLY IF the data flow property
         # yetl.allowRepartitioning: true
         partitioned_by:
-          - _PARTITION_KEY
+          - _partition_key
         # table ddl is optional to provide full flexbility of how you can manaage the datalake (house)
         # it can be declared inline or via sql include files. If not provided an empty schema table is
         # created and merge schema (if false) is flipped to true on the initial load.
@@ -133,8 +132,7 @@ dataflow:
           # allow yetl to repartition a table when the partitions are changed
           # If this is set to false and the partitions are changed then yetl will throw an exception
           yetl.allowRepartitioning: true
-          # builds a struct of metadata lineage and adds it the data in a column
-          # called _yetl_lineage
+          # logs the etl metadata to the configured metadata provider.
           yetl.lineageEnabled: true
 
           #### DELTA LAKE TABLE PROPERTIES ####
@@ -168,7 +166,7 @@ dataflow:
 
         # table constraints can be declared inline or via a SQL include file on the ddl
         check_constraints:
-          amount_lower_bound: "amount > -2000"
+          amount_lower_bound: "amount > -1000"
           amount_upper_bound: "amount < 10000"
       
       format: delta

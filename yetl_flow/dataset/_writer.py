@@ -7,9 +7,6 @@ from pyspark.sql import DataFrame
 from typing import ChainMap
 
 
-#  make_check_constraints_sql, create_table, make_check_table_properties_sql, get_table_properties, table_exists
-
-
 class Writer(Destination):
     def __init__(
         self, context, database: str, table: str, config: dict, io_type: str
@@ -18,8 +15,11 @@ class Writer(Destination):
 
         self.dataframe: DataFrame = None
         # try and load a schema if schema on read
-        self.table_dll = self._get_table_sql(config)
-        self.context.log.debug(f"Writer table ddl = {self.table_dll}")
+        self.table_ddl:str = self._get_table_sql(config)
+        self.context.log.debug(f"Writer table ddl = {self.table_ddl}")
+
+        # get the configured partitions.
+        self.partitions:list = self._get_partitions(config, self.table_ddl)
 
         self.auto_optimize = self._get_auto_optimize(config)
 
@@ -40,15 +40,42 @@ class Writer(Destination):
             self.context.log.info(
                 f"auto_io = {self.auto_io} automatically creating or altering delta table {self.database}.{self.table}"
             )
+
+            # TODO: return the partitions in the table properties
             properties = self.create_or_alter_table()
 
             self._set_table_constraints(properties, config)
             self._set_table_properties(properties, config)
 
-    def _set_table_constraints(self, existing_constraints: dict, config: dict):
+            # TODO: if the table partitions in the properties form the table is different to the partitions
+            # in the config or ddl, yetl.allowRepartitioning = true then repartition the table
+            self._table_repartition(properties, config)
+
+    def _table_repartition(self, table_properties:dict, config:dict):
+        pass
+
+    def _get_partitions(self, config:dict, table_ddl:str):
+
+        table:dict = config[TABLE]
+        partitions = []
+        # TODO: change this to a more reliable parser.
+        parsed_table_ddl = table_ddl
+        if parsed_table_ddl:
+            parsed_table_ddl = table_ddl.replace(" ", "").upper()
+
+        if parsed_table_ddl and "PARTITIONEDBY(" in parsed_table_ddl:
+            # TODO: get the columns in the PARTITIONED BY clause
+            partitions = ["partition_key"]
+        else:
+            partitions = table.get("partitioned_by")
+
+        return partitions
+
+
+    def _set_table_constraints(self, table_properties: dict, config: dict):
         _existing_constraints = {}
-        if existing_constraints:
-            _existing_constraints = existing_constraints.get(self.database_table)
+        if table_properties:
+            _existing_constraints = table_properties.get(self.database_table)
             _existing_constraints = _existing_constraints.get("constraints")
 
         self.column_constraints_ddl = self._get_check_constraints_sql(
