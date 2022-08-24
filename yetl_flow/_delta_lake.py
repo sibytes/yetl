@@ -90,3 +90,49 @@ def get_table_properties(context, database: str, table: str):
     msg = json.dumps(properties, indent=4, default=str)
     context.log.info(msg)
     return properties
+
+
+def get_table_details(context, database: str, table: str):
+
+    context.log.info(
+        f"getting existing table details and partitions for table {database}.{table}"
+    )
+    # df.where("col_name like 'Part%'").show()
+    # partitions = [r["data_type"] for r in  df.where("col_name like 'Part%'").select("data_type").collect()]
+
+    df: DataFrame = context.spark.sql(
+        f"DESCRIBE TABLE EXTENDED `{database}`.`{table}`"
+    ).collect()
+
+    # get the details into a dictionary
+    details = {c.asDict()["col_name"]: c.asDict()["data_type"] for c in df}
+
+    # pull out the columns
+    columns = {}
+    ordinal = 0
+    for k, v in details.items():
+        if k and v:
+            columns[k] = {}
+            columns[k]["ordinal"] = ordinal
+            columns[k]["type"] = v
+            ordinal = +1
+        else:
+            break
+
+    # pull out the columns
+    partitions = [v for k, v in details.items() if k.startswith("Part ")]
+
+    details = {
+        f"{database}.{table}": {
+            "columns": columns,
+            "partitions": partitions,
+            "name": details.get("Name"),
+            "location": details.get("Location"),
+            "provider": details.get("Provider"),
+            "owner": details.get("Owner"),
+        }
+    }
+
+    msg = json.dumps(details, indent=4, default=str)
+    context.log.info(msg)
+    return details

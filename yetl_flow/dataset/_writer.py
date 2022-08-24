@@ -15,11 +15,11 @@ class Writer(Destination):
 
         self.dataframe: DataFrame = None
         # try and load a schema if schema on read
-        self.table_ddl:str = self._get_table_sql(config)
+        self.table_ddl: str = self._get_table_sql(config)
         self.context.log.debug(f"Writer table ddl = {self.table_ddl}")
 
         # get the configured partitions.
-        self.partitions:list = self._get_partitions(config, self.table_ddl)
+        self.partitions: list = self._get_partitions(config, self.table_ddl)
 
         self.auto_optimize = self._get_auto_optimize(config)
 
@@ -41,22 +41,25 @@ class Writer(Destination):
                 f"auto_io = {self.auto_io} automatically creating or altering delta table {self.database}.{self.table}"
             )
 
-            # TODO: return the partitions in the table properties
+            # returns the table properties and partitions if the table already exists.
+            # TODO: for review, should this return those properties after the table is created if it doesn't exist?
             properties = self.create_or_alter_table()
 
+            # alter, drop or create any constraints defined that are not on the table
             self._set_table_constraints(properties, config)
+            # alter, drop or create any properties that are not on the table
             self._set_table_properties(properties, config)
 
             # TODO: if the table partitions in the properties form the table is different to the partitions
             # in the config or ddl, yetl.allowRepartitioning = true then repartition the table
             self._table_repartition(properties, config)
 
-    def _table_repartition(self, table_properties:dict, config:dict):
+    def _table_repartition(self, table_properties: dict, config: dict):
         pass
 
-    def _get_partitions(self, config:dict, table_ddl:str):
+    def _get_partitions(self, config: dict, table_ddl: str):
 
-        table:dict = config[TABLE]
+        table: dict = config[TABLE]
         partitions = []
         # TODO: change this to a more reliable parser.
         parsed_table_ddl = table_ddl
@@ -64,13 +67,12 @@ class Writer(Destination):
             parsed_table_ddl = table_ddl.replace(" ", "").upper()
 
         if parsed_table_ddl and "PARTITIONEDBY(" in parsed_table_ddl:
-            # TODO: get the columns in the PARTITIONED BY clause
-            partitions = ["partition_key"]
+            # TODO: get the columns in the PARTITIONED BY clause, need an 4ntler parser.
+            partitions = ["_partition_key", "allow_contact"]
         else:
-            partitions = table.get("partitioned_by")
+            partitions = table.get("partitioned_by", [])
 
         return partitions
-
 
     def _set_table_constraints(self, table_properties: dict, config: dict):
         _existing_constraints = {}
@@ -118,9 +120,15 @@ class Writer(Destination):
             self.initial_load = False
             # on non initial loads get the constraints and properties
             # to them to and sync with the declared constraints and properties.
+            # TODO: consolidate details and properties fetch since the properties are in the details. The delta lake api may have some improvements.
             properties = dl.get_table_properties(
                 self.context, self.database, self.table
             )
+            details = dl.get_table_details(self.context, self.database, self.table)
+            # get the partitions from the table details and add them to the properties.
+            table_name = f"{self.database}.{self.table}"
+            properties[table_name]["partitions"] = details[table_name]["partitions"]
+
         else:
             dl.create_table(
                 self.context, self.database, self.table, self.path, self.table_ddl

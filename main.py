@@ -48,7 +48,7 @@ def customer_landing_to_rawdb_csv(
 # reload load
 
 results = customer_landing_to_rawdb_csv(
-    timeslice=Timeslice(2022, "*", "*"), save_type=OverwriteSave
+    timeslice=Timeslice(2022, "*", "*"), save_type=OverwriteSchemaSave
 )
 
 # results = pipeline.test_customer_landing_to_rawdb_csv()

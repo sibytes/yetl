@@ -1,8 +1,10 @@
 from enum import Enum
 from abc import ABC
+from pyspark.sql import DataFrame
 
 
 class SaveMode(Enum):
+    # stop black linting from breaking the code.
     # fmt: off
     "https://spark.apache.org/docs/latest/sql-data-sources-load-save-functions.html#save-modes"
     DEFAULT = "default"
@@ -32,6 +34,7 @@ class DefaultSave(Save):
             self.dataframe.write.format(self.format)
             .options(**self.options)
             .mode(self.mode)
+            .partitionBy(*self.partitions)
             .save(self.path)
         )
 
@@ -45,6 +48,7 @@ class ErrorIfExistsSave(Save):
             self.dataframe.write.format(self.format)
             .options(**self.options)
             .mode(SaveMode.ERROR_IF_EXISTS.value)
+            .partitionBy(*self.partitions)
             .save(self.path)
         )
 
@@ -58,6 +62,7 @@ class AppendSave(Save):
             self.dataframe.write.format(self.format)
             .options(**self.options)
             .mode(SaveMode.APPEND.value)
+            .partitionBy(*self.partitions)
             .save(self.path)
         )
 
@@ -71,12 +76,13 @@ class OverwriteSchemaSave(Save):
         options = self.options
         options[SaveMode.OVERWRITE_SCHEMA.value] = True
         (
-
             self.dataframe.write.format(self.format)
             .options(**options)
             .mode(SaveMode.OVERWRITE.value)
+            .partitionBy(*self.partitions)
             .save(self.path)
         )
+
 
 class OverwriteSave(Save):
     def write(self):
@@ -87,9 +93,9 @@ class OverwriteSave(Save):
             self.dataframe.write.format(self.format)
             .options(**self.options)
             .mode(SaveMode.OVERWRITE.value)
+            .partitionBy(*self.partitions)
             .save(self.path)
         )
-
 
 
 class IgnoreSave(Save):
@@ -101,6 +107,7 @@ class IgnoreSave(Save):
             self.dataframe.write.format(self.format)
             .options(**self.options)
             .mode(SaveMode.IGNORE.value)
+            .partitionBy(*self.partitions)
             .save(self.path)
         )
 

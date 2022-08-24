@@ -31,8 +31,7 @@ __all__ = [
     "MergeSave",
     "AppendSave",
     "OverwriteSave",
-    "OverwriteSchemaSave"
-    "IgnoreSave",
+    "OverwriteSchemaSave" "IgnoreSave",
     "ErrorIfExistsSave",
     "Save",
 ]
