@@ -63,6 +63,7 @@ class AppendSave(Save):
 
 
 class OverwriteSchemaSave(Save):
+    # TODO: overwrites partitions, extend to include partitioning.
     def write(self):
         self.context.log.info(
             "Writer saving using the OverwriteSchemaSave which is an injected save."
