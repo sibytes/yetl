@@ -84,9 +84,9 @@ class Writer(Destination):
         self.context.log.debug(
             f"Writer table check constraints ddl = {self.column_constraints_ddl}"
         )
-        if self.table_dll or not self.initial_load:
+        if self.table_ddl or not self.initial_load:
             # can only add constraints to columns if there are any
-            # if there is no table_dll an empty table is created and the data schema defines the table
+            # if there is no table_ddl an empty table is created and the data schema defines the table
             # on the initial load so this is skipped on the 1st load.
             if self.column_constraints_ddl:
                 for cc in self.column_constraints_ddl:
@@ -123,7 +123,7 @@ class Writer(Destination):
             )
         else:
             dl.create_table(
-                self.context, self.database, self.table, self.path, self.table_dll
+                self.context, self.database, self.table, self.path, self.table_ddl
             )
             self.initial_load = True
 

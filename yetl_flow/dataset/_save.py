@@ -11,6 +11,7 @@ class SaveMode(Enum):
     OVERWRITE = "overwrite"
     IGNORE = "ignore"
     MERGE = "merge"
+    OVERWRITE_SCHEMA = "overwriteSchema"
     # fmt: on
 
 
@@ -61,6 +62,21 @@ class AppendSave(Save):
         )
 
 
+class OverwriteSchemaSave(Save):
+    def write(self):
+        self.context.log.info(
+            "Writer saving using the OverwriteSchemaSave which is an injected save."
+        )
+        options = self.options
+        options[SaveMode.OVERWRITE_SCHEMA.value] = True
+        (
+
+            self.dataframe.write.format(self.format)
+            .options(**options)
+            .mode(SaveMode.OVERWRITE.value)
+            .save(self.path)
+        )
+
 class OverwriteSave(Save):
     def write(self):
         self.context.log.info(
@@ -72,6 +88,7 @@ class OverwriteSave(Save):
             .mode(SaveMode.OVERWRITE.value)
             .save(self.path)
         )
+
 
 
 class IgnoreSave(Save):
