@@ -4,9 +4,8 @@ from pyspark.sql import DataFrame
 
 
 class SaveMode(Enum):
-    # stop black linting from breaking the code.
-    # fmt: off
-    "https://spark.apache.org/docs/latest/sql-data-sources-load-save-functions.html#save-modes"
+    """https://spark.apache.org/docs/latest/sql-data-sources-load-save-functions.html#save-modes"""
+
     DEFAULT = "default"
     ERROR_IF_EXISTS = "errorifexists"
     APPEND = "append"
@@ -14,7 +13,6 @@ class SaveMode(Enum):
     IGNORE = "ignore"
     MERGE = "merge"
     OVERWRITE_SCHEMA = "overwriteSchema"
-    # fmt: on
 
 
 class Save(ABC):
@@ -42,7 +40,7 @@ class DefaultSave(Save):
 class ErrorIfExistsSave(Save):
     def write(self):
         self.context.log.info(
-            "Writer saving using the ErrorIfExistsSave which is an injected save."
+            f"Writer saving using the {self.__class__.__name__} which is an injected save."
         )
         (
             self.dataframe.write.format(self.format)
@@ -56,7 +54,7 @@ class ErrorIfExistsSave(Save):
 class AppendSave(Save):
     def write(self):
         self.context.log.info(
-            "Writer saving using the AppendSave which is an injected save."
+            f"Writer saving using the {self.__class__.__name__} which is an injected save."
         )
         (
             self.dataframe.write.format(self.format)
@@ -68,10 +66,9 @@ class AppendSave(Save):
 
 
 class OverwriteSchemaSave(Save):
-    # TODO: overwrites partitions, extend to include partitioning.
     def write(self):
         self.context.log.info(
-            "Writer saving using the OverwriteSchemaSave which is an injected save."
+            f"Writer saving using the {self.__class__.__name__} which is an injected save."
         )
         options = self.options
         options[SaveMode.OVERWRITE_SCHEMA.value] = True
@@ -87,7 +84,7 @@ class OverwriteSchemaSave(Save):
 class OverwriteSave(Save):
     def write(self):
         self.context.log.info(
-            "Writer saving using the OverwriteSave which is an injected save."
+            f"Writer saving using the {self.__class__.__name__} which is an injected save."
         )
         (
             self.dataframe.write.format(self.format)
@@ -101,7 +98,7 @@ class OverwriteSave(Save):
 class IgnoreSave(Save):
     def write(self):
         self.context.log.info(
-            "Writer saving using the IgnoreSave which is an injected save."
+            f"Writer saving using the {self.__class__.__name__} which is an injected save."
         )
         (
             self.dataframe.write.format(self.format)
@@ -115,6 +112,6 @@ class IgnoreSave(Save):
 class MergeSave(Save):
     def write(self):
         self.context.log.info(
-            "Writer saving using the MergeSave which is an injected save."
+            f"Writer saving using the {self.__class__.__name__} which is an injected save."
         )
         raise NotImplementedError()

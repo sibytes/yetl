@@ -19,9 +19,15 @@ class Writer(Destination):
         self.context.log.debug(f"Writer table ddl = {self.table_ddl}")
 
         # get the configured partitions.
-        self.partitions: list = self._get_partitions(config, self.table_ddl)
-
-        self.auto_optimize = self._get_auto_optimize(config)
+        self.partitions: list = self._get_conf_partitions(config, self.table_ddl)
+        # get the configured table property for auto optimise.
+        self.auto_optimize = self._get_conf_dl_property(
+            config, dl.DeltaLakeProperties.OPTIMIZE_WRITE
+        )
+        # get the configured table property for autocompact - delta.autoOptimize.autoCompact
+        self.auto_compact = self._get_conf_dl_property(
+            config, dl.DeltaLakeProperties.AUTO_COMPACT
+        )
 
         # gets the read, write, etc options based on the type
         io_properties = config.get(io_type)
@@ -57,7 +63,7 @@ class Writer(Destination):
     def _table_repartition(self, table_properties: dict, config: dict):
         pass
 
-    def _get_partitions(self, config: dict, table_ddl: str):
+    def _get_conf_partitions(self, config: dict, table_ddl: str):
 
         table: dict = config[TABLE]
         partitions = []
@@ -98,7 +104,7 @@ class Writer(Destination):
         _existing_properties = {}
         if existing_properties:
             _existing_properties = existing_properties.get(self.database_table)
-            _existing_properties = _existing_properties.get("properties")
+            _existing_properties = _existing_properties.get(PROPERTIES)
         self.tbl_properties_ddl = self._get_table_properties_sql(
             config, _existing_properties
         )
@@ -127,7 +133,7 @@ class Writer(Destination):
             details = dl.get_table_details(self.context, self.database, self.table)
             # get the partitions from the table details and add them to the properties.
             table_name = f"{self.database}.{self.table}"
-            properties[table_name]["partitions"] = details[table_name]["partitions"]
+            properties[table_name][PARTITIONS] = details[table_name][PARTITIONS]
 
         else:
             dl.create_table(
@@ -137,22 +143,20 @@ class Writer(Destination):
 
         return properties
 
-    def _get_auto_optimize(self, config: dict):
+    def _get_conf_dl_property(self, config: dict, property: dl.DeltaLakeProperties):
         return (
-            config.get("table")
-            and config.get("table").get("properties")
-            and config.get("table")
-            .get("properties")
-            .get("delta.autoOptimize.optimizeWrite")
+            config.get(TABLE)
+            and config.get(TABLE).get(PROPERTIES)
+            and config.get(TABLE).get(PROPERTIES).get(property.value)
         )
 
     def _get_check_constraints_sql(
         self, config: dict, existing_constraints: dict = None
     ):
-        table = config.get("table")
+        table = config.get(TABLE)
         sql_constraints = []
         if table:
-            check_constraints = table.get("check_constraints")
+            check_constraints = table.get(CHECK_CONSTRAINTS)
 
         if not check_constraints:
             check_constraints = {}
@@ -200,7 +204,7 @@ class Writer(Destination):
 
         table = config.get("table")
         if table:
-            tbl_properties = table.get("properties")
+            tbl_properties = table.get(PROPERTIES)
             if existing_properties:
                 tbl_properties = dict(ChainMap(tbl_properties, existing_properties))
             tbl_properties = [f"'{k}' = '{v}'" for k, v in tbl_properties.items()]
@@ -214,7 +218,7 @@ class Writer(Destination):
 
     def _get_table_sql(self, config: dict):
 
-        table = config.get("table")
+        table = config.get(TABLE)
         if table:
             ddl: str = table.get("ddl")
             if ddl and os.path.exists(ddl):
@@ -235,6 +239,12 @@ class Writer(Destination):
     def write(self):
         self.context.log.info(f"Writing data to {self.database_table} at {self.path}")
         if self.dataframe:
+
+            if self.auto_compact and self.partitions:
+                self.dataframe = self.dataframe.coalesce(1).repartition(
+                    *self.partitions
+                )
+
             (super().write())
             if self.auto_optimize:
                 self.context.spark.sql(f"OPTIMIZE `{self.database}`.`{self.table}`")

@@ -1,5 +1,5 @@
 from delta import DeltaTable, configure_spark_with_delta_pip
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, DataFrame
 
 
 spark_config = {
@@ -26,3 +26,7 @@ path = "/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/raw/customer"
 tbl = DeltaTable.forPath(spark, path)
 
 tbl.details()
+
+df: DataFrame = tbl.toDF()
+
+df.re

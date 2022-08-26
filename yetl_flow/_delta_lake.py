@@ -1,5 +1,11 @@
 import json
 from pyspark.sql import DataFrame
+from enum import Enum
+
+
+class DeltaLakeProperties(Enum):
+    OPTIMIZE_WRITE = "delta.autoOptimize.optimizeWrite"
+    AUTO_COMPACT = "delta.autoOptimize.autoCompact"
 
 
 def table_exists(context, database: str, table: str):
