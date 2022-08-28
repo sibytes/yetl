@@ -240,13 +240,16 @@ class Writer(Destination):
         self.context.log.info(f"Writing data to {self.database_table} at {self.path}")
         if self.dataframe:
 
-            if self.auto_compact and self.partitions:
+            auto_compact = all([self.auto_compact, self.partitions, not self.context.is_databricks])
+            if auto_compact:
                 self.dataframe = self.dataframe.coalesce(1).repartition(
                     *self.partitions
                 )
 
             (super().write())
-            if self.auto_optimize:
+
+            auto_optimize = all([self.auto_optimize, not self.context.is_databricks])
+            if auto_optimize:
                 self.context.spark.sql(f"OPTIMIZE `{self.database}`.`{self.table}`")
         else:
             msg = f"Writer dataframe isn't set and cannot be written for {self.database_table} at {self.path}"
