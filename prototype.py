@@ -29,4 +29,4 @@ tbl.details()
 
 df: DataFrame = tbl.toDF()
 
-df.re
+df.transform()
