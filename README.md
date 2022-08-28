@@ -124,6 +124,7 @@ Version: 0.0.10
 - Refined, refactored and fixed lineage
 - Added file lineage logging
 - Add file lineage logging
+- Detect spark and databricks versions, determine whether to auto optimise and compact
 
 
 Version: 0.0.9
