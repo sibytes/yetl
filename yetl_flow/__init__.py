@@ -6,6 +6,7 @@ from .dataset import (
     MergeSave,
     AppendSave,
     OverwriteSave,
+    OverwriteSchemaSave,
     IgnoreSave,
     ErrorIfExistsSave,
     Save,
@@ -30,7 +31,7 @@ __all__ = [
     "MergeSave",
     "AppendSave",
     "OverwriteSave",
-    "IgnoreSave",
+    "OverwriteSchemaSave" "IgnoreSave",
     "ErrorIfExistsSave",
     "Save",
 ]

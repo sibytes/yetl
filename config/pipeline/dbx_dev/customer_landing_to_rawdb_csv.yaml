@@ -15,7 +15,7 @@ dataflow:
         properties:
           yetl.lineagecolumn.loadtimestamp: _LOAD_TIMESTAMP
           yetl.lineagecolumn.timeslice: _TIMESLICE
-          yetl.lineagecolumn.correlation_id: _CORRELATION_ID
+          yetl.lineagecolumn.context_id: _CONTEXT_ID
           yetl.lineagecolumn.filename: _FILENAME
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
@@ -57,7 +57,7 @@ dataflow:
         properties:
           yetl.lineagecolumn.loadtimestamp: _LOAD_TIMESTAMP
           yetl.lineagecolumn.timeslice: _TIMESLICE
-          yetl.lineagecolumn.correlation_id: _CORRELATION_ID
+          yetl.lineagecolumn.context_id: _CONTEXT_ID
           yetl.lineagecolumn.filename: _FILENAME
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
@@ -147,3 +147,4 @@ dataflow:
         mode: append
         options:
           mergeSchema: true
+

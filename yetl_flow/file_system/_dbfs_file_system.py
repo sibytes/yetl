@@ -41,4 +41,10 @@ class DbfsFileSystem(IFileSystem):
         return self._fs.mkdirs(path)
 
     def read_file(self, path: str, file_format: FileFormat) -> str:
-        pass
+        raise NotImplementedError()
+
+    def append_file(self, path: str, data: dict, file_format: FileFormat):
+        raise NotImplementedError()
+
+    def write_file(self, path: str, data: dict, file_format: FileFormat):
+        raise NotImplementedError()

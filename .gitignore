@@ -141,3 +141,6 @@ dmypy.json
 # internal spark metastore
 /metastore_db/*
 derby.log
+
+
+/config/runs/*

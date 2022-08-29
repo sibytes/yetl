@@ -5,9 +5,7 @@ import os
 from .. import _delta_lake as dl
 from pyspark.sql import DataFrame
 from typing import ChainMap
-
-
-#  make_check_constraints_sql, create_table, make_check_table_properties_sql, get_table_properties, table_exists
+from ..parser import parser
 
 
 class Writer(Destination):
@@ -18,10 +16,19 @@ class Writer(Destination):
 
         self.dataframe: DataFrame = None
         # try and load a schema if schema on read
-        self.table_dll = self._get_table_sql(config)
-        self.context.log.debug(f"Writer table ddl = {self.table_dll}")
+        self.table_ddl: str = self._get_table_sql(config)
+        self.context.log.debug(f"Writer table ddl = {self.table_ddl}")
 
-        self.auto_optimize = self._get_auto_optimize(config)
+        # get the configured partitions.
+        self.partitions: list = self._get_conf_partitions(config, self.table_ddl)
+        # get the configured table property for auto optimise.
+        self.auto_optimize = self._get_conf_dl_property(
+            config, dl.DeltaLakeProperties.OPTIMIZE_WRITE
+        )
+        # get the configured table property for autocompact - delta.autoOptimize.autoCompact
+        self.auto_compact = self._get_conf_dl_property(
+            config, dl.DeltaLakeProperties.AUTO_COMPACT
+        )
 
         # gets the read, write, etc options based on the type
         io_properties = config.get(io_type)
@@ -40,15 +47,52 @@ class Writer(Destination):
             self.context.log.info(
                 f"auto_io = {self.auto_io} automatically creating or altering delta table {self.database}.{self.table}"
             )
+
+            # returns the table properties and partitions if the table already exists.
+            # TODO: for review, should this return those properties after the table is created if it doesn't exist?
             properties = self.create_or_alter_table()
 
+            # alter, drop or create any constraints defined that are not on the table
             self._set_table_constraints(properties, config)
+            # alter, drop or create any properties that are not on the table
             self._set_table_properties(properties, config)
 
-    def _set_table_constraints(self, existing_constraints: dict, config: dict):
+            # TODO: if the table partitions in the properties form the table is different to the partitions
+            # in the config or ddl, yetl.allowRepartitioning = true then repartition the table
+            self._table_repartition(properties, config)
+
+    def _table_repartition(self, table_properties: dict, config: dict):
+        pass
+
+    def _get_conf_partitions(self, config: dict, table_ddl: str):
+
+        # get the partitioned columns from the SQL ddl
+        partitions = None
+        if table_ddl:
+            try:
+                partitions = parser.sql_partitioned_by(table_ddl)
+                msg = f"Parsed partitioning columns from sql ddl for {self.database}.{self.table} as {partitions}"
+                self.context.log.info(msg)
+            except Exception as e:
+                msg = f"An error has occured parsing sql ddl partitioned clause for {self.database}.{self.table} for the ddl: {table_ddl}"
+                self.context.log.error(msg)
+                raise Exception(msg) from e
+
+        # if there is no sql ddl then take it from the yaml parameters
+        if not partitions:
+            table: dict = config[TABLE]
+            # otherwise there are no partitioned columns and default to None
+            partitions = table.get("partitioned_by", [])
+            msg = f"Parsed partitioning columns from dataflow yaml config for {self.database}.{self.table} as {partitions}"
+
+
+
+        return partitions
+
+    def _set_table_constraints(self, table_properties: dict, config: dict):
         _existing_constraints = {}
-        if existing_constraints:
-            _existing_constraints = existing_constraints.get(self.database_table)
+        if table_properties:
+            _existing_constraints = table_properties.get(self.database_table)
             _existing_constraints = _existing_constraints.get("constraints")
 
         self.column_constraints_ddl = self._get_check_constraints_sql(
@@ -57,9 +101,9 @@ class Writer(Destination):
         self.context.log.debug(
             f"Writer table check constraints ddl = {self.column_constraints_ddl}"
         )
-        if self.table_dll or not self.initial_load:
+        if self.table_ddl or not self.initial_load:
             # can only add constraints to columns if there are any
-            # if there is no table_dll an empty table is created and the data schema defines the table
+            # if there is no table_ddl an empty table is created and the data schema defines the table
             # on the initial load so this is skipped on the 1st load.
             if self.column_constraints_ddl:
                 for cc in self.column_constraints_ddl:
@@ -69,7 +113,7 @@ class Writer(Destination):
         _existing_properties = {}
         if existing_properties:
             _existing_properties = existing_properties.get(self.database_table)
-            _existing_properties = _existing_properties.get("properties")
+            _existing_properties = _existing_properties.get(PROPERTIES)
         self.tbl_properties_ddl = self._get_table_properties_sql(
             config, _existing_properties
         )
@@ -91,64 +135,85 @@ class Writer(Destination):
             self.initial_load = False
             # on non initial loads get the constraints and properties
             # to them to and sync with the declared constraints and properties.
+            # TODO: consolidate details and properties fetch since the properties are in the details. The delta lake api may have some improvements.
             properties = dl.get_table_properties(
                 self.context, self.database, self.table
             )
+            details = dl.get_table_details(self.context, self.database, self.table)
+            # get the partitions from the table details and add them to the properties.
+            table_name = f"{self.database}.{self.table}"
+            properties[table_name][PARTITIONS] = details[table_name][PARTITIONS]
+
         else:
             dl.create_table(
-                self.context, self.database, self.table, self.path, self.table_dll
+                self.context, self.database, self.table, self.path, self.table_ddl
             )
             self.initial_load = True
 
         return properties
 
-    def _get_auto_optimize(self, config: dict):
+    def _get_conf_dl_property(self, config: dict, property: dl.DeltaLakeProperties):
         return (
-            config.get("table")
-            and config.get("table").get("properties")
-            and config.get("table")
-            .get("properties")
-            .get("delta.autoOptimize.optimizeWrite")
+            config.get(TABLE)
+            and config.get(TABLE).get(PROPERTIES)
+            and config.get(TABLE).get(PROPERTIES).get(property.value)
         )
 
     def _get_check_constraints_sql(
         self, config: dict, existing_constraints: dict = None
     ):
-        table = config.get("table")
-        sql_drop_constraints = []
-        sql_add_constraints = []
+        table = config.get(TABLE)
+        sql_constraints = []
         if table:
-            check_constraints = table.get("check_constraints")
+            check_constraints = table.get(CHECK_CONSTRAINTS)
 
         if not check_constraints:
             check_constraints = {}
 
+        # if the existing constraint is not defined in the config constraints
+        # and it is different then drop it and recreate
         if existing_constraints:
-            for name, constraint in existing_constraints.items():
-                cc = check_constraints.get(name)
-                if cc != constraint:
-                    sql_drop_constraints.append(
+            for name, existing_constraint in existing_constraints.items():
+                defined_constraint = check_constraints.get(name)
+
+                # if the existing constraint is not defined in the config constraints then drop it
+                if not defined_constraint:
+                    sql_constraints.append(
                         dl.alter_table_drop_constraint(self.database, self.table, name)
                     )
-
-        if check_constraints:
-            for name, constraint in check_constraints.items():
-                cc = existing_constraints.get(name)
-                if cc != constraint:
-                    sql_drop_constraints.append(
+                # if the existing constraint is defined and it is different then drop and add it
+                elif (
+                    defined_constraint.replace(" ", "").lower()
+                    != existing_constraint.replace(" ", "").lower()
+                ):
+                    sql_constraints.append(
+                        dl.alter_table_drop_constraint(self.database, self.table, name)
+                    )
+                    sql_constraints.append(
                         dl.alter_table_add_constraint(
-                            self.database, self.table, name, constraint
+                            self.database, self.table, name, defined_constraint
                         )
                     )
 
-        constraints = sql_drop_constraints + sql_add_constraints
-        return constraints
+        # the constraint is defined but doesn't exist on the table yet so
+        # add the constraint
+        if check_constraints:
+            for name, defined_constraint in check_constraints.items():
+                existing_constraint = existing_constraints.get(name)
+                if not existing_constraint:
+                    sql_constraints.append(
+                        dl.alter_table_add_constraint(
+                            self.database, self.table, name, defined_constraint
+                        )
+                    )
+
+        return sql_constraints
 
     def _get_table_properties_sql(self, config: dict, existing_properties: dict = None):
 
         table = config.get("table")
         if table:
-            tbl_properties = table.get("properties")
+            tbl_properties = table.get(PROPERTIES)
             if existing_properties:
                 tbl_properties = dict(ChainMap(tbl_properties, existing_properties))
             tbl_properties = [f"'{k}' = '{v}'" for k, v in tbl_properties.items()]
@@ -162,7 +227,7 @@ class Writer(Destination):
 
     def _get_table_sql(self, config: dict):
 
-        table = config.get("table")
+        table = config.get(TABLE)
         if table:
             ddl: str = table.get("ddl")
             if ddl and os.path.exists(ddl):
@@ -183,8 +248,17 @@ class Writer(Destination):
     def write(self):
         self.context.log.info(f"Writing data to {self.database_table} at {self.path}")
         if self.dataframe:
+
+            auto_compact = all([self.auto_compact, self.partitions, not self.context.is_databricks])
+            if auto_compact:
+                self.dataframe = self.dataframe.coalesce(1).repartition(
+                    *self.partitions
+                )
+
             (super().write())
-            if self.auto_optimize:
+
+            auto_optimize = all([self.auto_optimize, not self.context.is_databricks])
+            if auto_optimize:
                 self.context.spark.sql(f"OPTIMIZE `{self.database}`.`{self.table}`")
         else:
             msg = f"Writer dataframe isn't set and cannot be written for {self.database_table} at {self.path}"

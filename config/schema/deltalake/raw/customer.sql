@@ -7,6 +7,9 @@ CREATE TABLE {{database_name}}.{{table_name}}
     gender        string,
     job_title     string,
     amount        double,
-    allow_contact boolean
+    allow_contact boolean,
+    _partition_key int,
+    _context_id string
 )
-USING DELTA LOCATION '{{path}}';
+USING DELTA LOCATION '{{path}}'
+PARTITIONED BY (_partition_key, allow_contact);

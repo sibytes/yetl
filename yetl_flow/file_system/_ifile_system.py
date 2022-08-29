@@ -5,6 +5,7 @@ class FileFormat(Enum):
     TEXT = 1
     JSON = 2
     YAML = 3
+    JSONL = 4
 
 
 class IFileSystem:
@@ -40,5 +41,14 @@ class IFileSystem:
         """Creates the given directory if it does not exist, also creating any necessary parent directories"""
         pass
 
-    def read_file(self, path: str, file_system: FileFormat) -> str:
+    def read_file(self, path: str, file_format: FileFormat) -> str:
+        pass
+
+    def append_file(self, path: str, data: dict, file_format: FileFormat):
+        pass
+
+    def write_file(self, path: str, data: dict, file_format: FileFormat):
+        pass
+
+    def exists(self, path: str) -> bool:
         pass

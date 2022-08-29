@@ -1,7 +1,7 @@
 import os
 import shutil
 from ._ifile_system import IFileSystem, FileFormat
-
+from typing import Type, Union
 import yaml
 import json
 
@@ -107,3 +107,60 @@ class FileSystem(IFileSystem):
                 )
 
         return data
+
+    def append_file(self, path: str, data: Union[str, dict], file_format: FileFormat):
+
+        if isinstance(data, dict) and file_format == FileFormat.TEXT:
+            raise TypeError()
+        if isinstance(data, str) and file_format in [
+            FileFormat.JSON,
+            FileFormat.YAML,
+            FileFormat.JSONL,
+        ]:
+            raise TypeError()
+        if not isinstance(data, (str, dict)):
+            raise TypeError()
+
+        with open(path, "a") as f:
+            if file_format == FileFormat.JSON:
+                data_formatted = json.dumps(data, indent=4, default=str)
+                f.write(data_formatted)
+            elif file_format == FileFormat.YAML:
+                data_formatted = yaml.safe_dump(data, indent=4)
+                f.write(data_formatted)
+            elif file_format == FileFormat.TEXT:
+                f.write(data)
+            else:
+                raise Exception(
+                    f"File format not supported {file_format} when appending file {path}"
+                )
+
+    def write_file(self, path: str, data: Union[str, dict], file_format: FileFormat):
+
+        if isinstance(data, dict) and file_format == FileFormat.TEXT:
+            raise TypeError()
+        if isinstance(data, str) and file_format in [
+            FileFormat.JSON,
+            FileFormat.YAML,
+            FileFormat.JSONL,
+        ]:
+            raise TypeError()
+        if not isinstance(data, (str, dict)):
+            raise TypeError()
+
+        with open(path, "w") as f:
+            if file_format == FileFormat.JSON:
+                data_formatted = json.dumps(data, indent=4, default=str)
+                f.write(data_formatted)
+            elif file_format == FileFormat.YAML:
+                data_formatted = yaml.safe_dump(data, indent=4)
+                f.write(data_formatted)
+            elif file_format == FileFormat.TEXT:
+                f.write(data)
+            else:
+                raise Exception(
+                    f"File format not supported {file_format} when writing file {path}"
+                )
+
+    def exists(self, path: str) -> bool:
+        return os.path.exists(path)

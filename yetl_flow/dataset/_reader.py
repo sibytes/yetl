@@ -1,3 +1,4 @@
+from locale import D_FMT
 from ._source import Source
 from pyspark.sql import functions as fn
 from pyspark.sql.types import StructType
@@ -35,7 +36,7 @@ class Reader(Source):
 
         if not self.has_bad_records_path and not self.options.get(MODE):
             self.context.log.warning(
-                f"badRecordsPath and mode option are not set, default to mode={PERMISSIVE} {CORRELATION_ID}={str(self.correlation_id)}"
+                f"badRecordsPath and mode option are not set, default to mode={PERMISSIVE} {CONTEXT_ID}={str(self.context_id)}"
             )
             self.options[MODE] = PERMISSIVE
 
@@ -47,7 +48,7 @@ class Reader(Source):
 
         if self.auto_io:
             self.context.log.info(
-                f"auto_io = {self.auto_io} automatically creating or altering exception delta table {self.database}.{self.table} {CORRELATION_ID}={str(self.correlation_id)}"
+                f"auto_io = {self.auto_io} automatically creating or altering exception delta table {self.database}.{self.table} {CONTEXT_ID}={str(self.context_id)}"
             )
             self.create_or_alter_table()
 
@@ -59,7 +60,7 @@ class Reader(Source):
         )
         if table_exists:
             self.context.log.info(
-                f"Exception table already exists {self.exceptions_database}.{self.exceptions_table} at {self.exceptions_path} {CORRELATION_ID}={str(self.correlation_id)}"
+                f"Exception table already exists {self.exceptions_database}.{self.exceptions_table} at {self.exceptions_path} {CONTEXT_ID}={str(self.context_id)}"
             )
             self.initial_load = False
         else:
@@ -97,7 +98,7 @@ class Reader(Source):
         if self.has_corrupt_column and has_bad_records_path:
             has_bad_records_path = False
             self.context.log.warning(
-                f"badRecordsPath and mode option is not supported together, default to mode={self.options.get(MODE)} {CORRELATION_ID}={str(self.correlation_id)}"
+                f"badRecordsPath and mode option is not supported together, default to mode={self.options.get(MODE)} {CONTEXT_ID}={str(self.context_id)}"
             )
 
         elif has_bad_records_path:
@@ -148,7 +149,7 @@ class Reader(Source):
                 if exceptions and exceptions_count > 0:
                     options = {MERGE_SCHEMA: True}
                     self.context.log.warning(
-                        f"Writing {exceptions_count} exception(s) from {self.database_table} to {self.exceptions_database_table} delta table {CORRELATION_ID}={str(self.correlation_id)}"
+                        f"Writing {exceptions_count} exception(s) from {self.database_table} to {self.exceptions_database_table} delta table {CONTEXT_ID}={str(self.context_id)}"
                     )
                     exceptions.write.format(Format.DELTA.value).options(**options).mode(
                         APPEND
@@ -166,7 +167,7 @@ class Reader(Source):
 
             bad_records_path = self.options[BAD_RECORDS_PATH]
             self.context.log.info(
-                f"Validating dataframe read using badRecordsPath at {bad_records_path} {CORRELATION_ID}={str(self.correlation_id)}"
+                f"Validating dataframe read using badRecordsPath at {bad_records_path} {CONTEXT_ID}={str(self.context_id)}"
             )
             validator = BadRecordsPathSchemaOnRead(
                 self.context,
@@ -180,7 +181,7 @@ class Reader(Source):
 
         if self.has_corrupt_column:
             self.context.log.info(
-                f"Validating dataframe read using PERMISSIVE corrupt column at {CORRUPT_RECORD} {CORRELATION_ID}={str(self.correlation_id)}"
+                f"Validating dataframe read using PERMISSIVE corrupt column at {CORRUPT_RECORD} {CONTEXT_ID}={str(self.context_id)}"
             )
             validator = PermissiveSchemaOnRead(
                 self.context,
@@ -189,7 +190,7 @@ class Reader(Source):
                 self.database,
                 self.table,
             )
-            self.dataframe = self.dataframe.drop(CORRUPT_RECORD)
+            # self.dataframe = self.dataframe.drop(CORRUPT_RECORD)
 
         if validator:
             validation = validator.validate()
@@ -198,7 +199,7 @@ class Reader(Source):
 
     def read(self):
         self.context.log.info(
-            f"Reading data for {self.database_table} from {self.path} with options {self.options} {CORRELATION_ID}={str(self.correlation_id)}"
+            f"Reading data for {self.database_table} from {self.path} with options {self.options} {CONTEXT_ID}={str(self.context_id)}"
         )
 
         self.context.log.debug(json.dumps(self.options, indent=4, default=str))
@@ -208,12 +209,16 @@ class Reader(Source):
             .schema(self.schema)
             .options(**self.options)
             .load(self.path)
-            .withColumn(CORRELATION_ID, fn.lit(str(self.correlation_id)))
-            .withColumn(LOAD_TIMESTAMP, fn.current_timestamp())
-            # .withColumn(TIMESLICE, fn.lit(self.timeslice)) # TODO: fix injection of time slice lineage.
-            .withColumn(FILENAME, fn.input_file_name())
+            .withColumn(CONTEXT_ID, fn.lit(str(self.context_id)))
         )
 
+        self.context.log.debug(
+            f"Reordering sys_columns to end for {self.database_table} from {self.path} {CONTEXT_ID}={str(self.context_id)}"
+        )
         self.dataframe = df
         self.validation_result = self.validate()
+        self.save_metadata()
         return self.dataframe
+
+    def save_metadata(self):
+        super().save_metadata()

@@ -1,6 +1,5 @@
 import pathlib
 from setuptools import setup, find_packages
-import os
 
 
 # The directory containing this file

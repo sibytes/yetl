@@ -1,0 +1,22 @@
+{
+  "id": "int",
+  "first_name": "string",
+  "last_name": "string",
+  "email": "string",
+  "gender": "string",
+  "job_title": "string",
+  "amount": "double",
+  "allow_contact": "boolean",
+  "_partition_key": "int",
+  "_context_id": "string",
+  "": "",
+  "# Partitioning": "",
+  "Part 0": "_partition_key",
+  "Part 1": "allow_contact",
+  "# Detailed Table Information": "",
+  "Name": "raw.customer",
+  "Location": "file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/raw/customer",
+  "Provider": "delta",
+  "Owner": "shaunryan",
+  "Table Properties": "[Type=EXTERNAL,delta.appendOnly=False,delta.checkpoint.writeStatsAsJson=True,delta.compatibility.symlinkFormatManifest.enabled=False,delta.constraints.amount_lower_bound=amount > - 1000,delta.constraints.amount_upper_bound=amount < 10000,delta.dataSkippingNumIndexedCols=-1,delta.deletedFileRetentionDuration=interval 1 week,delta.enableChangeDataFeed=True,delta.logRetentionDuration=interval 30 days,delta.minReaderVersion=1,delta.minWriterVersion=4,delta.randomPrefixLength=2,delta.randomizeFilePrefixes=False,external=true,yetl.allowRepartitioning=True,yetl.lineageEnabled=True]"
+}

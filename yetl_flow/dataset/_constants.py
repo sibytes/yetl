@@ -19,9 +19,12 @@ AUTO_IO = "auto_io"
 TIMESTAMP = "timestamp"
 INFER_SCHEMA = "inferSchema"
 RECURSIVE_FILE_LOOKUP = "recursiveFileLookup"
+CHECK_CONSTRAINTS = "check_constraints"
+PROPERTIES = "properties"
+PARTITIONS = "partitions"
 
 # lineage columns
-CORRELATION_ID = "_correlation_id"
+CONTEXT_ID = "_context_id"
 LOAD_TIMESTAMP = "_load_timestamp"
 TIMESLICE = "_timeslice"
 FILENAME = "_filename"

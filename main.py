@@ -5,6 +5,7 @@ from yetl_flow import (
     Timeslice,
     TimesliceUtcNow,
     OverwriteSave,
+    OverwriteSchemaSave,
     Save,
 )
 from pyspark.sql.functions import *
@@ -33,7 +34,7 @@ def customer_landing_to_rawdb_csv(
 
     context.log.info("Joining customers with customer_preferences")
     df = df_cust.join(df_prefs, "id", "inner")
-    df = df_cust
+    df = df.withColumn("_partition_key", lit(2022))
 
     dataflow.destination_df("raw.customer", df)
 
@@ -47,7 +48,7 @@ def customer_landing_to_rawdb_csv(
 # reload load
 
 results = customer_landing_to_rawdb_csv(
-    timeslice=Timeslice(2022, "*", "*"), save_type=OverwriteSave
+    timeslice=Timeslice(2022, "*", "*"), save_type=OverwriteSchemaSave
 )
 
 # results = pipeline.test_customer_landing_to_rawdb_csv()

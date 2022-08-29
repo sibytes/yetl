@@ -2,6 +2,7 @@ from pyspark.sql.types import StructType
 from ._constants import *
 from . import _builtin_functions as builtin_funcs
 from ..schema_repo import ISchemaRepo
+import uuid
 
 
 class Dataset:
@@ -9,6 +10,7 @@ class Dataset:
         self, context, database: str, table: str, dataset: dict, io_type: str
     ) -> None:
 
+        self.id = uuid.uuid4()
         self.datalake = dataset["datalake"]
         self.datalake_protocol = context.fs.datalake_protocol
         self.context = context
@@ -19,7 +21,7 @@ class Dataset:
         self.file_date_format = dataset.get("file_date_format")
         self._path = self._get_path(dataset)
         self._path = builtin_funcs.execute_replacements(self._path, self)
-        self.correlation_id = dataset.get("correlation_id")
+        self.context_id = dataset.get("context_id")
         self.timeslice = dataset.get("timeslice")
 
         # default format to delta if not
@@ -54,3 +56,6 @@ class Dataset:
 
     def is_destination(self):
         pass
+
+    def save_metadata(self):
+        self.context.metadata_repo.save(self)
