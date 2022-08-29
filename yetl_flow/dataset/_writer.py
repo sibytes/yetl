@@ -5,6 +5,7 @@ import os
 from .. import _delta_lake as dl
 from pyspark.sql import DataFrame
 from typing import ChainMap
+from ..parser import parser
 
 
 class Writer(Destination):
@@ -65,18 +66,26 @@ class Writer(Destination):
 
     def _get_conf_partitions(self, config: dict, table_ddl: str):
 
-        table: dict = config[TABLE]
-        partitions = []
-        # TODO: change this to a more reliable parser.
-        parsed_table_ddl = table_ddl
-        if parsed_table_ddl:
-            parsed_table_ddl = table_ddl.replace(" ", "").upper()
+        # get the partitioned columns from the SQL ddl
+        partitions = None
+        if table_ddl:
+            try:
+                partitions = parser.sql_partitioned_by(table_ddl)
+                msg = f"Parsed partitioning columns from sql ddl for {self.database}.{self.table} as {partitions}"
+                self.context.log.info(msg)
+            except Exception as e:
+                msg = f"An error has occured parsing sql ddl partitioned clause for {self.database}.{self.table} for the ddl: {table_ddl}"
+                self.context.log.error(msg)
+                raise Exception(msg) from e
 
-        if parsed_table_ddl and "PARTITIONEDBY(" in parsed_table_ddl:
-            # TODO: get the columns in the PARTITIONED BY clause, need an 4ntler parser.
-            partitions = ["_partition_key", "allow_contact"]
-        else:
+        # if there is no sql ddl then take it from the yaml parameters
+        if not partitions:
+            table: dict = config[TABLE]
+            # otherwise there are no partitioned columns and default to None
             partitions = table.get("partitioned_by", [])
+            msg = f"Parsed partitioning columns from dataflow yaml config for {self.database}.{self.table} as {partitions}"
+
+
 
         return partitions
 
