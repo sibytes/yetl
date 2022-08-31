@@ -45,28 +45,33 @@ def customer_landing_to_rawdb_csv(
 
 
 # incremental load
+timeslice = Timeslice(2021, 1, 1)
+results = customer_landing_to_rawdb_csv(
+    timeslice = timeslice
+)
+
 # timeslice = Timeslice(2022, 7, 12)
 # results = customer_landing_to_rawdb_csv(
-#     timeslice = Timeslice(2022, 7, 12)
+#     timeslice = timeslice
 # )
 
 # reload load
 
-results = customer_landing_to_rawdb_csv(
-    timeslice=Timeslice(2022, "*", "*"), save_type=OverwriteSchemaSave
-)
+# results = customer_landing_to_rawdb_csv(
+#     timeslice=Timeslice(2022, "*", "*"), save_type=OverwriteSchemaSave
+# )
 
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC
+# MAGIC 
 # MAGIC select * from raw.customer
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC
+# MAGIC 
 # MAGIC select * from landing.exceptions
 
 # COMMAND ----------
@@ -76,16 +81,16 @@ dbutils.notebook.exit("YETL!")
 # COMMAND ----------
 
 # MAGIC %python
-# MAGIC
+# MAGIC 
 # MAGIC #clear down
-# MAGIC
+# MAGIC 
 # MAGIC spark.sql("drop database if exists landing cascade")
 # MAGIC spark.sql("drop database if exists raw cascade")
 # MAGIC files = dbutils.fs.ls("/mnt/datalake/yetl_data")
 # MAGIC print(files)
-# MAGIC
+# MAGIC 
 # MAGIC for f in files:
-# MAGIC
+# MAGIC 
 # MAGIC   if f.name != "landing/":
 # MAGIC     print(f"deleting the path {f.path}")
 # MAGIC     dbutils.fs.rm(f.path, True)
