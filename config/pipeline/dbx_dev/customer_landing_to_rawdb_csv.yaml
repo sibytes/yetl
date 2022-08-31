@@ -1,22 +1,22 @@
 dataflow:
-  retries: 2
+  retries: 0
   retry_wait: 1
-  enable_dataflow_types:
-    - full_load
-    - partition_load
-    - merge_compare
-    - merge_cdc
-    - nuke 
+  # enable_dataflow_types:
+  #   - full_load
+  #   - partition_load
+  #   - merge_compare
+  #   - merge_cdc
+  #   - nuke 
 
 
   landing:
     customer:
       table:
-        properties:
-          yetl.lineagecolumn.loadtimestamp: _LOAD_TIMESTAMP
-          yetl.lineagecolumn.timeslice: _TIMESLICE
-          yetl.lineagecolumn.context_id: _CONTEXT_ID
-          yetl.lineagecolumn.filename: _FILENAME
+          #### YETL TABLE PROPERTIES ####
+
+          # logs the etl metadata to the configured metadata provider.
+          yetl.lineageEnabled: true
+
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: csv
@@ -54,11 +54,12 @@ dataflow:
           
     customer_preferences:
       table:
-        properties:
-          yetl.lineagecolumn.loadtimestamp: _LOAD_TIMESTAMP
-          yetl.lineagecolumn.timeslice: _TIMESLICE
-          yetl.lineagecolumn.context_id: _CONTEXT_ID
-          yetl.lineagecolumn.filename: _FILENAME
+          #### YETL TABLE PROPERTIES ####
+
+          # builds a struct of metadata lineage and adds it the data in a column
+          # called _yetl_lineage
+          yetl.lineageEnabled: true
+
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: csv
@@ -88,6 +89,15 @@ dataflow:
   raw:
     customer:
       table:
+        # defining a partition key here is an option if
+        # we haven't defined the table using DDL with a partition key
+        # if you define it in the ddl statement (PARTITIONED BY) and here, then
+        # yetl will default to the ddl definition and throw a warning.
+        # IMPORTANT NOTE: if you change the partition key on existing table
+        # the yetl will repartition the table ONLY IF the data flow property
+        # yetl.allowRepartitioning: true
+        partitioned_by:
+          - _partition_key
         # table ddl is optional to provide full flexbility of how you can manaage the datalake (house)
         # it can be declared inline or via sql include files. If not provided an empty schema table is
         # created and merge schema (if false) is flipped to true on the initial load.
@@ -102,16 +112,33 @@ dataflow:
         #     gender        string,
         #     job_title     string,
         #     amount        double,
-        #     allow_contact boolean
+        #     allow_contact boolean,
+        #     _partition_key int,
+        #     _context_id string
         #   )
-        #   USING DELTA LOCATION '{{path}}';
+        #   USING DELTA LOCATION '{{path}}'
+        #   PARTITIONED_BY (_partition_key);
 
         ddl: ./config/schema/deltalake
 
 
         # https://docs.databricks.com/delta/table-properties.html
-        # https://docs.delta.io/2.0.0/table-properties.html
+        # https://docs.delta.io/2.1.0/table-properties.html
         properties:
+
+          #### YETL TABLE PROPERTIES ####
+
+          # allow yetl to repartition a table when the partitions are changed
+          # If this is set to false and the partitions are changed then yetl will throw an exception
+          yetl.allowRepartitioning: true
+          # logs the etl metadata to the configured metadata provider.
+          yetl.lineageEnabled: true
+
+          #### DELTA LAKE TABLE PROPERTIES ####
+
+          # https://docs.databricks.com/delta/table-properties.html
+          # https://docs.delta.io/2.0.0/table-properties.html
+
           delta.appendOnly: false
           delta.checkpoint.writeStatsAsJson: true
           # delta.checkpoint.writeStatsAsStruct: None # Not Supported
