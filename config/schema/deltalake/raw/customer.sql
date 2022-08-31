@@ -12,4 +12,4 @@ CREATE TABLE {{database_name}}.{{table_name}}
     _context_id string
 )
 USING DELTA LOCATION '{{path}}'
-PARTITIONED BY (_partition_key, allow_contact);
+PARTITIONED BY (_partition_key);
