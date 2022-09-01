@@ -5,7 +5,7 @@ class ISchemaRepo:
     def __init__(self, context, config: dict) -> None:
         self.context = context
 
-    def save_schema(self, schema: StructType, table_name: str):
+    def save_schema(self, schema: StructType,  database_name: str, table_name: str):
         """Save a schema into the repo."""
         pass
 

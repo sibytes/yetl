@@ -114,6 +114,11 @@ class Reader(Source):
 
         return schema
 
+
+    def _save_schema(self, schema:StructType):
+        schema = self.schema_repo.save_schema(schema, self.database, self.table)
+
+
     def _is_bad_records_path_set(
         self, options: dict, datalake_protocol: str, datalake: str
     ):
@@ -228,13 +233,18 @@ class Reader(Source):
 
         self.context.log.debug(json.dumps(self.options, indent=4, default=str))
 
-        df = (
+        df:DataFrame = (
             self.context.spark.read.format(self.format)
             .schema(self.schema)
             .options(**self.options)
             .load(self.path)
             .withColumn(CONTEXT_ID, fn.lit(str(self.context_id)))
         )
+
+        # if there isn't a schema and it's configured to create one the save it to repo.
+        if self._create_schema_if_not_exists and not self.schema:
+            self.schema = df.schema
+            self.schema_repo.save_schema(self.schema, self.database, self.table)
 
         self.context.log.debug(
             f"Reordering sys_columns to end for {self.database_table} from {self.path} {CONTEXT_ID}={str(self.context_id)}"

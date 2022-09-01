@@ -28,11 +28,13 @@ class SparkFileSchemaRepo(ISchemaRepo):
         else:
             return f"{self.root_path}/{database_name}/{table_name}.{self._EXT}"
 
-    def save_schema(self, schema: StructType, schema_name: str):
+    def save_schema(self, schema: StructType,  database_name: str, table_name: str):
         """Serialise a spark schema to a yaml file and saves to a schema file in the schema folder."""
 
+        path = self._mkpath(database_name, table_name)
+        path = os.path.abspath(path)
+
         schema_dict = json.loads(schema.json())
-        path = self._mkpath(schema_name)
         with open(path, "w") as f:
             f.write(yaml.safe_dump(schema_dict))
 
@@ -59,7 +61,7 @@ class SparkFileSchemaRepo(ISchemaRepo):
         schema = fs.read_file(path, FileFormat.YAML)
         if not schema:
             msg = f"Failed to load schema for dataset {database_name}.{table_name} from {path}"
-            raise SparkFileSchemaNotFound(path)
+            raise SchemaNotFound(path)
 
         msg = json.dumps(schema, indent=4, default=str)
         self.context.log.debug(msg)
