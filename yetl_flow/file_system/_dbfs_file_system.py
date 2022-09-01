@@ -45,7 +45,8 @@ class DbfsFileSystem(IFileSystem):
 
     def read_file(self, path: str, file_format: FileFormat) -> str:
 
-        path = f"/dbfs{path}"
+        if path[0] != ".":
+            path = f"/dbfs{path}"
         with open(path, "r") as f:
             if file_format == FileFormat.JSON:
                 data = json.loads(f.read())
@@ -63,7 +64,8 @@ class DbfsFileSystem(IFileSystem):
 
     def append_file(self, path: str, data: Union[str, dict], file_format: FileFormat):
 
-        path = f"/dbfs{path}"
+        if path[0] != ".":
+            path = f"/dbfs{path}"
         if isinstance(data, dict) and file_format == FileFormat.TEXT:
             raise TypeError()
         if isinstance(data, str) and file_format in [
@@ -91,7 +93,8 @@ class DbfsFileSystem(IFileSystem):
 
     def write_file(self, path: str, data: Union[str, dict], file_format: FileFormat):
 
-        path = f"/dbfs{path}"
+        if path[0] != ".":
+            path = f"/dbfs{path}"
         if isinstance(data, dict) and file_format == FileFormat.TEXT:
             raise TypeError()
         if isinstance(data, str) and file_format in [
