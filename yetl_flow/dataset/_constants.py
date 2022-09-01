@@ -29,6 +29,10 @@ LOAD_TIMESTAMP = "_load_timestamp"
 TIMESLICE = "_timeslice"
 FILENAME = "_filename"
 
+# yetl table properties
+YETL_TBLP_METADATA_LINEAGE_ENABLED = "yetl.metadata.lineageEnabled"
+YETL_TBLP_SCHEMA_CREATE_IF_NOT_EXISTS = "yetl.schema.createIfNotExists"
+
 
 class Format(Enum):
     JSON = "json"

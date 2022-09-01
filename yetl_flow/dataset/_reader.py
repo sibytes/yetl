@@ -1,10 +1,9 @@
-from locale import D_FMT
 from ._source import Source
 from pyspark.sql import functions as fn
 from pyspark.sql.types import StructType
 from ._constants import *
 from . import _builtin_functions as builtin_funcs
-from ..schema_repo import ISchemaRepo
+from ..schema_repo import ISchemaRepo, SchemaNotFound
 from ._validation import PermissiveSchemaOnRead, BadRecordsPathSchemaOnRead
 from pyspark.sql import DataFrame
 import json
@@ -17,6 +16,16 @@ class Reader(Source):
     ) -> None:
         super().__init__(context, database, table, config, io_type)
 
+        # get the table properties
+        properties: dict = self._get_table_properties(config["table"])
+
+        self._metadata_lineage_enabled = properties.get(
+            YETL_TBLP_METADATA_LINEAGE_ENABLED, False
+        )
+        self._create_schema_if_not_exists = properties.get(
+            YETL_TBLP_SCHEMA_CREATE_IF_NOT_EXISTS, False
+        )
+
         # try and load a schema if schema on read
         self.schema = self._get_schema(config["spark_schema_repo"])
 
@@ -25,6 +34,12 @@ class Reader(Source):
 
         self.auto_io = io_properties.get(AUTO_IO, True)
         self.options: dict = io_properties.get(OPTIONS)
+
+        # if we don't have a schema and set to create if not exists then set infer schema option to true
+        # so that we can infer the schema and use it create the schema file.
+        if not self.schema and self._create_schema_if_not_exists:
+            self.options["inferSchema"] = True
+
         # set record exception handling state.
         # The following state routes schema row excpetions out into an exception delta table:
         # - mode=PERMISSIVE and _currupt_columns in the schema
@@ -51,6 +66,9 @@ class Reader(Source):
                 f"auto_io = {self.auto_io} automatically creating or altering exception delta table {self.database}.{self.table} {CONTEXT_ID}={str(self.context_id)}"
             )
             self.create_or_alter_table()
+
+    def _get_table_properties(self, table_config: dict):
+        return table_config.get(PROPERTIES, {})
 
     def create_or_alter_table(self):
 
@@ -87,7 +105,14 @@ class Reader(Source):
         self.schema_repo: ISchemaRepo = (
             self.context.schema_repo_factory.get_schema_repo_type(self.context, config)
         )
-        return self.schema_repo.load_schema(self.database, self.table)
+        try:
+            schema = self.schema_repo.load_schema(self.database, self.table)
+        except SchemaNotFound as e:
+            msg = f"schema not for {self.database}.{self.table} as path {e}"
+            self.context.log.warning(msg)
+            schema = None
+
+        return schema
 
     def _is_bad_records_path_set(
         self, options: dict, datalake_protocol: str, datalake: str

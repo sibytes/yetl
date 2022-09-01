@@ -6,6 +6,12 @@ from ..file_system import FileFormat, IFileSystem, file_system_factory, FileSyst
 import os
 
 
+class SchemaNotFound(Exception):
+    def __init__(self, path: str):
+        self.message = path
+        super().__init__(self.path)
+
+
 class SparkFileSchemaRepo(ISchemaRepo):
 
     _SCHEMA_ROOT = "./config/schema/spark"
@@ -53,7 +59,7 @@ class SparkFileSchemaRepo(ISchemaRepo):
         schema = fs.read_file(path, FileFormat.YAML)
         if not schema:
             msg = f"Failed to load schema for dataset {database_name}.{table_name} from {path}"
-            raise Exception(msg)
+            raise SparkFileSchemaNotFound(path)
 
         msg = json.dumps(schema, indent=4, default=str)
         self.context.log.debug(msg)

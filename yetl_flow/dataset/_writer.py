@@ -85,8 +85,6 @@ class Writer(Destination):
             partitions = table.get("partitioned_by", [])
             msg = f"Parsed partitioning columns from dataflow yaml config for {self.database}.{self.table} as {partitions}"
 
-
-
         return partitions
 
     def _set_table_constraints(self, table_properties: dict, config: dict):
@@ -249,7 +247,9 @@ class Writer(Destination):
         self.context.log.info(f"Writing data to {self.database_table} at {self.path}")
         if self.dataframe:
 
-            auto_compact = all([self.auto_compact, self.partitions, not self.context.is_databricks])
+            auto_compact = all(
+                [self.auto_compact, self.partitions, not self.context.is_databricks]
+            )
             if auto_compact:
                 self.dataframe = self.dataframe.coalesce(1).repartition(
                     *self.partitions

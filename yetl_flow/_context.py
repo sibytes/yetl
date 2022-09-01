@@ -76,33 +76,35 @@ class Context:
         )
 
         self.log.info(f"Checking spark and databricks versions")
-        self.spark_version, self.databricks_version = self._get_spark_version(self.spark)
+        self.spark_version, self.databricks_version = self._get_spark_version(
+            self.spark
+        )
 
         if self.databricks_version:
             self.is_databricks = True
-            self.log.info(f"Databricks Runtime version detected as : {self.databricks_version}")
+            self.log.info(
+                f"Databricks Runtime version detected as : {self.databricks_version}"
+            )
         else:
             self.is_databricks = False
             self.log.info(f"Databricks Runtime version not detected.")
 
-
         self.log.info(f"Spark version detected as : {self.spark_version}")
 
+    def _get_spark_version(self, spark: SparkSession):
 
-
-    def _get_spark_version(self, spark:SparkSession):
-
-        version:str = spark.sql("select version() as version").collect()[0]["version"]
+        version: str = spark.sql("select version() as version").collect()[0]["version"]
 
         try:
-            databricks_version:dict = spark.sql("select current_version() as version").collect()[0]["version"].asDict()
+            databricks_version: dict = (
+                spark.sql("select current_version() as version")
+                .collect()[0]["version"]
+                .asDict()
+            )
         except:
-            databricks_version:dict = {}
-        
+            databricks_version: dict = {}
+
         return version, databricks_version
-
-
-
 
     def _get_deltalake_flow(
         self, app_name: str, name: str, config: dict, save_type: Type[Save]

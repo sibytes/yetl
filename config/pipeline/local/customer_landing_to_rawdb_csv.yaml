@@ -12,10 +12,12 @@ dataflow:
   landing:
     customer:
       table:
+        properties:
           #### YETL TABLE PROPERTIES ####
 
           # logs the etl metadata to the configured metadata provider.
-          yetl.lineageEnabled: true
+          yetl.metadata.lineageEnabled: true
+          yetl.schema.createIfNotExists: true
 
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
@@ -55,11 +57,12 @@ dataflow:
           
     customer_preferences:
       table:
+        properties:
           #### YETL TABLE PROPERTIES ####
 
-          # builds a struct of metadata lineage and adds it the data in a column
-          # called _yetl_lineage
-          yetl.lineageEnabled: true
+          # logs the etl metadata to the configured metadata provider.
+          yetl.metadata.lineageEnabled: true
+          yetl.schema.createIfNotExists: true
 
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
