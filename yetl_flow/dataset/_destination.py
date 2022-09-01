@@ -29,7 +29,7 @@ class Destination(Dataset):
         data_columns = data_columns + sys_columns
         self.dataframe = self.dataframe.select(*data_columns)
         super().write()
-        # self.save_metadata()
+        self.save_metadata()
 
     def is_source(self):
         return False
