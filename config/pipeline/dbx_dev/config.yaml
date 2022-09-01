@@ -15,7 +15,7 @@ deltalake_schema_repo:
 # used to write data lineage to
 metadata_repo:
   metadata_file:
-    metadata_root: /dbfs/yetl/runs
+    metadata_root: /yetl/runs
     metadata_dataset: dataset.json
     metadata_index: index.json
 
