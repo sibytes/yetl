@@ -8,6 +8,19 @@ class DeltaLakeProperties(Enum):
     AUTO_COMPACT = "delta.autoOptimize.autoCompact"
 
 
+def get_partition_predicate(partition_values: dict):
+
+    predicates = []
+    for k, v in partition_values.items():
+        v = [str(val) for val in v]
+        p = f"`{k}` in ({','.join(v)})"
+        predicates.append(p)
+
+    predicate = " and ".join(predicates)
+
+    return predicate
+
+
 def table_exists(context, database: str, table: str):
     table_exists = (
         context.spark.sql(f"SHOW TABLES in {database};")
@@ -98,13 +111,23 @@ def get_table_properties(context, database: str, table: str):
     return properties
 
 
+def optimize(context, database: str, table: str, partition_values: dict):
+    sql = f"OPTIMIZE `{database}`.`{table}`"
+
+    if partition_values:
+        predicate = get_partition_predicate(partition_values)
+        predicate = f" where {predicate}"
+        sql = f"{sql}{predicate}"
+
+    context.log.info(f"optimizing table {database}.{table}\n{sql}")
+    context.spark.sql(sql)
+
+
 def get_table_details(context, database: str, table: str):
 
     context.log.info(
         f"getting existing table details and partitions for table {database}.{table}"
     )
-    # df.where("col_name like 'Part%'").show()
-    # partitions = [r["data_type"] for r in  df.where("col_name like 'Part%'").select("data_type").collect()]
 
     df: DataFrame = context.spark.sql(
         f"DESCRIBE TABLE EXTENDED `{database}`.`{table}`"

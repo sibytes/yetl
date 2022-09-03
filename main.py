@@ -29,12 +29,14 @@ def customer_landing_to_rawdb_csv(
     # and written to delta table
     # delta tables are automatically created and if configured schema exceptions
     # are loaded syphened into a schema exception table
-    df_cust = dataflow.source_df("landing.customer").drop("_timeslice")
+    df_cust = dataflow.source_df("landing.customer")
     df_prefs = dataflow.source_df("landing.customer_preferences")
 
     context.log.info("Joining customers with customer_preferences")
     df = df_cust.join(df_prefs, "id", "inner")
-    df = df.withColumn("_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer"))
+    df = df.withColumn(
+        "_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer")
+    )
 
     dataflow.destination_df("raw.customer", df)
 

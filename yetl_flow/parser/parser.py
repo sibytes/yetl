@@ -4,12 +4,16 @@ from tracemalloc import start
 import regex
 from ._constants import NAME, REPLACE, ARGS
 
-class TimeslicePosition():
-     def __init__(self, start_pos:int, end_pos:int, length:int, format_code:str) -> None:
-         self.start_pos = start_pos
-         self.end_pos = end_pos
-         self.length = length
-         self.format_code = format_code
+
+class TimeslicePosition:
+    def __init__(
+        self, start_pos: int, end_pos: int, length: int, format_code: str
+    ) -> None:
+        self.start_pos = start_pos
+        self.end_pos = end_pos
+        self.length = length
+        self.format_code = format_code
+
 
 def sql_partitioned_by(sql: str):
 
@@ -143,6 +147,6 @@ def get_slice_position(path: str, dataset):
             end_pos = start_pos + l
             format_str = to_spark_format_code(format_str)
 
-            timeslice_pos = TimeslicePosition(start_pos+3, end_pos+3, l, format_str)
+            timeslice_pos = TimeslicePosition(start_pos + 3, end_pos + 3, l, format_str)
 
     return timeslice_pos

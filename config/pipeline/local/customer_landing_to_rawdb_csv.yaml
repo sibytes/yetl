@@ -17,6 +17,8 @@ dataflow:
 
           # logs the etl metadata to the configured metadata provider.
           yetl.metadata.lineageEnabled: true
+          # derive a timeslice column timestamp from the filepath
+          yetl.metadata.timeslice: true
           yetl.schema.createIfNotExists: true
 
       path_date_format: "%Y%m%d"
@@ -63,6 +65,7 @@ dataflow:
           # logs the etl metadata to the configured metadata provider.
           yetl.metadata.lineageEnabled: true
           yetl.schema.createIfNotExists: true
+          yetl.metadata.timeslice: false
 
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"

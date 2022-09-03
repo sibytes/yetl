@@ -2,7 +2,13 @@ from ._validation import PermissiveSchemaOnRead, BadRecordsPathSchemaOnRead
 from pyspark.sql import DataFrame
 import json
 from ._dataset import Dataset
-from ..parser._constants import Format, MERGE_SCHEMA, APPEND, BAD_RECORDS_PATH, CORRUPT_RECORD
+from ..parser._constants import (
+    Format,
+    MERGE_SCHEMA,
+    APPEND,
+    BAD_RECORDS_PATH,
+    CORRUPT_RECORD,
+)
 
 
 class Source(Dataset):

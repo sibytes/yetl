@@ -32,6 +32,7 @@ FILENAME = "_filename"
 # yetl table properties
 YETL_TBLP_METADATA_LINEAGE_ENABLED = "yetl.metadata.lineageEnabled"
 YETL_TBLP_SCHEMA_CREATE_IF_NOT_EXISTS = "yetl.schema.createIfNotExists"
+YETL_TBLP_METADATA_TIMESLICE = "yetl.metadata.timeslice"
 
 
 class Format(Enum):

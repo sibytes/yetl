@@ -26,7 +26,9 @@ class Reader(Source):
         self._create_schema_if_not_exists = properties.get(
             YETL_TBLP_SCHEMA_CREATE_IF_NOT_EXISTS, False
         )
-
+        self._metadata_timeslice_tabled = properties.get(
+            YETL_TBLP_METADATA_TIMESLICE, True
+        )
         # try and load a schema if schema on read
         self.schema = self._get_schema(config["spark_schema_repo"])
 
@@ -232,7 +234,6 @@ class Reader(Source):
 
         self.context.log.debug(json.dumps(self.options, indent=4, default=str))
 
-
         input_file_name = f"_path_{self.database}_{self.table}"
         df: DataFrame = (
             self.context.spark.read.format(self.format)
@@ -240,11 +241,26 @@ class Reader(Source):
             .options(**self.options)
             .load(self.path)
             .withColumn(CONTEXT_ID, fn.lit(str(self.context_id)))
-            # TODO .withColumn(input_file_name, fn.input_file_name())
-            .withColumn(TIMESLICE, fn.input_file_name())
-            .withColumn(TIMESLICE, fn.substring(TIMESLICE, self._timeslice_position.start_pos, self._timeslice_position.length))
-            .withColumn(TIMESLICE, fn.to_timestamp(TIMESLICE, self._timeslice_position.format_code))
         )
+
+        if self._metadata_timeslice_tabled:
+            df: DataFrame = (
+                df
+                # TODO .withColumn(input_file_name, fn.input_file_name())
+                .withColumn(TIMESLICE, fn.input_file_name())
+                .withColumn(
+                    TIMESLICE,
+                    fn.substring(
+                        TIMESLICE,
+                        self._timeslice_position.start_pos,
+                        self._timeslice_position.length,
+                    ),
+                )
+                .withColumn(
+                    TIMESLICE,
+                    fn.to_timestamp(TIMESLICE, self._timeslice_position.format_code),
+                )
+            )
 
         # if there isn't a schema and it's configured to create one the save it to repo.
         if self._create_schema_if_not_exists and not self.schema:
