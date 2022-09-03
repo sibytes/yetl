@@ -20,7 +20,7 @@ class DeltalakeSchemaFile(ISchemaRepo):
         else:
             return f"{self.root_path}/{database_name}/{table_name}.{self._EXT}"
 
-    def save_schema(self, schema: StructType,  database_name: str, table_name: str):
+    def save_schema(self, schema: StructType, database_name: str, table_name: str):
         """Serialise delta table to a create table sql file."""
         raise NotImplementedError
 

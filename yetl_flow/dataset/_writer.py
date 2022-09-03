@@ -49,17 +49,17 @@ class Writer(Destination):
             )
 
             # returns the table properties and partitions if the table already exists.
-            # TODO: for review, should this return those properties after the table is created if it doesn't exist?
-            properties = self.create_or_alter_table()
+            current_properties = self.create_or_alter_table()
 
             # alter, drop or create any constraints defined that are not on the table
-            self._set_table_constraints(properties, config)
+            self._set_table_constraints(current_properties, config)
             # alter, drop or create any properties that are not on the table
-            self._set_table_properties(properties, config)
+            self._set_table_properties(current_properties, config)
 
             # TODO: if the table partitions in the properties form the table is different to the partitions
             # in the config or ddl, yetl.allowRepartitioning = true then repartition the table
-            self._table_repartition(properties, config)
+            # Is this a feature we want? Not sure.
+            self._table_repartition(current_properties, config)
 
     def _table_repartition(self, table_properties: dict, config: dict):
         pass

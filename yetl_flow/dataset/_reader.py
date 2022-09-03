@@ -114,10 +114,8 @@ class Reader(Source):
 
         return schema
 
-
-    def _save_schema(self, schema:StructType):
+    def _save_schema(self, schema: StructType):
         schema = self.schema_repo.save_schema(schema, self.database, self.table)
-
 
     def _is_bad_records_path_set(
         self, options: dict, datalake_protocol: str, datalake: str
@@ -233,7 +231,7 @@ class Reader(Source):
 
         self.context.log.debug(json.dumps(self.options, indent=4, default=str))
 
-        df:DataFrame = (
+        df: DataFrame = (
             self.context.spark.read.format(self.format)
             .schema(self.schema)
             .options(**self.options)

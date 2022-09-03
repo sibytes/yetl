@@ -148,8 +148,8 @@ dataflow:
           # delta.checkpoint.writeStatsAsStruct: None # Not Supported
           # delta.columnMapping.mode: true # not released yet
           
-          # delta.autoOptimize.autoCompact: true        # Databricks, but supported by yetl
-          # delta.autoOptimize.optimizeWrite: true      # Databricks, but supported by yetl
+          delta.autoOptimize.autoCompact: true        # Databricks, but supported by yetl
+          delta.autoOptimize.optimizeWrite: true      # Databricks, but supported by yetl
           # delta.targetFileSize: 104857600             # Databricks only
           # delta.autoCompact.maxFileSize: 134217728    # Databricks only
           # delta.isolationLevel:  WriteSerializable    # Databricks only

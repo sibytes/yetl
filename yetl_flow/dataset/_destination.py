@@ -3,6 +3,7 @@ from pyspark.sql import DataFrame
 from ._save import DefaultSave
 from pyspark.sql import functions as fn
 from ._constants import *
+import json
 
 
 class Destination(Dataset):
@@ -24,12 +25,40 @@ class Destination(Dataset):
         self.dataframe = self.dataframe.drop(CONTEXT_ID).withColumn(
             CONTEXT_ID, fn.lit(str(self.context_id))
         )
+
+        # clean up the column ordering
         sys_columns = [c for c in self.dataframe.columns if c.startswith("_")]
         data_columns = [c for c in self.dataframe.columns if not c.startswith("_")]
         data_columns = data_columns + sys_columns
         self.dataframe = self.dataframe.select(*data_columns)
+
+        # get the partitions values for efficient IO patterns
+        self.partition_values = self._get_partitions_values()
+
+        if self.partition_values:
+            msg_partition_values = json.dumps(self.partition_values, indent=4)
+            self.context.log.info(
+                f"""IO operations for {self.database}.{self.table} will be paritioned by: \n{msg_partition_values}"""
+            )
+
         super().write()
         self.save_metadata()
+
+    def _get_partitions_values(self):
+
+        partition_values = {}
+        if self.partitions:
+            partition_values_df = self.dataframe.select(*self.partitions).distinct()
+
+            for p in self.partitions:
+                partition_values_df = partition_values_df.withColumn(
+                    p, fn.collect_list(p)
+                )
+
+            partition_values_df = partition_values_df.collect()
+            partition_values = partition_values_df[0].asDict()
+
+        return partition_values
 
     def is_source(self):
         return False
