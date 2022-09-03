@@ -9,7 +9,8 @@ CREATE TABLE {{database_name}}.{{table_name}}
     amount        double,
     allow_contact boolean,
     _partition_key int,
-    _context_id string
+    _context_id string,
+    _slice timestamp
 )
 USING DELTA LOCATION '{{path}}'
 PARTITIONED BY (_partition_key);

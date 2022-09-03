@@ -1,5 +1,5 @@
 from ._destination import Destination
-from ._constants import *
+from ..parser._constants import *
 from ..schema_repo import ISchemaRepo
 import os
 from .. import _delta_lake as dl

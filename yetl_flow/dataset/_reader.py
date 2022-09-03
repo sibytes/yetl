@@ -1,13 +1,14 @@
 from ._source import Source
 from pyspark.sql import functions as fn
 from pyspark.sql.types import StructType
-from ._constants import *
+from ..parser._constants import *
 from . import _builtin_functions as builtin_funcs
 from ..schema_repo import ISchemaRepo, SchemaNotFound
 from ._validation import PermissiveSchemaOnRead, BadRecordsPathSchemaOnRead
 from pyspark.sql import DataFrame
 import json
 from .. import _delta_lake as dl
+from ..parser import parser
 
 
 class Reader(Source):
@@ -231,12 +232,18 @@ class Reader(Source):
 
         self.context.log.debug(json.dumps(self.options, indent=4, default=str))
 
+
+        input_file_name = f"_path_{self.database}_{self.table}"
         df: DataFrame = (
             self.context.spark.read.format(self.format)
             .schema(self.schema)
             .options(**self.options)
             .load(self.path)
             .withColumn(CONTEXT_ID, fn.lit(str(self.context_id)))
+            # TODO .withColumn(input_file_name, fn.input_file_name())
+            .withColumn(TIMESLICE, fn.input_file_name())
+            .withColumn(TIMESLICE, fn.substring(TIMESLICE, self._timeslice_position.start_pos, self._timeslice_position.length))
+            .withColumn(TIMESLICE, fn.to_timestamp(TIMESLICE, self._timeslice_position.format_code))
         )
 
         # if there isn't a schema and it's configured to create one the save it to repo.

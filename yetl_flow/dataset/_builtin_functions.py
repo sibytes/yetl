@@ -1,23 +1,5 @@
-import regex
-from ._constants import NAME, REPLACE, ARGS
-
-
-def parse_functions(sentence: str):
-
-    rgx_function = regex.compile(r"(?si)(?|{0}(.*?){1}|{1}(.*?){0})".format("{{", "}}"))
-    functions = rgx_function.findall(sentence)
-    funcs = []
-    for f in functions:
-        for fp in f:
-            func: str = fp
-            args = func[func.find("(") + 1 : func.find(")")]
-            args = args.split(",")
-            args = [a.strip() for a in args]
-            function_name = func[: func.find("(")].strip()
-            function = {NAME: function_name, REPLACE: func, ARGS: args}
-            funcs.append(function)
-
-    return funcs
+from ..parser.parser import parse_functions
+from ..parser._constants import NAME, REPLACE, ARGS
 
 
 def execute_replacements(sentence: str, dataset):

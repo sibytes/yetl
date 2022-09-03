@@ -3,7 +3,7 @@ from pyspark.sql import functions as fn
 from pyspark.sql import SparkSession
 from pyspark.sql.utils import AnalysisException
 from typing import Callable
-from ._constants import *
+from ..parser._constants import *
 
 
 class IValidator:
