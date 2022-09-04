@@ -111,13 +111,17 @@ def get_table_properties(context, database: str, table: str):
     return properties
 
 
-def optimize(context, database: str, table: str, partition_values: dict):
+def optimize(context, database: str, table: str, partition_values: dict, zorder_by:list=[]):
     sql = f"OPTIMIZE `{database}`.`{table}`"
 
     if partition_values:
         predicate = get_partition_predicate(partition_values)
         predicate = f" WHERE {predicate}"
         sql = f"{sql}{predicate}"
+
+    if zorder_by:
+        sql_zorderby =  ",".join([f"`{z}`" for z in zorder_by])
+        sql = f"{sql} ZORDER BY ({sql_zorderby})"
 
     context.log.info(f"optimizing table {database}.{table}\n{sql}")
     context.spark.sql(sql)
