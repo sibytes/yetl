@@ -1,3 +1,4 @@
+from doctest import FAIL_FAST
 from ._source import Source
 from pyspark.sql import functions as fn
 from pyspark.sql.types import StructType
@@ -17,6 +18,9 @@ class Reader(Source):
     ) -> None:
         super().__init__(context, database, table, config, io_type)
 
+        # gets the read, write, etc options based on the type
+        io_properties = config.get(io_type)
+
         # get the table properties
         properties: dict = self._get_table_properties(config["table"])
 
@@ -29,46 +33,129 @@ class Reader(Source):
         self._metadata_timeslice_tabled = properties.get(
             YETL_TBLP_METADATA_TIMESLICE, True
         )
-        # try and load a schema if schema on read
-        self.schema = self._get_schema(config["spark_schema_repo"])
 
-        # gets the read, write, etc options based on the type
-        io_properties = config.get(io_type)
-
+        self.has_exception_configured = EXCEPTIONS in config.keys()
         self.auto_io = io_properties.get(AUTO_IO, True)
         self.options: dict = io_properties.get(OPTIONS)
+        self.infer_schema = self.options.get(INFER_SCHEMA, False)
+        self.has_badrecordspath_configured = BAD_RECORDS_PATH in self.options.keys()
+        self.mode = self.options.get(MODE, None)
 
-        # if we don't have a schema and set to create if not exists then set infer schema option to true
-        # so that we can infer the schema and use it create the schema file.
-        if not self.schema and self._create_schema_if_not_exists:
-            self.options["inferSchema"] = True
+        # try and load a schema if schema on read
+        try:
+            self.schema = self._get_schema(config["spark_schema_repo"])
+            self.has_schema = True
 
-        # set record exception handling state.
-        # The following state routes schema row excpetions out into an exception delta table:
-        # - mode=PERMISSIVE and _currupt_columns in the schema
-        # - if badrecordpath set
-        self.has_corrupt_column = self._is_corrupt_column_set(self.options, self.schema)
-        self.has_bad_records_path, self.options = self._is_bad_records_path_set(
-            self.options, self.datalake_protocol, self.datalake
+
+        except SchemaNotFound as e:
+            self.schema = None
+            self.has_schema = False
+            if not self.infer_schema and not self._create_schema_if_not_exists:
+                self._creating_inferred_schema = False
+                msg = f"schema not found for {self.database}.{self.table} as path {e}"
+                raise SchemaNotFound
+            else:
+                msg = f"schema not found for {self.database}.{self.table} as path {e}"
+                self.context.log.warning(msg)
+
+        self._creating_inferred_schema = (
+            self._create_schema_if_not_exists and not self.has_schema
         )
 
-        if not self.has_bad_records_path and not self.options.get(MODE):
-            self.context.log.warning(
-                f"badRecordsPath and mode option are not set, default to mode={PERMISSIVE} {CONTEXT_ID}={str(self.context_id)}"
-            )
-            self.options[MODE] = PERMISSIVE
+        if self.auto_io and self._creating_inferred_schema:
+            self._on_schema_creation()
 
-        self._set_has_exceptions_table(config)
+        if self.has_exception_configured:
+            self._set_exceptions_attributes(config)
+
+        if not self._creating_inferred_schema:
+            self._validate_configuration()
+
+        if self.has_badrecordspath_configured:
+            self.options = self.configure_badrecords_path(
+                self.options, self.datalake_protocol, self.datalake
+            )
+
+        # set the exceptions table settings if configured.
 
         self.database_table = f"{self.database}.{self.table}"
+        # self._initial_load = super().initial_load
 
-        self._initial_load = super().initial_load
-
-        if self.auto_io:
+        if self.auto_io and self.has_exception_configured:
             self.context.log.info(
                 f"auto_io = {self.auto_io} automatically creating or altering exception delta table {self.database}.{self.table} {CONTEXT_ID}={str(self.context_id)}"
             )
             self.create_or_alter_table()
+
+    def _validate_configuration(self):
+
+        if not self.has_badrecordspath_configured and not self.mode:
+            self.context.log.warning(
+                f"{BAD_RECORDS_PATH} and {MODE} option are not set, defaulting to {MODE}={FAIL_FAST} {CONTEXT_ID}={str(self.context_id)}"
+            )
+            self.options[MODE] = FAIL_FAST
+
+        self.has_corrupt_column = self._is_corrupt_column_set(self.options, self.schema)
+
+        if self.has_badrecordspath_configured and self.mode:
+            msg = f"{BAD_RECORDS_PATH} and {MODE} option are both set, this is not supported. Configure either {BAD_RECORDS_PATH} or {MODE} {CONTEXT_ID}={str(self.context_id)}"
+            self.context.log.error(msg)
+            raise Exception(msg)
+
+        if self.has_badrecordspath_configured and not self.has_schema:
+            msg = f"No schema has been defined. {BAD_RECORDS_PATH} requires that a schema is defined. {CONTEXT_ID}={str(self.context_id)}"
+            self.context.log.error(msg)
+            raise Exception(msg)
+
+        if self.has_badrecordspath_configured and not self.has_exception_configured:
+            msg = f"{BAD_RECORDS_PATH} requires that {EXCEPTIONS} configuration is defined. {CONTEXT_ID}={str(self.context_id)}"
+            self.context.log.error(msg)
+            raise Exception(msg)
+
+        if self.has_badrecordspath_configured and not self.has_corrupt_column:
+            msg = f"{BAD_RECORDS_PATH} doesn't support the use of the _corrupt_record columnd. {CONTEXT_ID}={str(self.context_id)}"
+            self.context.log.error(msg)
+            raise Exception(msg)
+
+        if self.mode and not self.has_schema:
+            msg = f"No schema has been defined. {MODE}={self.mode} configuration requires that a schema is defined. {CONTEXT_ID}={str(self.context_id)}"
+            self.context.log.error(msg)
+            raise Exception(msg)
+
+        if self.mode!=PERMISSIVE and self.has_exception_configured:
+            msg = f"{MODE}={self.mode}, exceptions can only be handled on a mode={PERMISSIVE}, {EXCEPTIONS} configuration will be disabled. {CONTEXT_ID}={str(self.context_id)}"
+            self.context.log.warning(msg)
+            self.has_exception_configured = False
+
+        if self.mode==PERMISSIVE and self.has_exception_configured and not self.has_corrupt_column:
+            msg = f"If expceptions are configured for {MODE}={self.mode} then _corrupt_record columns must be supplied in the schema. {CONTEXT_ID}={str(self.context_id)}"
+            self.context.log.error(msg)
+            raise Exception(msg)
+
+    def _on_schema_creation(self):
+
+        self.initial_load = True
+        self.has_corrupt_column = False
+
+        if self.has_exception_configured:
+            msg = f"Creating inferred schema for {self.database}.{self.table} {EXCEPTIONS} configuration will be ignored"
+            self.context.log.warning(msg)
+            self.has_exception_configured = False
+
+        if self.has_badrecordspath_configured:
+            msg = f"Creating inferred schema for {self.database}.{self.table} {BAD_RECORDS_PATH} configuration will be ingnored"
+            self.context.log.warning(msg)
+            self.has_badrecordspath_configured = False
+
+        if self.mode:
+            msg = f"Creating inferred schema for {self.database}.{self.table} {self.mode} configuration will be ignored"
+            self.context.log.warning(msg)
+            del self.options[MODE]
+
+        if not self.infer_schema:
+            msg = f"Creating inferred schema for {self.database}.{self.table} defaulting {INFER_SCHEMA} to True"
+            self.context.log.warning(msg)
+            self.options[INFER_SCHEMA] = True
 
     def _get_table_properties(self, table_config: dict):
         return table_config.get(PROPERTIES, {})
@@ -108,74 +195,57 @@ class Reader(Source):
         self.schema_repo: ISchemaRepo = (
             self.context.schema_repo_factory.get_schema_repo_type(self.context, config)
         )
-        try:
-            schema = self.schema_repo.load_schema(self.database, self.table)
-        except SchemaNotFound as e:
-            msg = f"schema not for {self.database}.{self.table} as path {e}"
-            self.context.log.warning(msg)
-            schema = None
-
+        schema = self.schema_repo.load_schema(self.database, self.table)
         return schema
 
     def _save_schema(self, schema: StructType):
         schema = self.schema_repo.save_schema(schema, self.database, self.table)
 
-    def _is_bad_records_path_set(
+    def configure_badrecords_path(
         self, options: dict, datalake_protocol: str, datalake: str
     ):
 
-        has_bad_records_path = BAD_RECORDS_PATH in options
+        bad_records_path = options[BAD_RECORDS_PATH]
+        bad_records_path = builtin_funcs.execute_replacements(bad_records_path, self)
+        options[BAD_RECORDS_PATH] = f"{datalake_protocol}{datalake}/{bad_records_path}"
 
-        if self.has_corrupt_column and has_bad_records_path:
-            has_bad_records_path = False
-            self.context.log.warning(
-                f"badRecordsPath and mode option is not supported together, default to mode={self.options.get(MODE)} {CONTEXT_ID}={str(self.context_id)}"
-            )
+        return options
 
-        elif has_bad_records_path:
-            bad_records_path = options[BAD_RECORDS_PATH]
-            bad_records_path = builtin_funcs.execute_replacements(
-                bad_records_path, self
-            )
-            options[
-                BAD_RECORDS_PATH
-            ] = f"{datalake_protocol}{datalake}/{bad_records_path}"
+    def _set_exceptions_attributes(self, dataset: dict):
 
-        return has_bad_records_path, options
-
-    def _set_has_exceptions_table(self, dataset: dict):
-        self.has_exceptions_table = EXCEPTIONS in dataset
-        if self.has_exceptions_table:
-            exceptions = dataset[EXCEPTIONS]
-            self.exceptions_table = exceptions.get(TABLE)
-            self.exceptions_database = exceptions.get(DATABASE)
-            self.exceptions_database_table = (
-                f"{self.exceptions_database}.{self.exceptions_table}"
-            )
-            exceptions_path = exceptions.get(PATH)
-            self.exceptions_path = f"{self.datalake_protocol}{self.datalake}/{exceptions_path}/{self.exceptions_database}/{self.exceptions_table}"
+        exceptions = dataset[EXCEPTIONS]
+        self.exceptions_table = exceptions.get(TABLE)
+        self.exceptions_database = exceptions.get(DATABASE)
+        self.exceptions_database_table = (
+            f"{self.exceptions_database}.{self.exceptions_table}"
+        )
+        exceptions_path = exceptions.get(PATH)
+        self.exceptions_path = f"{self.datalake_protocol}{self.datalake}/{exceptions_path}/{self.exceptions_database}/{self.exceptions_table}"
 
     def _is_corrupt_column_set(self, options: dict, schema: StructType):
 
-        has_corrupt_column = (
-            options.get(MODE, "").lower() == PERMISSIVE
-            and CORRUPT_RECORD in schema.fieldNames()
-        )
-
-        if (
-            options.get(MODE, "").lower() == PERMISSIVE
-            and not CORRUPT_RECORD in schema.fieldNames()
-        ):
-            self.context.log.warning(
-                f"mode={PERMISSIVE} and corrupt record is not set in the schema, schema on read corrupt records will be silently dropped."
+        if schema:
+            has_corrupt_column = (
+                options.get(MODE, "").lower() == PERMISSIVE
+                and CORRUPT_RECORD in schema.fieldNames()
             )
+
+            if (
+                options.get(MODE, "").lower() == PERMISSIVE
+                and not CORRUPT_RECORD in schema.fieldNames()
+            ):
+                self.context.log.warning(
+                    f"mode={PERMISSIVE} and corrupt record is not set in the schema, schema on read corrupt records will be silently dropped."
+                )
+        else:
+            has_corrupt_column = False
 
         return has_corrupt_column
 
     def _get_validation_exceptions_handler(self):
         def handle_exceptions(exceptions: DataFrame):
             exceptions_count = 0
-            if self.has_exceptions_table:
+            if self.has_exception_configured:
                 exceptions_count = exceptions.count()
                 if exceptions and exceptions_count > 0:
                     options = {MERGE_SCHEMA: True}
@@ -194,7 +264,7 @@ class Reader(Source):
         validation_handler = self._get_validation_exceptions_handler()
         validator = None
 
-        if self.has_bad_records_path:
+        if self.has_badrecordspath_configured:
 
             bad_records_path = self.options[BAD_RECORDS_PATH]
             self.context.log.info(
@@ -235,10 +305,14 @@ class Reader(Source):
         self.context.log.debug(json.dumps(self.options, indent=4, default=str))
 
         input_file_name = f"_path_{self.database}_{self.table}"
+
+        df = self.context.spark.read.format(self.format)
+
+        if self.has_schema:
+            df = df.schema(self.schema)
+
         df: DataFrame = (
-            self.context.spark.read.format(self.format)
-            .schema(self.schema)
-            .options(**self.options)
+            df.options(**self.options)
             .load(self.path)
             .withColumn(CONTEXT_ID, fn.lit(str(self.context_id)))
         )
@@ -263,12 +337,13 @@ class Reader(Source):
             )
 
         # if there isn't a schema and it's configured to create one the save it to repo.
-        if self._create_schema_if_not_exists and not self.schema:
+        if self._creating_inferred_schema:
+            self.context.log.info(f"Saving inferred schema for {self.database}.{self.table} into schema repository. {CONTEXT_ID}={str(self.context_id)}")
             self.schema = df.schema
             self.schema_repo.save_schema(self.schema, self.database, self.table)
 
         self.context.log.debug(
-            f"Reordering sys_columns to end for {self.database_table} from {self.path} {CONTEXT_ID}={str(self.context_id)}"
+            f"Reordering sys_columns to end for {self.database_table} from {self.path}. {CONTEXT_ID}={str(self.context_id)}"
         )
         self.dataframe = df
         self.validation_result = self.validate()

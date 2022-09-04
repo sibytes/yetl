@@ -8,7 +8,7 @@ import os
 
 class SchemaNotFound(Exception):
     def __init__(self, path: str):
-        self.message = path
+        self.path = path
         super().__init__(self.path)
 
 
@@ -58,10 +58,11 @@ class SparkFileSchemaRepo(ISchemaRepo):
         self.context.log.info(
             f"Loading schema for dataset {database_name}.{table_name} from {path} using {type(fs)}"
         )
-        schema = fs.read_file(path, FileFormat.YAML)
-        if not schema:
+        try:
+            schema = fs.read_file(path, FileFormat.YAML)
+        except Exception as e:
             msg = f"Failed to load schema for dataset {database_name}.{table_name} from {path}"
-            raise SchemaNotFound(path)
+            raise SchemaNotFound(path) from e
 
         msg = json.dumps(schema, indent=4, default=str)
         self.context.log.debug(msg)

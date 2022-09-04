@@ -49,9 +49,9 @@ class Destination(Dataset):
         partition_values = {}
         if self.partitions:
             partition_values_df = self.dataframe.select(*self.partitions).distinct()
-            
+
             for p in self.partitions:
-                group_by:list = list(self.partitions)
+                group_by: list = list(self.partitions)
                 group_by.remove(p)
                 if group_by:
                     partition_values_df = partition_values_df.groupBy(*group_by).agg(

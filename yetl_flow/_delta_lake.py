@@ -111,7 +111,9 @@ def get_table_properties(context, database: str, table: str):
     return properties
 
 
-def optimize(context, database: str, table: str, partition_values: dict, zorder_by:list=[]):
+def optimize(
+    context, database: str, table: str, partition_values: dict, zorder_by: list = []
+):
     sql = f"OPTIMIZE `{database}`.`{table}`"
 
     if partition_values:
@@ -120,7 +122,7 @@ def optimize(context, database: str, table: str, partition_values: dict, zorder_
         sql = f"{sql}{predicate}"
 
     if zorder_by:
-        sql_zorderby =  ",".join([f"`{z}`" for z in zorder_by])
+        sql_zorderby = ",".join([f"`{z}`" for z in zorder_by])
         sql = f"{sql} ZORDER BY ({sql_zorderby})"
 
     context.log.info(f"optimizing table {database}.{table}\n{sql}")

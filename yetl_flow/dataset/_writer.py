@@ -17,7 +17,7 @@ class Writer(Destination):
         self.dataframe: DataFrame = None
         # try and load a schema if schema on read
         self.table_ddl: str = self._get_table_sql(config)
-        self.zorder_by:list = self._get_table_zorder(config)
+        self.zorder_by: list = self._get_table_zorder(config)
         self.context.log.debug(f"Writer table ddl = {self.table_ddl}")
 
         # get the configured partitions.
@@ -227,7 +227,7 @@ class Writer(Destination):
     def _get_table_zorder(self, config: dict):
 
         table = config.get(TABLE)
-        zorder_by:list = []
+        zorder_by: list = []
         if table:
             zorder_by = table.get("zorder_by", [])
 
@@ -261,7 +261,9 @@ class Writer(Destination):
                 [self.auto_compact, self.partitions, not self.context.is_databricks]
             )
             if auto_compact:
-                self.context.log.info(f"Auto compacting in memory partitions for {self.database_table} on partitions {self.partitions}")
+                self.context.log.info(
+                    f"Auto compacting in memory partitions for {self.database_table} on partitions {self.partitions}"
+                )
                 self.dataframe = self.dataframe.coalesce(1).repartition(
                     *self.partitions
                 )
@@ -270,8 +272,16 @@ class Writer(Destination):
 
             auto_optimize = all([self.auto_optimize, not self.context.is_databricks])
             if auto_optimize:
-                self.context.log.info(f"Auto optimizing {self.database_table} where {self.partition_values} zorder by {self.zorder_by}")
-                dl.optimize(self.context, self.database, self.table, self.partition_values, self.zorder_by)
+                self.context.log.info(
+                    f"Auto optimizing {self.database_table} where {self.partition_values} zorder by {self.zorder_by}"
+                )
+                dl.optimize(
+                    self.context,
+                    self.database,
+                    self.table,
+                    self.partition_values,
+                    self.zorder_by,
+                )
 
         else:
             msg = f"Writer dataframe isn't set and cannot be written for {self.database_table} at {self.path}"

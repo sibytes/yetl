@@ -19,6 +19,10 @@ dataflow:
           yetl.metadata.lineageEnabled: true
           # derive a timeslice column timestamp from the filepath
           yetl.metadata.timeslice: true
+          # this will automatically default to an inferred schema load on the 1st load 
+          # and use it to create a schema in the repo.
+          # this is handy in dev workflows to create a starter schema.
+          # best practice strongly recommends that inferred schema's are reviewed
           yetl.schema.createIfNotExists: true
 
       path_date_format: "%Y%m%d"
@@ -34,7 +38,7 @@ dataflow:
           mode: PERMISSIVE
           # if infer schema if true the schema will be ingored, generally speaking this is a bad approach for prod pipelines
           # however if you set to true you have to do the work of creating the schema and placing into the schema repo
-          # So! if inferSchema is false which is the default for this framework and there isn't one, the 1st time
+          # So! if inferSchema is false and yetl.schema.createIfNotExists=True and there isn't one, the 1st time
           # you run the pipeline it will infer it, save the schema into the repo. You either leave it as is or 
           # it gives you a starter schema to refine.
           inferSchema: false
