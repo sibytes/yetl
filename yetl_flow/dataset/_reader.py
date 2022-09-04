@@ -122,12 +122,12 @@ class Reader(Source):
             self.context.log.error(msg)
             raise Exception(msg)
 
-        if self.mode!=PERMISSIVE and self.has_exception_configured:
+        if self.mode.lower()!=PERMISSIVE and self.has_exception_configured:
             msg = f"{MODE}={self.mode}, exceptions can only be handled on a mode={PERMISSIVE}, {EXCEPTIONS} configuration will be disabled. {CONTEXT_ID}={str(self.context_id)}"
             self.context.log.warning(msg)
             self.has_exception_configured = False
 
-        if self.mode==PERMISSIVE and self.has_exception_configured and not self.has_corrupt_column:
+        if self.mode.lower()==PERMISSIVE and self.has_exception_configured and not self.has_corrupt_column:
             msg = f"If expceptions are configured for {MODE}={self.mode} then _corrupt_record columns must be supplied in the schema. {CONTEXT_ID}={str(self.context_id)}"
             self.context.log.error(msg)
             raise Exception(msg)

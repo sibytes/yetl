@@ -111,7 +111,7 @@ dataflow:
           - _partition_key
 
         zorder_by:
-          - allow_contact
+          - email
           - id
         # table ddl is optional to provide full flexbility of how you can manaage the datalake (house)
         # it can be declared inline or via sql include files. If not provided an empty schema table is
