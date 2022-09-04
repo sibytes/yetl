@@ -115,6 +115,13 @@ There is a CI build configured for this repo that builds on main origin and publ
 
 # Releases
 
+Version: 0.0.13
+
+- Added support default schema creation etl.schema.createIfNotExists.
+- refactoed and cleaned up the basic reader
+- added consistent validation and consistent property settings to basic reader
+- added reader skipping features based on configuration settings
+
 Version: 0.0.12
 
 - Added support multicolumn zording.
