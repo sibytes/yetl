@@ -49,11 +49,18 @@ class Destination(Dataset):
         partition_values = {}
         if self.partitions:
             partition_values_df = self.dataframe.select(*self.partitions).distinct()
-
+            
             for p in self.partitions:
-                partition_values_df = partition_values_df.withColumn(
-                    p, fn.collect_list(p)
-                )
+                group_by:list = list(self.partitions)
+                group_by.remove(p)
+                if group_by:
+                    partition_values_df = partition_values_df.groupBy(*group_by).agg(
+                        fn.collect_set(p).alias(p)
+                    )
+                else:
+                    partition_values_df = partition_values_df.withColumn(
+                        p, fn.collect_set(p)
+                    )
 
             partition_values_df = partition_values_df.collect()
             partition_values = partition_values_df[0].asDict()

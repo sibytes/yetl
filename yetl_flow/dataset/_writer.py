@@ -251,6 +251,7 @@ class Writer(Destination):
                 [self.auto_compact, self.partitions, not self.context.is_databricks]
             )
             if auto_compact:
+                self.context.log.info(f"Auto compacting in memory partitions for {self.database_table} on partitions {self.partitions}")
                 self.dataframe = self.dataframe.coalesce(1).repartition(
                     *self.partitions
                 )
@@ -259,7 +260,7 @@ class Writer(Destination):
 
             auto_optimize = all([self.auto_optimize, not self.context.is_databricks])
             if auto_optimize:
-
+                self.context.log.info(f"Auto optimizing {self.database_table} where {self.partition_values}")
                 dl.optimize(self.context, self.database, self.table, self.partition_values)
 
         else:

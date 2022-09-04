@@ -118,6 +118,9 @@ There is a CI build configured for this repo that builds on main origin and publ
 Version: 0.0.11
 
 - [Upgrade to spark 3.3](https://github.com/sibytes/yetl/issues/32). Upgraded development for spark 3.3 and delta lake 2.1.
+- Added _timeslice metadata column parsing into the destination dataset so that it can be used for partitioning, works even if the read path is wildcarded '*'
+- Added support for partition based optimization on writes
+- Added support for multi column partitioning
 
 Version: 0.0.10
 

@@ -105,6 +105,10 @@ dataflow:
         # yetl.allowRepartitioning: true
         partitioned_by:
           - _partition_key
+
+        zorder_by:
+          - allow_contact
+          - id
         # table ddl is optional to provide full flexbility of how you can manaage the datalake (house)
         # it can be declared inline or via sql include files. If not provided an empty schema table is
         # created and merge schema (if false) is flipped to true on the initial load.

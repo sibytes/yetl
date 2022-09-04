@@ -116,7 +116,7 @@ def optimize(context, database: str, table: str, partition_values: dict):
 
     if partition_values:
         predicate = get_partition_predicate(partition_values)
-        predicate = f" where {predicate}"
+        predicate = f" WHERE {predicate}"
         sql = f"{sql}{predicate}"
 
     context.log.info(f"optimizing table {database}.{table}\n{sql}")

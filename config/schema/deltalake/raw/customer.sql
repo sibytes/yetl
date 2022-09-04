@@ -13,4 +13,4 @@ CREATE TABLE {{database_name}}.{{table_name}}
     _slice timestamp
 )
 USING DELTA LOCATION '{{path}}'
-PARTITIONED BY (_partition_key);
+PARTITIONED BY (_partition_key,allow_contact);
