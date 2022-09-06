@@ -1,22 +1,15 @@
 dataflow:
   retries: 0
   retry_wait: 1
-  # enable_dataflow_types:
-  #   - full_load
-  #   - partition_load
-  #   - merge_compare
-  #   - merge_cdc
-  #   - nuke 
+
 
 
   landing:
-    customer:
+    customer_noschema:
       table:
         properties:
           #### YETL TABLE PROPERTIES ####
 
-          # logs the etl metadata to the configured metadata provider.
-          yetl.metadata.lineageEnabled: true
           # derive a timeslice column timestamp from the filepath
           yetl.metadata.timeslice: true
           # this will automatically default to an inferred schema load on the 1st load 
@@ -43,7 +36,6 @@ dataflow:
           # it gives you a starter schema to refine.
           inferSchema: false
           header: true
-          # badRecordsPath: "data/exceptions/landing/customer/{{timeslice(path_date_format)}}"
       exceptions:
           path: "data/delta_lake/exceptions"
           database: landing
@@ -67,7 +59,6 @@ dataflow:
           #### YETL TABLE PROPERTIES ####
 
           # logs the etl metadata to the configured metadata provider.
-          yetl.metadata.lineageEnabled: true
           yetl.schema.createIfNotExists: true
           yetl.metadata.timeslice: false
 
@@ -113,28 +104,12 @@ dataflow:
         zorder_by:
           - email
           - id
+
         # table ddl is optional to provide full flexbility of how you can manaage the datalake (house)
         # it can be declared inline or via sql include files. If not provided an empty schema table is
         # created and merge schema (if false) is flipped to true on the initial load.
 
-        # ddl: |
-        #   CREATE TABLE {{database_name}}.{{table_name}}
-        #   (
-        #     id            integer not null,
-        #     first_name    string not null,
-        #     last_name     string,
-        #     email         string,
-        #     gender        string,
-        #     job_title     string,
-        #     amount        double,
-        #     allow_contact boolean,
-        #     _partition_key int,
-        #     _context_id string
-        #   )
-        #   USING DELTA LOCATION '{{path}}'
-        #   PARTITIONED_BY (_partition_key);
-
-        ddl: ./config/schema/deltalake
+        # ddl: null
 
 
         # https://docs.databricks.com/delta/table-properties.html

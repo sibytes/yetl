@@ -1,4 +1,3 @@
-from doctest import FAIL_FAST
 from ._source import Source
 from pyspark.sql import functions as fn
 from pyspark.sql.types import StructType
@@ -9,7 +8,6 @@ from ._validation import PermissiveSchemaOnRead, BadRecordsPathSchemaOnRead
 from pyspark.sql import DataFrame
 import json
 from .. import _delta_lake as dl
-from ..parser import parser
 
 
 class Reader(Source):

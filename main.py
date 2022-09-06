@@ -13,7 +13,7 @@ from typing import Type
 
 
 @yetl_flow(log_level="ERROR")
-def customer_landing_to_rawdb_csv(
+def batch_text_csv_to_delta_permissive_1(
     context: Context,
     dataflow: IDataflow,
     timeslice: Timeslice = TimesliceUtcNow(),
@@ -45,10 +45,10 @@ def customer_landing_to_rawdb_csv(
 # timeslice = Timeslice(2022, 7, 11)
 # timeslice = Timeslice(2022, 7, 12)
 timeslice = Timeslice(2022, 7, "*")
-results = customer_landing_to_rawdb_csv(timeslice=timeslice)
+results = batch_text_csv_to_delta_permissive_1(timeslice=timeslice)
 
 # reload load
-
+# timeslice = Timeslice(2022, "*", "*")
 # results = customer_landing_to_rawdb_csv(
-#     timeslice=Timeslice(2022, "*", "*"), save_type=OverwriteSchemaSave
+#     timeslice=timeslice, save_type=OverwriteSchemaSave
 # )

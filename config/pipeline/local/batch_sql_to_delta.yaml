@@ -1,12 +1,6 @@
 dataflow:
-  retries: 2
+  retries: 0
   retry_wait: 1
-  enable_dataflow_types:
-    - full_load
-    - partition_load
-    - merge_compare
-    - merge_cdc
-    - nuke 
 
 
   raw:
