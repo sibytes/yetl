@@ -1,3 +1,7 @@
+# Loads data from text files to a delta table.
+# This load tests the following features:
+#   - badrecordspath data validation.
+
 dataflow:
   retries: 0
   retry_wait: 1

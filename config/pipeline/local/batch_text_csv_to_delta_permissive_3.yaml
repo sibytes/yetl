@@ -1,3 +1,10 @@
+# Loads data from text files to a delta table.
+# This load tests the following features:
+#   - No schema exists so the schema is inferred on primary load and saved into the repo as a starter schema - yetl.schema.createIfNotExists: true
+#   - no ddl definition the schema of the target table is inferred by the form the data.
+#   - merge schema is false on write but because the table is created 1st the frameowrk will change this to true automatically on the 1st load.
+#   - partitions are defined here in the yaml because there is no sql to define the table.
+
 dataflow:
   retries: 0
   retry_wait: 1
@@ -71,7 +78,6 @@ dataflow:
           mode: PERMISSIVE
           inferSchema: false
           header: true
-          # badRecordsPath: "data/exceptions/landing/customer_preferences/{{timeslice(path_date_format)}}"
       exceptions:
           path: "data/delta_lake/exceptions"
           database: landing
@@ -100,6 +106,7 @@ dataflow:
         # yetl.allowRepartitioning: true
         partitioned_by:
           - _partition_key
+          - allow_contact
 
         zorder_by:
           - email

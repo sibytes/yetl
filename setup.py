@@ -26,7 +26,15 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
     ],
-    packages=find_packages(),
+    packages=[
+        "yetl_flow",
+        "yetl_flow.dataflow",
+        "yetl_flow.dataset",
+        "yetl_flow.file_system",
+        "yetl_flow.metadata_repo",
+        "yetl_flow.parser",
+        "yetl_flow.schema_repo",
+    ],
     install_requires=["pyyaml", "pyspark", "regex", "delta-spark"],
     zip_safe=False,
 )

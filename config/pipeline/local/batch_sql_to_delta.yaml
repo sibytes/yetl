@@ -1,3 +1,6 @@
+# Loads data using SQL from the a delta table called customer in to a table called dim_customer
+# A pattern that we would use to load curated tables tables such as a data warehouse or feature store.
+
 dataflow:
   retries: 0
   retry_wait: 1

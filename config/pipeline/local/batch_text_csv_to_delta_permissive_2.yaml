@@ -1,3 +1,9 @@
+# Loads data from text files to a delta table.
+# This load tests the following features:
+#   - permissice data validation.
+#   - dll definition of the target table using inline sql
+#   - partitions in the ddl should override the partitions in here
+
 dataflow:
   retries: 0
   retry_wait: 1

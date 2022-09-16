@@ -257,16 +257,23 @@ class Writer(Destination):
         self.context.log.info(f"Writing data to {self.database_table} at {self.path}")
         if self.dataframe:
 
-            auto_compact = all(
-                [self.auto_compact, self.partitions, not self.context.is_databricks]
-            )
-            if auto_compact:
-                self.context.log.info(
-                    f"Auto compacting in memory partitions for {self.database_table} on partitions {self.partitions}"
-                )
-                self.dataframe = self.dataframe.coalesce(1).repartition(
-                    *self.partitions
-                )
+            # don't think this is needed because from the docs
+            # "Repartition output data before write: For partitioned tables, merge can produce a much larger number 
+            # of small files than the number of shuffle partitions. This is because every shuffle task can write 
+            # multiple files in multiple partitions, and can become a performance bottleneck. In many cases, it 
+            # helps to repartition the output data by the table’s partition columns before writing it. You enable 
+            # this by setting the Spark session configuration spark.databricks.delta.merge.repartitionBeforeWrite.enabled to true."
+
+            # auto_compact = all(
+            #     [self.auto_compact, self.partitions, not self.context.is_databricks]
+            # )
+            # if auto_compact:
+            #     self.context.log.info(
+            #         f"Auto compacting in memory partitions for {self.database_table} on partitions {self.partitions}"
+            #     )
+            #     self.dataframe = self.dataframe.repartition(
+            #         *self.partitions
+            #     )
 
             (super().write())
 

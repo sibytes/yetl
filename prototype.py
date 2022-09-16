@@ -29,4 +29,15 @@ tbl.details()
 
 df: DataFrame = tbl.toDF()
 
-df.transform()
+(
+    tbl.alias('dst').merge(
+        df.alias('src'),
+        'people.id = updates.id'
+    ) 
+    .whenMatchedUpdateAll()
+    .whenMatchedDelete()
+    .whenNotMatchedInsertAll()
+    .execute()
+)
+
+

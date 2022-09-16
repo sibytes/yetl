@@ -113,4 +113,5 @@ wcwidth==0.2.5
 webencodings==0.5.1
 -e git+ssh://git@github.com/sibytes/yetl.git@b4f888b67b317b14c2db07edf9b64a534a8aa53a#egg=yetl
 -e git+ssh://git@github.com/sibytes/yetl.git@b9f81bb3def0aeb0468c2764f2ee20a6b4368f56#egg=yetl_flow
+-e git+ssh://git@github.com/sibytes/yetl.git@d92ff7d47b0113fa2c0efe497c078edd1d3d7eb6#egg=yetl_framework
 zipp==3.8.0
