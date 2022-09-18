@@ -52,7 +52,7 @@ def batch_text_csv_to_delta_permissive_1(
 
 ```python
 timeslice = Timeslice(2022, 7, 12)
-results = customer_landing_to_rawdb_csv(
+results = batch_text_csv_to_delta_permissive_1(
     timeslice = Timeslice(2022, 7, 12)
 )
 ```
@@ -60,7 +60,7 @@ results = customer_landing_to_rawdb_csv(
 ## Run a full load for Year 2022:
 
 ```python
-results = customer_landing_to_rawdb_csv(
+results = batch_text_csv_to_delta_permissive_1(
     timeslice = Timeslice(2022, '*', '*'),
     save = OverwriteSave
 )
