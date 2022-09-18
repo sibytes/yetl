@@ -17,8 +17,7 @@ from typing import Type
 def batch_text_csv_to_delta_permissive_1(
     context: Context,
     dataflow: IDataflow,
-    timeslice: Timeslice = TimesliceUtcNow(),
-    save_type: Type[Save] = None,
+    timeslice: Timeslice = TimesliceUtcNow()
 ) -> dict:
     """Load the demo customer data as is into a raw delta hive registered table.
 
@@ -46,7 +45,7 @@ def batch_text_csv_to_delta_permissive_1(
 # timeslice = Timeslice(2022, 7, 11)
 # timeslice = Timeslice(2022, 7, 12)
 timeslice = Timeslice(2022, 7, "*")
-results = batch_text_csv_to_delta_permissive_1(timeslice=timeslice, save_type=MergeSave)
+results = batch_text_csv_to_delta_permissive_1(timeslice=timeslice)
 
 # reload load
 # timeslice = Timeslice(2022, "*", "*")

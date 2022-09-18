@@ -6,6 +6,7 @@ from .. import _delta_lake as dl
 from pyspark.sql import DataFrame
 from typing import ChainMap
 from ..parser import parser
+from ..save import save_factory, Save
 
 
 class Writer(Destination):
@@ -41,6 +42,17 @@ class Writer(Destination):
             msg = f"{MODE} is missing from the Destination Write configuration and is required."
             context.log.error(msg)
             raise Exception(msg) from e
+
+
+        if isinstance(self.mode, dict):
+            if "merge" == self.mode.keys[0]:
+                
+                self.merge_join = self.mode.get("join")
+                self.merge_update_match = self.mode.get("update_match")
+                self.merge_delete_match = self.mode.get("delete_match")
+                self.mode = self.mode.keys[0]
+
+        self._save:Save = save_factory.get_save_type(self)
 
         self._initial_load = super().initial_load
 
@@ -275,7 +287,7 @@ class Writer(Destination):
             #         *self.partitions
             #     )
 
-            (super().write())
+            super().write()
 
             auto_optimize = all([self.auto_optimize, not self.context.is_databricks])
             if auto_optimize:

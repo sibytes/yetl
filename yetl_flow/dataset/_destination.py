@@ -1,6 +1,5 @@
 from ._dataset import Dataset
 from pyspark.sql import DataFrame
-from ._save import DefaultSave
 from pyspark.sql import functions as fn
 from ..parser._constants import *
 import json
@@ -41,7 +40,8 @@ class Destination(Dataset):
                 f"""IO operations for {self.database}.{self.table} will be paritioned by: \n{msg_partition_values}"""
             )
 
-        super().write()
+        # TODO: replace with compsition not inheritance.
+        self._save.write()
         self.save_metadata()
 
     def _get_partitions_values(self):
