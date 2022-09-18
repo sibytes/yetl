@@ -110,18 +110,21 @@ class MergeSave(Save):
             ) 
         )
 
-        if merge_update_match:
-            merger = merger.whenMatchedUpdateAll(merge_update_match)
-        else:
-            merger = merger.whenMatchedUpdateAll()
+        if self.dataset.merge_update:
+            if merge_update_match:
+                merger = merger.whenMatchedUpdateAll(merge_update_match)
+            else:
+                merger = merger.whenMatchedUpdateAll()
 
-        if merge_insert_match:
-            merger = merger.whenNotMatchedInsertAll(merge_insert_match)
-        else:
-            merger = merger.whenNotMatchedInsertAll(merge_insert_match)
+        if self.dataset.merge_insert:
+            if merge_insert_match:
+                merger = merger.whenNotMatchedInsertAll(merge_insert_match)
+            else:
+                merger = merger.whenNotMatchedInsertAll()
 
-        if self.dataset.merge_delete_match:
-            merger = merger.whenMatchedDelete(self.dataset.merge_delete_match)
+        if self.dataset.merge_delete:
+            if self.dataset.merge_delete_match:
+                merger = merger.whenMatchedDelete(self.dataset.merge_delete_match)
 
         merger.execute()
 

@@ -46,11 +46,11 @@ class Writer(Destination):
 
         if isinstance(self.mode, dict):
             if "merge" in self.mode.keys():
-                self.mode = self.mode.get("merge")
-                self.merge_join = self.mode.get("join")
-                self.merge_update_match = self.mode.get("update_match")
-                self.merge_delete_match = self.mode.get("delete_match")
-                self.merge_insert_match = self.mode.get("insert_match")
+                mode = self.mode.get("merge")
+                self.merge_join = mode.get("join")
+                self.merge_update, self.merge_update_match = self._get_merge_match(mode, "update")
+                self.merge_insert, self.merge_insert_match = self._get_merge_match(mode, "insert")
+                self.merge_delete, self.merge_delete_match = self._get_merge_match(mode, "delete")
                 self.mode = "merge"
 
         self.save:Save = save_factory.get_save_type(self)
@@ -77,6 +77,16 @@ class Writer(Destination):
 
     def _table_repartition(self, table_properties: dict, config: dict):
         pass
+
+    def _get_merge_match(self, mode:dict, crud:str):
+
+        merge = mode.get(crud, False)
+        merge_match = None
+        if isinstance(merge, dict):
+            merge_match = merge.get("match")
+            merge = True
+
+        return merge, merge_match
 
     def _get_conf_partitions(self, config: dict, table_ddl: str):
 
