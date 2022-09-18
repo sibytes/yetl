@@ -1,6 +1,7 @@
 from enum import Enum
 from abc import ABC
 from pyspark.sql import DataFrame
+from delta import DeltaTable
 
 
 class SaveMode(Enum):
@@ -114,4 +115,17 @@ class MergeSave(Save):
         self.context.log.info(
             f"Writer saving using the {self.__class__.__name__} which is an injected save."
         )
-        raise NotImplementedError()
+
+        tbl = DeltaTable.forPath(self.context.spark, self.path)
+        (
+            tbl.alias('dst').merge(
+                self.dataframe.alias('src'),
+                'dst.id = src.id'
+            ) 
+            .whenMatchedUpdateAll()
+            .whenMatchedDelete()
+            .whenNotMatchedInsertAll()
+            .execute()
+        )
+
+

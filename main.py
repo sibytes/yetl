@@ -6,6 +6,7 @@ from yetl_flow import (
     TimesliceUtcNow,
     OverwriteSave,
     OverwriteSchemaSave,
+    MergeSave,
     Save,
 )
 from pyspark.sql.functions import *
@@ -45,7 +46,7 @@ def batch_text_csv_to_delta_permissive_1(
 # timeslice = Timeslice(2022, 7, 11)
 # timeslice = Timeslice(2022, 7, 12)
 timeslice = Timeslice(2022, 7, "*")
-results = batch_text_csv_to_delta_permissive_1(timeslice=timeslice)
+results = batch_text_csv_to_delta_permissive_1(timeslice=timeslice, save_type=MergeSave)
 
 # reload load
 # timeslice = Timeslice(2022, "*", "*")
