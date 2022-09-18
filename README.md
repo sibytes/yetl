@@ -23,16 +23,14 @@ from yetl_flow import (
     Save
 )
 from pyspark.sql.functions import *
-from typing import Type
 
 @yetl_flow(log_level="ERROR")
-def customer_landing_to_rawdb_csv(
-    context: Context, 
-    dataflow: IDataflow, 
-    timeslice: Timeslice = TimesliceUtcNow(), 
-    save_type: Type[Save] = None
+def batch_text_csv_to_delta_permissive_1(
+    context: Context,
+    dataflow: IDataflow,
+    timeslice: Timeslice = TimesliceUtcNow(),
+    save: Save = None
 ) -> dict:
-    """Load the demo customer data as is into a raw delta hive registered table."""
 
     # the config for this dataflow has 2 landing sources that are joined
     # and written to delta table
@@ -43,9 +41,11 @@ def customer_landing_to_rawdb_csv(
 
     context.log.info("Joining customers with customer_preferences")
     df = df_cust.join(df_prefs, "id", "inner")
-    df = df_cust
+    df = df.withColumn(
+        "_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer")
+    )
 
-    dataflow.destination_df("raw.customer", df)
+    dataflow.destination_df("raw.customer", df, save = save)
 ```
 
 ## Run an incremental load:
@@ -57,12 +57,12 @@ results = customer_landing_to_rawdb_csv(
 )
 ```
 
-## Run a full load:
+## Run a full load for Year 2022:
 
 ```python
 results = customer_landing_to_rawdb_csv(
     timeslice = Timeslice(2022, '*', '*'),
-    save_type = OverwriteSave
+    save = OverwriteSave
 )
 ```
 
