@@ -6,6 +6,7 @@ from .. import _delta_lake as dl
 from pyspark.sql import DataFrame
 from typing import ChainMap
 from ..parser import parser
+from ..save import save_factory, Save
 
 
 class Writer(Destination):
@@ -42,6 +43,18 @@ class Writer(Destination):
             context.log.error(msg)
             raise Exception(msg) from e
 
+
+        if isinstance(self.mode, dict):
+            if "merge" in self.mode.keys():
+                mode = self.mode.get("merge")
+                self.merge_join = mode.get("join")
+                self.merge_update, self.merge_update_match = self._get_merge_match(mode, "update")
+                self.merge_insert, self.merge_insert_match = self._get_merge_match(mode, "insert")
+                self.merge_delete, self.merge_delete_match = self._get_merge_match(mode, "delete")
+                self.mode = "merge"
+
+        self.save:Save = save_factory.get_save_type(self)
+
         self._initial_load = super().initial_load
 
         if self.auto_io:
@@ -64,6 +77,16 @@ class Writer(Destination):
 
     def _table_repartition(self, table_properties: dict, config: dict):
         pass
+
+    def _get_merge_match(self, mode:dict, crud:str):
+
+        merge = mode.get(crud, False)
+        merge_match = None
+        if isinstance(merge, dict):
+            merge_match = merge.get("match")
+            merge = True
+
+        return merge, merge_match
 
     def _get_conf_partitions(self, config: dict, table_ddl: str):
 
@@ -275,7 +298,7 @@ class Writer(Destination):
             #         *self.partitions
             #     )
 
-            (super().write())
+            super().write()
 
             auto_optimize = all([self.auto_optimize, not self.context.is_databricks])
             if auto_optimize:

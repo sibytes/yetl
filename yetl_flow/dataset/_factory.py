@@ -1,7 +1,6 @@
 from enum import Enum
 from typing import Type
 from ._dataset import Dataset
-from ._save import Save, DefaultSave, AppendSave
 from ._reader import Reader
 from ._writer import Writer
 from ._stream_reader import StreamReader
@@ -37,8 +36,7 @@ class _DatasetFactory:
         context,
         database: str,
         table: str,
-        dataset_config: dict,
-        save_type: Type[Save] = DefaultSave,
+        dataset_config: dict
     ) -> Dataset:
 
         type: IOType = next(
@@ -53,14 +51,6 @@ class _DatasetFactory:
 
         self._logger.info(f"Get {type.name} from factory dataset")
         dataset_class = self._dataset.get(type)
-
-        # TODO: fix this - need to register save types and lose the if
-        if type == IOType.WRITE:
-
-            class InjectDestination(dataset_class, save_type):
-                pass
-
-            dataset_class = InjectDestination
 
         if not dataset_class:
             self._logger.error(
@@ -78,3 +68,5 @@ factory.register_dataset_type(IOType.READ, Reader)
 factory.register_dataset_type(IOType.WRITE, Writer)
 factory.register_dataset_type(IOType.READSTREAM, StreamReader)
 factory.register_dataset_type(IOType.WRITESTREAM, StreamWriter)
+
+

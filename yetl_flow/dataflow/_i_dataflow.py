@@ -1,4 +1,4 @@
-from ..dataset import Dataset, Save, DefaultSave
+from ..dataset import Dataset
 from typing import Type
 from abc import ABC, abstractmethod
 from pyspark.sql import DataFrame
@@ -10,8 +10,7 @@ class IDataflow(ABC):
         self,
         context,
         config: dict,
-        dataflow_config: dict,
-        save_type: Type[Save] = DefaultSave,
+        dataflow_config: dict
     ) -> None:
 
         self.log = context.log
