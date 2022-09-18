@@ -40,8 +40,7 @@ class Destination(Dataset):
                 f"""IO operations for {self.database}.{self.table} will be paritioned by: \n{msg_partition_values}"""
             )
 
-        # TODO: replace with compsition not inheritance.
-        self._save.write()
+        self.save.write()
         self.save_metadata()
 
     def _get_partitions_values(self):

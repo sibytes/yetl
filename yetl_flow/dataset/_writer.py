@@ -52,7 +52,7 @@ class Writer(Destination):
                 self.merge_delete_match = self.mode.get("delete_match")
                 self.mode = self.mode.keys[0]
 
-        self._save:Save = save_factory.get_save_type(self)
+        self.save:Save = save_factory.get_save_type(self)
 
         self._initial_load = super().initial_load
 

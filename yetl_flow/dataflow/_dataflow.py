@@ -2,8 +2,9 @@ from pyspark.sql import DataFrame, functions as fn
 from ..dataset import Dataset, Source, Destination
 from ._i_dataflow import IDataflow
 from ..dataset import dataset_factory
-from typing import Type
+from typing import Callable, Type
 from enum import Enum
+from ..save import Save
 
 
 class DataFlowType(Enum):
@@ -70,9 +71,12 @@ class Dataflow(IDataflow):
         src: Source = self.sources[database_table]
         return src.dataframe
 
-    def destination_df(self, database_table: str, dataframe: DataFrame):
+    def destination_df(self, database_table: str, dataframe: DataFrame, save:Callable = None):
 
         dst: Destination = self.destinations[database_table]
         dst.dataframe = dataframe
+        if save:
+            dst.save = save(dst)
+
         if dst.auto_io:
             dst.write()

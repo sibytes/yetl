@@ -38,17 +38,17 @@ def batch_text_csv_to_delta_permissive_1(
         "_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer")
     )
 
-    dataflow.destination_df("raw.customer", df)
+    dataflow.destination_df("raw.customer", df, save = OverwriteSchemaSave)
 
 
 # incremental load
 # timeslice = Timeslice(2022, 7, 11)
 # timeslice = Timeslice(2022, 7, 12)
-timeslice = Timeslice(2022, 7, "*")
-results = batch_text_csv_to_delta_permissive_1(timeslice=timeslice)
+# timeslice = Timeslice(2022, 7, "*")
+# results = batch_text_csv_to_delta_permissive_1(timeslice=timeslice)
 
 # reload load
-# timeslice = Timeslice(2022, "*", "*")
-# results = customer_landing_to_rawdb_csv(
-#     timeslice=timeslice, save_type=OverwriteSchemaSave
-# )
+timeslice = Timeslice(2022, "*", "*")
+results = batch_text_csv_to_delta_permissive_1(
+    timeslice = timeslice
+)
