@@ -115,6 +115,13 @@ There is a CI build configured for this repo that builds on main origin and publ
 
 # Releases
 
+Version: 0.0.14
+
+- Started building in integration tests
+- Refactored Destination save using class composition
+- Recfactored save dependency injection down to the dataset level
+- Added support for Merge save using deltalake
+
 Version: 0.0.13
 
 - Added support default schema creation etl.schema.createIfNotExists.

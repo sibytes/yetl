@@ -98,17 +98,42 @@ class MergeSave(Save):
     def write(self):
         super().write()
 
+
+        merge_update_match = self._derive_any_except_match(self.dataset.merge_update_match, self.dataset.dataframe)
+        merge_insert_match = self._derive_any_except_match(self.dataset.merge_insert_match, self.dataset.dataframe)
+
         tbl = DeltaTable.forPath(self.dataset.context.spark, self.dataset.path)
-        (
+        merger = (
             tbl.alias('dst').merge(
                 self.dataset.dataframe.alias('src'),
-                'dst.id = src.id'
+                self.dataset.merge_join
             ) 
-            .whenMatchedUpdateAll()
-            .whenMatchedDelete()
-            .whenNotMatchedInsertAll()
-            .execute()
         )
+
+        if merge_update_match:
+            merger = merger.whenMatchedUpdateAll(merge_update_match)
+        else:
+            merger = merger.whenMatchedUpdateAll()
+
+        if merge_insert_match:
+            merger = merger.whenNotMatchedInsertAll(merge_insert_match)
+        else:
+            merger = merger.whenNotMatchedInsertAll(merge_insert_match)
+
+        if self.dataset.merge_delete_match:
+            merger = merger.whenMatchedDelete(self.dataset.merge_delete_match)
+
+        merger.execute()
+
+    def _derive_any_except_match(self, merge_match:str|dict, df:DataFrame):
+
+        if isinstance(merge_match, dict):
+            any_except = merge_match.get("any_not_equal_except")
+            derived_merge_match = [f"src.{c} != dst.{c}" for c in df.columns if c not in any_except and not c.startswith("_")]
+            derived_merge_match = " or ".join(derived_merge_match)
+            return derived_merge_match
+        else:
+            return merge_match
 
 
 class DefaultSave(AppendSave):

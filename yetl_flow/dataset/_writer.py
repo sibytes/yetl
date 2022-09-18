@@ -45,12 +45,13 @@ class Writer(Destination):
 
 
         if isinstance(self.mode, dict):
-            if "merge" == self.mode.keys[0]:
-                
+            if "merge" in self.mode.keys():
+                self.mode = self.mode.get("merge")
                 self.merge_join = self.mode.get("join")
                 self.merge_update_match = self.mode.get("update_match")
                 self.merge_delete_match = self.mode.get("delete_match")
-                self.mode = self.mode.keys[0]
+                self.merge_insert_match = self.mode.get("insert_match")
+                self.mode = "merge"
 
         self.save:Save = save_factory.get_save_type(self)
 

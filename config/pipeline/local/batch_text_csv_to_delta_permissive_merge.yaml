@@ -161,14 +161,28 @@ dataflow:
               src.id = dst.id
 
             # you can provide the clause explicitly
-            # update_match: |
-            #   src.change_hash != dst.change_hash
+            # update
+            #   match: |
+            #     src.change_hash != dst.change_hash
             # or use a simple abstract construct for simple use cases
-            update_match: 
-              all_not_equal_except:
-                - id
-            delete_match: |
-              src.change_hash IS NULL
+            udpate:
+              match: 
+                any_not_equal_except:
+                  - id
+
+            
+            insert: true
+              # you can provide the clause explicitly
+              # match: |
+              #   src.change_hash != dst.change_hash
+              # or use a simple abstract construct for simple use cases
+              # insert_match: 
+              #   any_not_equal_except:
+              #     - id
+
+            delete: false
+              # match: |
+              #   src.change_hash IS NULL
 
         options:
           mergeSchema: true

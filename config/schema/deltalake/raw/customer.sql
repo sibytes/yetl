@@ -10,7 +10,7 @@ CREATE TABLE {{database_name}}.{{table_name}}
     allow_contact boolean,
     _partition_key int,
     _context_id string,
-    _slice timestamp
+    _timeslice timestamp
 )
 USING DELTA LOCATION '{{path}}'
 PARTITIONED BY (_partition_key,allow_contact);
