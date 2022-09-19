@@ -115,6 +115,10 @@ There is a CI build configured for this repo that builds on main origin and publ
 
 # Releases
 
+Version: 0.0.15
+
+- raise errors and warnings from thresholds configurations
+
 Version: 0.0.14
 
 - Started building in integration tests
