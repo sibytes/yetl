@@ -4,7 +4,11 @@ from pyspark.sql.types import StructType
 from ..parser._constants import *
 from . import _builtin_functions as builtin_funcs
 from ..schema_repo import ISchemaRepo, SchemaNotFound
-from ._validation import PermissiveSchemaOnRead, BadRecordsPathSchemaOnRead
+from ._validation import (
+    PermissiveSchemaOnRead,
+    BadRecordsPathSchemaOnRead,
+    ThresholdLevels,
+)
 from pyspark.sql import DataFrame
 import json
 from .. import _delta_lake as dl
@@ -32,6 +36,9 @@ class Reader(Source):
             YETL_TBLP_METADATA_TIMESLICE, True
         )
 
+        self.thresholds_warnings = self._get_thresholds(config, ThresholdLevels.WARNING)
+        self.thresholds_error = self._get_thresholds(config, ThresholdLevels.ERROR)
+
         self.has_exception_configured = EXCEPTIONS in config.keys()
         self.auto_io = io_properties.get(AUTO_IO, True)
         self.options: dict = io_properties.get(OPTIONS)
@@ -43,7 +50,6 @@ class Reader(Source):
         try:
             self.schema = self._get_schema(config["spark_schema_repo"])
             self.has_schema = True
-
 
         except SchemaNotFound as e:
             self.schema = None
@@ -85,6 +91,11 @@ class Reader(Source):
             )
             self.create_or_alter_table()
 
+    def _get_thresholds(self, config: dict, level: ThresholdLevels):
+        thresholds: dict = config.get("thresholds")
+        if thresholds:
+            return thresholds.get(level.value)
+
     def _validate_configuration(self):
 
         if not self.has_badrecordspath_configured and not self.mode:
@@ -120,12 +131,16 @@ class Reader(Source):
             self.context.log.error(msg)
             raise Exception(msg)
 
-        if self.mode.lower()!=PERMISSIVE and self.has_exception_configured:
+        if self.mode.lower() != PERMISSIVE and self.has_exception_configured:
             msg = f"{MODE}={self.mode}, exceptions can only be handled on a mode={PERMISSIVE}, {EXCEPTIONS} configuration will be disabled. {CONTEXT_ID}={str(self.context_id)}"
             self.context.log.warning(msg)
             self.has_exception_configured = False
 
-        if self.mode.lower()==PERMISSIVE and self.has_exception_configured and not self.has_corrupt_column:
+        if (
+            self.mode.lower() == PERMISSIVE
+            and self.has_exception_configured
+            and not self.has_corrupt_column
+        ):
             msg = f"If expceptions are configured for {MODE}={self.mode} then _corrupt_record columns must be supplied in the schema. {CONTEXT_ID}={str(self.context_id)}"
             self.context.log.error(msg)
             raise Exception(msg)
@@ -336,7 +351,9 @@ class Reader(Source):
 
         # if there isn't a schema and it's configured to create one the save it to repo.
         if self._creating_inferred_schema:
-            self.context.log.info(f"Saving inferred schema for {self.database}.{self.table} into schema repository. {CONTEXT_ID}={str(self.context_id)}")
+            self.context.log.info(
+                f"Saving inferred schema for {self.database}.{self.table} into schema repository. {CONTEXT_ID}={str(self.context_id)}"
+            )
             self.schema = df.schema
             self.schema_repo.save_schema(self.schema, self.database, self.table)
 

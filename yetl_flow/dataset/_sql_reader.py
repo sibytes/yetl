@@ -8,22 +8,17 @@ import json
 from .. import _delta_lake as dl
 
 
-
 class SQLReader(Source):
     def __init__(
         self, context, database: str, table: str, config: dict, io_type: str
     ) -> None:
         super().__init__(context, database, table, config, io_type)
 
-
-
     def _validate_configuration(self):
         pass
 
-
     def _get_table_properties(self, table_config: dict):
         return table_config.get(PROPERTIES, {})
-
 
     @property
     def initial_load(self):
@@ -43,8 +38,6 @@ class SQLReader(Source):
         schema = self.schema_repo.load_schema(self.database, self.table)
         return schema
 
-
-
     def validate(self):
 
         pass
@@ -56,7 +49,7 @@ class SQLReader(Source):
 
         self.context.log.debug(json.dumps(self.options, indent=4, default=str))
 
-        df:DataFrame = self.context.spark.sql(self.sql)
+        df: DataFrame = self.context.spark.sql(self.sql)
 
         self.dataframe = df
         self.validation_result = self.validate()

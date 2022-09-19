@@ -32,11 +32,7 @@ class _DatasetFactory:
             return None
 
     def get_dataset_type(
-        self,
-        context,
-        database: str,
-        table: str,
-        dataset_config: dict
+        self, context, database: str, table: str, dataset_config: dict
     ) -> Dataset:
 
         type: IOType = next(
@@ -68,5 +64,3 @@ factory.register_dataset_type(IOType.READ, Reader)
 factory.register_dataset_type(IOType.WRITE, Writer)
 factory.register_dataset_type(IOType.READSTREAM, StreamReader)
 factory.register_dataset_type(IOType.WRITESTREAM, StreamWriter)
-
-

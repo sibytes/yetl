@@ -15,5 +15,5 @@ __all__ = [
     "Writer",
     "StreamReader",
     "StreamWriter",
-    "dataset_factory"
+    "dataset_factory",
 ]

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class SaveModeType(Enum):
     """https://spark.apache.org/docs/latest/sql-data-sources-load-save-functions.html#save-modes"""
 

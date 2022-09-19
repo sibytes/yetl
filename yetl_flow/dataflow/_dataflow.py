@@ -41,9 +41,7 @@ class Dataflow(IDataflow):
                 v["deltalake_schema_repo"] = self._deltalake_schema_repo
                 v["context_id"] = self.context.context_id
                 v["timeslice"] = self.context.timeslice
-                md = dataset_factory.get_dataset_type(
-                    self.context, database, table, v
-                )
+                md = dataset_factory.get_dataset_type(self.context, database, table, v)
                 self.log.debug(
                     f"Deserialized {database}.{table} configuration into {type(md)}"
                 )
@@ -71,7 +69,9 @@ class Dataflow(IDataflow):
         src: Source = self.sources[database_table]
         return src.dataframe
 
-    def destination_df(self, database_table: str, dataframe: DataFrame, save:Callable = None):
+    def destination_df(
+        self, database_table: str, dataframe: DataFrame, save: Callable = None
+    ):
 
         dst: Destination = self.destinations[database_table]
         dst.dataframe = dataframe

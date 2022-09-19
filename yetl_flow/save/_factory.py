@@ -14,6 +14,7 @@ import logging
 from ..dataset import Dataset
 from ._save_mode_type import SaveModeType
 
+
 class _SaveFactory:
     def __init__(self) -> None:
         self._logger = logging.getLogger(__name__)
@@ -30,10 +31,7 @@ class _SaveFactory:
         except:
             return None
 
-    def get_save_type(
-        self,
-        dataset: Dataset
-    ) -> Save:
+    def get_save_type(self, dataset: Dataset) -> Save:
 
         type: SaveModeType = self._get_save_mode_type(dataset.mode)
 
@@ -58,4 +56,3 @@ factory.register_save_type(SaveModeType.OVERWRITE, OverwriteSave)
 factory.register_save_type(SaveModeType.OVERWRITE_SCHEMA, OverwriteSchemaSave)
 factory.register_save_type(SaveModeType.ERROR_IF_EXISTS, ErrorIfExistsSave)
 factory.register_save_type(SaveModeType.MERGE, MergeSave)
-

@@ -18,7 +18,7 @@ def batch_text_csv_to_delta_permissive_merge(
     context: Context,
     dataflow: IDataflow,
     timeslice: Timeslice = TimesliceUtcNow(),
-    save: Save = None
+    save: Save = None,
 ) -> dict:
     """Load the demo customer data as is into a raw delta hive registered table.
 
@@ -39,7 +39,7 @@ def batch_text_csv_to_delta_permissive_merge(
         "_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer")
     )
 
-    dataflow.destination_df("raw.customer", df, save = save)
+    dataflow.destination_df("raw.customer", df, save=save)
 
 
 # incremental load
@@ -50,6 +50,4 @@ def batch_text_csv_to_delta_permissive_merge(
 
 # reload load
 timeslice = Timeslice(2022, "*", "*")
-results = batch_text_csv_to_delta_permissive_merge(
-    timeslice = timeslice
-)
+results = batch_text_csv_to_delta_permissive_merge(timeslice=timeslice)

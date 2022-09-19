@@ -9,7 +9,6 @@ from ._save_mode_type import SaveModeType
 
 
 class ErrorIfExistsSave(Save):
-
     def __init__(self, dataset: Dataset) -> None:
         super().__init__(dataset)
 
@@ -25,7 +24,6 @@ class ErrorIfExistsSave(Save):
 
 
 class AppendSave(Save):
-
     def __init__(self, dataset: Dataset) -> None:
         super().__init__(dataset)
 
@@ -41,7 +39,6 @@ class AppendSave(Save):
 
 
 class OverwriteSchemaSave(Save):
-
     def __init__(self, dataset: Dataset) -> None:
         super().__init__(dataset)
 
@@ -59,7 +56,6 @@ class OverwriteSchemaSave(Save):
 
 
 class OverwriteSave(Save):
-
     def __init__(self, dataset: Dataset) -> None:
         super().__init__(dataset)
 
@@ -75,7 +71,6 @@ class OverwriteSave(Save):
 
 
 class IgnoreSave(Save):
-
     def __init__(self, dataset: Dataset) -> None:
         super().__init__(dataset)
 
@@ -91,23 +86,22 @@ class IgnoreSave(Save):
 
 
 class MergeSave(Save):
-
     def __init__(self, dataset: Dataset) -> None:
         super().__init__(dataset)
 
     def write(self):
         super().write()
 
-
-        merge_update_match = self._derive_any_except_match(self.dataset.merge_update_match, self.dataset.dataframe)
-        merge_insert_match = self._derive_any_except_match(self.dataset.merge_insert_match, self.dataset.dataframe)
+        merge_update_match = self._derive_any_except_match(
+            self.dataset.merge_update_match, self.dataset.dataframe
+        )
+        merge_insert_match = self._derive_any_except_match(
+            self.dataset.merge_insert_match, self.dataset.dataframe
+        )
 
         tbl = DeltaTable.forPath(self.dataset.context.spark, self.dataset.path)
-        merger = (
-            tbl.alias('dst').merge(
-                self.dataset.dataframe.alias('src'),
-                self.dataset.merge_join
-            ) 
+        merger = tbl.alias("dst").merge(
+            self.dataset.dataframe.alias("src"), self.dataset.merge_join
         )
 
         if self.dataset.merge_update:
@@ -128,11 +122,15 @@ class MergeSave(Save):
 
         merger.execute()
 
-    def _derive_any_except_match(self, merge_match:str|dict, df:DataFrame):
+    def _derive_any_except_match(self, merge_match: str | dict, df: DataFrame):
 
         if isinstance(merge_match, dict):
             any_except = merge_match.get("any_not_equal_except")
-            derived_merge_match = [f"src.{c} != dst.{c}" for c in df.columns if c not in any_except and not c.startswith("_")]
+            derived_merge_match = [
+                f"src.{c} != dst.{c}"
+                for c in df.columns
+                if c not in any_except and not c.startswith("_")
+            ]
             derived_merge_match = " or ".join(derived_merge_match)
             return derived_merge_match
         else:
@@ -140,10 +138,8 @@ class MergeSave(Save):
 
 
 class DefaultSave(AppendSave):
-
     def __init__(self, dataset: Dataset) -> None:
         super().__init__(dataset)
 
     def write(self):
         super().write()
-

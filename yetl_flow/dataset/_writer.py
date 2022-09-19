@@ -43,17 +43,22 @@ class Writer(Destination):
             context.log.error(msg)
             raise Exception(msg) from e
 
-
         if isinstance(self.mode, dict):
             if "merge" in self.mode.keys():
                 mode = self.mode.get("merge")
                 self.merge_join = mode.get("join")
-                self.merge_update, self.merge_update_match = self._get_merge_match(mode, "update")
-                self.merge_insert, self.merge_insert_match = self._get_merge_match(mode, "insert")
-                self.merge_delete, self.merge_delete_match = self._get_merge_match(mode, "delete")
+                self.merge_update, self.merge_update_match = self._get_merge_match(
+                    mode, "update"
+                )
+                self.merge_insert, self.merge_insert_match = self._get_merge_match(
+                    mode, "insert"
+                )
+                self.merge_delete, self.merge_delete_match = self._get_merge_match(
+                    mode, "delete"
+                )
                 self.mode = "merge"
 
-        self.save:Save = save_factory.get_save_type(self)
+        self.save: Save = save_factory.get_save_type(self)
 
         self._initial_load = super().initial_load
 
@@ -78,7 +83,7 @@ class Writer(Destination):
     def _table_repartition(self, table_properties: dict, config: dict):
         pass
 
-    def _get_merge_match(self, mode:dict, crud:str):
+    def _get_merge_match(self, mode: dict, crud: str):
 
         merge = mode.get(crud, False)
         merge_match = None
@@ -281,10 +286,10 @@ class Writer(Destination):
         if self.dataframe:
 
             # don't think this is needed because from the docs
-            # "Repartition output data before write: For partitioned tables, merge can produce a much larger number 
-            # of small files than the number of shuffle partitions. This is because every shuffle task can write 
-            # multiple files in multiple partitions, and can become a performance bottleneck. In many cases, it 
-            # helps to repartition the output data by the table’s partition columns before writing it. You enable 
+            # "Repartition output data before write: For partitioned tables, merge can produce a much larger number
+            # of small files than the number of shuffle partitions. This is because every shuffle task can write
+            # multiple files in multiple partitions, and can become a performance bottleneck. In many cases, it
+            # helps to repartition the output data by the table’s partition columns before writing it. You enable
             # this by setting the Spark session configuration spark.databricks.delta.merge.repartitionBeforeWrite.enabled to true."
 
             # auto_compact = all(

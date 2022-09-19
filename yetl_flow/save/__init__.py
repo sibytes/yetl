@@ -1,4 +1,3 @@
-
 from ._factory import factory as save_factory
 from ._saves import (
     AppendSave,

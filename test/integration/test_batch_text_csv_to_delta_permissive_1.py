@@ -41,7 +41,6 @@ def batch_text_csv_to_delta_permissive_1(
     dataflow.destination_df("raw.customer", df)
 
 
-
 def test_batch_text_csv_to_delta_permissive_1():
     # incremental load
     # timeslice = Timeslice(2022, 7, 11)

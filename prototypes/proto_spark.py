@@ -30,14 +30,10 @@ tbl.details()
 df: DataFrame = tbl.toDF()
 
 (
-    tbl.alias('dst').merge(
-        df.alias('src'),
-        'people.id = updates.id'
-    ) 
+    tbl.alias("dst")
+    .merge(df.alias("src"), "people.id = updates.id")
     .whenMatchedUpdateAll()
     .whenMatchedDelete()
     .whenNotMatchedInsertAll()
     .execute()
 )
-
-

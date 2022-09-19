@@ -1,5 +1,6 @@
 from abc import ABC
 
+
 class Save(ABC):
     def __init__(self, dataset) -> None:
         self.dataset = dataset

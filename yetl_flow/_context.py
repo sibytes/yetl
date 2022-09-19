@@ -8,6 +8,7 @@ import uuid
 from .schema_repo import schema_repo_factory
 import json
 from ._timeslice import Timeslice, TimesliceUtcNow
+
 # from .dataset import Save, DefaultSave
 from typing import Type
 from delta import configure_spark_with_delta_pip
@@ -21,7 +22,7 @@ class Context:
         log_level: str,
         name: str,
         spark: SparkSession = None,
-        timeslice: datetime = None
+        timeslice: datetime = None,
     ) -> None:
         self.context_id = uuid.uuid4()
         self.name = name
@@ -70,9 +71,7 @@ class Context:
         # The configuration file is loaded using the app name. This keeps intuitive tight
         # naming convention between datadlows and the config files that store them
         self.log.info(f"Setting application context dataflow {self.name}")
-        self.dataflow = self._get_deltalake_flow(
-            self.app_name, self.name, config
-        )
+        self.dataflow = self._get_deltalake_flow(self.app_name, self.name, config)
 
         self.log.info(f"Checking spark and databricks versions")
         self.spark_version, self.databricks_version = self._get_spark_version(
@@ -105,9 +104,7 @@ class Context:
 
         return version, databricks_version
 
-    def _get_deltalake_flow(
-        self, app_name: str, name: str, config: dict
-    ):
+    def _get_deltalake_flow(self, app_name: str, name: str, config: dict):
 
         dataflow_config: dict = cp.load_pipeline_config(app_name, name)
         dataflow_config = dataflow_config.get("dataflow")

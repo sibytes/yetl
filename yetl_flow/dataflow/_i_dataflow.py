@@ -6,12 +6,7 @@ import json
 
 
 class IDataflow(ABC):
-    def __init__(
-        self,
-        context,
-        config: dict,
-        dataflow_config: dict
-    ) -> None:
+    def __init__(self, context, config: dict, dataflow_config: dict) -> None:
 
         self.log = context.log
         self.log.debug("initialise dataflow with config")
