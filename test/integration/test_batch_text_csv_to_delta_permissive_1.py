@@ -17,7 +17,7 @@ def batch_text_csv_to_delta_permissive_1(
     context: Context,
     dataflow: IDataflow,
     timeslice: Timeslice = TimesliceUtcNow(),
-    save_type: Type[Save] = None,
+    save: Type[Save] = None,
 ) -> dict:
     """Load the demo customer data as is into a raw delta hive registered table.
 
@@ -38,7 +38,7 @@ def batch_text_csv_to_delta_permissive_1(
         "_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer")
     )
 
-    dataflow.destination_df("raw.customer", df)
+    dataflow.destination_df("raw.customer", df, save=save)
 
 
 def test_batch_text_csv_to_delta_permissive_1():
@@ -51,7 +51,7 @@ def test_batch_text_csv_to_delta_permissive_1():
     # reload load
     # timeslice = Timeslice(2022, "*", "*")
     results = batch_text_csv_to_delta_permissive_1(
-        timeslice=timeslice, save_type=OverwriteSchemaSave
+        timeslice=timeslice, saves=OverwriteSchemaSave
     )
 
     assert True

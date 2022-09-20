@@ -1,3 +1,5 @@
+import numbers
+from unicodedata import numeric
 from pyspark.sql.dataframe import DataFrame
 from pyspark.sql import functions as fn
 from pyspark.sql import SparkSession
@@ -49,28 +51,29 @@ class IValidator:
 
             raise_thresholds = False
             messages = []
-            if min_rows:
+            if isinstance(min_rows, int):
                 if self.total_count <= min_rows:
                     raise_thresholds = True
                     messages.append(
                         f"min_rows threshold exceeded: {self.total_count} < {min_rows}"
                     )
 
-            if max_rows:
+            if isinstance(max_rows, int):
                 if self.total_count > max_rows:
                     raise_thresholds = True
                     messages.append(
                         f"max_rows threshold exceeded: {self.total_count} > {max_rows}"
                     )
 
-            if exception_count:
+            if isinstance(exception_count, int):
                 if self.exceptions_count > exception_count:
                     raise_thresholds = True
                     messages.append(
                         f"exception_count threshold exceeded: {self.exceptions_count} >= {exception_count}"
                     )
 
-            if exception_percent:
+            if isinstance(exception_percent, numbers.Number):
+
                 actual_exception_percent = (invalid_count / self.total_count) * 100
                 if actual_exception_percent > exception_percent:
                     raise_thresholds = True
@@ -79,7 +82,7 @@ class IValidator:
                     )
 
             if raise_thresholds:
-                msg = f"{level.value} Thresholds:\n"
+                msg = f"{level.value} Thresholds:\n\t"
                 messages = "\n\t".join(messages)
                 msg = f"{msg}{messages}"
 

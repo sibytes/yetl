@@ -176,7 +176,7 @@ dataflow:
               # match: |
               #   src.change_hash != dst.change_hash
               # or use a simple abstract construct for simple use cases
-              # insert_match: 
+              # match: 
               #   any_not_equal_except:
               #     - id
 

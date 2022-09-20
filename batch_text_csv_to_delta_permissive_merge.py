@@ -14,7 +14,7 @@ from typing import Type
 
 
 @yetl_flow(log_level="ERROR")
-def batch_text_csv_to_delta_permissive_1(
+def batch_text_csv_to_delta_permissive_merge(
     context: Context,
     dataflow: IDataflow,
     timeslice: Timeslice = TimesliceUtcNow(),
@@ -43,11 +43,11 @@ def batch_text_csv_to_delta_permissive_1(
 
 
 # incremental load
-timeslice = Timeslice(2021, 1, 1)
+# timeslice = Timeslice(2022, 7, 11)
 # timeslice = Timeslice(2022, 7, 12)
 # timeslice = Timeslice(2022, 7, "*")
-results = batch_text_csv_to_delta_permissive_1(timeslice=timeslice)
+# results = batch_text_csv_to_delta_permissive_1(timeslice=timeslice)
 
 # reload load
-# timeslice = Timeslice(2022, "*", "*")
-# results = batch_text_csv_to_delta_permissive_1(timeslice=timeslice, save=OverwriteSave)
+timeslice = Timeslice(2022, "*", "*")
+results = batch_text_csv_to_delta_permissive_merge(timeslice=timeslice)

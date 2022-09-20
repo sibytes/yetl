@@ -291,6 +291,8 @@ class Reader(Source):
                 self.table,
                 bad_records_path,
                 self.context.spark,
+                self.thresholds_warnings,
+                self.thresholds_error,
             )
 
         if self.has_corrupt_column:
@@ -303,6 +305,8 @@ class Reader(Source):
                 validation_handler,
                 self.database,
                 self.table,
+                self.thresholds_warnings,
+                self.thresholds_error,
             )
 
         if validator:
