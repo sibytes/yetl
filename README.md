@@ -23,13 +23,14 @@ from yetl_flow import (
     Save
 )
 from pyspark.sql.functions import *
+from typing import Type
 
 @yetl_flow(log_level="ERROR")
 def batch_text_csv_to_delta_permissive_1(
     context: Context,
     dataflow: IDataflow,
     timeslice: Timeslice = TimesliceUtcNow(),
-    save: Save = None
+    save: Type[Save] = None
 ) -> dict:
 
     # the config for this dataflow has 2 landing sources that are joined
