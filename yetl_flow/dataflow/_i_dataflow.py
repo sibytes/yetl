@@ -25,24 +25,6 @@ class IDataflow(ABC):
         self.sources = {}
         self.destinations = {}
 
-        self.retries = dataflow_config.get("retries", 0)
-        try:
-            del dataflow_config["retries"]
-        except KeyError:
-            pass
-
-        self.retry_wait = dataflow_config.get("retry_wait", 0)
-        try:
-            del dataflow_config["retry_wait"]
-        except KeyError:
-            pass
-
-        self.enabled_dataflow_types = dataflow_config.get("enable_dataflow_types", [])
-        try:
-            del dataflow_config["enable_dataflow_types"]
-        except KeyError:
-            pass
-
     @abstractmethod
     def append(self, dataset: Dataset) -> None:
         pass

@@ -6,10 +6,6 @@
 #   - partitions are defined here in the yaml because there is no sql to define the table.
 
 dataflow:
-  retries: 0
-  retry_wait: 1
-
-
 
   landing:
     customer_noschema:

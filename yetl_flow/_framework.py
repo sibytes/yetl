@@ -30,36 +30,23 @@ def yetl_flow(name: str = None, app_name: str = None, log_level="INFO"):
             context = Context(app_name, log_level, _name, spark, timeslice)
 
             # run the pipeline
-            yetl_flow_exception = None
             context.log.info(
-                f"""Executing Dataflow {context.app_name} with:
-                timeslice={timeslice} 
-                retries={context.dataflow.retries}"""
+                f"Executing Dataflow {context.app_name} with timeslice={timeslice}"
             )
-            while context.dataflow.retries >= 0:
-                try:
-                    function(
-                        context=context,
-                        dataflow=context.dataflow,
-                        timeslice=timeslice,
-                        *args,
-                        **kwargs,
-                    )
-                    break
-                except Exception as e:
-                    msg = f"Dataflow application {context.app_name} failed due to {e}."
-                    context.dataflow.retries -= 1
-                    context.log.error(msg)
-                    yetl_flow_exception = e
-                    if context.dataflow.retries >= 0:
-                        context.log.info(
-                            f"Retrying {context.app_name} in after {context.dataflow.retry_wait} seconds; {context.dataflow.retries} retries are remaning."
-                        )
-                        time.sleep(context.dataflow.retry_wait)
 
-            if yetl_flow_exception:
-                msg = f"Dataflow application {context.app_name} failed due to {yetl_flow_exception}. No retries remaining."
-                raise YetlFlowException(msg) from yetl_flow_exception
+            try:
+                function(
+                    context=context,
+                    dataflow=context.dataflow,
+                    timeslice=timeslice,
+                    *args,
+                    **kwargs,
+                )
+            except Exception as e:
+                msg = f"Dataflow application {context.app_name} failed due to {e}."
+                context.log.error(msg)
+                raise e
+
 
             # get the delta lake audit information and add it to the return
             audit = get_audits(context)
