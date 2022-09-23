@@ -84,9 +84,6 @@ dataflow:
         # we haven't defined the table using DDL with a partition key
         # if you define it in the ddl statement (PARTITIONED BY) and here, then
         # yetl will default to the ddl definition and throw a warning.
-        # IMPORTANT NOTE: if you change the partition key on existing table
-        # the yetl will repartition the table ONLY IF the data flow property
-        # yetl.allowRepartitioning: true
         partitioned_by:
           - _partition_key
         # table ddl is optional to provide full flexbility of how you can manaage the datalake (house)
@@ -116,14 +113,6 @@ dataflow:
         # https://docs.databricks.com/delta/table-properties.html
         # https://docs.delta.io/2.1.0/table-properties.html
         properties:
-
-          #### YETL TABLE PROPERTIES ####
-
-          # allow yetl to repartition a table when the partitions are changed
-          # If this is set to false and the partitions are changed then yetl will throw an exception
-          yetl.allowRepartitioning: true
-          # logs the etl metadata to the configured metadata provider.
-          yetl.lineageEnabled: true
 
           #### DELTA LAKE TABLE PROPERTIES ####
 

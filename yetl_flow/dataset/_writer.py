@@ -75,13 +75,7 @@ class Writer(Destination):
             # alter, drop or create any properties that are not on the table
             self._set_table_properties(current_properties, config)
 
-            # TODO: if the table partitions in the properties form the table is different to the partitions
-            # in the config or ddl, yetl.allowRepartitioning = true then repartition the table
-            # Is this a feature we want? Not sure.
-            self._table_repartition(current_properties, config)
 
-    def _table_repartition(self, table_properties: dict, config: dict):
-        pass
 
     def _get_merge_match(self, mode: dict, crud: str):
 
