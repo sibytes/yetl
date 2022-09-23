@@ -43,7 +43,6 @@ class IValidator:
 
     def raise_thresholds(self, thresholds: dict, level: ThresholdLevels):
 
-        level = ThresholdLevels.INFO
         if isinstance(thresholds, dict):
             min_rows = thresholds.get("min_rows")
             max_rows = thresholds.get("max_rows")
@@ -106,6 +105,10 @@ class IValidator:
     def get_result(self):
         validation = {
             "validation": {
+                "thresholds":{
+                    "warning": self.warning_thresholds,
+                    "error": self.error_thresholds
+                },
                 "schema_on_read": {
                     f"{self.database}.{self.table}": {
                         "total_count": self.total_count,
