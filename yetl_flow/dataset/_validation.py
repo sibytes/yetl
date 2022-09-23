@@ -6,11 +6,12 @@ from pyspark.sql import SparkSession
 from pyspark.sql.utils import AnalysisException
 from typing import Callable
 from ..parser._constants import *
-
+import json
 
 class ThresholdLevels(Enum):
     WARNING = "warning"
     ERROR = "error"
+    INFO = "info"
 
 
 class IValidator:
@@ -35,12 +36,14 @@ class IValidator:
         self.table = table
         self.warning_thresholds = warning_thresholds
         self.error_thresholds = error_thresholds
+        self.level = ThresholdLevels.INFO
 
     def validate(self) -> dict:
         pass
 
     def raise_thresholds(self, thresholds: dict, level: ThresholdLevels):
 
+        level = ThresholdLevels.INFO
         if isinstance(thresholds, dict):
             min_rows = thresholds.get("min_rows")
             max_rows = thresholds.get("max_rows")
@@ -88,10 +91,12 @@ class IValidator:
 
                 if level == ThresholdLevels.ERROR:
                     self.context.log.error(msg)
-                    raise Exception(msg)
+                    self.level = ThresholdLevels.ERROR
 
                 if level == ThresholdLevels.WARNING:
                     self.context.log.warning(msg)
+                    self.level = ThresholdLevels.WARNING
+
 
     def get_result(self):
         validation = {
@@ -105,7 +110,17 @@ class IValidator:
                 }
             }
         }
-        return validation
+        validation_json = json.dumps(validation, indent=4, default=str)
+        
+        match self.level:
+            case ThresholdLevels.INFO:
+                self.context.log.info(validation_json)
+            case ThresholdLevels.WARNING:
+                self.context.log.warning(validation_json)
+            case ThresholdLevels.ERROR:
+                self.context.log.error(validation_json)
+
+        return self.level, validation
 
 
 class PermissiveSchemaOnRead(IValidator):

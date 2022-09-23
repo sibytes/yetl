@@ -23,8 +23,6 @@ def yetl_flow(name: str = None, app_name: str = None, log_level="INFO"):
             timeslice = kwargs.get("timeslice")
             if "timeslice" in kwargs.keys():
                 del kwargs["timeslice"]
-            if "save_type" in kwargs.keys():
-                del kwargs["save_type"]
 
             # create the context for the pipeline to run
             context = Context(app_name, log_level, _name, spark, timeslice)
@@ -49,8 +47,7 @@ def yetl_flow(name: str = None, app_name: str = None, log_level="INFO"):
 
 
             # get the delta lake audit information and add it to the return
-            audit = get_audits(context)
-            audit = {"deltalake_log": audit}
+            audit = {}
 
             return audit
 

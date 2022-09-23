@@ -310,10 +310,12 @@ class Reader(Source):
             )
 
         if validator:
-            validation = validator.validate()
+            level_validation, validation = validator.validate()
             self.dataframe = validator.dataframe
-            self.context.log.info(json.dumps(validation, indent=4, default=str))
 
+
+
+            
     def read(self):
         self.context.log.info(
             f"Reading data for {self.database_table} from {self.path} with options {self.options} {CONTEXT_ID}={str(self.context_id)}"

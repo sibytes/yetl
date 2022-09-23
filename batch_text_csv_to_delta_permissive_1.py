@@ -47,6 +47,7 @@ timeslice = Timeslice(2021, 1, 1)
 # timeslice = Timeslice(2022, 7, 12)
 # timeslice = Timeslice(2022, 7, "*")
 results = batch_text_csv_to_delta_permissive_1(timeslice=timeslice)
+print(results)
 
 # reload load
 # timeslice = Timeslice(2022, "*", "*")
