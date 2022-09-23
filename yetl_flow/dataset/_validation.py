@@ -50,7 +50,8 @@ class IValidator:
             exception_count = thresholds.get("exception_count")
             exception_percent = thresholds.get("exception_percent")
 
-            invalid_count = self.total_count - self.valid_count
+            exception_count = self.total_count - self.valid_count
+            self.exception_percent = (exception_count / self.total_count) * 100
 
             raise_thresholds = False
             messages = []
@@ -77,11 +78,11 @@ class IValidator:
 
             if isinstance(exception_percent, numbers.Number):
 
-                actual_exception_percent = (invalid_count / self.total_count) * 100
-                if actual_exception_percent > exception_percent:
+                
+                if self.exception_percent > exception_percent:
                     raise_thresholds = True
                     messages.append(
-                        f"exception_percent threshold exceeded: {actual_exception_percent} > {exception_percent}"
+                        f"exception_percent threshold exceeded: {self.exception_percent} > {exception_percent}"
                     )
 
             if raise_thresholds:
@@ -97,6 +98,10 @@ class IValidator:
                     self.context.log.warning(msg)
                     self.level = ThresholdLevels.WARNING
 
+                if level == ThresholdLevels.INFO:
+                    self.context.log.info(msg)
+                    self.level = ThresholdLevels.INFO
+
 
     def get_result(self):
         validation = {
@@ -106,6 +111,7 @@ class IValidator:
                         "total_count": self.total_count,
                         "valid_count": self.valid_count,
                         "exception_count": self.exceptions_count,
+                        "exception_percent": self.exception_percent
                     }
                 }
             }
