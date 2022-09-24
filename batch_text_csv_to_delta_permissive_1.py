@@ -1,3 +1,4 @@
+from unittest import result
 from yetl_flow import (
     yetl_flow,
     IDataflow,
@@ -11,6 +12,7 @@ from yetl_flow import (
 )
 from pyspark.sql.functions import *
 from typing import Type
+import json
 
 
 @yetl_flow(log_level="ERROR")
@@ -43,12 +45,14 @@ def batch_text_csv_to_delta_permissive_1(
 
 
 # incremental load
-timeslice = Timeslice(2021, 1, 1)
+# timeslice = Timeslice(2021, 1, 1)
 # timeslice = Timeslice(2022, 7, 12)
 # timeslice = Timeslice(2022, 7, "*")
-results = batch_text_csv_to_delta_permissive_1(timeslice=timeslice)
-print(results)
+# results = batch_text_csv_to_delta_permissive_1(timeslice=timeslice)
+# print(results)
 
 # reload load
-# timeslice = Timeslice(2022, "*", "*")
-# results = batch_text_csv_to_delta_permissive_1(timeslice=timeslice, save=OverwriteSave)
+timeslice = Timeslice(2022, "*", "*")
+results = batch_text_csv_to_delta_permissive_1(timeslice=timeslice, save=OverwriteSave)
+results = json.dumps(results, indent=4, default=str)
+print(results)

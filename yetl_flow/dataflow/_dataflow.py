@@ -5,6 +5,7 @@ from ..dataset import dataset_factory
 from typing import Callable, Type
 from enum import Enum
 from ..save import Save
+from ..audit import Audit
 
 
 class DataFlowType(Enum):
@@ -25,13 +26,10 @@ class DataFlowType(Enum):
 
 class Dataflow(IDataflow):
     def __init__(
-        self,
-        context,
-        config: dict,
-        dataflow_config: dict,
+        self, context, config: dict, dataflow_config: dict, auditor: Audit
     ) -> None:
 
-        super().__init__(context, config, dataflow_config)
+        super().__init__(context, config, dataflow_config, auditor)
 
         for database, v in dataflow_config.items():
             for table, v in v.items():
@@ -40,12 +38,24 @@ class Dataflow(IDataflow):
                 v["spark_schema_repo"] = self._spark_schema_repo
                 v["deltalake_schema_repo"] = self._deltalake_schema_repo
                 v["context_id"] = self.context.context_id
+                v["dataflow_id"] = self.id
                 v["timeslice"] = self.context.timeslice
-                md = dataset_factory.get_dataset_type(self.context, database, table, v)
+                md = dataset_factory.get_dataset_type(
+                    self.context, database, table, v, auditor
+                )
                 self.log.debug(
                     f"Deserialized {database}.{table} configuration into {type(md)}"
                 )
                 self.append(md)
+                self.audit_lineage()
+
+    def audit_lineage(self):
+        lineage = {"lineage": {str(self.id): {}}}
+        for _, d in self.destinations.items():
+            src_ids = [str(s.id) for _, s in self.sources.items()]
+            lineage["lineage"][str(self.id)][str(d.id)] = {"depends_on": src_ids}
+
+        self.auditor.dataflow(lineage)
 
     def append(self, dataset: Dataset):
 

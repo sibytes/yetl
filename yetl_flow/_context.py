@@ -8,6 +8,7 @@ import uuid
 from .schema_repo import schema_repo_factory
 import json
 from ._timeslice import Timeslice, TimesliceUtcNow
+from .audit import Audit
 
 # from .dataset import Save, DefaultSave
 from typing import Type
@@ -21,10 +22,12 @@ class Context:
         app_name: str,
         log_level: str,
         name: str,
-        spark: SparkSession = None,
+        auditor: Audit,
         timeslice: datetime = None,
     ) -> None:
+        self.auditor = auditor
         self.context_id = uuid.uuid4()
+        auditor.dataflow({"context_id": str(self.context_id)})
         self.name = name
         self.app_name = app_name
 
@@ -37,13 +40,11 @@ class Context:
 
         self.log = logging.getLogger(self.app_name)
         self.log_level = log_level
-        self.spark = spark
 
         # load application configuration
         config: dict = cp.load_config(self.app_name)
 
-        if not spark:
-            self.spark = self._get_spark_context(app_name, config)
+        self.spark = self._get_spark_context(app_name, config)
 
         # set up the spark logger, the application has a python logger built in
         # but we also make the spark logger available should it be needed
@@ -71,7 +72,9 @@ class Context:
         # The configuration file is loaded using the app name. This keeps intuitive tight
         # naming convention between datadlows and the config files that store them
         self.log.info(f"Setting application context dataflow {self.name}")
-        self.dataflow = self._get_deltalake_flow(self.app_name, self.name, config)
+        self.dataflow = self._get_deltalake_flow(
+            self.app_name, self.name, config, auditor
+        )
 
         self.log.info(f"Checking spark and databricks versions")
         self.spark_version, self.databricks_version = self._get_spark_version(
@@ -104,14 +107,16 @@ class Context:
 
         return version, databricks_version
 
-    def _get_deltalake_flow(self, app_name: str, name: str, config: dict):
+    def _get_deltalake_flow(
+        self, app_name: str, name: str, config: dict, auditor: Audit
+    ):
 
         dataflow_config: dict = cp.load_pipeline_config(app_name, name)
         dataflow_config = dataflow_config.get("dataflow")
 
         self.log.debug("Deserializing configuration into Dataflow")
 
-        dataflow = Dataflow(self, config, dataflow_config)
+        dataflow = Dataflow(self, config, dataflow_config, auditor)
 
         return dataflow
 

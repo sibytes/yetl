@@ -1,16 +1,23 @@
-from pyspark.sql.types import StructType
 from ..parser._constants import *
 from . import _builtin_functions as builtin_funcs
-from ..schema_repo import ISchemaRepo
 from ..parser import parser
 import uuid
+from ..audit import Audit
+from datetime import datetime
 
 
 class Dataset:
     def __init__(
-        self, context, database: str, table: str, dataset: dict, io_type: str
+        self,
+        context,
+        database: str,
+        table: str,
+        dataset: dict,
+        io_type: str,
+        auditor: Audit,
     ) -> None:
 
+        self.auditor = auditor
         self.id = uuid.uuid4()
         self.datalake = dataset["datalake"]
         self.datalake_protocol = context.fs.datalake_protocol
@@ -24,12 +31,15 @@ class Dataset:
         self._timeslice_position = parser.get_slice_position(self.path, self)
         self._path = builtin_funcs.execute_replacements(self._path, self)
         self.context_id = dataset.get("context_id")
+        self.dataflow_id = dataset.get("dataflow_id")
         self.timeslice = dataset.get("timeslice")
 
         # default format to delta if not
         fmt = dataset.get(FORMAT, Format.DELTA.name)
         self.format_type = Format[fmt.upper()]
         self._initial_load = False
+
+        self.auditor.dataflow(self.get_metadata())
 
     def _get_path(self, dataset: dict):
         path = dataset.get(PATH)
@@ -61,3 +71,16 @@ class Dataset:
 
     def save_metadata(self):
         self.context.metadata_repo.save(self)
+
+    def get_metadata(self):
+        metadata = {
+            str(self.id): {
+                "type": self.__class__.__name__,
+                "dataflow_id": str(self.dataflow_id),
+                "database": self.database,
+                "table": self.table,
+                "path": self.path,
+            }
+        }
+
+        return metadata

@@ -12,13 +12,20 @@ from ._validation import (
 from pyspark.sql import DataFrame
 import json
 from .. import _delta_lake as dl
+from ..audit import Audit
 
 
 class Reader(Source):
     def __init__(
-        self, context, database: str, table: str, config: dict, io_type: str
+        self,
+        context,
+        database: str,
+        table: str,
+        config: dict,
+        io_type: str,
+        auditor: Audit,
     ) -> None:
-        super().__init__(context, database, table, config, io_type)
+        super().__init__(context, database, table, config, io_type, auditor)
 
         # gets the read, write, etc options based on the type
         io_properties = config.get(io_type)
@@ -313,9 +320,6 @@ class Reader(Source):
             level_validation, validation = validator.validate()
             self.dataframe = validator.dataframe
 
-
-
-            
     def read(self):
         self.context.log.info(
             f"Reading data for {self.database_table} from {self.path} with options {self.options} {CONTEXT_ID}={str(self.context_id)}"

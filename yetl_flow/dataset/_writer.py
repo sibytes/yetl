@@ -7,13 +7,20 @@ from pyspark.sql import DataFrame
 from typing import ChainMap
 from ..parser import parser
 from ..save import save_factory, Save
+from ..audit import Audit
 
 
 class Writer(Destination):
     def __init__(
-        self, context, database: str, table: str, config: dict, io_type: str
+        self,
+        context,
+        database: str,
+        table: str,
+        config: dict,
+        io_type: str,
+        auditor: Audit,
     ) -> None:
-        super().__init__(context, database, table, config, io_type)
+        super().__init__(context, database, table, config, io_type, auditor)
 
         self.dataframe: DataFrame = None
         # try and load a schema if schema on read
@@ -74,8 +81,6 @@ class Writer(Destination):
             self._set_table_constraints(current_properties, config)
             # alter, drop or create any properties that are not on the table
             self._set_table_properties(current_properties, config)
-
-
 
     def _get_merge_match(self, mode: dict, crud: str):
 

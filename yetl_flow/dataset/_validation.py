@@ -8,6 +8,7 @@ from typing import Callable
 from ..parser._constants import *
 import json
 
+
 class ThresholdLevels(Enum):
     WARNING = "warning"
     ERROR = "error"
@@ -77,7 +78,6 @@ class IValidator:
 
             if isinstance(exception_percent, numbers.Number):
 
-                
                 if self.exception_percent > exception_percent:
                     raise_thresholds = True
                     messages.append(
@@ -101,26 +101,25 @@ class IValidator:
                     self.context.log.info(msg)
                     self.level = ThresholdLevels.INFO
 
-
     def get_result(self):
         validation = {
             "validation": {
-                "thresholds":{
+                "thresholds": {
                     "warning": self.warning_thresholds,
-                    "error": self.error_thresholds
+                    "error": self.error_thresholds,
                 },
                 "schema_on_read": {
                     f"{self.database}.{self.table}": {
                         "total_count": self.total_count,
                         "valid_count": self.valid_count,
                         "exception_count": self.exceptions_count,
-                        "exception_percent": self.exception_percent
+                        "exception_percent": self.exception_percent,
                     }
-                }
+                },
             }
         }
         validation_json = json.dumps(validation, indent=4, default=str)
-        
+
         match self.level:
             case ThresholdLevels.INFO:
                 self.context.log.info(validation_json)

@@ -6,6 +6,7 @@ from ._writer import Writer
 from ._stream_reader import StreamReader
 from ._stream_writer import StreamWriter
 import logging
+from ..audit import Audit
 
 
 class IOType(Enum):
@@ -32,7 +33,7 @@ class _DatasetFactory:
             return None
 
     def get_dataset_type(
-        self, context, database: str, table: str, dataset_config: dict
+        self, context, database: str, table: str, dataset_config: dict, auditor: Audit
     ) -> Dataset:
 
         type: IOType = next(
@@ -55,7 +56,7 @@ class _DatasetFactory:
             raise ValueError(type)
 
         return dataset_class(
-            context, database, table, dataset_config, type.name.lower()
+            context, database, table, dataset_config, type.name.lower(), auditor
         )
 
 

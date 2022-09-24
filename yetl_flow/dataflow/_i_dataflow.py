@@ -3,11 +3,18 @@ from typing import Type
 from abc import ABC, abstractmethod
 from pyspark.sql import DataFrame
 import json
+from ..audit import Audit
+import uuid
 
 
 class IDataflow(ABC):
-    def __init__(self, context, config: dict, dataflow_config: dict) -> None:
+    def __init__(
+        self, context, config: dict, dataflow_config: dict, auditor: Audit
+    ) -> None:
 
+        self.auditor = auditor
+        self.id = uuid.uuid4()
+        auditor.dataflow({"dataflow_id": str(self.id)})
         self.log = context.log
         self.log.debug("initialise dataflow with config")
         self.log.debug(json.dumps(config, indent=4, default=str))
