@@ -12,7 +12,8 @@ from ._validation import (
 from pyspark.sql import DataFrame
 import json
 from .. import _delta_lake as dl
-from ..audit import Audit
+from ..audit import Audit, AuditTask
+from datetime import datetime
 
 
 class Reader(Source):
@@ -33,9 +34,7 @@ class Reader(Source):
         # get the table properties
         properties: dict = self._get_table_properties(config["table"])
 
-        self._metadata_lineage_enabled = properties.get(
-            YETL_TBLP_METADATA_LINEAGE_ENABLED, False
-        )
+
         self._create_schema_if_not_exists = properties.get(
             YETL_TBLP_SCHEMA_CREATE_IF_NOT_EXISTS, False
         )
@@ -192,13 +191,15 @@ class Reader(Source):
             )
             self.initial_load = False
         else:
-            dl.create_table(
+            start_datetime =  datetime.now()
+            sql = dl.create_table(
                 self.context,
                 self.exceptions_database,
                 self.exceptions_table,
                 self.exceptions_path,
             )
             self.initial_load = True
+            self.auditor.dataflow_task(self.id, AuditTask.SQL, sql, start_datetime)
 
     @property
     def initial_load(self):

@@ -150,3 +150,10 @@ def get_slice_position(path: str, dataset):
             timeslice_pos = TimeslicePosition(start_pos + 3, end_pos + 3, l, format_str)
 
     return timeslice_pos
+
+
+def reduce_whitespace(sentence:str):
+
+    pattern = re.compile(r"\s+")
+
+    return pattern.sub(" ", sentence).strip()

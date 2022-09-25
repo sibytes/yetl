@@ -41,6 +41,8 @@ def create_table(context, database: str, table: str, path: str, sql: str = None)
 
     context.spark.sql(sql)
 
+    return sql
+
 
 def create_database(context, database: str):
     context.log.info(f"Creating database if not exists `{database}`")

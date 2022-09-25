@@ -34,10 +34,6 @@ class Writer(Destination):
         self.auto_optimize = self._get_conf_dl_property(
             config, dl.DeltaLakeProperties.OPTIMIZE_WRITE
         )
-        # get the configured table property for autocompact - delta.autoOptimize.autoCompact
-        self.auto_compact = self._get_conf_dl_property(
-            config, dl.DeltaLakeProperties.AUTO_COMPACT
-        )
 
         # gets the read, write, etc options based on the type
         io_properties = config.get(io_type)
@@ -290,17 +286,6 @@ class Writer(Destination):
             # multiple files in multiple partitions, and can become a performance bottleneck. In many cases, it
             # helps to repartition the output data by the table’s partition columns before writing it. You enable
             # this by setting the Spark session configuration spark.databricks.delta.merge.repartitionBeforeWrite.enabled to true."
-
-            # auto_compact = all(
-            #     [self.auto_compact, self.partitions, not self.context.is_databricks]
-            # )
-            # if auto_compact:
-            #     self.context.log.info(
-            #         f"Auto compacting in memory partitions for {self.database_table} on partitions {self.partitions}"
-            #     )
-            #     self.dataframe = self.dataframe.repartition(
-            #         *self.partitions
-            #     )
 
             super().write()
 
