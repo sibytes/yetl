@@ -6,6 +6,7 @@ from uuid import UUID
 import yaml
 import time
 from ..parser.parser import reduce_whitespace
+from ..warnings import Warning
 
 class AuditLevel(Enum):
     DATAFLOW = "dataflow"
@@ -33,10 +34,18 @@ class Audit:
         }
         self._task_counter = {}
 
-    def error(self, data: dict):
-        self._append(data, AuditLevel.WARNING)
+    def error(self, exception: Exception):
+        data = {
+            "exception": exception.__class__.__name__, 
+            "message": str(exception)
+        }
+        self._append(data, AuditLevel.ERROR)
 
-    def warning(self, data: dict):
+    def warning(self, warning:Warning):
+        data = {
+            "warning": warning.__class__.__name__, 
+            "message": str(warning)
+        }
         self._append(data, AuditLevel.WARNING)
 
     def dataflow_task(self, dataset_id:UUID, task:AuditTask, detail:str, start_datetime:datetime):
@@ -46,7 +55,7 @@ class Audit:
 
         audit_step = {
                 "task": task.value,
-                "detail": reduce_whitespace(detail),
+                "message": reduce_whitespace(detail),
                 "start_datetime": start_datetime.strftime("%Y-%m-%d %H:%M:%S"),
                 "end_datetime": end_datetime.strftime("%Y-%m-%d %H:%M:%S"),
                 "seconds_duration": duration
