@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Type
 from ._dataset import Dataset
 from ._reader import Reader
-from ._writer import Writer
+from ._deltalake_writer import Writer
 from ._stream_reader import StreamReader
 from ._stream_writer import StreamWriter
 import logging

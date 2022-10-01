@@ -10,6 +10,7 @@ from ..save import save_factory, Save
 from ..audit import Audit, AuditTask
 from datetime import datetime
 
+
 class Writer(Destination):
     def __init__(
         self,
@@ -148,13 +149,18 @@ class Writer(Destination):
     def create_or_alter_table(self):
 
         properties = None
-        dl.create_database(self.context, self.database)
+        start_datetime = datetime.now()
+        detail = dl.create_database(self.context, self.database)
+        self.auditor.dataset_task(self.id, AuditTask.SQL, detail, start_datetime)
+
         table_exists = dl.table_exists(self.context, self.database, self.table)
         if table_exists:
             self.context.log.info(
                 f"Table already exists {self.database}.{self.table} at {self.path}"
             )
             self.initial_load = False
+
+            start_datetime = datetime.now()
             # on non initial loads get the constraints and properties
             # to them to and sync with the declared constraints and properties.
             # TODO: consolidate details and properties fetch since the properties are in the details. The delta lake api may have some improvements.
@@ -165,11 +171,16 @@ class Writer(Destination):
             # get the partitions from the table details and add them to the properties.
             table_name = f"{self.database}.{self.table}"
             properties[table_name][PARTITIONS] = details[table_name][PARTITIONS]
+            self.auditor.dataset_task(
+                self.id, AuditTask.GET_TABLE_PROPERTIES, properties
+            )
 
         else:
-            dl.create_table(
+            start_datetime = datetime.now()
+            detail = dl.create_table(
                 self.context, self.database, self.table, self.path, self.table_ddl
             )
+            self.auditor.dataset_task(self.id, AuditTask.SQL, detail, start_datetime)
             self.initial_load = True
 
         return properties
@@ -289,7 +300,9 @@ class Writer(Destination):
             start_datetime = datetime.now()
             super().write()
             write_audit = dl.get_audit(self.context, f"{self.database}.{self.table}")
-            self.auditor.dataset_task(self.id, AuditTask.DELTA_TABLE_WRITE, write_audit, start_datetime)
+            self.auditor.dataset_task(
+                self.id, AuditTask.DELTA_TABLE_WRITE, write_audit, start_datetime
+            )
 
             auto_optimize = all([self.auto_optimize, not self.context.is_databricks])
             if auto_optimize:
@@ -304,8 +317,12 @@ class Writer(Destination):
                     self.partition_values,
                     self.zorder_by,
                 )
-                write_audit = dl.get_audit(self.context, f"{self.database}.{self.table}")
-                self.auditor.dataset_task(self.id, AuditTask.DELTA_TABLE_OPTIMIZE, write_audit, start_datetime)
+                write_audit = dl.get_audit(
+                    self.context, f"{self.database}.{self.table}"
+                )
+                self.auditor.dataset_task(
+                    self.id, AuditTask.DELTA_TABLE_OPTIMIZE, write_audit, start_datetime
+                )
 
         else:
             msg = f"Writer dataframe isn't set and cannot be written for {self.database_table} at {self.path}"

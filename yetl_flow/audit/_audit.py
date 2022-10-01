@@ -23,6 +23,7 @@ class AuditFormat(Enum):
 
 class AuditTask(Enum):
     SQL = "sql"
+    GET_TABLE_PROPERTIES = "get_table_properties"
     DELTA_TABLE_WRITE = "delta_table_write"
     DELTA_TABLE_OPTIMIZE = "delta_table_optimize"
     SCHEMA_ON_READ_VALIDATION = "schema_on_read_validation"
@@ -34,7 +35,7 @@ class Audit:
 
     def __init__(self) -> None:
         self.audit_log = {
-            AuditLevel.DATAFLOW.value: {AuditLevel.DATASETS.value:{}},
+            AuditLevel.DATAFLOW.value: {AuditLevel.DATASETS.value: {}},
             AuditLevel.WARNING.value: {self._COUNT: 0},
             AuditLevel.ERROR.value: {self._COUNT: 0},
         }
@@ -49,7 +50,11 @@ class Audit:
         self._append(data, AuditLevel.WARNING)
 
     def dataset_task(
-        self, dataset_id: UUID, task: AuditTask, detail: str|dict, start_datetime: datetime
+        self,
+        dataset_id: UUID,
+        task: AuditTask,
+        detail: str | dict,
+        start_datetime: datetime,
     ):
 
         end_datetime = datetime.now()
@@ -67,12 +72,16 @@ class Audit:
         }
 
         data = {self._next_task_id(dataset_id): audit_step}
-        if self.audit_log[AuditLevel.DATAFLOW.value][AuditLevel.DATASETS.value][str(dataset_id)].get("tasks"):
-            self.audit_log[AuditLevel.DATAFLOW.value][AuditLevel.DATASETS.value][str(dataset_id)]["tasks"] |= data
+        if self.audit_log[AuditLevel.DATAFLOW.value][AuditLevel.DATASETS.value][
+            str(dataset_id)
+        ].get("tasks"):
+            self.audit_log[AuditLevel.DATAFLOW.value][AuditLevel.DATASETS.value][
+                str(dataset_id)
+            ]["tasks"].update(data)
         else:
-            self.audit_log[AuditLevel.DATAFLOW.value][AuditLevel.DATASETS.value][str(dataset_id)] |= {
-                "tasks": data
-            }
+            self.audit_log[AuditLevel.DATAFLOW.value][AuditLevel.DATASETS.value][
+                str(dataset_id)
+            ] |= {"tasks": data}
 
     def dataset(self, data: dict):
         self.audit_log[AuditLevel.DATAFLOW.value][AuditLevel.DATASETS.value] |= data

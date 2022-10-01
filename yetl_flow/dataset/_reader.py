@@ -320,14 +320,15 @@ class Reader(Source):
         if validator:
             start_datetime = datetime.now()
             level_validation, validation = validator.validate()
-            self.auditor.dataset_task(self.id, AuditTask.SCHEMA_ON_READ_VALIDATION, validation, start_datetime)
+            self.auditor.dataset_task(
+                self.id, AuditTask.SCHEMA_ON_READ_VALIDATION, validation, start_datetime
+            )
             self.dataframe = validator.dataframe
 
     def read(self):
         self.context.log.info(
             f"Reading data for {self.database_table} from {self.path} with options {self.options} {CONTEXT_ID}={str(self.context_id)}"
         )
-
 
         self.context.log.debug(json.dumps(self.options, indent=4, default=str))
 
@@ -377,10 +378,7 @@ class Reader(Source):
             f"Reordering sys_columns to end for {self.database_table} from {self.path}. {CONTEXT_ID}={str(self.context_id)}"
         )
         self.dataframe = df
-        detail = {
-            "path": self.path,
-            "options": self.options
-        }
+        detail = {"path": self.path, "options": self.options}
         self.auditor.dataset_task(self.id, AuditTask.LAZY_READ, detail, start_datetime)
         self.validation_result = self.validate()
         self.save_metadata()
