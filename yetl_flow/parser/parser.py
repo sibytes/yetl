@@ -152,7 +152,7 @@ def get_slice_position(path: str, dataset):
     return timeslice_pos
 
 
-def reduce_whitespace(sentence:str):
+def reduce_whitespace(sentence: str):
 
     pattern = re.compile(r"\s+")
 

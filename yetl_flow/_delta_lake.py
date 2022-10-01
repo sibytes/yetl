@@ -51,11 +51,11 @@ def create_database(context, database: str):
     context.spark.sql(sql)
 
 
-def get_audit(context, database_table: str):
+def get_audit(context, database_table: str)->dict:
     context.log.info(f"Auditing database table {database_table}")
     sql = f"DESCRIBE HISTORY {database_table}"
     context.log.debug(sql)
-    audit = context.spark.sql(sql).first().asDict()
+    audit:dict = context.spark.sql(sql).first().asDict()
     return audit
 
 

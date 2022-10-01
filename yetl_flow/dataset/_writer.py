@@ -7,8 +7,8 @@ from pyspark.sql import DataFrame
 from typing import ChainMap
 from ..parser import parser
 from ..save import save_factory, Save
-from ..audit import Audit
-
+from ..audit import Audit, AuditTask
+from datetime import datetime
 
 class Writer(Destination):
     def __init__(
@@ -286,8 +286,10 @@ class Writer(Destination):
             # multiple files in multiple partitions, and can become a performance bottleneck. In many cases, it
             # helps to repartition the output data by the table’s partition columns before writing it. You enable
             # this by setting the Spark session configuration spark.databricks.delta.merge.repartitionBeforeWrite.enabled to true."
-
+            start_datetime = datetime.now()
             super().write()
+            write_audit = dl.get_audit(self.context, f"{self.database}.{self.table}")
+            self.auditor.dataflow_task(self.id, AuditTask.DELTA_TABLE_WRITE, write_audit, start_datetime)
 
             auto_optimize = all([self.auto_optimize, not self.context.is_databricks])
             if auto_optimize:

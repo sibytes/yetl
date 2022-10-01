@@ -34,7 +34,6 @@ class Reader(Source):
         # get the table properties
         properties: dict = self._get_table_properties(config["table"])
 
-
         self._create_schema_if_not_exists = properties.get(
             YETL_TBLP_SCHEMA_CREATE_IF_NOT_EXISTS, False
         )
@@ -191,7 +190,7 @@ class Reader(Source):
             )
             self.initial_load = False
         else:
-            start_datetime =  datetime.now()
+            start_datetime = datetime.now()
             sql = dl.create_table(
                 self.context,
                 self.exceptions_database,

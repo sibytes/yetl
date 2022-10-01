@@ -1,6 +1,3 @@
 from ._audit import Audit, AuditTask
 
-__all__ = [
-    "Audit",
-    "AuditTasks"
-]
+__all__ = ["Audit", "AuditTasks"]

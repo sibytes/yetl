@@ -1,7 +1,5 @@
-
 class Warning:
-
-    def __init__(self, message:str) -> None:
+    def __init__(self, message: str) -> None:
         self.message = message
 
     def __str__(self) -> str:
