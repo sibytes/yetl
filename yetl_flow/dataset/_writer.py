@@ -289,13 +289,14 @@ class Writer(Destination):
             start_datetime = datetime.now()
             super().write()
             write_audit = dl.get_audit(self.context, f"{self.database}.{self.table}")
-            self.auditor.dataflow_task(self.id, AuditTask.DELTA_TABLE_WRITE, write_audit, start_datetime)
+            self.auditor.dataset_task(self.id, AuditTask.DELTA_TABLE_WRITE, write_audit, start_datetime)
 
             auto_optimize = all([self.auto_optimize, not self.context.is_databricks])
             if auto_optimize:
                 self.context.log.info(
                     f"Auto optimizing {self.database_table} where {self.partition_values} zorder by {self.zorder_by}"
                 )
+                start_datetime = datetime.now()
                 dl.optimize(
                     self.context,
                     self.database,
@@ -303,6 +304,8 @@ class Writer(Destination):
                     self.partition_values,
                     self.zorder_by,
                 )
+                write_audit = dl.get_audit(self.context, f"{self.database}.{self.table}")
+                self.auditor.dataset_task(self.id, AuditTask.DELTA_TABLE_OPTIMIZE, write_audit, start_datetime)
 
         else:
             msg = f"Writer dataframe isn't set and cannot be written for {self.database_table} at {self.path}"

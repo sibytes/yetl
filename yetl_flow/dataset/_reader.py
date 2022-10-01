@@ -199,7 +199,7 @@ class Reader(Source):
                 self.exceptions_path,
             )
             self.initial_load = True
-            self.auditor.dataflow_task(self.id, AuditTask.SQL, sql, start_datetime)
+            self.auditor.dataset_task(self.id, AuditTask.SQL, sql, start_datetime)
 
     @property
     def initial_load(self):
@@ -320,7 +320,7 @@ class Reader(Source):
         if validator:
             start_datetime = datetime.now()
             level_validation, validation = validator.validate()
-            self.auditor.dataflow_task(self.id, AuditTask.SCHEMA_ON_READ_VALIDATION, validation, start_datetime)
+            self.auditor.dataset_task(self.id, AuditTask.SCHEMA_ON_READ_VALIDATION, validation, start_datetime)
             self.dataframe = validator.dataframe
 
     def read(self):
@@ -381,7 +381,7 @@ class Reader(Source):
             "path": self.path,
             "options": self.options
         }
-        self.auditor.dataflow_task(self.id, AuditTask.LAZY_READ, detail, start_datetime)
+        self.auditor.dataset_task(self.id, AuditTask.LAZY_READ, detail, start_datetime)
         self.validation_result = self.validate()
         self.save_metadata()
         return self.dataframe

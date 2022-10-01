@@ -39,7 +39,7 @@ class Dataset:
         self.format_type = Format[fmt.upper()]
         self._initial_load = False
 
-        self.auditor.dataflow(self.get_metadata())
+        self.auditor.dataset(self.get_metadata())
 
     def _get_path(self, dataset: dict):
         path = dataset.get(PATH)

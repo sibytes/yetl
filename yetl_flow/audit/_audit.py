@@ -11,6 +11,7 @@ from ..warnings import Warning
 
 class AuditLevel(Enum):
     DATAFLOW = "dataflow"
+    DATASETS = "datasets"
     WARNING = "warning"
     ERROR = "error"
 
@@ -23,6 +24,7 @@ class AuditFormat(Enum):
 class AuditTask(Enum):
     SQL = "sql"
     DELTA_TABLE_WRITE = "delta_table_write"
+    DELTA_TABLE_OPTIMIZE = "delta_table_optimize"
     SCHEMA_ON_READ_VALIDATION = "schema_on_read_validation"
     LAZY_READ = "lazy_read"
 
@@ -32,7 +34,7 @@ class Audit:
 
     def __init__(self) -> None:
         self.audit_log = {
-            AuditLevel.DATAFLOW.value: {},
+            AuditLevel.DATAFLOW.value: {AuditLevel.DATASETS.value:{}},
             AuditLevel.WARNING.value: {self._COUNT: 0},
             AuditLevel.ERROR.value: {self._COUNT: 0},
         }
@@ -46,7 +48,7 @@ class Audit:
         data = {"warning": warning.__class__.__name__, "message": str(warning)}
         self._append(data, AuditLevel.WARNING)
 
-    def dataflow_task(
+    def dataset_task(
         self, dataset_id: UUID, task: AuditTask, detail: str|dict, start_datetime: datetime
     ):
 
@@ -65,12 +67,15 @@ class Audit:
         }
 
         data = {self._next_task_id(dataset_id): audit_step}
-        if self.audit_log[AuditLevel.DATAFLOW.value][str(dataset_id)].get("tasks"):
-            self.audit_log[AuditLevel.DATAFLOW.value][str(dataset_id)]["tasks"] |= data
+        if self.audit_log[AuditLevel.DATAFLOW.value][AuditLevel.DATASETS.value][str(dataset_id)].get("tasks"):
+            self.audit_log[AuditLevel.DATAFLOW.value][AuditLevel.DATASETS.value][str(dataset_id)]["tasks"] |= data
         else:
-            self.audit_log[AuditLevel.DATAFLOW.value][str(dataset_id)] |= {
+            self.audit_log[AuditLevel.DATAFLOW.value][AuditLevel.DATASETS.value][str(dataset_id)] |= {
                 "tasks": data
             }
+
+    def dataset(self, data: dict):
+        self.audit_log[AuditLevel.DATAFLOW.value][AuditLevel.DATASETS.value] |= data
 
     def dataflow(self, data: dict):
         self._append(data, AuditLevel.DATAFLOW)
