@@ -23,6 +23,8 @@ class AuditFormat(Enum):
 class AuditTask(Enum):
     SQL = "sql"
     DELTA_TABLE_WRITE = "delta_table_write"
+    SCHEMA_ON_READ_VALIDATION = "schema_on_read_validation"
+    LAZY_READ = "lazy_read"
 
 
 class Audit:
@@ -63,11 +65,11 @@ class Audit:
         }
 
         data = {self._next_task_id(dataset_id): audit_step}
-        if self.audit_log[AuditLevel.DATAFLOW.value][str(dataset_id)].get("steps"):
-            self.audit_log[AuditLevel.DATAFLOW.value][str(dataset_id)]["steps"] |= data
+        if self.audit_log[AuditLevel.DATAFLOW.value][str(dataset_id)].get("tasks"):
+            self.audit_log[AuditLevel.DATAFLOW.value][str(dataset_id)]["tasks"] |= data
         else:
             self.audit_log[AuditLevel.DATAFLOW.value][str(dataset_id)] |= {
-                "steps": data
+                "tasks": data
             }
 
     def dataflow(self, data: dict):

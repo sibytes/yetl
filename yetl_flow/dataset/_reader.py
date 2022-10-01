@@ -29,6 +29,7 @@ class Reader(Source):
         super().__init__(context, database, table, config, io_type, auditor)
 
         # gets the read, write, etc options based on the type
+        self.config = config
         io_properties = config.get(io_type)
 
         # get the table properties
@@ -317,7 +318,9 @@ class Reader(Source):
             )
 
         if validator:
+            start_datetime = datetime.now()
             level_validation, validation = validator.validate()
+            self.auditor.dataflow_task(self.id, AuditTask.SCHEMA_ON_READ_VALIDATION, validation, start_datetime)
             self.dataframe = validator.dataframe
 
     def read(self):
@@ -325,9 +328,12 @@ class Reader(Source):
             f"Reading data for {self.database_table} from {self.path} with options {self.options} {CONTEXT_ID}={str(self.context_id)}"
         )
 
+
         self.context.log.debug(json.dumps(self.options, indent=4, default=str))
 
         input_file_name = f"_path_{self.database}_{self.table}"
+
+        start_datetime = datetime.now()
 
         df = self.context.spark.read.format(self.format)
 
@@ -371,6 +377,11 @@ class Reader(Source):
             f"Reordering sys_columns to end for {self.database_table} from {self.path}. {CONTEXT_ID}={str(self.context_id)}"
         )
         self.dataframe = df
+        detail = {
+            "path": self.path,
+            "options": self.options
+        }
+        self.auditor.dataflow_task(self.id, AuditTask.LAZY_READ, detail, start_datetime)
         self.validation_result = self.validate()
         self.save_metadata()
         return self.dataframe
