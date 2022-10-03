@@ -98,7 +98,7 @@ class Audit:
 
     def _increment_count(self, level: AuditLevel):
         if self.audit_log[level.value].get(self._COUNT):
-            self.audit_log[level.value][self._COUNT] = +1
+            self.audit_log[level.value][self._COUNT] += 1
 
     def get(self, format: AuditFormat = AuditFormat.JSON):
 
