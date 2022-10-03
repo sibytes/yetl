@@ -23,6 +23,7 @@ class AuditFormat(Enum):
 
 class AuditTask(Enum):
     SQL = "sql"
+    SET_TABLE_PROPERTIES = "set_table_properties"
     GET_TABLE_PROPERTIES = "get_table_properties"
     DELTA_TABLE_WRITE = "delta_table_write"
     DELTA_TABLE_OPTIMIZE = "delta_table_optimize"

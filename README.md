@@ -119,6 +119,7 @@ There is a CI build configured for this repo that builds on main origin and publ
 Version: 0.0.15
 
 - raise errors and warnings from thresholds configurations
+- Refactored audit loging and added comprehensive data flow auditing.
 
 Version: 0.0.14
 

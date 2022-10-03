@@ -113,6 +113,7 @@ class Writer(Destination):
         return partitions
 
     def _set_table_constraints(self, table_properties: dict, config: dict):
+
         _existing_constraints = {}
         if table_properties:
             _existing_constraints = table_properties.get(self.database_table)
@@ -129,8 +130,11 @@ class Writer(Destination):
             # if there is no table_ddl an empty table is created and the data schema defines the table
             # on the initial load so this is skipped on the 1st load.
             if self.column_constraints_ddl:
+                start_datetime = datetime.now()
                 for cc in self.column_constraints_ddl:
                     self.context.spark.sql(cc)
+                self.auditor.dataset_task(self.id, AuditTask.SET_TABLE_PROPERTIES, self.column_constraints_ddl, start_datetime)
+            
 
     def _set_table_properties(self, existing_properties: dict, config: dict):
         _existing_properties = {}
@@ -144,7 +148,9 @@ class Writer(Destination):
             f"Writer table properties ddl = {self.tbl_properties_ddl}"
         )
         if self.tbl_properties_ddl:
+            start_datetime = datetime.now()
             self.context.spark.sql(self.tbl_properties_ddl)
+            self.auditor.dataset_task(self.id, AuditTask.SET_TABLE_PROPERTIES, self.tbl_properties_ddl, start_datetime)
 
     def create_or_alter_table(self):
 
