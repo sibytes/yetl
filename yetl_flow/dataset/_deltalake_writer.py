@@ -172,7 +172,7 @@ class Writer(Destination):
             table_name = f"{self.database}.{self.table}"
             properties[table_name][PARTITIONS] = details[table_name][PARTITIONS]
             self.auditor.dataset_task(
-                self.id, AuditTask.GET_TABLE_PROPERTIES, properties
+                self.id, AuditTask.GET_TABLE_PROPERTIES, properties, start_datetime
             )
 
         else:

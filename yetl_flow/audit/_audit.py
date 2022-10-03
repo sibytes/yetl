@@ -115,7 +115,7 @@ class Audit:
     def _next_task_id(self, dataset_id: UUID) -> int:
 
         if dataset_id in self._task_counter.keys():
-            self._task_counter[dataset_id] = +1
+            self._task_counter[dataset_id] += 1
         else:
             self._task_counter[dataset_id] = 0
 
