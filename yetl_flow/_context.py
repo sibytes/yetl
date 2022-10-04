@@ -14,9 +14,10 @@ from .audit import Audit
 from typing import Type
 from delta import configure_spark_with_delta_pip
 from .metadata_repo import metadata_repo_factory, IMetadataRepo
+from abc import ABC
 
 
-class Context:
+class IContext(ABC):
     def __init__(
         self,
         app_name: str,
@@ -25,26 +26,36 @@ class Context:
         auditor: Audit,
         timeslice: datetime = None,
     ) -> None:
+        pass
+
         self.auditor = auditor
         self.context_id = uuid.uuid4()
         auditor.dataflow({"context_id": str(self.context_id)})
         self.name = name
         self.app_name = app_name
-
         if not app_name:
             self.app_name = self.name
-
         self.timeslice: Timeslice = timeslice
         if not self.timeslice:
             self.timeslice = TimesliceUtcNow()
-
         self.log = logging.getLogger(self.app_name)
         self.log_level = log_level
+        self._config: dict = cp.load_config(self.app_name)
 
-        # load application configuration
-        config: dict = cp.load_config(self.app_name)
 
-        self.spark = self._get_spark_context(app_name, config)
+class Context(IContext):
+    def __init__(
+        self,
+        app_name: str,
+        log_level: str,
+        name: str,
+        auditor: Audit,
+        timeslice: datetime = None,
+    ) -> None:
+
+        super().__init__(app_name, log_level, name, auditor, timeslice)
+
+        self.spark = self._get_spark_context(app_name, self._config)
 
         # set up the spark logger, the application has a python logger built in
         # but we also make the spark logger available should it be needed
@@ -57,12 +68,12 @@ class Context:
 
         # abstraction of the filesystem for driver file commands e.g. rm, ls, mv, cp
         self.fs: IFileSystem = file_system_factory.get_file_system_type(
-            self, config=config
+            self, config=self._config
         )
 
         # abstraction of the metadata repo for saving yetl dataflow lineage.
         self.metadata_repo: IMetadataRepo = (
-            metadata_repo_factory.get_metadata_repo_type(self, config=config)
+            metadata_repo_factory.get_metadata_repo_type(self, config=self._config)
         )
 
         # abstraction of the schema repo
@@ -73,7 +84,7 @@ class Context:
         # naming convention between datadlows and the config files that store them
         self.log.info(f"Setting application context dataflow {self.name}")
         self.dataflow = self._get_deltalake_flow(
-            self.app_name, self.name, config, auditor
+            self.app_name, self.name, self._config, auditor
         )
 
         self.log.info(f"Checking spark and databricks versions")

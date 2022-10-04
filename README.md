@@ -16,7 +16,7 @@ Example:
 from yetl_flow import (
     yetl_flow, 
     IDataflow, 
-    Context, 
+    IContext, 
     Timeslice, 
     TimesliceUtcNow, 
     OverwriteSave, 
@@ -27,7 +27,7 @@ from typing import Type
 
 @yetl_flow(log_level="ERROR")
 def batch_text_csv_to_delta_permissive_1(
-    context: Context,
+    context: IContext,
     dataflow: IDataflow,
     timeslice: Timeslice = TimesliceUtcNow(),
     save: Type[Save] = None

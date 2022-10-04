@@ -17,7 +17,7 @@ from .save import (
 
 from .dataflow import IDataflow
 from ._decorators import yetl_flow
-from ._context import Context
+from ._context import IContext
 from ._timeslice import Timeslice, TimesliceUtcNow, TimesliceNow
 
 
@@ -27,7 +27,7 @@ __all__ = [
     "StreamReader",
     "StreamWriter",
     "yetl_flow",
-    "Context",
+    "IContext",
     "IDataflow",
     "Timeslice",
     "TimesliceUtcNow",

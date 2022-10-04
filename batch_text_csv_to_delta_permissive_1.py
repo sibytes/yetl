@@ -2,7 +2,7 @@ from unittest import result
 from yetl_flow import (
     yetl_flow,
     IDataflow,
-    Context,
+    IContext,
     Timeslice,
     TimesliceUtcNow,
     OverwriteSave,
@@ -17,7 +17,7 @@ import json
 
 @yetl_flow(log_level="ERROR")
 def batch_text_csv_to_delta_permissive_1(
-    context: Context,
+    context: IContext,
     dataflow: IDataflow,
     timeslice: Timeslice = TimesliceUtcNow(),
     save: Type[Save] = None,
