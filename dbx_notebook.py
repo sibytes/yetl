@@ -6,7 +6,7 @@
 from yetl_flow import (
     yetl_flow,
     IDataflow,
-    Context,
+    IContext,
     Timeslice,
     TimesliceUtcNow,
     OverwriteSave,
@@ -19,7 +19,7 @@ from typing import Type
 
 @yetl_flow(log_level="ERROR")
 def customer_landing_to_rawdb_csv(
-    context: Context,
+    context: IContext,
     dataflow: IDataflow,
     timeslice: Timeslice = TimesliceUtcNow(),
     save_type: Type[Save] = None,

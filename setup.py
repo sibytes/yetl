@@ -34,6 +34,7 @@ setup(
         "yetl_flow.metadata_repo",
         "yetl_flow.parser",
         "yetl_flow.schema_repo",
+        "yetl_flow.context",
     ],
     install_requires=["pyyaml", "pyspark", "regex", "delta-spark"],
     zip_safe=False,

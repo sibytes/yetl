@@ -26,10 +26,10 @@ class DataFlowType(Enum):
 
 class Dataflow(IDataflow):
     def __init__(
-        self, context, config: dict, dataflow_config: dict, auditor: Audit
+        self, context, dataflow_config: dict
     ) -> None:
 
-        super().__init__(context, config, dataflow_config, auditor)
+        super().__init__(context, dataflow_config)
 
         for database, v in dataflow_config.items():
             for table, v in v.items():
@@ -41,7 +41,7 @@ class Dataflow(IDataflow):
                 v["dataflow_id"] = self.id
                 v["timeslice"] = self.context.timeslice
                 md = dataset_factory.get_dataset_type(
-                    self.context, database, table, v, auditor
+                    self.context, database, table, v, self.auditor
                 )
                 self.log.debug(
                     f"Deserialized {database}.{table} configuration into {type(md)}"

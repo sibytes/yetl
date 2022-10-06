@@ -17,7 +17,7 @@ from .save import (
 
 from .dataflow import IDataflow
 from ._decorators import yetl_flow
-from ._context import IContext
+from .context import IContext
 from ._timeslice import Timeslice, TimesliceUtcNow, TimesliceNow
 
 

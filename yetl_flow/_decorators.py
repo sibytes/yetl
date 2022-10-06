@@ -1,5 +1,7 @@
-from . import _logging_config  # must be the 1st import
-from ._context import Context
+# implicit, not referenced - must be the 1st import
+from . import _logging_config
+
+from .context import SparkContext
 from .audit import Audit
 from datetime import datetime
 
@@ -31,8 +33,9 @@ def yetl_flow(name: str = None, app_name: str = None, log_level="INFO"):
             if "timeslice" in kwargs.keys():
                 del kwargs["timeslice"]
 
+            # TODO: abstract out spark context to IContext
             # create the context for the pipeline to run
-            context = Context(app_name, log_level, _name, auditor, timeslice)
+            context = SparkContext(app_name, log_level, _name, auditor, timeslice)
 
             # run the pipeline
             context.log.info(
@@ -50,6 +53,7 @@ def yetl_flow(name: str = None, app_name: str = None, log_level="INFO"):
             except Exception as e:
                 msg = f"Dataflow application {context.app_name} failed due to {e}."
                 context.log.error(msg)
+                auditor.error(e)
                 raise e
 
             # get the delta lake audit information and add it to the return
