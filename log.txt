@@ -1,197 +1,261 @@
-INFO : 2022-09-20 19:47:29,999 : batch_text_csv_to_delta_permissive_1 : _config_provider.py.load_config: line(41) : Loading Dataflow configuration from file /Users/shaunryan/AzureDevOps/yetl/config/pipeline/local/config.yaml
-INFO : 2022-09-20 19:47:30,002 : batch_text_csv_to_delta_permissive_1 : _context.py._get_spark_context: line(119) : Setting spark context
-22/09/20 19:47:31 WARN Utils: Your hostname, Shauns-MacBook-Pro.local resolves to a loopback address: 127.0.0.1; using 192.168.0.16 instead (on interface en0)
-22/09/20 19:47:31 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
+22/10/06 12:57:45 WARN Utils: Your hostname, Shauns-MacBook-Pro.local resolves to a loopback address: 127.0.0.1; using 192.168.0.16 instead (on interface en0)
+22/10/06 12:57:45 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
 :: loading settings :: url = jar:file:/Users/shaunryan/opt/spark-3.3.0-bin-hadoop3/jars/ivy-2.5.0.jar!/org/apache/ivy/core/settings/ivysettings.xml
-22/09/20 19:47:33 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
-INFO : 2022-09-20 19:47:35,120 : batch_text_csv_to_delta_permissive_1 : _context.py.__init__: line(52) : Setting application context spark logger at level ERROR
-INFO : 2022-09-20 19:47:35,131 : batch_text_csv_to_delta_permissive_1 : _factory.py.get_file_system_type: line(50) : Setting filestystem using protocol file:
-INFO : 2022-09-20 19:47:35,131 : batch_text_csv_to_delta_permissive_1 : _factory.py.get_metadata_repo_type: line(41) : Setting up metadata repo on metadata_file 
-INFO : 2022-09-20 19:47:35,132 : batch_text_csv_to_delta_permissive_1 : _context.py.__init__: line(73) : Setting application context dataflow batch_text_csv_to_delta_permissive_1
-INFO : 2022-09-20 19:47:35,132 : batch_text_csv_to_delta_permissive_1 : _config_provider.py.load_pipeline_config: line(29) : Loading Dataflow configuration from file /Users/shaunryan/AzureDevOps/yetl/config/pipeline/local/batch_text_csv_to_delta_permissive_1.yaml
-INFO : 2022-09-20 19:47:35,147 : batch_text_csv_to_delta_permissive_1 : _factory.py.get_schema_repo_type: line(39) : Setting up schema repo on spark_schema_file 
-INFO : 2022-09-20 19:47:35,147 : batch_text_csv_to_delta_permissive_1 : _spark_file_schema_repo.py.load_schema: line(58) : Loading schema for dataset landing.customer from /Users/shaunryan/AzureDevOps/yetl/config/schema/spark/landing/customer.yaml using <class 'yetl_flow.file_system._file_system.FileSystem'>
-INFO : 2022-09-20 19:47:35,151 : batch_text_csv_to_delta_permissive_1 : _reader.py.__init__: line(89) : auto_io = True automatically creating or altering exception delta table landing.customer _context_id=a74d7fb0-76b3-4b7b-9311-4984ee842cde
-INFO : 2022-09-20 19:47:35,151 : batch_text_csv_to_delta_permissive_1 : _delta_lake.py.create_database: line(46) : Creating database if not exists `landing`
-INFO : 2022-09-20 19:47:44,642 : batch_text_csv_to_delta_permissive_1 : _reader.py.create_or_alter_table: line(183) : Exception table already exists landing.exceptions at file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/exceptions/landing/exceptions _context_id=a74d7fb0-76b3-4b7b-9311-4984ee842cde
-INFO : 2022-09-20 19:47:44,642 : batch_text_csv_to_delta_permissive_1 : _reader.py.read: line(318) : Reading data for landing.customer from file:/Users/shaunryan/AzureDevOps/yetl/data/landing/20210101/customer_20210101.csv with options {'mode': 'PERMISSIVE', 'inferSchema': False, 'header': True} _context_id=a74d7fb0-76b3-4b7b-9311-4984ee842cde
-INFO : 2022-09-20 19:47:44,959 : batch_text_csv_to_delta_permissive_1 : _reader.py.validate: line(299) : Validating dataframe read using PERMISSIVE corrupt column at _corrupt_record _context_id=a74d7fb0-76b3-4b7b-9311-4984ee842cde
-WARNING : 2022-09-20 19:47:46,332 : batch_text_csv_to_delta_permissive_1 : _reader.py.handle_exceptions: line(265) : Writing 1 exception(s) from landing.customer to landing.exceptions delta table _context_id=a74d7fb0-76b3-4b7b-9311-4984ee842cde
-WARNING : 2022-09-20 19:47:57,998 : batch_text_csv_to_delta_permissive_1 : _validation.py.raise_thresholds: line(94) : warning Thresholds:
-	exception_count threshold exceeded: 1 >= 0
-	exception_percent threshold exceeded: 9.090909090909092 > 0
-INFO : 2022-09-20 19:47:57,999 : batch_text_csv_to_delta_permissive_1 : _reader.py.validate: line(315) : {
-    "validation": {
-        "schema_on_read": {
-            "landing.customer": {
-                "total_count": 11,
-                "valid_count": 10,
-                "exception_count": 1
-            }
-        }
-    }
-}
-INFO : 2022-09-20 19:47:58,000 : batch_text_csv_to_delta_permissive_1 : _factory.py.get_schema_repo_type: line(39) : Setting up schema repo on spark_schema_file 
-INFO : 2022-09-20 19:47:58,000 : batch_text_csv_to_delta_permissive_1 : _spark_file_schema_repo.py.load_schema: line(58) : Loading schema for dataset landing.customer_preferences from /Users/shaunryan/AzureDevOps/yetl/config/schema/spark/landing/customer_preferences.yaml using <class 'yetl_flow.file_system._file_system.FileSystem'>
-INFO : 2022-09-20 19:47:58,002 : batch_text_csv_to_delta_permissive_1 : _reader.py.__init__: line(89) : auto_io = True automatically creating or altering exception delta table landing.customer_preferences _context_id=a74d7fb0-76b3-4b7b-9311-4984ee842cde
-INFO : 2022-09-20 19:47:58,002 : batch_text_csv_to_delta_permissive_1 : _delta_lake.py.create_database: line(46) : Creating database if not exists `landing`
-INFO : 2022-09-20 19:47:58,084 : batch_text_csv_to_delta_permissive_1 : _reader.py.create_or_alter_table: line(183) : Exception table already exists landing.exceptions at file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/exceptions/landing/exceptions _context_id=a74d7fb0-76b3-4b7b-9311-4984ee842cde
-INFO : 2022-09-20 19:47:58,084 : batch_text_csv_to_delta_permissive_1 : _reader.py.read: line(318) : Reading data for landing.customer_preferences from file:/Users/shaunryan/AzureDevOps/yetl/data/landing/20210101/customer_preferences_20210101.csv with options {'mode': 'PERMISSIVE', 'inferSchema': False, 'header': True} _context_id=a74d7fb0-76b3-4b7b-9311-4984ee842cde
-INFO : 2022-09-20 19:47:58,105 : batch_text_csv_to_delta_permissive_1 : _reader.py.validate: line(299) : Validating dataframe read using PERMISSIVE corrupt column at _corrupt_record _context_id=a74d7fb0-76b3-4b7b-9311-4984ee842cde
-INFO : 2022-09-20 19:47:58,556 : batch_text_csv_to_delta_permissive_1 : _reader.py.validate: line(315) : {
-    "validation": {
-        "schema_on_read": {
-            "landing.customer_preferences": {
-                "total_count": 10,
-                "valid_count": 10,
-                "exception_count": 0
-            }
-        }
-    }
-}
-INFO : 2022-09-20 19:47:58,557 : batch_text_csv_to_delta_permissive_1 : _factory.py.get_schema_repo_type: line(39) : Setting up schema repo on deltalake_sql_file 
-INFO : 2022-09-20 19:47:58,558 : batch_text_csv_to_delta_permissive_1 : _deltalake_sql_file.py.load_schema: line(43) : Loading schema for dataset raw.customer from ./config/schema/deltalake/raw/customer.sql using <class 'yetl_flow.file_system._file_system.FileSystem'>
-INFO : 2022-09-20 19:47:58,558 : batch_text_csv_to_delta_permissive_1 : _writer.py._get_conf_partitions: line(104) : Parsed partitioning columns from sql ddl for raw.customer as ['_partition_key', 'allow_contact']
-INFO : 2022-09-20 19:47:58,558 : batch_text_csv_to_delta_permissive_1 : _writer.py.__init__: line(66) : auto_io = True automatically creating or altering delta table raw.customer
-INFO : 2022-09-20 19:47:58,558 : batch_text_csv_to_delta_permissive_1 : _delta_lake.py.create_database: line(46) : Creating database if not exists `raw`
-INFO : 2022-09-20 19:47:58,767 : batch_text_csv_to_delta_permissive_1 : _writer.py.create_or_alter_table: line(159) : Table already exists raw.customer at file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/raw/customer
-INFO : 2022-09-20 19:47:58,767 : batch_text_csv_to_delta_permissive_1 : _delta_lake.py.get_table_properties: line(88) : getting existing table properties for table raw.customer
-INFO : 2022-09-20 19:48:02,217 : batch_text_csv_to_delta_permissive_1 : _delta_lake.py.get_table_properties: line(110) : {
-    "raw.customer": {
-        "constraints": {
-            "amount_lower_bound": "amount > - 1000",
-            "amount_upper_bound": "amount < 10000"
-        },
-        "properties": {
-            "delta.appendOnly": "False",
-            "delta.autoOptimize.autoCompact": "True",
-            "delta.autoOptimize.optimizeWrite": "True",
-            "delta.checkpoint.writeStatsAsJson": "True",
-            "delta.compatibility.symlinkFormatManifest.enabled": "False",
-            "delta.dataSkippingNumIndexedCols": "-1",
-            "delta.deletedFileRetentionDuration": "interval 1 week",
-            "delta.enableChangeDataFeed": "True",
-            "delta.logRetentionDuration": "interval 30 days",
-            "delta.minReaderVersion": "1",
-            "delta.minWriterVersion": "4",
-            "delta.randomPrefixLength": "2",
-            "delta.randomizeFilePrefixes": "False",
-            "yetl.allowRepartitioning": "True"
-        }
-    }
-}
-INFO : 2022-09-20 19:48:02,218 : batch_text_csv_to_delta_permissive_1 : _delta_lake.py.get_table_details: line(134) : getting existing table details and partitions for table raw.customer
-INFO : 2022-09-20 19:48:02,293 : batch_text_csv_to_delta_permissive_1 : _delta_lake.py.get_table_details: line(172) : {
-    "raw.customer": {
-        "columns": {
-            "id": {
-                "ordinal": 0,
-                "type": "int"
-            },
-            "first_name": {
-                "ordinal": 1,
-                "type": "string"
-            },
-            "last_name": {
-                "ordinal": 1,
-                "type": "string"
-            },
-            "email": {
-                "ordinal": 1,
-                "type": "string"
-            },
-            "gender": {
-                "ordinal": 1,
-                "type": "string"
-            },
-            "job_title": {
-                "ordinal": 1,
-                "type": "string"
-            },
-            "amount": {
-                "ordinal": 1,
-                "type": "double"
-            },
-            "allow_contact": {
-                "ordinal": 1,
-                "type": "boolean"
-            },
-            "_partition_key": {
-                "ordinal": 1,
-                "type": "int"
-            },
-            "_context_id": {
-                "ordinal": 1,
-                "type": "string"
-            },
-            "_timeslice": {
-                "ordinal": 1,
-                "type": "timestamp"
-            }
-        },
-        "partitions": [
-            "_partition_key",
-            "allow_contact"
-        ],
-        "name": "raw.customer",
-        "location": "file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/raw/customer",
-        "provider": "delta",
-        "owner": "shaunryan"
-    }
-}
+22/10/06 12:57:46 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
 You are setting a property: delta.autoOptimize.autoCompact that is not recognized by this version of Delta
 You are setting a property: delta.autoOptimize.optimizeWrite that is not recognized by this version of Delta
-INFO : 2022-09-20 19:48:04,697 : batch_text_csv_to_delta_permissive_1 : _context.py.__init__: line(76) : Checking spark and databricks versions
-INFO : 2022-09-20 19:48:04,871 : batch_text_csv_to_delta_permissive_1 : _context.py.__init__: line(88) : Databricks Runtime version not detected.
-INFO : 2022-09-20 19:48:04,871 : batch_text_csv_to_delta_permissive_1 : _context.py.__init__: line(90) : Spark version detected as : 3.3.0 f74867bddfbcdd4d08076db36851e88b15e66556
-INFO : 2022-09-20 19:48:04,872 : batch_text_csv_to_delta_permissive_1 : _framework.py.wrap_function: line(34) : Executing Dataflow batch_text_csv_to_delta_permissive_1 with:
-                timeslice=2021-01-01 00:00:00.000000 
-                retries=0
-INFO : 2022-09-20 19:48:04,872 : batch_text_csv_to_delta_permissive_1 : batch_text_csv_to_delta_permissive_1.py.batch_text_csv_to_delta_permissive_1: line(36) : Joining customers with customer_preferences
-INFO : 2022-09-20 19:48:04,901 : batch_text_csv_to_delta_permissive_1 : _writer.py.write: line(285) : Writing data to raw.customer at file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/raw/customer
-INFO : 2022-09-20 19:48:05,334 : batch_text_csv_to_delta_permissive_1 : _destination.py.write: line(39) : IO operations for raw.customer will be paritioned by: 
 {
-    "_partition_key": [
-        20210101
-    ],
-    "allow_contact": [
-        true
-    ]
-}
-INFO : 2022-09-20 19:48:05,334 : batch_text_csv_to_delta_permissive_1 : _save.py.write: line(9) : Writer saving using the AppendSave 
-INFO : 2022-09-20 19:48:07,910 : batch_text_csv_to_delta_permissive_1 : _writer.py.write: line(310) : Auto optimizing raw.customer where {'_partition_key': [20210101], 'allow_contact': [True]} zorder by ['email', 'id']
-INFO : 2022-09-20 19:48:07,910 : batch_text_csv_to_delta_permissive_1 : _delta_lake.py.optimize: line(128) : optimizing table raw.customer
-OPTIMIZE `raw`.`customer` WHERE `_partition_key` in (20210101) and `allow_contact` in (True) ZORDER BY (`email`,`id`)
-INFO : 2022-09-20 19:48:11,835 : batch_text_csv_to_delta_permissive_1 : _delta_lake.py.get_audit: line(53) : Auditing database table raw.customer
-INFO : 2022-09-20 19:48:12,424 : batch_text_csv_to_delta_permissive_1 : _delta_lake.py.get_audits: line(67) : {
-    "raw.customer": {
-        "clusterId": null,
-        "engineInfo": "Apache-Spark/3.3.0 Delta-Lake/2.1.0",
-        "isBlindAppend": false,
-        "isolationLevel": "SnapshotIsolation",
-        "job": null,
-        "notebook": null,
-        "operation": "OPTIMIZE",
-        "operationMetrics": {
-            "maxFileSize": "3888",
-            "minFileSize": "3888",
-            "numAddedBytes": "3888",
-            "numAddedFiles": "1",
-            "numRemovedBytes": "7388",
-            "numRemovedFiles": "2",
-            "p25FileSize": "3888",
-            "p50FileSize": "3888",
-            "p75FileSize": "3888"
+    "dataflow": {
+        "datasets": {
+            "e2e4b02e-6930-420a-a75b-a945c180781a": {
+                "type": "Reader",
+                "dataflow_id": "d4f79c71-5253-4103-99c4-369019637fa2",
+                "database": "landing",
+                "table": "customer",
+                "path": "file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_2022**.csv",
+                "tasks": {
+                    "0": {
+                        "task": "sql",
+                        "message": "CREATE TABLE IF NOT EXISTS `landing`.`exceptions` USING DELTA LOCATION 'file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/exceptions/landing/exceptions';",
+                        "start_datetime": "2022-10-06 12:57:58",
+                        "end_datetime": "2022-10-06 12:58:07",
+                        "seconds_duration": 9.273305
+                    },
+                    "1": {
+                        "task": "lazy_read",
+                        "message": {
+                            "path": "file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_2022**.csv",
+                            "options": {
+                                "mode": "PERMISSIVE",
+                                "inferSchema": false,
+                                "header": true
+                            }
+                        },
+                        "start_datetime": "2022-10-06 12:58:07",
+                        "end_datetime": "2022-10-06 12:58:07",
+                        "seconds_duration": 0.172829
+                    },
+                    "2": {
+                        "task": "schema_on_read_validation",
+                        "message": {
+                            "validation": {
+                                "thresholds": {
+                                    "warning": {
+                                        "min_rows": 1,
+                                        "max_rows": 1000,
+                                        "exception_count": 0,
+                                        "exception_percent": 0
+                                    },
+                                    "error": {
+                                        "min_rows": 0,
+                                        "max_rows": 100000000,
+                                        "exception_count": 50,
+                                        "exception_percent": 80
+                                    }
+                                },
+                                "schema_on_read": {
+                                    "landing.customer": {
+                                        "total_count": 20,
+                                        "valid_count": 20,
+                                        "exception_count": 0,
+                                        "exception_percent": 0.0
+                                    }
+                                }
+                            }
+                        },
+                        "start_datetime": "2022-10-06 12:58:07",
+                        "end_datetime": "2022-10-06 12:58:08",
+                        "seconds_duration": 0.870145
+                    }
+                }
+            },
+            "03a3a8e2-7ad8-482d-8c4a-bbd98eb95478": {
+                "type": "Reader",
+                "dataflow_id": "d4f79c71-5253-4103-99c4-369019637fa2",
+                "database": "landing",
+                "table": "customer_preferences",
+                "path": "file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_preferences_2022**.csv",
+                "tasks": {
+                    "0": {
+                        "task": "lazy_read",
+                        "message": {
+                            "path": "file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_preferences_2022**.csv",
+                            "options": {
+                                "mode": "PERMISSIVE",
+                                "inferSchema": false,
+                                "header": true
+                            }
+                        },
+                        "start_datetime": "2022-10-06 12:58:08",
+                        "end_datetime": "2022-10-06 12:58:08",
+                        "seconds_duration": 0.025772
+                    },
+                    "1": {
+                        "task": "schema_on_read_validation",
+                        "message": {
+                            "validation": {
+                                "thresholds": {
+                                    "warning": {
+                                        "min_rows": 0,
+                                        "max_rows": 1000,
+                                        "exception_count": 0,
+                                        "exception_percent": 0
+                                    },
+                                    "error": {
+                                        "min_rows": 0,
+                                        "max_rows": 100000000,
+                                        "exception_count": 50,
+                                        "exception_percent": 80
+                                    }
+                                },
+                                "schema_on_read": {
+                                    "landing.customer_preferences": {
+                                        "total_count": 20,
+                                        "valid_count": 20,
+                                        "exception_count": 0,
+                                        "exception_percent": 0.0
+                                    }
+                                }
+                            }
+                        },
+                        "start_datetime": "2022-10-06 12:58:08",
+                        "end_datetime": "2022-10-06 12:58:09",
+                        "seconds_duration": 0.463003
+                    }
+                }
+            },
+            "8411605f-748f-46b6-89d1-929ddebefd12": {
+                "type": "Writer",
+                "dataflow_id": "d4f79c71-5253-4103-99c4-369019637fa2",
+                "database": "raw",
+                "table": "customer",
+                "path": "file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/raw/customer",
+                "tasks": {
+                    "0": {
+                        "task": "sql",
+                        "message": "CREATE DATABASE IF NOT EXISTS raw",
+                        "start_datetime": "2022-10-06 12:58:09",
+                        "end_datetime": "2022-10-06 12:58:09",
+                        "seconds_duration": 0.182751
+                    },
+                    "1": {
+                        "task": "sql",
+                        "message": "CREATE TABLE raw.customer ( id integer not null, first_name string not null, last_name string, email string, gender string, job_title string, amount double, allow_contact boolean, _partition_key int, _context_id string, _timeslice timestamp ) USING DELTA LOCATION 'file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/raw/customer' PARTITIONED BY (_partition_key,allow_contact);",
+                        "start_datetime": "2022-10-06 12:58:09",
+                        "end_datetime": "2022-10-06 12:58:13",
+                        "seconds_duration": 3.836908
+                    },
+                    "2": {
+                        "task": "set_table_properties",
+                        "message": [
+                            "ALTER TABLE `raw`.`customer` ADD CONSTRAINT amount_lower_bound CHECK (amount > -1000);",
+                            "ALTER TABLE `raw`.`customer` ADD CONSTRAINT amount_upper_bound CHECK (amount < 10000);"
+                        ],
+                        "start_datetime": "2022-10-06 12:58:13",
+                        "end_datetime": "2022-10-06 12:58:20",
+                        "seconds_duration": 7.115609
+                    },
+                    "3": {
+                        "task": "set_table_properties",
+                        "message": "ALTER TABLE `raw`.`customer` SET TBLPROPERTIES ('delta.appendOnly' = 'False', 'delta.checkpoint.writeStatsAsJson' = 'True', 'delta.autoOptimize.autoCompact' = 'True', 'delta.autoOptimize.optimizeWrite' = 'True', 'delta.compatibility.symlinkFormatManifest.enabled' = 'False', 'delta.dataSkippingNumIndexedCols' = '-1', 'delta.logRetentionDuration' = 'interval 30 days', 'delta.deletedFileRetentionDuration' = 'interval 1 week', 'delta.enableChangeDataFeed' = 'True', 'delta.minReaderVersion' = '1', 'delta.minWriterVersion' = '2', 'delta.randomizeFilePrefixes' = 'False', 'delta.randomPrefixLength' = '2');",
+                        "start_datetime": "2022-10-06 12:58:20",
+                        "end_datetime": "2022-10-06 12:58:23",
+                        "seconds_duration": 2.611671
+                    },
+                    "4": {
+                        "task": "delta_table_write",
+                        "message": {
+                            "version": 4,
+                            "timestamp": "2022-10-06 12:58:26.165000",
+                            "userId": null,
+                            "userName": null,
+                            "operation": "WRITE",
+                            "operationParameters": {
+                                "mode": "Overwrite",
+                                "partitionBy": "[\"_partition_key\",\"allow_contact\"]"
+                            },
+                            "job": null,
+                            "notebook": null,
+                            "clusterId": null,
+                            "readVersion": 3,
+                            "isolationLevel": "Serializable",
+                            "isBlindAppend": false,
+                            "operationMetrics": {
+                                "numOutputRows": "20",
+                                "numOutputBytes": "13107",
+                                "numFiles": "4"
+                            },
+                            "userMetadata": null,
+                            "engineInfo": "Apache-Spark/3.3.0 Delta-Lake/2.1.0"
+                        },
+                        "start_datetime": "2022-10-06 12:58:23",
+                        "end_datetime": "2022-10-06 12:58:29",
+                        "seconds_duration": 6.282688
+                    },
+                    "5": {
+                        "task": "delta_table_optimize",
+                        "message": {
+                            "version": 5,
+                            "timestamp": "2022-10-06 12:58:32.273000",
+                            "userId": null,
+                            "userName": null,
+                            "operation": "OPTIMIZE",
+                            "operationParameters": {
+                                "predicate": "[\"((_partition_key IN (20220711, 20220712)) AND (allow_contact IN (false, true)))\"]",
+                                "zOrderBy": "[\"email\",\"id\"]"
+                            },
+                            "job": null,
+                            "notebook": null,
+                            "clusterId": null,
+                            "readVersion": 4,
+                            "isolationLevel": "SnapshotIsolation",
+                            "isBlindAppend": false,
+                            "operationMetrics": {
+                                "numRemovedBytes": "13107",
+                                "p50FileSize": "3302",
+                                "p25FileSize": "3233",
+                                "numAddedFiles": "4",
+                                "minFileSize": "3201",
+                                "p75FileSize": "3371",
+                                "numAddedBytes": "13107",
+                                "maxFileSize": "3371",
+                                "numRemovedFiles": "4"
+                            },
+                            "userMetadata": null,
+                            "engineInfo": "Apache-Spark/3.3.0 Delta-Lake/2.1.0"
+                        },
+                        "start_datetime": "2022-10-06 12:58:29",
+                        "end_datetime": "2022-10-06 12:58:35",
+                        "seconds_duration": 5.50677
+                    }
+                }
+            }
         },
-        "operationParameters": {
-            "predicate": "[\"((_partition_key IN (20210101)) AND (allow_contact IN (true)))\"]",
-            "zOrderBy": "[\"email\",\"id\"]"
+        "name": "batch_text_csv_to_delta_permissive_1",
+        "args": {
+            "timeslice": "2022-*-* 00:00:00.000000",
+            "save": "<class 'yetl_flow.save._saves.OverwriteSave'>"
         },
-        "readVersion": 7,
-        "timestamp": "2022-09-20 19:48:09.726000",
-        "userId": null,
-        "userMetadata": null,
-        "userName": null,
-        "version": 8
+        "started": "2022-10-06 12:57:43",
+        "started_utc": "2022-10-06 12:57:43",
+        "context_id": "51cc0b61-360e-486b-8598-e3d273f9ffd6",
+        "lineage": {
+            "d4f79c71-5253-4103-99c4-369019637fa2": {
+                "8411605f-748f-46b6-89d1-929ddebefd12": {
+                    "depends_on": [
+                        "e2e4b02e-6930-420a-a75b-a945c180781a",
+                        "03a3a8e2-7ad8-482d-8c4a-bbd98eb95478"
+                    ]
+                }
+            }
+        },
+        "finished": "2022-10-06 12:58:35",
+        "finished_utc": "2022-10-06 12:58:35"
+    },
+    "warning": {
+        "count": 0
+    },
+    "error": {
+        "count": 0
     }
 }
