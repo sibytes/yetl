@@ -1,4 +1,4 @@
-datalake: "{{cwd}}"
+datalake: "{{cwd}}/data"
 datalake_protocol: "file:"
 spark:
   spark.master: local

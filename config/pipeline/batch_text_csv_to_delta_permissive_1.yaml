@@ -1,17 +1,29 @@
+# Loads data from text files to a delta table.
+# This load tests the following features:
+#   - permissive data validation.
+#   - dll definition of the target table in a sql file
+#   - partitions in the sql file should override the partitions in here
+
 dataflow:
 
   landing:
     customer:
       table:
+        properties:
           #### YETL TABLE PROPERTIES ####
 
-          # logs the etl metadata to the configured metadata provider.
-          yetl.lineageEnabled: true
+          # derive a timeslice column timestamp from the filepath
+          yetl.metadata.timeslice: true
+          # this will automatically default to an inferred schema load on the 1st load 
+          # and use it to create a schema in the repo.
+          # this is handy in dev workflows to create a starter schema.
+          # best practice strongly recommends that inferred schema's are reviewed
+          # yetl.schema.createIfNotExists: true
 
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: csv
-      path: yetl_data/landing/{{timeslice(path_date_format)}}/customer_{{timeslice(file_date_format)}}.csv
+      path: landing/{{timeslice(path_date_format)}}/customer_{{timeslice(file_date_format)}}.csv
       read:
         # datasets that have auto_io will automatically action the read.
         # where it is false the dataframe can be retrieved in the user implemented
@@ -21,16 +33,16 @@ dataflow:
           mode: PERMISSIVE
           # if infer schema if true the schema will be ingored, generally speaking this is a bad approach for prod pipelines
           # however if you set to true you have to do the work of creating the schema and placing into the schema repo
-          # So! if inferSchema is false which is the default for this framework and there isn't one, the 1st time
+          # So! if inferSchema is false and yetl.schema.createIfNotExists=True and there isn't one, the 1st time
           # you run the pipeline it will infer it, save the schema into the repo. You either leave it as is or 
           # it gives you a starter schema to refine.
           inferSchema: false
           header: true
-#           badRecordsPath: "yetl_data/exceptions/landing/customer/{{timeslice(path_date_format)}}"
       exceptions:
-          path: "yetl_data/delta_lake/exceptions"
+          path: "/delta_lake/exceptions"
           database: landing
           table: exceptions
+
       thresholds:
         warning:
           min_rows: 1
@@ -45,24 +57,22 @@ dataflow:
           
     customer_preferences:
       table:
+        properties:
           #### YETL TABLE PROPERTIES ####
-
-          # builds a struct of metadata lineage and adds it the data in a column
-          # called _yetl_lineage
-          yetl.lineageEnabled: true
+          # yetl.schema.createIfNotExists: true
+          yetl.metadata.timeslice: false
 
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: csv
-      path: yetl_data/landing/{{timeslice(path_date_format)}}/customer_preferences_{{timeslice(file_date_format)}}.csv
+      path: landing/{{timeslice(path_date_format)}}/customer_preferences_{{timeslice(file_date_format)}}.csv
       read:
         options:
           mode: PERMISSIVE
           inferSchema: false
           header: true
-          # badRecordsPath: "data/exceptions/landing/customer_preferences/{{timeslice(path_date_format)}}"
       exceptions:
-          path: "data/delta_lake/exceptions"
+          path: "delta_lake/exceptions"
           database: landing
           table: exceptions
       thresholds:
@@ -86,27 +96,13 @@ dataflow:
         # yetl will default to the ddl definition and throw a warning.
         partitioned_by:
           - _partition_key
+
+        zorder_by:
+          - email
+          - id
         # table ddl is optional to provide full flexbility of how you can manaage the datalake (house)
         # it can be declared inline or via sql include files. If not provided an empty schema table is
         # created and merge schema (if false) is flipped to true on the initial load.
-
-        # ddl: |
-        #   CREATE TABLE {{database_name}}.{{table_name}}
-        #   (
-        #     id            integer not null,
-        #     first_name    string not null,
-        #     last_name     string,
-        #     email         string,
-        #     gender        string,
-        #     job_title     string,
-        #     amount        double,
-        #     allow_contact boolean,
-        #     _partition_key int,
-        #     _context_id string
-        #   )
-        #   USING DELTA LOCATION '{{path}}'
-        #   PARTITIONED_BY (_partition_key);
-
         ddl: ./config/schema/deltalake
 
 
@@ -124,8 +120,8 @@ dataflow:
           # delta.checkpoint.writeStatsAsStruct: None # Not Supported
           # delta.columnMapping.mode: true # not released yet
           
-          # delta.autoOptimize.autoCompact: true        # Databricks, but supported by yetl
-          # delta.autoOptimize.optimizeWrite: true      # Databricks, but supported by yetl
+          delta.autoOptimize.autoCompact: true        # Databricks, but supported by yetl
+          delta.autoOptimize.optimizeWrite: true      # Databricks, but supported by yetl
           # delta.targetFileSize: 104857600             # Databricks only
           # delta.autoCompact.maxFileSize: 134217728    # Databricks only
           # delta.isolationLevel:  WriteSerializable    # Databricks only
@@ -149,9 +145,8 @@ dataflow:
           amount_upper_bound: "amount < 10000"
       
       format: delta
-      path: yetl_data/delta_lake/raw/customer
+      path: delta_lake/raw/customer
       write:
         mode: append
         options:
           mergeSchema: true
-

@@ -36,7 +36,7 @@ dataflow:
           WHERE _TIMESLICE = {{timeslice}}
         # sql: ./config/schema/sql
       exceptions:
-          path: "data/delta_lake/exceptions"
+          path: "delta_lake/exceptions"
           database: raw
           table: exceptions
       thresholds:
@@ -112,7 +112,7 @@ dataflow:
           amount_upper_bound: "amount < 10000"
       
       format: delta
-      path: data/delta_lake/dw/dim_customer
+      path: delta_lake/dw/dim_customer
       write:
         mode: merge #might need merge_scd_type_2
         options:

@@ -1,8 +1,6 @@
 # Loads data from text files to a delta table.
 # This load tests the following features:
-#   - permissive data validation.
-#   - dll definition of the target table in a sql file
-#   - partitions in the sql file should override the partitions in here
+#   - badrecordspath data validation.
 
 dataflow:
 
@@ -18,19 +16,18 @@ dataflow:
           # and use it to create a schema in the repo.
           # this is handy in dev workflows to create a starter schema.
           # best practice strongly recommends that inferred schema's are reviewed
-          # yetl.schema.createIfNotExists: true
+          yetl.schema.createIfNotExists: true
 
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: csv
-      path: data/landing/{{timeslice(path_date_format)}}/customer_{{timeslice(file_date_format)}}.csv
+      path: landing/{{timeslice(path_date_format)}}/customer_{{timeslice(file_date_format)}}.csv
       read:
         # datasets that have auto_io will automatically action the read.
         # where it is false the dataframe can be retrieved in the user implemented
         # dataflow and handled manually as desired.
         auto: true
         options:
-          mode: PERMISSIVE
           # if infer schema if true the schema will be ingored, generally speaking this is a bad approach for prod pipelines
           # however if you set to true you have to do the work of creating the schema and placing into the schema repo
           # So! if inferSchema is false and yetl.schema.createIfNotExists=True and there isn't one, the 1st time
@@ -38,8 +35,9 @@ dataflow:
           # it gives you a starter schema to refine.
           inferSchema: false
           header: true
+          badRecordsPath: "exceptions/landing/customer/{{timeslice(path_date_format)}}"
       exceptions:
-          path: "data/delta_lake/exceptions"
+          path: "delta_lake/exceptions"
           database: landing
           table: exceptions
 
@@ -59,20 +57,22 @@ dataflow:
       table:
         properties:
           #### YETL TABLE PROPERTIES ####
-          # yetl.schema.createIfNotExists: true
+
+          # logs the etl metadata to the configured metadata provider.
+          yetl.schema.createIfNotExists: true
           yetl.metadata.timeslice: false
 
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: csv
-      path: data/landing/{{timeslice(path_date_format)}}/customer_preferences_{{timeslice(file_date_format)}}.csv
+      path: landing/{{timeslice(path_date_format)}}/customer_preferences_{{timeslice(file_date_format)}}.csv
       read:
         options:
-          mode: PERMISSIVE
           inferSchema: false
           header: true
+          badRecordsPath: "exceptions/landing/customer_preferences/{{timeslice(path_date_format)}}"
       exceptions:
-          path: "data/delta_lake/exceptions"
+          path: "delta_lake/exceptions"
           database: landing
           table: exceptions
       thresholds:
@@ -94,6 +94,7 @@ dataflow:
         # we haven't defined the table using DDL with a partition key
         # if you define it in the ddl statement (PARTITIONED BY) and here, then
         # yetl will default to the ddl definition and throw a warning.
+
         partitioned_by:
           - _partition_key
 
@@ -103,6 +104,7 @@ dataflow:
         # table ddl is optional to provide full flexbility of how you can manaage the datalake (house)
         # it can be declared inline or via sql include files. If not provided an empty schema table is
         # created and merge schema (if false) is flipped to true on the initial load.
+
         ddl: ./config/schema/deltalake
 
 
@@ -145,7 +147,7 @@ dataflow:
           amount_upper_bound: "amount < 10000"
       
       format: delta
-      path: data/delta_lake/raw/customer
+      path: delta_lake/raw/customer
       write:
         mode: append
         options:

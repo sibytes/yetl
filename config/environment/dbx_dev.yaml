@@ -1,4 +1,4 @@
-datalake: "/mnt/datalake"
+datalake: "/mnt/datalake/yetl_data"
 datalake_protocol: "dbfs:"
 spark:
   spark.master: local

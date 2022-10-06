@@ -6,9 +6,7 @@ import uuid
 
 
 class IDataflow(ABC):
-    def __init__(
-        self, context, dataflow_config: dict
-    ) -> None:
+    def __init__(self, context, dataflow_config: dict) -> None:
 
         self.auditor = context.auditor
         self.id = uuid.uuid4()

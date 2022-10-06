@@ -68,8 +68,6 @@ class SparkContext(IContext):
 
         return version, databricks_version
 
-
-
     def _get_spark_context(self, app_name: str, config: dict):
         self.log.info("Setting spark context")
         spark_config = config["spark"]
@@ -97,10 +95,7 @@ class SparkContext(IContext):
 
         return logger
 
-
-    def _get_deltalake_flow(
-        self
-    ):
+    def _get_deltalake_flow(self):
         # load the data pipeline provider
         dataflow_config: dict = cp.load_pipeline_config(self.app_name, self.name)
         dataflow_config = dataflow_config.get("dataflow")

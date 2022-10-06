@@ -50,8 +50,5 @@ class IContext(ABC):
         # abstraction of the schema repo
         self.schema_repo_factory = schema_repo_factory
 
-    def _get_deltalake_flow(
-        self
-    ):
+    def _get_deltalake_flow(self):
         None
-

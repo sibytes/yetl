@@ -133,8 +133,12 @@ class Writer(Destination):
                 start_datetime = datetime.now()
                 for cc in self.column_constraints_ddl:
                     self.context.spark.sql(cc)
-                self.auditor.dataset_task(self.id, AuditTask.SET_TABLE_PROPERTIES, self.column_constraints_ddl, start_datetime)
-            
+                self.auditor.dataset_task(
+                    self.id,
+                    AuditTask.SET_TABLE_PROPERTIES,
+                    self.column_constraints_ddl,
+                    start_datetime,
+                )
 
     def _set_table_properties(self, existing_properties: dict, config: dict):
         _existing_properties = {}
@@ -150,7 +154,12 @@ class Writer(Destination):
         if self.tbl_properties_ddl:
             start_datetime = datetime.now()
             self.context.spark.sql(self.tbl_properties_ddl)
-            self.auditor.dataset_task(self.id, AuditTask.SET_TABLE_PROPERTIES, self.tbl_properties_ddl, start_datetime)
+            self.auditor.dataset_task(
+                self.id,
+                AuditTask.SET_TABLE_PROPERTIES,
+                self.tbl_properties_ddl,
+                start_datetime,
+            )
 
     def create_or_alter_table(self):
 

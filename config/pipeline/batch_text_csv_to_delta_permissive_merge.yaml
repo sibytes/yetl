@@ -1,9 +1,3 @@
-# Loads data from text files to a delta table.
-# This load tests the following features:
-#   - permissice data validation.
-#   - dll definition of the target table using inline sql
-#   - partitions in the ddl should override the partitions in here
-
 dataflow:
 
   landing:
@@ -23,7 +17,7 @@ dataflow:
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: csv
-      path: data/landing/{{timeslice(path_date_format)}}/customer_{{timeslice(file_date_format)}}.csv
+      path: landing/{{timeslice(path_date_format)}}/customer_{{timeslice(file_date_format)}}.csv
       read:
         # datasets that have auto_io will automatically action the read.
         # where it is false the dataframe can be retrieved in the user implemented
@@ -38,26 +32,54 @@ dataflow:
           # it gives you a starter schema to refine.
           inferSchema: false
           header: true
+      exceptions:
+          path: "delta_lake/exceptions"
+          database: landing
+          table: exceptions
+
+      thresholds:
+        warning:
+          min_rows: 1
+          max_rows: 1000
+          exception_count: 0
+          exception_percent: 0
+        error:
+          min_rows: 0
+          max_rows: 100000000
+          exception_count: 50
+          exception_percent: 80
           
     customer_preferences:
       table:
         properties:
           #### YETL TABLE PROPERTIES ####
-
-          # logs the etl metadata to the configured metadata provider.
-          yetl.schema.createIfNotExists: true
+          # yetl.schema.createIfNotExists: true
           yetl.metadata.timeslice: false
 
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: csv
-      path: data/landing/{{timeslice(path_date_format)}}/customer_preferences_{{timeslice(file_date_format)}}.csv
+      path: landing/{{timeslice(path_date_format)}}/customer_preferences_{{timeslice(file_date_format)}}.csv
       read:
         options:
           mode: PERMISSIVE
           inferSchema: false
           header: true
-
+      exceptions:
+          path: "delta_lake/exceptions"
+          database: landing
+          table: exceptions
+      thresholds:
+        warning:
+          min_rows: 0
+          max_rows: 1000
+          exception_count: 0
+          exception_percent: 0
+        error:
+          min_rows: 0
+          max_rows: 100000000
+          exception_count: 50
+          exception_percent: 80
 
   raw:
     customer:
@@ -68,7 +90,6 @@ dataflow:
         # yetl will default to the ddl definition and throw a warning.
         partitioned_by:
           - _partition_key
-          - allow_contact
 
         zorder_by:
           - email
@@ -76,24 +97,7 @@ dataflow:
         # table ddl is optional to provide full flexbility of how you can manaage the datalake (house)
         # it can be declared inline or via sql include files. If not provided an empty schema table is
         # created and merge schema (if false) is flipped to true on the initial load.
-
-        ddl: |
-          CREATE TABLE {{database_name}}.{{table_name}}
-          (
-              id            integer not null,
-              first_name    string not null,
-              last_name     string,
-              email         string,
-              gender        string,
-              job_title     string,
-              amount        double,
-              allow_contact boolean,
-              _partition_key int,
-              _context_id string,
-              _slice timestamp
-          )
-          USING DELTA LOCATION '{{path}}'
-          PARTITIONED BY (_partition_key,allow_contact);
+        ddl: ./config/schema/deltalake
 
 
         # https://docs.databricks.com/delta/table-properties.html
@@ -110,8 +114,8 @@ dataflow:
           # delta.checkpoint.writeStatsAsStruct: None # Not Supported
           # delta.columnMapping.mode: true # not released yet
           
-          # delta.autoOptimize.autoCompact: true        # Databricks, but supported by yetl
-          # delta.autoOptimize.optimizeWrite: true      # Databricks, but supported by yetl
+          delta.autoOptimize.autoCompact: true        # Databricks, but supported by yetl
+          delta.autoOptimize.optimizeWrite: true      # Databricks, but supported by yetl
           # delta.targetFileSize: 104857600             # Databricks only
           # delta.autoCompact.maxFileSize: 134217728    # Databricks only
           # delta.isolationLevel:  WriteSerializable    # Databricks only
@@ -135,8 +139,37 @@ dataflow:
           amount_upper_bound: "amount < 10000"
       
       format: delta
-      path: data/delta_lake/raw/customer
+      path: delta_lake/raw/customer
       write:
-        mode: append
+        mode:
+          # the alias for source and destination is src and dst
+          merge:
+            join: |
+              src.id = dst.id
+
+            # you can provide the clause explicitly
+            # update
+            #   match: |
+            #     src.change_hash != dst.change_hash
+            # or use a simple abstract construct for simple use cases
+            update:
+              match: 
+                any_not_equal_except:
+                  - id
+
+            
+            insert: true
+              # you can provide the clause explicitly
+              # match: |
+              #   src.change_hash != dst.change_hash
+              # or use a simple abstract construct for simple use cases
+              # match: 
+              #   any_not_equal_except:
+              #     - id
+
+            delete: false
+              # match: |
+              #   src.change_hash IS NULL
+
         options:
           mergeSchema: true
