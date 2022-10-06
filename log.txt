@@ -1,27 +1,20 @@
-22/10/06 12:57:45 WARN Utils: Your hostname, Shauns-MacBook-Pro.local resolves to a loopback address: 127.0.0.1; using 192.168.0.16 instead (on interface en0)
-22/10/06 12:57:45 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
+22/10/06 13:00:58 WARN Utils: Your hostname, Shauns-MacBook-Pro.local resolves to a loopback address: 127.0.0.1; using 192.168.0.16 instead (on interface en0)
+22/10/06 13:00:58 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
 :: loading settings :: url = jar:file:/Users/shaunryan/opt/spark-3.3.0-bin-hadoop3/jars/ivy-2.5.0.jar!/org/apache/ivy/core/settings/ivysettings.xml
-22/10/06 12:57:46 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+22/10/06 13:00:59 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
 You are setting a property: delta.autoOptimize.autoCompact that is not recognized by this version of Delta
 You are setting a property: delta.autoOptimize.optimizeWrite that is not recognized by this version of Delta
 {
     "dataflow": {
         "datasets": {
-            "e2e4b02e-6930-420a-a75b-a945c180781a": {
+            "97bcbff2-b381-4ba5-8ccb-842436158ef3": {
                 "type": "Reader",
-                "dataflow_id": "d4f79c71-5253-4103-99c4-369019637fa2",
+                "dataflow_id": "a6e4d236-6996-44e2-b25e-51bb5790baa7",
                 "database": "landing",
                 "table": "customer",
                 "path": "file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_2022**.csv",
                 "tasks": {
                     "0": {
-                        "task": "sql",
-                        "message": "CREATE TABLE IF NOT EXISTS `landing`.`exceptions` USING DELTA LOCATION 'file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/exceptions/landing/exceptions';",
-                        "start_datetime": "2022-10-06 12:57:58",
-                        "end_datetime": "2022-10-06 12:58:07",
-                        "seconds_duration": 9.273305
-                    },
-                    "1": {
                         "task": "lazy_read",
                         "message": {
                             "path": "file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_2022**.csv",
@@ -31,11 +24,11 @@ You are setting a property: delta.autoOptimize.optimizeWrite that is not recogni
                                 "header": true
                             }
                         },
-                        "start_datetime": "2022-10-06 12:58:07",
-                        "end_datetime": "2022-10-06 12:58:07",
-                        "seconds_duration": 0.172829
+                        "start_datetime": "2022-10-06 13:01:12",
+                        "end_datetime": "2022-10-06 13:01:13",
+                        "seconds_duration": 0.31842
                     },
-                    "2": {
+                    "1": {
                         "task": "schema_on_read_validation",
                         "message": {
                             "validation": {
@@ -63,15 +56,15 @@ You are setting a property: delta.autoOptimize.optimizeWrite that is not recogni
                                 }
                             }
                         },
-                        "start_datetime": "2022-10-06 12:58:07",
-                        "end_datetime": "2022-10-06 12:58:08",
-                        "seconds_duration": 0.870145
+                        "start_datetime": "2022-10-06 13:01:13",
+                        "end_datetime": "2022-10-06 13:01:14",
+                        "seconds_duration": 1.479603
                     }
                 }
             },
-            "03a3a8e2-7ad8-482d-8c4a-bbd98eb95478": {
+            "8359c637-3ee7-4665-8155-f3c025827c97": {
                 "type": "Reader",
-                "dataflow_id": "d4f79c71-5253-4103-99c4-369019637fa2",
+                "dataflow_id": "a6e4d236-6996-44e2-b25e-51bb5790baa7",
                 "database": "landing",
                 "table": "customer_preferences",
                 "path": "file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_preferences_2022**.csv",
@@ -86,9 +79,9 @@ You are setting a property: delta.autoOptimize.optimizeWrite that is not recogni
                                 "header": true
                             }
                         },
-                        "start_datetime": "2022-10-06 12:58:08",
-                        "end_datetime": "2022-10-06 12:58:08",
-                        "seconds_duration": 0.025772
+                        "start_datetime": "2022-10-06 13:01:14",
+                        "end_datetime": "2022-10-06 13:01:14",
+                        "seconds_duration": 0.034754
                     },
                     "1": {
                         "task": "schema_on_read_validation",
@@ -118,15 +111,15 @@ You are setting a property: delta.autoOptimize.optimizeWrite that is not recogni
                                 }
                             }
                         },
-                        "start_datetime": "2022-10-06 12:58:08",
-                        "end_datetime": "2022-10-06 12:58:09",
-                        "seconds_duration": 0.463003
+                        "start_datetime": "2022-10-06 13:01:14",
+                        "end_datetime": "2022-10-06 13:01:15",
+                        "seconds_duration": 0.807431
                     }
                 }
             },
-            "8411605f-748f-46b6-89d1-929ddebefd12": {
+            "5baceead-3f12-4f64-9e5b-7baea7daaa7a": {
                 "type": "Writer",
-                "dataflow_id": "d4f79c71-5253-4103-99c4-369019637fa2",
+                "dataflow_id": "a6e4d236-6996-44e2-b25e-51bb5790baa7",
                 "database": "raw",
                 "table": "customer",
                 "path": "file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/raw/customer",
@@ -134,39 +127,55 @@ You are setting a property: delta.autoOptimize.optimizeWrite that is not recogni
                     "0": {
                         "task": "sql",
                         "message": "CREATE DATABASE IF NOT EXISTS raw",
-                        "start_datetime": "2022-10-06 12:58:09",
-                        "end_datetime": "2022-10-06 12:58:09",
-                        "seconds_duration": 0.182751
+                        "start_datetime": "2022-10-06 13:01:15",
+                        "end_datetime": "2022-10-06 13:01:15",
+                        "seconds_duration": 0.020079
                     },
                     "1": {
-                        "task": "sql",
-                        "message": "CREATE TABLE raw.customer ( id integer not null, first_name string not null, last_name string, email string, gender string, job_title string, amount double, allow_contact boolean, _partition_key int, _context_id string, _timeslice timestamp ) USING DELTA LOCATION 'file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/raw/customer' PARTITIONED BY (_partition_key,allow_contact);",
-                        "start_datetime": "2022-10-06 12:58:09",
-                        "end_datetime": "2022-10-06 12:58:13",
-                        "seconds_duration": 3.836908
+                        "task": "get_table_properties",
+                        "message": {
+                            "raw.customer": {
+                                "constraints": {
+                                    "amount_lower_bound": "amount > - 1000",
+                                    "amount_upper_bound": "amount < 10000"
+                                },
+                                "properties": {
+                                    "delta.appendOnly": "False",
+                                    "delta.autoOptimize.autoCompact": "True",
+                                    "delta.autoOptimize.optimizeWrite": "True",
+                                    "delta.checkpoint.writeStatsAsJson": "True",
+                                    "delta.compatibility.symlinkFormatManifest.enabled": "False",
+                                    "delta.dataSkippingNumIndexedCols": "-1",
+                                    "delta.deletedFileRetentionDuration": "interval 1 week",
+                                    "delta.enableChangeDataFeed": "True",
+                                    "delta.logRetentionDuration": "interval 30 days",
+                                    "delta.minReaderVersion": "1",
+                                    "delta.minWriterVersion": "4",
+                                    "delta.randomPrefixLength": "2",
+                                    "delta.randomizeFilePrefixes": "False"
+                                },
+                                "partitions": [
+                                    "_partition_key",
+                                    "allow_contact"
+                                ]
+                            }
+                        },
+                        "start_datetime": "2022-10-06 13:01:15",
+                        "end_datetime": "2022-10-06 13:01:24",
+                        "seconds_duration": 8.453327
                     },
                     "2": {
                         "task": "set_table_properties",
-                        "message": [
-                            "ALTER TABLE `raw`.`customer` ADD CONSTRAINT amount_lower_bound CHECK (amount > -1000);",
-                            "ALTER TABLE `raw`.`customer` ADD CONSTRAINT amount_upper_bound CHECK (amount < 10000);"
-                        ],
-                        "start_datetime": "2022-10-06 12:58:13",
-                        "end_datetime": "2022-10-06 12:58:20",
-                        "seconds_duration": 7.115609
+                        "message": "ALTER TABLE `raw`.`customer` SET TBLPROPERTIES ('delta.appendOnly' = 'False', 'delta.autoOptimize.autoCompact' = 'True', 'delta.autoOptimize.optimizeWrite' = 'True', 'delta.checkpoint.writeStatsAsJson' = 'True', 'delta.compatibility.symlinkFormatManifest.enabled' = 'False', 'delta.dataSkippingNumIndexedCols' = '-1', 'delta.deletedFileRetentionDuration' = 'interval 1 week', 'delta.enableChangeDataFeed' = 'True', 'delta.logRetentionDuration' = 'interval 30 days', 'delta.minReaderVersion' = '1', 'delta.minWriterVersion' = '2', 'delta.randomPrefixLength' = '2', 'delta.randomizeFilePrefixes' = 'False');",
+                        "start_datetime": "2022-10-06 13:01:24",
+                        "end_datetime": "2022-10-06 13:01:27",
+                        "seconds_duration": 2.974332
                     },
                     "3": {
-                        "task": "set_table_properties",
-                        "message": "ALTER TABLE `raw`.`customer` SET TBLPROPERTIES ('delta.appendOnly' = 'False', 'delta.checkpoint.writeStatsAsJson' = 'True', 'delta.autoOptimize.autoCompact' = 'True', 'delta.autoOptimize.optimizeWrite' = 'True', 'delta.compatibility.symlinkFormatManifest.enabled' = 'False', 'delta.dataSkippingNumIndexedCols' = '-1', 'delta.logRetentionDuration' = 'interval 30 days', 'delta.deletedFileRetentionDuration' = 'interval 1 week', 'delta.enableChangeDataFeed' = 'True', 'delta.minReaderVersion' = '1', 'delta.minWriterVersion' = '2', 'delta.randomizeFilePrefixes' = 'False', 'delta.randomPrefixLength' = '2');",
-                        "start_datetime": "2022-10-06 12:58:20",
-                        "end_datetime": "2022-10-06 12:58:23",
-                        "seconds_duration": 2.611671
-                    },
-                    "4": {
                         "task": "delta_table_write",
                         "message": {
-                            "version": 4,
-                            "timestamp": "2022-10-06 12:58:26.165000",
+                            "version": 7,
+                            "timestamp": "2022-10-06 13:01:30.051000",
                             "userId": null,
                             "userName": null,
                             "operation": "WRITE",
@@ -177,7 +186,7 @@ You are setting a property: delta.autoOptimize.optimizeWrite that is not recogni
                             "job": null,
                             "notebook": null,
                             "clusterId": null,
-                            "readVersion": 3,
+                            "readVersion": 6,
                             "isolationLevel": "Serializable",
                             "isBlindAppend": false,
                             "operationMetrics": {
@@ -188,15 +197,15 @@ You are setting a property: delta.autoOptimize.optimizeWrite that is not recogni
                             "userMetadata": null,
                             "engineInfo": "Apache-Spark/3.3.0 Delta-Lake/2.1.0"
                         },
-                        "start_datetime": "2022-10-06 12:58:23",
-                        "end_datetime": "2022-10-06 12:58:29",
-                        "seconds_duration": 6.282688
+                        "start_datetime": "2022-10-06 13:01:27",
+                        "end_datetime": "2022-10-06 13:01:33",
+                        "seconds_duration": 5.886687
                     },
-                    "5": {
+                    "4": {
                         "task": "delta_table_optimize",
                         "message": {
-                            "version": 5,
-                            "timestamp": "2022-10-06 12:58:32.273000",
+                            "version": 8,
+                            "timestamp": "2022-10-06 13:01:35.834000",
                             "userId": null,
                             "userName": null,
                             "operation": "OPTIMIZE",
@@ -207,7 +216,7 @@ You are setting a property: delta.autoOptimize.optimizeWrite that is not recogni
                             "job": null,
                             "notebook": null,
                             "clusterId": null,
-                            "readVersion": 4,
+                            "readVersion": 7,
                             "isolationLevel": "SnapshotIsolation",
                             "isBlindAppend": false,
                             "operationMetrics": {
@@ -224,9 +233,9 @@ You are setting a property: delta.autoOptimize.optimizeWrite that is not recogni
                             "userMetadata": null,
                             "engineInfo": "Apache-Spark/3.3.0 Delta-Lake/2.1.0"
                         },
-                        "start_datetime": "2022-10-06 12:58:29",
-                        "end_datetime": "2022-10-06 12:58:35",
-                        "seconds_duration": 5.50677
+                        "start_datetime": "2022-10-06 13:01:33",
+                        "end_datetime": "2022-10-06 13:01:38",
+                        "seconds_duration": 5.629961
                     }
                 }
             }
@@ -236,21 +245,21 @@ You are setting a property: delta.autoOptimize.optimizeWrite that is not recogni
             "timeslice": "2022-*-* 00:00:00.000000",
             "save": "<class 'yetl_flow.save._saves.OverwriteSave'>"
         },
-        "started": "2022-10-06 12:57:43",
-        "started_utc": "2022-10-06 12:57:43",
-        "context_id": "51cc0b61-360e-486b-8598-e3d273f9ffd6",
+        "started": "2022-10-06 13:00:56",
+        "started_utc": "2022-10-06 13:00:56",
+        "context_id": "9f813be2-934e-4896-862b-50eaf173afdd",
         "lineage": {
-            "d4f79c71-5253-4103-99c4-369019637fa2": {
-                "8411605f-748f-46b6-89d1-929ddebefd12": {
+            "a6e4d236-6996-44e2-b25e-51bb5790baa7": {
+                "5baceead-3f12-4f64-9e5b-7baea7daaa7a": {
                     "depends_on": [
-                        "e2e4b02e-6930-420a-a75b-a945c180781a",
-                        "03a3a8e2-7ad8-482d-8c4a-bbd98eb95478"
+                        "97bcbff2-b381-4ba5-8ccb-842436158ef3",
+                        "8359c637-3ee7-4665-8155-f3c025827c97"
                     ]
                 }
             }
         },
-        "finished": "2022-10-06 12:58:35",
-        "finished_utc": "2022-10-06 12:58:35"
+        "finished": "2022-10-06 13:01:38",
+        "finished_utc": "2022-10-06 13:01:38"
     },
     "warning": {
         "count": 0
