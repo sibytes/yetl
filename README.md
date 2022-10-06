@@ -116,6 +116,10 @@ There is a CI build configured for this repo that builds on main origin and publ
 
 # Releases
 
+Version: 0.0.16
+
+- Refactored context into inteface to allow the future expansion into engines other than spark.
+
 Version: 0.0.15
 
 - raise errors and warnings from thresholds configurations
