@@ -5,14 +5,14 @@ import json
 from enum import Enum
 
 
+_EXT = "yaml"
+_VAR_CWD = "{{cwd}}"
+
+
 class EnvVariables(Enum):
     YETL_PIPELINE_ROOT = "./config/pipeline"
     YETL_ENVIRONEMNT_ROOT = "./config/environment"
     YETL_ENVIRONMENT = "local"
-
-
-_EXT = "yaml"
-_VAR_CWD = "{{cwd}}"
 
 
 def _mk_env_path():
