@@ -381,8 +381,5 @@ class Reader(Source):
         detail = {"path": self.path, "options": self.options}
         self.auditor.dataset_task(self.id, AuditTask.LAZY_READ, detail, start_datetime)
         self.validation_result = self.validate()
-        self.save_metadata()
         return self.dataframe
 
-    def save_metadata(self):
-        super().save_metadata()

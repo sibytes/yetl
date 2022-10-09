@@ -48,7 +48,6 @@ class Destination(Dataset):
             )
 
         self.save.write()
-        self.save_metadata()
 
     def _get_partitions_values(self):
 
@@ -79,5 +78,4 @@ class Destination(Dataset):
     def is_destination(self):
         return True
 
-    def save_metadata(self):
-        return super().save_metadata()
+

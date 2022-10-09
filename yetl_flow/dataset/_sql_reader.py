@@ -60,8 +60,4 @@ class SQLReader(Source):
 
         self.dataframe = df
         self.validation_result = self.validate()
-        self.save_metadata()
         return self.dataframe
-
-    def save_metadata(self):
-        super().save_metadata()
