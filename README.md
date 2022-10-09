@@ -116,6 +116,12 @@ There is a CI build configured for this repo that builds on main origin and publ
 
 # Releases
 
+Version: 0.0.17
+
+- Integration testing with databricks.
+- Refactored configuration so that there is more re-use across environments
+- Dataset types are now specifically declared in the configuration to reduce complexity when adding more types of datasets.
+
 Version: 0.0.16
 
 - Refactored context into inteface to allow the future expansion into engines other than spark.
