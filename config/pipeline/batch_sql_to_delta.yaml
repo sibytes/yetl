@@ -18,38 +18,24 @@ dataflow:
         # type: view
         # type: temp_view
         # inline or separate file.
-        sql: |
-          SELECT
-            id            ,
-            first_name    ,
-            last_name     ,
-            email         ,
-            gender        ,
-            job_title     ,
-            amount        ,
-            allow_contact ,
-            current_timestamp() as from_datetime,
-            to_timestamp('9999-12-31 23:59:59.999') as to_datetime,
-            true as current,
-            cast(null as datetime) as deleted_datetime  
-          FROM {{database_name}}.{{table_name}}
-          WHERE _TIMESLICE = {{timeslice}}
-        # sql: ./config/schema/sql
-      exceptions:
-          path: "delta_lake/exceptions"
-          database: raw
-          table: exceptions
-      thresholds:
-        warning:
-          min_rows: 1
-          max_rows: 1000
-          exception_count: 0
-          exception_percent: 0
-        error:
-          min_rows: 0
-          max_rows: 100000000
-          exception_count: 50
-          exception_percent: 80
+        # sql: |
+        #   SELECT
+        #     id            ,
+        #     first_name    ,
+        #     last_name     ,
+        #     email         ,
+        #     gender        ,
+        #     job_title     ,
+        #     amount        ,
+        #     allow_contact ,
+        #     current_timestamp() as _from_datetime,
+        #     to_timestamp('9999-12-31 23:59:59.999') as _to_datetime,
+        #     true as _current,
+        #     cast(null as datetime) as _deleted_datetime  
+        #   FROM {{database_name}}.{{table_name}}
+        #   WHERE _TIMESLICE = {{timeslice}}
+        sql: ./config/schema/sql
+
 
   dw:
     dim_customer:
@@ -59,8 +45,8 @@ dataflow:
         # created and merge schema (if false) is flipped to true on the initial load.
 
         # ddl: |
-        #   CREATE TABLE {{database_name}}.{{table_name}}
-        #   (
+        #  CREATE TABLE {{database_name}}.{{table_name}}
+        # (
         #     id            integer not null,
         #     first_name    string not null,
         #     last_name     string,
@@ -69,11 +55,14 @@ dataflow:
         #     job_title     string,
         #     amount        double,
         #     allow_contact boolean,
-        #     from_date     datetime,
-        #     to_date       datetime,
-        #     current       boolean,
-        #     deleted_date  datetime
-        #   )
+        #     _from_date     datetime,
+        #     _to_date       datetime,
+        #     _current       boolean,
+        #     _deleted_date  datetime,
+        #     _partition_key int,
+        #     _context_id string,
+        #     _timeslice timestamp
+        # )
         #   USING DELTA LOCATION '{{path}}';
 
         ddl: ./config/schema/deltalake

@@ -8,9 +8,12 @@ CREATE TABLE {{database_name}}.{{table_name}}
     job_title     string,
     amount        double,
     allow_contact boolean,
-    from_date     datetime,
-    to_date       datetime,
-    current       boolean,
-    deleted_date  datetime
+    _from_date     datetime,
+    _to_date       datetime,
+    _current       boolean,
+    _deleted_date  datetime,
+    _partition_key int,
+    _context_id string,
+    _timeslice timestamp
 )
 USING DELTA LOCATION '{{path}}';
