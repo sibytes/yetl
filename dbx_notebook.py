@@ -11,18 +11,20 @@ from yetl_flow import (
     TimesliceUtcNow,
     OverwriteSave,
     OverwriteSchemaSave,
+    MergeSave,
     Save,
 )
 from pyspark.sql.functions import *
 from typing import Type
+import json
 
 
 @yetl_flow(log_level="ERROR")
-def customer_landing_to_rawdb_csv(
+def batch_text_csv_to_delta_permissive_1(
     context: IContext,
     dataflow: IDataflow,
     timeslice: Timeslice = TimesliceUtcNow(),
-    save_type: Type[Save] = None,
+    save: Type[Save] = None,
 ) -> dict:
     """Load the demo customer data as is into a raw delta hive registered table.
 
@@ -39,25 +41,25 @@ def customer_landing_to_rawdb_csv(
 
     context.log.info("Joining customers with customer_preferences")
     df = df_cust.join(df_prefs, "id", "inner")
-    df = df.withColumn("_partition_key", lit(2022))
+    df = df.withColumn(
+        "_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer")
+    )
 
-    dataflow.destination_df("raw.customer", df)
+    dataflow.destination_df("raw.customer", df, save=save)
 
 
 # incremental load
-timeslice = Timeslice(2021, 1, 1)
-results = customer_landing_to_rawdb_csv(timeslice=timeslice)
-
+# timeslice = Timeslice(2021, 1, 1)
 # timeslice = Timeslice(2022, 7, 12)
-# results = customer_landing_to_rawdb_csv(
-#     timeslice = timeslice
-# )
+# timeslice = Timeslice(2022, 7, "*")
+# results = batch_text_csv_to_delta_permissive_1(timeslice=timeslice)
+# print(results)
 
 # reload load
-
-# results = customer_landing_to_rawdb_csv(
-#     timeslice=Timeslice(2022, "*", "*"), save_type=OverwriteSchemaSave
-# )
+timeslice = Timeslice(2022, "*", "*")
+results = batch_text_csv_to_delta_permissive_1(timeslice=timeslice, save=OverwriteSave)
+results = json.dumps(results, indent=4, default=str)
+print(results)
 
 
 # COMMAND ----------
