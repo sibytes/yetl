@@ -2,6 +2,7 @@ dataflow:
 
   landing:
     customer:
+      type: Reader
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: json
@@ -27,6 +28,7 @@ dataflow:
           exception_percent: 80
           
     customer_preferences:
+      type: Reader
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: json
@@ -54,6 +56,7 @@ dataflow:
 
   raw:
     customer:
+      type: DeltaWriter
       format: delta
       path: delta_lake/raw/customer
       write:

@@ -6,6 +6,7 @@ dataflow:
 
   landing:
     customer:
+      type: Reader
       table:
         properties:
           #### YETL TABLE PROPERTIES ####
@@ -54,6 +55,7 @@ dataflow:
           exception_percent: 80
           
     customer_preferences:
+      type: Reader
       table:
         properties:
           #### YETL TABLE PROPERTIES ####
@@ -89,6 +91,7 @@ dataflow:
 
   raw:
     customer:
+      type: DeltaWriter
       table:
         # defining a partition key here is an option if
         # we haven't defined the table using DDL with a partition key

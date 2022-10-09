@@ -11,7 +11,7 @@ from ..audit import Audit, AuditTask
 from datetime import datetime
 
 
-class Writer(Destination):
+class DeltaWriter(Destination):
     def __init__(
         self,
         context,
@@ -27,7 +27,7 @@ class Writer(Destination):
         # try and load a schema if schema on read
         self.table_ddl: str = self._get_table_sql(config)
         self.zorder_by: list = self._get_table_zorder(config)
-        self.context.log.debug(f"Writer table ddl = {self.table_ddl}")
+        self.context.log.debug(f"DeltaWriter table ddl = {self.table_ddl}")
 
         # get the configured partitions.
         self.partitions: list = self._get_conf_partitions(config, self.table_ddl)
@@ -149,7 +149,7 @@ class Writer(Destination):
             config, _existing_properties
         )
         self.context.log.debug(
-            f"Writer table properties ddl = {self.tbl_properties_ddl}"
+            f"DeltaWriter table properties ddl = {self.tbl_properties_ddl}"
         )
         if self.tbl_properties_ddl:
             start_datetime = datetime.now()
@@ -340,7 +340,7 @@ class Writer(Destination):
                 )
 
         else:
-            msg = f"Writer dataframe isn't set and cannot be written for {self.database_table} at {self.path}"
+            msg = f"DeltaWriter dataframe isn't set and cannot be written for {self.database_table} at {self.path}"
             self.context.log.error(msg)
             raise Exception(msg)
 

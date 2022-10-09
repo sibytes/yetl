@@ -5,6 +5,7 @@ dataflow:
 
   raw:
     customer:
+      type: SqlReader
       table:
       timeslice_format: "%Y%m%d"
       format: delta
@@ -14,7 +15,6 @@ dataflow:
         # dataflow and handled manually as desired.
         # auto: false # does auto make sense on a sql read?
         name: dim_customer
-        type: dataframe
         # type: view
         # type: temp_view
         # inline or separate file.
@@ -39,6 +39,7 @@ dataflow:
 
   dw:
     dim_customer:
+      type: DeltaWriter
       table:
         # table ddl is optional to provide full flexbility of how you can manaage the datalake (house)
         # it can be declared inline or via sql include files. If not provided an empty schema table is

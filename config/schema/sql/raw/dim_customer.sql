@@ -13,3 +13,4 @@ SELECT
   cast(null as datetime) as _deleted_datetime  
 FROM {{database_name}}.{{table_name}}
 WHERE _TIMESLICE = {{timeslice}}
+

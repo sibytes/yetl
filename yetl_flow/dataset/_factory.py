@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Type
 from ._dataset import Dataset
 from ._reader import Reader
-from ._deltalake_writer import Writer
+from ._deltalake_writer import DeltaWriter
 from ._stream_reader import StreamReader
 from ._stream_writer import StreamWriter
 import logging
@@ -10,8 +10,8 @@ from ..audit import Audit
 
 
 class IOType(Enum):
-    READ = 1
-    WRITE = 2
+    READER = 1
+    DELTAWRITER = 2
     READSTREAM = 3
     WRITESTREAM = 4
 
@@ -36,15 +36,9 @@ class _DatasetFactory:
         self, context, database: str, table: str, dataset_config: dict, auditor: Audit
     ) -> Dataset:
 
-        type: IOType = next(
-            iter(
-                [
-                    self._get_io_type(k)
-                    for k in dataset_config.keys()
-                    if self._get_io_type(k)
-                ]
-            )
-        )
+        dataset_type:str = dataset_config["type"]
+        type: IOType = self._get_io_type(dataset_type)
+
 
         self._logger.info(f"Get {type.name} from factory dataset")
         dataset_class = self._dataset.get(type)
@@ -61,7 +55,7 @@ class _DatasetFactory:
 
 
 factory = _DatasetFactory()
-factory.register_dataset_type(IOType.READ, Reader)
-factory.register_dataset_type(IOType.WRITE, Writer)
+factory.register_dataset_type(IOType.READER, Reader)
+factory.register_dataset_type(IOType.DELTAWRITER, DeltaWriter)
 factory.register_dataset_type(IOType.READSTREAM, StreamReader)
 factory.register_dataset_type(IOType.WRITESTREAM, StreamWriter)

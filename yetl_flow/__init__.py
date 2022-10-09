@@ -1,6 +1,6 @@
 from .dataset import (
     Reader,
-    Writer,
+    DeltaWriter,
     StreamReader,
     StreamWriter,
 )
@@ -23,7 +23,7 @@ from ._timeslice import Timeslice, TimesliceUtcNow, TimesliceNow
 
 __all__ = [
     "Reader",
-    "Writer",
+    "DeltaWriter",
     "StreamReader",
     "StreamWriter",
     "yetl_flow",
