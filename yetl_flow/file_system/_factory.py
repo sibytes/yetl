@@ -64,4 +64,5 @@ class _FileSystemFactory:
 
 factory = _FileSystemFactory()
 factory.register_file_system_type(FileSystemType.FILE, FileSystem)
-factory.register_file_system_type(FileSystemType.DBFS, DbfsFileSystem)
+# factory.register_file_system_type(FileSystemType.DBFS, DbfsFileSystem)
+factory.register_file_system_type(FileSystemType.DBFS, FileSystem)
