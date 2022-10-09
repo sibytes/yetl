@@ -69,9 +69,6 @@ class Dataset:
     def is_destination(self):
         pass
 
-    def save_metadata(self):
-        self.context.metadata_repo.save(self)
-
     def get_metadata(self):
         metadata = {
             str(self.id): {
