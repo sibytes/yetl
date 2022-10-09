@@ -8,6 +8,7 @@ import time
 from ..parser.parser import reduce_whitespace
 from ..warnings import Warning
 
+from typing import Union
 
 class AuditLevel(Enum):
     DATAFLOW = "dataflow"
@@ -54,7 +55,7 @@ class Audit:
         self,
         dataset_id: UUID,
         task: AuditTask,
-        detail: str | dict,
+        detail: Union(str | dict),
         start_datetime: datetime,
     ):
 

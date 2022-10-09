@@ -4,7 +4,7 @@ from pyspark.sql import DataFrame
 from delta import DeltaTable
 from ..dataset import Dataset
 from ._save import Save
-
+from typing import Union
 from ._save_mode_type import SaveModeType
 
 
@@ -122,7 +122,7 @@ class MergeSave(Save):
 
         merger.execute()
 
-    def _derive_any_except_match(self, merge_match: str | dict, df: DataFrame):
+    def _derive_any_except_match(self, merge_match: Union(str | dict), df: DataFrame):
 
         if isinstance(merge_match, dict):
             any_except = merge_match.get("any_not_equal_except")
