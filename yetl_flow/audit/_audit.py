@@ -103,13 +103,21 @@ class Audit:
 
     def get(self, format: AuditFormat = AuditFormat.JSON):
 
-        match format:
-            case AuditFormat.JSON:
-                metadata = json.dumps(self.audit_log, indent=4, default=str)
-            case AuditFormat.YAML:
-                metadata = yaml.safe_dump(self.audit_log, indent=4)
-            case _:
-                metadata = json.dumps(self.audit_log, indent=4, default=str)
+        # For python 10
+        # match format:
+        #     case AuditFormat.JSON:
+        #         metadata = json.dumps(self.audit_log, indent=4, default=str)
+        #     case AuditFormat.YAML:
+        #         metadata = yaml.safe_dump(self.audit_log, indent=4)
+        #     case _:
+        #         metadata = json.dumps(self.audit_log, indent=4, default=str)
+
+        if format == AuditFormat.JSON:
+            metadata = json.dumps(self.audit_log, indent=4, default=str)
+        elif format == AuditFormat.YAML:
+            metadata = yaml.safe_dump(self.audit_log, indent=4)
+        else:
+            metadata = json.dumps(self.audit_log, indent=4, default=str)
 
         return metadata
 

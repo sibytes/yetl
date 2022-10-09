@@ -120,13 +120,21 @@ class IValidator:
         }
         validation_json = json.dumps(validation, indent=4, default=str)
 
-        match self.level:
-            case ThresholdLevels.INFO:
-                self.context.log.info(validation_json)
-            case ThresholdLevels.WARNING:
-                self.context.log.warning(validation_json)
-            case ThresholdLevels.ERROR:
-                self.context.log.error(validation_json)
+        if self.level == ThresholdLevels.INFO:
+            self.context.log.info(validation_json)
+        elif ThresholdLevels.WARNING:
+            self.context.log.warning(validation_json)
+        elif ThresholdLevels.ERROR
+            self.context.log.error(validation_json)
+
+        # Python 10
+        # match self.level:
+        #     case ThresholdLevels.INFO:
+        #         self.context.log.info(validation_json)
+        #     case ThresholdLevels.WARNING:
+        #         self.context.log.warning(validation_json)
+        #     case ThresholdLevels.ERROR:
+        #         self.context.log.error(validation_json)
 
         return self.level, validation
 
