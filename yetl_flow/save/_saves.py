@@ -122,7 +122,7 @@ class MergeSave(Save):
 
         merger.execute()
 
-    def _derive_any_except_match(self, merge_match: Union(str | dict), df: DataFrame):
+    def _derive_any_except_match(self, merge_match: Union[str, dict], df: DataFrame):
 
         if isinstance(merge_match, dict):
             any_except = merge_match.get("any_not_equal_except")

@@ -10,6 +10,7 @@ from ..warnings import Warning
 
 from typing import Union
 
+
 class AuditLevel(Enum):
     DATAFLOW = "dataflow"
     DATASETS = "datasets"
@@ -55,7 +56,7 @@ class Audit:
         self,
         dataset_id: UUID,
         task: AuditTask,
-        detail: Union(str | dict),
+        detail: Union[str, dict],
         start_datetime: datetime,
     ):
 

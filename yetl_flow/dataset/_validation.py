@@ -124,7 +124,7 @@ class IValidator:
             self.context.log.info(validation_json)
         elif ThresholdLevels.WARNING:
             self.context.log.warning(validation_json)
-        elif ThresholdLevels.ERROR
+        elif ThresholdLevels.ERROR:
             self.context.log.error(validation_json)
 
         # Python 10
