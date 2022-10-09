@@ -15,10 +15,10 @@ class DataFlowType(Enum):
     NUKE - Drops all the tables and data before fully reloading everything
     """
 
-    FULL_LOAD = (0,)
+    FULL_LOAD = 0
     PARTITION_LOAD = 1
-    MERGE_COMPARE = (2,)
-    MERGER_CDC = (3,)
+    MERGE_COMPARE = 2
+    MERGER_CDC = 3
     NUKE = 100
 
 
@@ -59,10 +59,7 @@ class Dataflow(IDataflow):
             self.log.debug(
                 f"Appending source {dataset.database_table} as {type(dataset)} to dataflow"
             )
-            if dataset.auto_io:
-                source: Source = dataset
-                source.read()
-            self.sources[dataset.database_table] = source
+            self.sources[dataset.database_table] = dataset
 
         elif dataset.is_destination():
             self.log.debug(
@@ -72,8 +69,10 @@ class Dataflow(IDataflow):
 
     def source_df(self, database_table: str):
 
-        src: Source = self.sources[database_table]
-        return src.dataframe
+        source: Source = self.sources[database_table]
+        if source.auto_io:
+            source.read()
+        return source.dataframe
 
     def destination_df(
         self, database_table: str, dataframe: DataFrame, save: Callable = None
