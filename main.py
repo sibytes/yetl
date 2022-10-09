@@ -1,3 +1,3 @@
-import batch_text_csv_to_delta_permissive_1
+# import batch_text_csv_to_delta_permissive_1
 
-# import batch_text_csv_to_delta_permissive_merge
+import batch_text_csv_to_delta_permissive_merge

@@ -11,6 +11,7 @@ from yetl_flow import (
 )
 from pyspark.sql.functions import *
 from typing import Type
+import json
 
 
 @yetl_flow(log_level="ERROR")
@@ -51,3 +52,5 @@ def batch_text_csv_to_delta_permissive_merge(
 # reload load
 timeslice = Timeslice(2022, "*", "*")
 results = batch_text_csv_to_delta_permissive_merge(timeslice=timeslice)
+results = json.dumps(results, indent=4, default=str)
+print(results)

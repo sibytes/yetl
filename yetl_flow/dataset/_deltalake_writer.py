@@ -37,7 +37,7 @@ class DeltaWriter(Destination):
         )
 
         # gets the read, write, etc options based on the type
-        io_properties = config.get(io_type)
+        io_properties = config.get("write")
         self.auto_io = io_properties.get(AUTO_IO, True)
         self.options: dict = io_properties.get(OPTIONS)
         try:

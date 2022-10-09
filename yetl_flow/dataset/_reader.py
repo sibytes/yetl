@@ -30,7 +30,7 @@ class Reader(Source):
 
         # gets the read, write, etc options based on the type
         self.config = config
-        io_properties = config.get(io_type)
+        io_properties = config.get("read")
 
         # get the table properties
         properties: dict = self._get_table_properties(config["table"])
