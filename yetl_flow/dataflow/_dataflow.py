@@ -6,22 +6,6 @@ from typing import Callable
 from enum import Enum
 
 
-class DataFlowType(Enum):
-    """The type of lead e.g. incremental, incremental CDC, full load etc
-    FULL_LOAD - Selects all the data, has the option of supplying a slice * mask to the timeslice
-    PARTITION_LOAD - Loads / reloads affected partitions
-    MERGE_COMPARE - Merges based on a full comparison of change tracking fields
-    MERGE_CDC - Merges based on CDC provided metadata
-    NUKE - Drops all the tables and data before fully reloading everything
-    """
-
-    FULL_LOAD = 0
-    PARTITION_LOAD = 1
-    MERGE_COMPARE = 2
-    MERGER_CDC = 3
-    NUKE = 100
-
-
 class Dataflow(IDataflow):
     def __init__(self, context, dataflow_config: dict) -> None:
 

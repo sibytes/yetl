@@ -116,6 +116,13 @@ There is a CI build configured for this repo that builds on main origin and publ
 
 # Releases
 
+Version: 0.0.18
+
+- Major cleanup and refactor of datasets for future road map
+- Sources and destinations have the same auto_io lifecycle in the dataflow, auto is called on retrieval from the dataflow collections
+- Added SQLReader dataset type so we can define SQL Sources from any hive table in data flows that write to destinations (e.g. delta lake tables)
+
+
 Version: 0.0.17
 
 - Integration testing with databricks.
