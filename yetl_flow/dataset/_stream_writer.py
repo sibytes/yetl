@@ -1,8 +1,8 @@
-from ._destination import Destination
+from ._dataset import Dataset
 from ..audit import Audit
 
 
-class StreamWriter(Destination):
+class StreamWriter(Dataset):
     def __init__(
         self,
         context,

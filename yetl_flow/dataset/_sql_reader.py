@@ -1,4 +1,5 @@
-from ._source import Source
+from ._base import Source
+from ._dataset import Dataset
 from pyspark.sql import functions as fn
 from ..parser._constants import *
 from . import _builtin_functions as builtin_funcs
@@ -9,7 +10,7 @@ from .. import _delta_lake as dl
 from ..audit import Audit
 
 
-class SQLReader(Source):
+class SQLReader(Dataset, Source):
     def __init__(
         self,
         context,

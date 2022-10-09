@@ -1,8 +1,8 @@
-from ._source import Source
+from ._dataset import Dataset
 from ..audit import Audit
 
 
-class StreamReader(Source):
+class StreamReader(Dataset):
     def __init__(
         self,
         context,

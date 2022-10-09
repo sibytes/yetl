@@ -1,5 +1,4 @@
 import numbers
-from unicodedata import numeric
 from pyspark.sql.dataframe import DataFrame
 from pyspark.sql import functions as fn
 from pyspark.sql import SparkSession

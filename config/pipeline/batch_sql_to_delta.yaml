@@ -9,32 +9,29 @@ dataflow:
       table:
       timeslice_format: "%Y%m%d"
       format: delta
-      sql:
-        # datasets that have auto_io will automatically action the read.
-        # where it is false the dataframe can be retrieved in the user implemented
-        # dataflow and handled manually as desired.
-        # auto: false # does auto make sense on a sql read?
-        name: dim_customer
-        # type: view
-        # type: temp_view
-        # inline or separate file.
-        # sql: |
-        #   SELECT
-        #     id            ,
-        #     first_name    ,
-        #     last_name     ,
-        #     email         ,
-        #     gender        ,
-        #     job_title     ,
-        #     amount        ,
-        #     allow_contact ,
-        #     current_timestamp() as _from_datetime,
-        #     to_timestamp('9999-12-31 23:59:59.999') as _to_datetime,
-        #     true as _current,
-        #     cast(null as datetime) as _deleted_datetime  
-        #   FROM {{database_name}}.{{table_name}}
-        #   WHERE _TIMESLICE = {{timeslice}}
-        sql: ./config/schema/sql
+      # datasets that have auto_io will automatically action the read.
+      # where it is false the dataframe can be retrieved in the user implemented
+      # dataflow and handled manually as desired.
+      auto: true # does auto make sense on a sql read?
+
+      # inline or separate file.
+      # sql: |
+      #   SELECT
+      #     id            ,
+      #     first_name    ,
+      #     last_name     ,
+      #     email         ,
+      #     gender        ,
+      #     job_title     ,
+      #     amount        ,
+      #     allow_contact ,
+      #     current_timestamp() as _from_datetime,
+      #     to_timestamp('9999-12-31 23:59:59.999') as _to_datetime,
+      #     true as _current,
+      #     cast(null as datetime) as _deleted_datetime  
+      #   FROM {{database_name}}.{{table_name}}
+      #   WHERE _TIMESLICE = {{timeslice}}
+      sql: ./config/schema/sql
 
 
   dw:

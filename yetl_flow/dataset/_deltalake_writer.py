@@ -1,4 +1,3 @@
-from ._destination import Destination
 from ..parser._constants import *
 from ..schema_repo import ISchemaRepo
 import os
@@ -9,9 +8,13 @@ from ..parser import parser
 from ..save import save_factory, Save
 from ..audit import Audit, AuditTask
 from datetime import datetime
+from pyspark.sql import functions as fn
+import json
+from ._dataset import Dataset
+from ._base import Destination
 
 
-class DeltaWriter(Destination):
+class DeltaWriter(Dataset, Destination):
     def __init__(
         self,
         context,
@@ -302,6 +305,55 @@ class DeltaWriter(Destination):
 
         return ddl
 
+    def _get_partitions_values(self):
+
+        partition_values = {}
+        if self.partitions:
+            partition_values_df = self.dataframe.select(*self.partitions).distinct()
+
+            for p in self.partitions:
+                group_by: list = list(self.partitions)
+                group_by.remove(p)
+                if group_by:
+                    partition_values_df = partition_values_df.groupBy(*group_by).agg(
+                        fn.collect_set(p).alias(p)
+                    )
+                else:
+                    partition_values_df = partition_values_df.withColumn(
+                        p, fn.collect_set(p)
+                    )
+
+            partition_values_df = partition_values_df.collect()
+            partition_values = partition_values_df[0].asDict()
+
+        return partition_values
+
+    def _prepare_write(self):
+
+        self.context.log.debug(
+            f"Reordering sys_columns to end for {self.database_table} from {self.path} {CONTEXT_ID}={str(self.context_id)}"
+        )
+        # remove a re-add the _context_id since there will be dupplicate columns
+        # when dataframe is built from multiple sources.
+        self.dataframe = self.dataframe.drop(CONTEXT_ID).withColumn(
+            CONTEXT_ID, fn.lit(str(self.context_id))
+        )
+
+        # clean up the column ordering
+        sys_columns = [c for c in self.dataframe.columns if c.startswith("_")]
+        data_columns = [c for c in self.dataframe.columns if not c.startswith("_")]
+        data_columns = data_columns + sys_columns
+        self.dataframe = self.dataframe.select(*data_columns)
+
+        # get the partitions values for efficient IO patterns
+        self.partition_values = self._get_partitions_values()
+
+        if self.partition_values:
+            msg_partition_values = json.dumps(self.partition_values, indent=4)
+            self.context.log.info(
+                f"""IO operations for {self.database}.{self.table} will be paritioned by: \n{msg_partition_values}"""
+            )
+
     def write(self):
         self.context.log.info(f"Writing data to {self.database_table} at {self.path}")
         if self.dataframe:
@@ -313,7 +365,8 @@ class DeltaWriter(Destination):
             # helps to repartition the output data by the table’s partition columns before writing it. You enable
             # this by setting the Spark session configuration spark.databricks.delta.merge.repartitionBeforeWrite.enabled to true."
             start_datetime = datetime.now()
-            super().write()
+            self._prepare_write()
+            self.save.write()
             write_audit = dl.get_audit(self.context, f"{self.database}.{self.table}")
             self.auditor.dataset_task(
                 self.id, AuditTask.DELTA_TABLE_WRITE, write_audit, start_datetime

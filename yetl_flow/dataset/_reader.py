@@ -1,4 +1,4 @@
-from ._source import Source
+from ._dataset import Dataset
 from pyspark.sql import functions as fn
 from pyspark.sql.types import StructType
 from ..parser._constants import *
@@ -14,9 +14,10 @@ import json
 from .. import _delta_lake as dl
 from ..audit import Audit, AuditTask
 from datetime import datetime
+from ._base import Source
 
 
-class Reader(Source):
+class Reader(Dataset, Source):
     def __init__(
         self,
         context,
@@ -381,5 +382,5 @@ class Reader(Source):
         detail = {"path": self.path, "options": self.options}
         self.auditor.dataset_task(self.id, AuditTask.LAZY_READ, detail, start_datetime)
         self.validation_result = self.validate()
-        return self.dataframe
 
+        return self.dataframe

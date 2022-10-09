@@ -1,6 +1,5 @@
 from ._dataset import Dataset
-from ._source import Source
-from ._destination import Destination
+from ._base import Destination, Source
 from ._reader import Reader
 from ._deltalake_writer import DeltaWriter
 from ._stream_reader import StreamReader
