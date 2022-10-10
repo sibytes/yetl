@@ -24,7 +24,7 @@ def batch_sql_to_delta(
     """Load the demo customer data from Raw delta table using SQL to a DW dimension delta table"""
 
     df_dim_cust = dataflow.source_df("raw.customer")
-
+    df_dim_cust.show()
     df_dim_cust = df_dim_cust.withColumn(
         "_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer")
     )

@@ -26,8 +26,11 @@ class SQLReader(Dataset, Source):
         self.dataframe: DataFrame = None
         # try and load the sql definition
         self.sql: str = self._get_select_sql(config)
-
         self.context.log.debug(f"SQLReader sql = {self.sql}")
+        
+        io_properties = config.get("read")
+        self.auto_io = io_properties.get(AUTO_IO, True)
+        
 
     def _get_select_sql(self, config: dict):
 
@@ -84,10 +87,8 @@ class SQLReader(Dataset, Source):
 
     def read(self):
         self.context.log.info(
-            f"Reading data for {self.database_table} from {self.path} with options {self.options} {CONTEXT_ID}={str(self.context_id)}"
+            f"Reading data for {self.database_table} with query {self.sql} {CONTEXT_ID}={str(self.context_id)}"
         )
-
-        self.context.log.debug(json.dumps(self.options, indent=4, default=str))
 
         df: DataFrame = self.context.spark.sql(self.sql)
 

@@ -36,10 +36,11 @@ dataflow:
 
       timeslice_format: "%Y%m%d"
       format: delta
-      # datasets that have auto_io will automatically action the read.
-      # where it is false the dataframe can be retrieved in the user implemented
-      # dataflow and handled manually as desired.
-      auto: true # does auto make sense on a sql read?
+      read:
+        # datasets that have auto_io will automatically action the read.
+        # where it is false the dataframe can be retrieved in the user implemented
+        # dataflow and handled manually as desired.
+        auto: true # does auto make sense on a sql read?
 
 
 
