@@ -19,29 +19,29 @@ class SparkFileSchemaRepo(ISchemaRepo):
 
     def __init__(self, context, config: dict) -> None:
         super().__init__(context, config)
-        self.root_path = config["spark_schema_file"].get("spark_schema_root")
+        self.root_path = config["spark_schema_file"].get("spark_schema_root", self._SCHEMA_ROOT)
 
-    def _mkpath(self, database_name: str, table_name: str):
+    def _mkpath(self, database_name: str, table_name: str, sub_location:str):
         """Function that builds the schema path"""
-        if not self.root_path:
-            return f"{self._SCHEMA_ROOT}/{database_name}/{table_name}.{self._EXT}"
+        if sub_location:
+            return f"{self.root_path}/{sub_location}/{database_name}/{table_name}.{self._EXT}"
         else:
             return f"{self.root_path}/{database_name}/{table_name}.{self._EXT}"
 
-    def save_schema(self, schema: StructType, database_name: str, table_name: str):
+    def save_schema(self, schema: StructType, database_name: str, table_name: str, sub_location:str=None):
         """Serialise a spark schema to a yaml file and saves to a schema file in the schema folder."""
 
-        path = self._mkpath(database_name, table_name)
+        path = self._mkpath(database_name, table_name, sub_location)
         path = os.path.abspath(path)
 
         schema_dict = json.loads(schema.json())
         with open(path, "w") as f:
             f.write(yaml.safe_dump(schema_dict))
 
-    def load_schema(self, database_name: str, table_name: str):
+    def load_schema(self, database_name: str, table_name: str, sub_location:str=None):
         """Loads a spark from a yaml file and deserialises to a spark schema."""
 
-        path = self._mkpath(database_name, table_name)
+        path = self._mkpath(database_name, table_name, sub_location)
         path = os.path.abspath(path)
 
         # this was in thought that schema's could be maintain and loaded off DBFS for databricks

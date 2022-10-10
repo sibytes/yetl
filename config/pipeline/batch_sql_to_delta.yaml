@@ -7,6 +7,33 @@ dataflow:
     customer:
       type: SqlReader
       table:
+        # inline or separate file.
+        # sql: |
+        #   SELECT
+        #     id            ,
+        #     first_name    ,
+        #     last_name     ,
+        #     email         ,
+        #     gender        ,
+        #     job_title     ,
+        #     amount        ,
+        #     allow_contact ,
+        #     current_timestamp() as _from_datetime,
+        #     to_timestamp('9999-12-31 23:59:59.999') as _to_datetime,
+        #     true as _current,
+        #     cast(null as datetime) as _deleted_datetime  
+        #   FROM {{database_name}}.{{table_name}}
+        #   WHERE _TIMESLICE = {{timeslice}}
+
+        # schema is optional, it will default to the database name raw as defined above
+        # it's used to locate the sql definition in the schema repo
+        # schema: raw
+
+        # name is optional, it will default to the table name customer as defined above
+        # it's used to locate the sql definition at the lowest level in the schema repo
+        name: dim_customer
+        sql: "{{root}}/sql"
+
       timeslice_format: "%Y%m%d"
       format: delta
       # datasets that have auto_io will automatically action the read.
@@ -14,24 +41,7 @@ dataflow:
       # dataflow and handled manually as desired.
       auto: true # does auto make sense on a sql read?
 
-      # inline or separate file.
-      # sql: |
-      #   SELECT
-      #     id            ,
-      #     first_name    ,
-      #     last_name     ,
-      #     email         ,
-      #     gender        ,
-      #     job_title     ,
-      #     amount        ,
-      #     allow_contact ,
-      #     current_timestamp() as _from_datetime,
-      #     to_timestamp('9999-12-31 23:59:59.999') as _to_datetime,
-      #     true as _current,
-      #     cast(null as datetime) as _deleted_datetime  
-      #   FROM {{database_name}}.{{table_name}}
-      #   WHERE _TIMESLICE = {{timeslice}}
-      sql: ./config/schema/sql
+
 
 
   dw:

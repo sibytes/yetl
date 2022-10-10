@@ -9,6 +9,6 @@ class ISchemaRepo:
         """Save a schema into the repo."""
         pass
 
-    def load_schema(self, database_name: str, table_name: str):
+    def load_schema(self, database_name: str, table_name: str, sub_location:str=None):
         """Loads a spark from a file."""
         pass

@@ -2,32 +2,35 @@ import json
 from ._ischema_repo import ISchemaRepo
 from pyspark.sql.types import StructType
 from ..file_system import FileFormat, IFileSystem, file_system_factory, FileSystemType
+import os
 
 
 class DeltalakeSchemaFile(ISchemaRepo):
 
-    _SCHEMA_ROOT = "./config/schema/deltalake"
+    _SCHEMA_ROOT = "./config/schema"
     _EXT = "sql"
 
     def __init__(self, context, config: dict) -> None:
         super().__init__(context, config)
-        self.root_path = config["deltalake_sql_file"].get("deltalake_schema_root")
+        self.root_path = config["deltalake_sql_file"].get("deltalake_schema_root", self._SCHEMA_ROOT)
 
-    def _mkpath(self, database_name: str, table_name: str):
+
+    def _mkpath(self, database_name: str, table_name: str, sub_location:str):
         """Function that builds the schema path"""
-        if not self.root_path:
-            return f"{self._SCHEMA_ROOT}/{database_name}/{table_name}.{self._EXT}"
-        else:
-            return f"{self.root_path}/{database_name}/{table_name}.{self._EXT}"
 
-    def save_schema(self, schema: StructType, database_name: str, table_name: str):
+        path =  sub_location.replace("{{root}}", self.root_path)
+        path = f"{path}/{database_name}/{table_name}.{self._EXT}"
+        return path
+
+
+    def save_schema(self, schema: StructType, database_name: str, table_name: str, sub_location:str):
         """Serialise delta table to a create table sql file."""
         raise NotImplementedError
 
-    def load_schema(self, database_name: str, table_name: str):
+    def load_schema(self, database_name: str, table_name: str, sub_location:str):
         """Loads a spark from a yaml file and deserialises to a spark schema."""
 
-        path = self._mkpath(database_name, table_name)
+        path = self._mkpath(database_name, table_name, sub_location)
 
         # this was in thought that schema's could be maintain and loaded off DBFS for databricks
         # it actually works much better using the local repo files

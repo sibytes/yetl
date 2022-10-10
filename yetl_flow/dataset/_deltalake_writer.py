@@ -290,13 +290,13 @@ class DeltaWriter(Dataset, Destination):
         table = config.get(TABLE)
         if table:
             ddl: str = table.get("ddl")
-            if ddl and os.path.exists(ddl):
+            if ddl and not "\n" in ddl:
                 self.schema_repo: ISchemaRepo = (
                     self.context.schema_repo_factory.get_schema_repo_type(
                         self.context, config["deltalake_schema_repo"]
                     )
                 )
-                ddl = self.schema_repo.load_schema(self.database, self.table)
+                ddl = self.schema_repo.load_schema(self.database, self.table, ddl)
                 ddl = ddl.replace("{{database_name}}", self.database)
                 ddl = ddl.replace("{{table_name}}", self.table)
                 ddl = ddl.replace("{{path}}", self.path)
