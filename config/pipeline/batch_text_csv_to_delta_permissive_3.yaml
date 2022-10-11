@@ -41,9 +41,9 @@ dataflow:
           inferSchema: false
           header: true
       exceptions:
-          path: "delta_lake/exceptions"
+          path: "delta_lake/{{table_name}}_exceptions"
           database: landing
-          table: exceptions
+          table: "{{table_name}}_exceptions"
 
       thresholds:
         warning:
@@ -77,9 +77,9 @@ dataflow:
           inferSchema: false
           header: true
       exceptions:
-          path: "delta_lake/exceptions"
+          path: "delta_lake/{{table_name}}_exceptions"
           database: landing
-          table: exceptions
+          table: "{{table_name}}_exceptions"
       thresholds:
         warning:
           min_rows: 0

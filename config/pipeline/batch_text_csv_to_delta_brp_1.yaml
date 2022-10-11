@@ -38,9 +38,9 @@ dataflow:
           header: true
           badRecordsPath: "exceptions/landing/customer/{{timeslice(path_date_format)}}"
       exceptions:
-          path: "delta_lake/exceptions"
+          path: "delta_lake/{{table_name}}_exceptions"
           database: landing
-          table: exceptions
+          table: "{{table_name}}_exceptions"
 
       thresholds:
         warning:
@@ -74,9 +74,9 @@ dataflow:
           header: true
           badRecordsPath: "exceptions/landing/customer_preferences/{{timeslice(path_date_format)}}"
       exceptions:
-          path: "delta_lake/exceptions"
+          path: "delta_lake/{{table_name}}_exceptions"
           database: landing
-          table: exceptions
+          table: "{{table_name}}_exceptions"
       thresholds:
         warning:
           min_rows: 0

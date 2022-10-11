@@ -37,6 +37,7 @@ setup(
         "yetl_flow.metadata_model",
         "yetl_flow.metadata_repo",
         "yetl_flow.parser",
+        "yetl_flow.save",
         "yetl_flow.schema_repo",
         "yetl_flow.warnings",
     ],
