@@ -34,7 +34,7 @@ setup(
         "yetl_flow.dataset",
         "yetl_flow.exceptions",
         "yetl_flow.file_system",
-        "yetl_flow.metadata_model",
+        # "yetl_flow.metadata_model",
         "yetl_flow.metadata_repo",
         "yetl_flow.parser",
         "yetl_flow.save",
