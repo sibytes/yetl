@@ -12,22 +12,24 @@ class DeltalakeSchemaFile(ISchemaRepo):
 
     def __init__(self, context, config: dict) -> None:
         super().__init__(context, config)
-        self.root_path = config["deltalake_sql_file"].get("deltalake_schema_root", self._SCHEMA_ROOT)
+        self.root_path = config["deltalake_sql_file"].get(
+            "deltalake_schema_root", self._SCHEMA_ROOT
+        )
 
-
-    def _mkpath(self, database_name: str, table_name: str, sub_location:str):
+    def _mkpath(self, database_name: str, table_name: str, sub_location: str):
         """Function that builds the schema path"""
 
-        path =  sub_location.replace("{{root}}", self.root_path)
+        path = sub_location.replace("{{root}}", self.root_path)
         path = f"{path}/{database_name}/{table_name}.{self._EXT}"
         return path
 
-
-    def save_schema(self, schema: StructType, database_name: str, table_name: str, sub_location:str):
+    def save_schema(
+        self, schema: StructType, database_name: str, table_name: str, sub_location: str
+    ):
         """Serialise delta table to a create table sql file."""
         raise NotImplementedError
 
-    def load_schema(self, database_name: str, table_name: str, sub_location:str):
+    def load_schema(self, database_name: str, table_name: str, sub_location: str):
         """Loads a spark from a yaml file and deserialises to a spark schema."""
 
         path = self._mkpath(database_name, table_name, sub_location)

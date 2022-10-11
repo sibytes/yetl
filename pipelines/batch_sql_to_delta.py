@@ -5,7 +5,7 @@ from yetl_flow import (
     Timeslice,
     TimesliceUtcNow,
     Save,
-    OverwriteSave
+    OverwriteSave,
 )
 from pyspark.sql.functions import *
 from typing import Type

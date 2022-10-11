@@ -54,7 +54,6 @@ def yetl_flow(name: str = None, app_name: str = None, log_level="INFO"):
                 msg = f"Dataflow application {context.app_name} failed due to {e}."
                 context.log.error(msg)
                 auditor.error(e)
-                raise e
 
             # get the delta lake audit information and add it to the return
             auditor.dataflow({"finished": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})

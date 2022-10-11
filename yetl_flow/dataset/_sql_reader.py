@@ -7,6 +7,7 @@ from ..audit import Audit
 from datetime import datetime
 from ..audit import Audit, AuditTask
 
+
 class SQLReader(Dataset, Source):
     def __init__(
         self,
@@ -23,10 +24,9 @@ class SQLReader(Dataset, Source):
         # try and load the sql definition
         self.sql: str = self._get_select_sql(config)
         self.context.log.debug(f"SQLReader sql = {self.sql}")
-        
+
         io_properties = config.get("read")
         self.auto_io = io_properties.get(AUTO_IO, True)
-        
 
     def _get_select_sql(self, config: dict):
 
@@ -42,7 +42,6 @@ class SQLReader(Dataset, Source):
                     )
                 )
 
-
                 sql = self.schema_repo.load_schema(schema, name, sql)
                 sql = sql.replace("{{database_name}}", self.database)
                 sql = sql.replace("{{table_name}}", self.table)
@@ -51,7 +50,6 @@ class SQLReader(Dataset, Source):
             sql = None
 
         return sql
-
 
     def _validate_configuration(self):
         pass

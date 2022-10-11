@@ -19,16 +19,24 @@ class SparkFileSchemaRepo(ISchemaRepo):
 
     def __init__(self, context, config: dict) -> None:
         super().__init__(context, config)
-        self.root_path = config["spark_schema_file"].get("spark_schema_root", self._SCHEMA_ROOT)
+        self.root_path = config["spark_schema_file"].get(
+            "spark_schema_root", self._SCHEMA_ROOT
+        )
 
-    def _mkpath(self, database_name: str, table_name: str, sub_location:str):
+    def _mkpath(self, database_name: str, table_name: str, sub_location: str):
         """Function that builds the schema path"""
         if sub_location:
             return f"{self.root_path}/{sub_location}/{database_name}/{table_name}.{self._EXT}"
         else:
             return f"{self.root_path}/{database_name}/{table_name}.{self._EXT}"
 
-    def save_schema(self, schema: StructType, database_name: str, table_name: str, sub_location:str=None):
+    def save_schema(
+        self,
+        schema: StructType,
+        database_name: str,
+        table_name: str,
+        sub_location: str = None,
+    ):
         """Serialise a spark schema to a yaml file and saves to a schema file in the schema folder."""
 
         path = self._mkpath(database_name, table_name, sub_location)
@@ -38,7 +46,9 @@ class SparkFileSchemaRepo(ISchemaRepo):
         with open(path, "w") as f:
             f.write(yaml.safe_dump(schema_dict))
 
-    def load_schema(self, database_name: str, table_name: str, sub_location:str=None):
+    def load_schema(
+        self, database_name: str, table_name: str, sub_location: str = None
+    ):
         """Loads a spark from a yaml file and deserialises to a spark schema."""
 
         path = self._mkpath(database_name, table_name, sub_location)
