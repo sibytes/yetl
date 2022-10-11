@@ -236,12 +236,20 @@ class Reader(Dataset, Source):
     def _set_exceptions_attributes(self, dataset: dict):
 
         exceptions = dataset[EXCEPTIONS]
-        self.exceptions_table = exceptions.get(TABLE)
-        self.exceptions_database = exceptions.get(DATABASE)
+        self.exceptions_table:str = exceptions.get(TABLE)
+        self.exceptions_table = self.exceptions_table.replace("{{table_name}}", self.table)
+        self.exceptions_table = self.exceptions_table.replace("{{database_name}}", self.database)
+
+        self.exceptions_database:str = exceptions.get(DATABASE)
+        self.exceptions_database = self.exceptions_database.replace("{{table_name}}", self.table)
+        self.exceptions_database = self.exceptions_database.replace("{{database_name}}", self.database)
+
         self.exceptions_database_table = (
             f"{self.exceptions_database}.{self.exceptions_table}"
         )
-        exceptions_path = exceptions.get(PATH)
+        exceptions_path:str = exceptions.get(PATH)
+        exceptions_path = exceptions_path.replace("{{table_name}}", self.table)
+        exceptions_path = exceptions_path.replace("{{database_name}}", self.database)
         self.exceptions_path = f"{self.datalake_protocol}{self.datalake}/{exceptions_path}/{self.exceptions_database}/{self.exceptions_table}"
 
     def _is_corrupt_column_set(self, options: dict, schema: StructType):

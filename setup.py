@@ -11,7 +11,7 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="yetl-framework",
-    version="0.0.19",
+    version="0.0.20",
     description="yet (another spark) etl framework",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -24,7 +24,7 @@ setup(
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
     packages=[
         "yetl_flow",
@@ -34,7 +34,6 @@ setup(
         "yetl_flow.dataset",
         "yetl_flow.exceptions",
         "yetl_flow.file_system",
-        # "yetl_flow.metadata_model",
         "yetl_flow.metadata_repo",
         "yetl_flow.parser",
         "yetl_flow.save",
