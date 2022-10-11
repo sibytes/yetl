@@ -1,5 +1,5 @@
 # Loads data using SQL from the a delta table called customer in to a table called dim_customer
-# A pattern that we would use to load curated tables tables such as a data warehouse or feature store.
+# A pattern that we would use to load golden tables such as a data warehouse or feature store.
 
 dataflow:
 
@@ -7,24 +7,6 @@ dataflow:
     customer:
       type: SqlReader
       table:
-        # inline or separate file.
-        # sql: |
-        #   SELECT
-        #     id            ,
-        #     first_name    ,
-        #     last_name     ,
-        #     email         ,
-        #     gender        ,
-        #     job_title     ,
-        #     amount        ,
-        #     allow_contact ,
-        #     current_timestamp() as _from_datetime,
-        #     to_timestamp('9999-12-31 23:59:59.999') as _to_datetime,
-        #     true as _current,
-        #     cast(null as datetime) as _deleted_datetime  
-        #   FROM {{database_name}}.{{table_name}}
-        #   WHERE _TIMESLICE = {{timeslice}}
-
         # schema is optional, it will default to the database name raw as defined above
         # it's used to locate the sql definition in the schema repo
         # schema: raw
@@ -40,60 +22,17 @@ dataflow:
         # datasets that have auto_io will automatically action the read.
         # where it is false the dataframe can be retrieved in the user implemented
         # dataflow and handled manually as desired.
-        auto: true # does auto make sense on a sql read?
-
-
-
+        auto: true
 
   dw:
     dim_customer:
       type: DeltaWriter
       table:
-        # table ddl is optional to provide full flexbility of how you can manaage the datalake (house)
-        # it can be declared inline or via sql include files. If not provided an empty schema table is
-        # created and merge schema (if false) is flipped to true on the initial load.
-
-        # ddl: |
-        #  CREATE TABLE {{database_name}}.{{table_name}}
-        # (
-        #     id            integer not null,
-        #     first_name    string not null,
-        #     last_name     string,
-        #     email         string,
-        #     gender        string,
-        #     job_title     string,
-        #     amount        double,
-        #     allow_contact boolean,
-        #     _from_date     datetime,
-        #     _to_date       datetime,
-        #     _current       boolean,
-        #     _deleted_date  datetime,
-        #     _partition_key int,
-        #     _context_id string,
-        #     _timeslice timestamp
-        # )
-        #   USING DELTA LOCATION '{{path}}';
-
         ddl: ./config/schema/deltalake
 
-
-        # https://docs.databricks.com/delta/table-properties.html
-        # https://docs.delta.io/2.0.0/table-properties.html
         properties:
           delta.appendOnly: false
           delta.checkpoint.writeStatsAsJson: true
-          # delta.checkpoint.writeStatsAsStruct: None # Not Supported
-          # delta.columnMapping.mode: true # not released yet
-          
-          # delta.autoOptimize.autoCompact: true        # Databricks, but supported by yetl
-          # delta.autoOptimize.optimizeWrite: true      # Databricks, but supported by yetl
-          # delta.targetFileSize: 104857600             # Databricks only
-          # delta.autoCompact.maxFileSize: 134217728    # Databricks only
-          # delta.isolationLevel:  WriteSerializable    # Databricks only
-          # delta.setTransactionRetentionDuration: None # Databricks only
-          # delta.targetFileSize: None                  # Databricks only
-          # delta.tuneFileSizesForRewrites: None        # Databricks only
-          # delta.schema.autoMerge.enabled: false       # Databricms only, best to set this in the options but can be set on a table.
           delta.compatibility.symlinkFormatManifest.enabled: false
           delta.dataSkippingNumIndexedCols: -1
           delta.logRetentionDuration: interval 30 days
@@ -112,6 +51,6 @@ dataflow:
       format: delta
       path: delta_lake/dw/dim_customer
       write:
-        mode: merge #might need merge_scd_type_2
+        mode: append
         options:
           mergeSchema: true

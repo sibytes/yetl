@@ -1,15 +1,11 @@
 from ._base import Source
 from ._dataset import Dataset
-from pyspark.sql import functions as fn
 from ..parser._constants import *
-from . import _builtin_functions as builtin_funcs
 from ..schema_repo import ISchemaRepo, SchemaNotFound
 from pyspark.sql import DataFrame
-import json
-from .. import _delta_lake as dl
 from ..audit import Audit
-import os
-
+from datetime import datetime
+from ..audit import Audit, AuditTask
 
 class SQLReader(Dataset, Source):
     def __init__(
@@ -90,8 +86,14 @@ class SQLReader(Dataset, Source):
             f"Reading data for {self.database_table} with query {self.sql} {CONTEXT_ID}={str(self.context_id)}"
         )
 
+        start_datetime = datetime.now()
+
         df: DataFrame = self.context.spark.sql(self.sql)
 
         self.dataframe = df
+
+        detail = {"table": self.database_table, "sql": self.sql}
+        self.auditor.dataset_task(self.id, AuditTask.LAZY_READ, detail, start_datetime)
+
         self.validation_result = self.validate()
         return self.dataframe
