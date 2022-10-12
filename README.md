@@ -116,6 +116,12 @@ There is a CI build configured for this repo that builds on main origin and publ
 
 # Releases
 
+Version: 0.0.21
+- Added in Jinja for variables replacements as more robust solution than simple string replacements.
+
+Version: 0.0.20
+- Fixed missing packages in build
+
 Version: 0.0.19
 - Fixed missing packages in build
 
