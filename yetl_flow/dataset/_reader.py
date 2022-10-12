@@ -1,3 +1,4 @@
+from yetl_flow.parser.parser import JinjaVariables, render_jinja
 from ._dataset import Dataset
 from pyspark.sql import functions as fn
 from pyspark.sql.types import StructType
@@ -28,6 +29,11 @@ class Reader(Dataset, Source):
         auditor: Audit,
     ) -> None:
         super().__init__(context, database, table, config, io_type, auditor)
+
+        self._replacements = {
+            JinjaVariables.DATABASE_NAME:self.database, 
+            JinjaVariables.TABLE_NAME:self.table
+        }
 
         # gets the read, write, etc options based on the type
         self.config = config
@@ -236,21 +242,19 @@ class Reader(Dataset, Source):
     def _set_exceptions_attributes(self, dataset: dict):
 
         exceptions = dataset[EXCEPTIONS]
-        self.exceptions_table:str = exceptions.get(TABLE)
-        self.exceptions_table = self.exceptions_table.replace("{{table_name}}", self.table)
-        self.exceptions_table = self.exceptions_table.replace("{{database_name}}", self.database)
-
-        self.exceptions_database:str = exceptions.get(DATABASE)
-        self.exceptions_database = self.exceptions_database.replace("{{table_name}}", self.table)
-        self.exceptions_database = self.exceptions_database.replace("{{database_name}}", self.database)
+        self.exceptions_table = render_jinja(exceptions.get(TABLE), self._replacements)
+        self.exceptions_database = render_jinja(exceptions.get(DATABASE), self._replacements)
+        exceptions_path = render_jinja(exceptions.get(PATH), self._replacements)
 
         self.exceptions_database_table = (
             f"{self.exceptions_database}.{self.exceptions_table}"
         )
-        exceptions_path:str = exceptions.get(PATH)
-        exceptions_path = exceptions_path.replace("{{table_name}}", self.table)
-        exceptions_path = exceptions_path.replace("{{database_name}}", self.database)
         self.exceptions_path = f"{self.datalake_protocol}{self.datalake}/{exceptions_path}/{self.exceptions_database}/{self.exceptions_table}"
+        self.context.log.debug(f"""Jinja rendered exception table configuration:
+            database_name: {self.exceptions_database}
+            table_name: {self.exceptions_table}
+            exception_path: {self.exceptions_path}
+        """)
 
     def _is_corrupt_column_set(self, options: dict, schema: StructType):
 

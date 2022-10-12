@@ -1,9 +1,15 @@
+from enum import Enum
+from pipes import Template
 import re
 from datetime import datetime
-from tracemalloc import start
 import regex
 from ._constants import NAME, REPLACE, ARGS
+import jinja2
 
+
+class JinjaVariables(Enum):
+    DATABASE_NAME = "database_name"
+    TABLE_NAME = "table_name"
 
 class TimeslicePosition:
     def __init__(
@@ -109,6 +115,16 @@ def to_spark_format_code(py_format: str):
     py_format = py_format.replace("%", "")
 
     return py_format
+
+
+def render_jinja(data:str, replacements:dict[JinjaVariables, str]):
+
+    if data and isinstance(data, str):
+        replace = {k.value:v for (k, v) in replacements.items()}
+        template:jinja2.Template = jinja2.Template(data)
+        data = template.render(replace)
+    
+    return data
 
 
 def parse_functions(sentence: str):
