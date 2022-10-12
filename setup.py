@@ -40,6 +40,6 @@ setup(
         "yetl_flow.schema_repo",
         "yetl_flow.warnings",
     ],
-    install_requires=["pyyaml", "pyspark", "regex", "delta-spark"],
+    install_requires=["pyyaml", "pyspark", "regex", "delta-spark","Jinja2"],
     zip_safe=False,
 )
