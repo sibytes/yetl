@@ -3,7 +3,7 @@
 
 # COMMAND ----------
 
-from yetl_flow import (
+from yetl.flow import (
     yetl_flow,
     IDataflow,
     IContext,

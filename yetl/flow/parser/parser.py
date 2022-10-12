@@ -13,6 +13,7 @@ class JinjaVariables(Enum):
     PATH = "path"
     ROOT = "root"
 
+
 class TimeslicePosition:
     def __init__(
         self, start_pos: int, end_pos: int, length: int, format_code: str
@@ -119,13 +120,13 @@ def to_spark_format_code(py_format: str):
     return py_format
 
 
-def render_jinja(data:str, replacements:dict[JinjaVariables, str]):
+def render_jinja(data: str, replacements: dict[JinjaVariables, str]):
 
     if data and isinstance(data, str):
-        replace = {k.value:v for (k, v) in replacements.items()}
-        template:jinja2.Template = jinja2.Template(data)
+        replace = {k.value: v for (k, v) in replacements.items()}
+        template: jinja2.Template = jinja2.Template(data)
         data = template.render(replace)
-    
+
     return data
 
 

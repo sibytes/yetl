@@ -27,9 +27,9 @@ class DeltaWriter(Dataset, Destination):
         super().__init__(context, database, table, config, io_type, auditor)
 
         self._replacements = {
-            parser.JinjaVariables.DATABASE_NAME:self.database, 
-            parser.JinjaVariables.TABLE_NAME:self.table, 
-            parser.JinjaVariables.PATH:self.path 
+            parser.JinjaVariables.DATABASE_NAME: self.database,
+            parser.JinjaVariables.TABLE_NAME: self.table,
+            parser.JinjaVariables.PATH: self.path,
         }
 
         self.dataframe: DataFrame = None

@@ -1,4 +1,4 @@
-from yetl_flow.parser.parser import JinjaVariables, render_jinja
+from ..parser.parser import JinjaVariables, render_jinja
 from ._dataset import Dataset
 from pyspark.sql import functions as fn
 from pyspark.sql.types import StructType
@@ -31,8 +31,8 @@ class Reader(Dataset, Source):
         super().__init__(context, database, table, config, io_type, auditor)
 
         self._replacements = {
-            JinjaVariables.DATABASE_NAME:self.database, 
-            JinjaVariables.TABLE_NAME:self.table
+            JinjaVariables.DATABASE_NAME: self.database,
+            JinjaVariables.TABLE_NAME: self.table,
         }
 
         # gets the read, write, etc options based on the type
@@ -243,18 +243,22 @@ class Reader(Dataset, Source):
 
         exceptions = dataset[EXCEPTIONS]
         self.exceptions_table = render_jinja(exceptions.get(TABLE), self._replacements)
-        self.exceptions_database = render_jinja(exceptions.get(DATABASE), self._replacements)
+        self.exceptions_database = render_jinja(
+            exceptions.get(DATABASE), self._replacements
+        )
         exceptions_path = render_jinja(exceptions.get(PATH), self._replacements)
 
         self.exceptions_database_table = (
             f"{self.exceptions_database}.{self.exceptions_table}"
         )
         self.exceptions_path = f"{self.datalake_protocol}{self.datalake}/{exceptions_path}/{self.exceptions_database}/{self.exceptions_table}"
-        self.context.log.debug(f"""Jinja rendered exception table configuration:
+        self.context.log.debug(
+            f"""Jinja rendered exception table configuration:
             database_name: {self.exceptions_database}
             table_name: {self.exceptions_table}
             exception_path: {self.exceptions_path}
-        """)
+        """
+        )
 
     def _is_corrupt_column_set(self, options: dict, schema: StructType):
 
