@@ -10,6 +10,8 @@ import jinja2
 class JinjaVariables(Enum):
     DATABASE_NAME = "database_name"
     TABLE_NAME = "table_name"
+    PATH = "path"
+    ROOT = "root"
 
 class TimeslicePosition:
     def __init__(

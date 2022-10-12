@@ -26,6 +26,12 @@ class DeltaWriter(Dataset, Destination):
     ) -> None:
         super().__init__(context, database, table, config, io_type, auditor)
 
+        self._replacements = {
+            parser.JinjaVariables.DATABASE_NAME:self.database, 
+            parser.JinjaVariables.TABLE_NAME:self.table, 
+            parser.JinjaVariables.PATH:self.path 
+        }
+
         self.dataframe: DataFrame = None
         # try and load a schema if schema on read
         self.table_ddl: str = self._get_table_sql(config)
@@ -297,9 +303,7 @@ class DeltaWriter(Dataset, Destination):
                     )
                 )
                 ddl = self.schema_repo.load_schema(self.database, self.table, ddl)
-                ddl = ddl.replace("{{database_name}}", self.database)
-                ddl = ddl.replace("{{table_name}}", self.table)
-                ddl = ddl.replace("{{path}}", self.path)
+                ddl = parser.render_jinja(ddl, self._replacements)
         else:
             ddl = None
 

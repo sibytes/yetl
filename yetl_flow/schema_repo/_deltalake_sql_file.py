@@ -3,6 +3,7 @@ from ._ischema_repo import ISchemaRepo
 from pyspark.sql.types import StructType
 from ..file_system import FileFormat, IFileSystem, file_system_factory, FileSystemType
 import os
+from ..parser.parser import render_jinja, JinjaVariables
 
 
 class DeltalakeSchemaFile(ISchemaRepo):
@@ -19,7 +20,8 @@ class DeltalakeSchemaFile(ISchemaRepo):
     def _mkpath(self, database_name: str, table_name: str, sub_location: str):
         """Function that builds the schema path"""
 
-        path = sub_location.replace("{{root}}", self.root_path)
+        replacements = {JinjaVariables.ROOT:self.root_path}
+        path = render_jinja(sub_location, replacements)
         path = f"{path}/{database_name}/{table_name}.{self._EXT}"
         return path
 
