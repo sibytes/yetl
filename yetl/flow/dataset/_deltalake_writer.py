@@ -1,6 +1,5 @@
 from ..parser._constants import *
 from ..schema_repo import ISchemaRepo
-import os
 from .. import _delta_lake as dl
 from pyspark.sql import DataFrame
 from typing import ChainMap
@@ -30,6 +29,7 @@ class DeltaWriter(Dataset, Destination):
             parser.JinjaVariables.DATABASE_NAME: self.database,
             parser.JinjaVariables.TABLE_NAME: self.table,
             parser.JinjaVariables.PATH: self.path,
+            **self._replacements,
         }
 
         self.dataframe: DataFrame = None

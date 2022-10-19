@@ -1,9 +1,14 @@
-from ..parser.parser import JinjaVariables, render_jinja
+from ..parser.parser import (
+    JinjaVariables,
+    render_jinja,
+    to_regex_search_pattern,
+    to_spark_format_code,
+)
 from ._dataset import Dataset
 from pyspark.sql import functions as fn
 from pyspark.sql.types import StructType
 from ..parser._constants import *
-from . import _builtin_functions as builtin_funcs
+
 from ..schema_repo import ISchemaRepo, SchemaNotFound
 from ._validation import (
     PermissiveSchemaOnRead,
@@ -16,6 +21,7 @@ from .. import _delta_lake as dl
 from ..audit import Audit, AuditTask
 from datetime import datetime
 from ._base import Source
+from ..parser.parser import JinjaVariables
 
 
 class Reader(Dataset, Source):
@@ -33,6 +39,7 @@ class Reader(Dataset, Source):
         self._replacements = {
             JinjaVariables.DATABASE_NAME: self.database,
             JinjaVariables.TABLE_NAME: self.table,
+            **self._replacements,
         }
 
         # gets the read, write, etc options based on the type
@@ -45,9 +52,7 @@ class Reader(Dataset, Source):
         self._create_schema_if_not_exists = properties.get(
             YETL_TBLP_SCHEMA_CREATE_IF_NOT_EXISTS, False
         )
-        self._metadata_timeslice_tabled = properties.get(
-            YETL_TBLP_METADATA_TIMESLICE, True
-        )
+        self._set_metadata_timeslice_enabled(properties)
 
         self.thresholds_warnings = self._get_thresholds(config, ThresholdLevels.WARNING)
         self.thresholds_error = self._get_thresholds(config, ThresholdLevels.ERROR)
@@ -103,6 +108,14 @@ class Reader(Dataset, Source):
                 f"auto_io = {self.auto_io} automatically creating or altering exception delta table {self.database}.{self.table} {CONTEXT_ID}={str(self.context_id)}"
             )
             self.create_or_alter_table()
+
+    def _set_metadata_timeslice_enabled(self, properties:dict):
+
+        self._metadata_timeslice_enabled = properties.get(
+            YETL_TBLP_METADATA_TIMESLICE, None
+        )
+        if isinstance(self._metadata_timeslice_enabled, str):
+            self._metadata_timeslice_enabled = JinjaVariables[self._metadata_timeslice_enabled.upper()]
 
     def _get_thresholds(self, config: dict, level: ThresholdLevels):
         thresholds: dict = config.get("thresholds")
@@ -184,7 +197,11 @@ class Reader(Dataset, Source):
             self.options[INFER_SCHEMA] = True
 
     def _get_table_properties(self, table_config: dict):
-        return table_config.get(PROPERTIES, {})
+        properties = table_config.get(PROPERTIES, {})
+        if properties == None:
+            properties = {}
+
+        return properties
 
     def create_or_alter_table(self):
 
@@ -234,7 +251,7 @@ class Reader(Dataset, Source):
     ):
 
         bad_records_path = options[BAD_RECORDS_PATH]
-        bad_records_path = builtin_funcs.execute_replacements(bad_records_path, self)
+        bad_records_path = render_jinja(bad_records_path, self._replacements)
         options[BAD_RECORDS_PATH] = f"{datalake_protocol}{datalake}/{bad_records_path}"
 
         return options
@@ -342,6 +359,47 @@ class Reader(Dataset, Source):
             )
             self.dataframe = validator.dataframe
 
+    def _add_timeslice(self, df: DataFrame):
+
+        # TODO .withColumn(input_file_name, fn.input_file_name())
+        if (
+            self._metadata_timeslice_enabled
+            == JinjaVariables.TIMESLICE_PATH_DATE_FORMAT
+        ):
+
+            pattern = to_regex_search_pattern(self.path_date_format)
+            spark_format_string = to_spark_format_code(self.path_date_format)
+
+            df: DataFrame = (
+                df.withColumn(TIMESLICE, fn.input_file_name())
+                .withColumn(
+                    "TIMESLICE", fn.regexp_extract(fn.col("filename"), pattern, 0)
+                )
+                .withColumn(
+                    TIMESLICE,
+                    fn.to_timestamp(TIMESLICE, spark_format_string),
+                )
+            )
+
+        elif (
+            self._metadata_timeslice_enabled
+            == JinjaVariables.TIMESLICE_FILE_DATE_FORMAT
+        ):
+
+            pattern = to_regex_search_pattern(self.file_date_format)
+            spark_format_string = to_spark_format_code(self.file_date_format)
+
+            df: DataFrame = (
+                df.withColumn(TIMESLICE, fn.input_file_name())
+                .withColumn(TIMESLICE, fn.substring_index(fn.col(TIMESLICE), "/", -1))
+                .withColumn(TIMESLICE, fn.regexp_extract(fn.col(TIMESLICE), pattern, 0))
+                .withColumn(
+                    TIMESLICE,
+                    fn.to_timestamp(TIMESLICE, spark_format_string),
+                )
+            )
+        return df
+
     def read(self):
         self.context.log.info(
             f"Reading data for {self.database_table} from {self.path} with options {self.options} {CONTEXT_ID}={str(self.context_id)}"
@@ -353,35 +411,18 @@ class Reader(Dataset, Source):
 
         start_datetime = datetime.now()
 
-        df = self.context.spark.read.format(self.format)
+        df: DataFrame = self.context.spark.read.format(self.format)
 
         if self.has_schema:
             df = df.schema(self.schema)
 
-        df: DataFrame = (
+        df = (
             df.options(**self.options)
             .load(self.path)
             .withColumn(CONTEXT_ID, fn.lit(str(self.context_id)))
         )
 
-        if self._metadata_timeslice_tabled:
-            df: DataFrame = (
-                df
-                # TODO .withColumn(input_file_name, fn.input_file_name())
-                .withColumn(TIMESLICE, fn.input_file_name())
-                .withColumn(
-                    TIMESLICE,
-                    fn.substring(
-                        TIMESLICE,
-                        self._timeslice_position.start_pos,
-                        self._timeslice_position.length,
-                    ),
-                )
-                .withColumn(
-                    TIMESLICE,
-                    fn.to_timestamp(TIMESLICE, self._timeslice_position.format_code),
-                )
-            )
+        df = self._add_timeslice(df)
 
         # if there isn't a schema and it's configured to create one the save it to repo.
         if self._creating_inferred_schema:

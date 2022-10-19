@@ -22,7 +22,7 @@ dataflow:
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: csv
-      path: landing/{{timeslice(path_date_format)}}/customer_{{timeslice(file_date_format)}}.csv
+      path: landing/{{timeslice_path_date_format}}/customer_{{timeslice_file_date_format}}.csv
       read:
         # datasets that have auto_io will automatically action the read.
         # where it is false the dataframe can be retrieved in the user implemented
@@ -36,7 +36,7 @@ dataflow:
           # it gives you a starter schema to refine.
           inferSchema: false
           header: true
-          badRecordsPath: "exceptions/landing/customer/{{timeslice(path_date_format)}}"
+          badRecordsPath: "exceptions/landing/customer/{{timeslice_path_date_format}}"
       exceptions:
           path: "delta_lake/{{table_name}}_exceptions"
           database: landing
@@ -67,12 +67,12 @@ dataflow:
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: csv
-      path: landing/{{timeslice(path_date_format)}}/customer_preferences_{{timeslice(file_date_format)}}.csv
+      path: landing/{{timeslice_path_date_format}}/customer_preferences_{{timeslice_file_date_format}}.csv
       read:
         options:
           inferSchema: false
           header: true
-          badRecordsPath: "exceptions/landing/customer_preferences/{{timeslice(path_date_format)}}"
+          badRecordsPath: "exceptions/landing/customer_preferences/{{timeslice_path_date_format}}"
       exceptions:
           path: "delta_lake/{{table_name}}_exceptions"
           database: landing

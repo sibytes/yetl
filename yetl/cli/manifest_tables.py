@@ -2,6 +2,7 @@ import os
 import glob
 import re
 
+
 class Source:
     def __init__(self) -> None:
         pass
@@ -15,19 +16,18 @@ class Source:
 
 class FileSource(Source):
     def __init__(
-        self, directory_path: str, filename: str = ".*", name_mask: str = None
+        self, directory_path: str, filename: str = "*", name_mask: str = None
     ) -> None:
         self.directory_path = directory_path
         self.filename = filename
         self.name_mask = name_mask
 
-    def _extract_name(self, name:str):
+    def _extract_name(self, name: str):
         try:
             result = re.search(self.name_mask, name).group()
             return result
         except:
             return None
-
 
     def tables(self) -> list:
         files_found = []
@@ -36,7 +36,12 @@ class FileSource(Source):
                 path = os.path.join(root, d, self.filename)
                 dir_files = glob.glob(path)
                 dir_files = [os.path.basename(df) for df in dir_files]
-                dir_files = [self._extract_name(df) for df in dir_files if self._extract_name(df)]
+                if self.name_mask:
+                    dir_files = [
+                        self._extract_name(df)
+                        for df in dir_files
+                        if self._extract_name(df)
+                    ]
                 files_found = files_found + dir_files
 
         # de-dupe names

@@ -14,7 +14,7 @@ dataflow:
           #### YETL TABLE PROPERTIES ####
 
           # derive a timeslice column timestamp from the filepath
-          yetl.metadata.timeslice: true
+          yetl.metadata.timeslice: timeslice_file_date_format
           # this will automatically default to an inferred schema load on the 1st load 
           # and use it to create a schema in the repo.
           # this is handy in dev workflows to create a starter schema.
@@ -24,7 +24,7 @@ dataflow:
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: csv
-      path: landing/{{timeslice(path_date_format)}}/customer_{{timeslice(file_date_format)}}.csv
+      path: landing/{{timeslice_path_date_format}}/customer_{{timeslice_file_date_format}}.csv
       read:
         # datasets that have auto_io will automatically action the read.
         # where it is false the dataframe can be retrieved in the user implemented
@@ -59,15 +59,15 @@ dataflow:
     customer_preferences:
       type: Reader
       table:
-        properties:
+        properties: null
           #### YETL TABLE PROPERTIES ####
           # yetl.schema.createIfNotExists: true
-          yetl.metadata.timeslice: false
+          # yetl.metadata.timeslice: timeslice_file_date_format
 
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: csv
-      path: landing/{{timeslice(path_date_format)}}/customer_preferences_{{timeslice(file_date_format)}}.csv
+      path: landing/{{timeslice_path_date_format}}/customer_preferences_{{timeslice_file_date_format}}.csv
       read:
         options:
           mode: PERMISSIVE

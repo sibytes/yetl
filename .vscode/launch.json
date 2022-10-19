@@ -12,7 +12,21 @@
             "program": "main.py",
             "console": "integratedTerminal",
             "envFile": "${workspaceFolder}/.env",
-            "args": ["--command", "manifest_tables", "--source_type", "file", "--directory", "/Users/shaunryan/AzureDevOps/yetl/data/landing", "--filename_mask", "*", "--extract_regex", "^[a-zA-Z_]+[a-zA-Z]+"],
+            "args": [
+                "build",
+                "adworks",
+                "." ,
+                "adworks_tables.yml", 
+                "landing_to_raw.yaml",
+                "./config"
+                // "create-table-manifest", 
+                // "File", 
+                // "/Users/shaunryan/AzureDevOps/yetl-patterns/data/landing/adventureworks", 
+                // "--filename", 
+                // "*", 
+                // "--extract-regex", 
+                // "(?<=_)[^_]+"
+            ],
             "env": {  }
         },
         {

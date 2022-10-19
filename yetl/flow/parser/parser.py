@@ -1,3 +1,4 @@
+from dataclasses import replace
 from enum import Enum
 from pipes import Template
 import re
@@ -12,6 +13,8 @@ class JinjaVariables(Enum):
     TABLE_NAME = "table_name"
     PATH = "path"
     ROOT = "root"
+    TIMESLICE_FILE_DATE_FORMAT = "timeslice_file_date_format"
+    TIMESLICE_PATH_DATE_FORMAT = "timeslice_path_date_format"
 
 
 class TimeslicePosition:
@@ -40,6 +43,92 @@ def sql_partitioned_by(sql: str):
         return partitions_lst
     else:
         return None
+
+
+def to_regex_search_pattern(py_format: str):
+    """Convert python format codes to spark format codes
+        (\d{1,4}([.\-/])\d{1,2}([.\-/])\d{1,4})
+    https://spark.apache.org/docs/latest/sql-ref-datetime-pattern.html
+
+    %d -> \d{2}       - Day of the month as a zero-padded decimal number.
+    %m -> [0-1][1-9]  - Month as a zero-padded decimal number.
+    %y -> \d{2}       - Year without century as a zero-padded decimal number.
+    %Y -> \d{4}       - Year with century as a decimal number.
+    %H -> [0-2][1-9]  - Hour (24-hour clock) as a zero-padded decimal number.
+    %M -> \d{2}       - Minute as a zero-padded decimal number.
+    %S -> \d{2}       - Second as a zero-padded decimal number.
+    %f -> [0]\.?\d{6} - Microsecond as a decimal number, zero-padded to 6 digits.
+    %% -> ([%])       - A literal '%' character.
+    %j -> \d{2}       - Day of the year as a zero-padded decimal number.
+
+    NOT SUPPORTED - %U - Week number of the year (Sunday as the first day of the week) as a zero-padded decimal number. All days in a new year preceding the first Sunday are considered to be in week 0.
+    NOT SUPPORTED - %W - Week number of the year (Monday as the first day of the week) as a zero-padded decimal number. All days in a new year preceding the first Monday are considered to be in week 0.
+
+    NOT SUPPORTED - %c - Locale’s appropriate date and time representation.
+    NOT SUPPORTED - %x - Locale’s appropriate date representation.
+    NOT SUPPORTED - %X - Locale’s appropriate time representation.
+    NOT SUPPORTED - %G - ISO 8601 year with century representing the year that contains the greater part of the ISO week (%V).
+    NOT SUPPORTED - %u - ISO 8601 weekday as a decimal number where 1 is Monday.
+    NOT SUPPORTED - %V - ISO 8601 week as a decimal number with Monday as the first day of the week. Week 01 is the week containing Jan 4.
+    NOT SUPPORTED - %z - UTC offset in the form ±HHMM[SS[.ffffff]] (empty string if the object is naive).
+    NOT SUPPORTED - %Z - Time zone name (empty string if the object is naive).
+    NOT SUPPORTED - %I - Hour (12-hour clock) as a zero-padded decimal number.
+    NOT SUPPORTED - %p - Locale’s equivalent of either AM or PM.
+    NOT SUPPORTED - %b - Month as locale’s abbreviated name.
+    NOT SUPPORTED - %B - Month as locale’s full name.
+    NOT SUPPORTED - %a - Weekday as locale’s abbreviated name.
+    NOT SUPPORTED - %A - Weekday as locale’s full name.
+    NOT SUPPORTED - %w - Weekday as a decimal number, where 0 is Sunday and 6 is Saturday."""
+
+    UNSUPPORTED_FORMAT_CODES = [
+        "%U",
+        "%W",
+        "%c",
+        "%x",
+        "%X",
+        "%G",
+        "%u",
+        "%V",
+        "%z",
+        "%Z",
+        "%I",
+        "%p",
+        "%b",
+        "%B",
+        "%a",
+        "%A",
+        "%w",
+    ]
+    unsupported_codes = []
+    for c in UNSUPPORTED_FORMAT_CODES:
+        if c in py_format:
+            unsupported_codes.append(c)
+
+    if unsupported_codes:
+        unsupported_codes = ",".join(unsupported_codes)
+        raise Exception(
+            f"The format contains the following unsupported format codes: {unsupported_codes}"
+        )
+
+    pattern = py_format.replace("%d", "\d{2}")
+    pattern = pattern.replace("%m", "[0-1][1-9]")
+    pattern = pattern.replace("%y", "\d{2}")
+    pattern = pattern.replace("%Y", "\d{4}")
+    pattern = pattern.replace("%H", "[0-2][1-9]")
+    pattern = pattern.replace("%M", "\d{2}")
+    pattern = pattern.replace("%S", "\d{2}")
+    pattern = pattern.replace("%f", "[0]\.?\d{6}")
+
+    seps = [f"%{s[0]}" for s in pattern.split("%")][1:]
+    replace_seps = [s[0] for s in pattern.split("%")][1:]
+    replace_seps = [f"[{s}]" for s in replace_seps]
+
+    for s, r in zip(seps, replace_seps):
+        pattern = pattern.replace(s, r)
+
+    pattern = f"({pattern})"
+
+    return pattern
 
 
 def to_spark_format_code(py_format: str):
@@ -130,45 +219,6 @@ def render_jinja(data: str, replacements: dict[JinjaVariables, str]):
     return data
 
 
-def parse_functions(sentence: str):
-
-    rgx_function = regex.compile(r"(?si)(?|{0}(.*?){1}|{1}(.*?){0})".format("{{", "}}"))
-    functions = rgx_function.findall(sentence)
-    funcs = []
-    for f in functions:
-        for fp in f:
-            func: str = fp
-            args = func[func.find("(") + 1 : func.find(")")]
-            args = args.split(",")
-            args = [a.strip() for a in args]
-            function_name = func[: func.find("(")].strip()
-            function = {NAME: function_name, REPLACE: func, ARGS: args}
-            funcs.append(function)
-
-    return funcs
-
-
-def get_slice_position(path: str, dataset):
-
-    parsed = parse_functions(path)
-    start_pos = path.find("{")
-    end_pos = -1
-    timeslice_pos = None
-
-    if start_pos > 0:
-        dte_format_attribute = parsed[0]["args"][0]
-
-        if hasattr(dataset, dte_format_attribute):
-            format_str = getattr(dataset, dte_format_attribute)
-
-            l = len(datetime.now().strftime(format_str))
-
-            end_pos = start_pos + l
-            format_str = to_spark_format_code(format_str)
-
-            timeslice_pos = TimeslicePosition(start_pos + 3, end_pos + 3, l, format_str)
-
-    return timeslice_pos
 
 
 def reduce_whitespace(sentence: str):

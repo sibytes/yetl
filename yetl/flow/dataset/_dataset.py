@@ -1,8 +1,7 @@
 from ..parser._constants import *
-from . import _builtin_functions as builtin_funcs
-from ..parser import parser
 from ..audit import Audit
 from ._base import _Base
+from ..parser.parser import JinjaVariables, render_jinja
 
 
 class Dataset(_Base):
@@ -20,9 +19,20 @@ class Dataset(_Base):
 
         self.path_date_format = dataset.get("path_date_format")
         self.file_date_format = dataset.get("file_date_format")
+        self._replacements = {}
+
+        if self.file_date_format:
+            self._replacements[
+                JinjaVariables.TIMESLICE_FILE_DATE_FORMAT
+            ] = context.timeslice.strftime(self.file_date_format)
+
+        if self.path_date_format:
+            self._replacements[
+                JinjaVariables.TIMESLICE_PATH_DATE_FORMAT
+            ] = context.timeslice.strftime(self.path_date_format)
+
         self._path = self._get_path(dataset)
-        self._timeslice_position = parser.get_slice_position(self.path, self)
-        self._path = builtin_funcs.execute_replacements(self._path, self)
+        self._path = render_jinja(self._path, self._replacements)
 
         self.auditor.dataset(self.get_metadata())
 
