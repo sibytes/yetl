@@ -33,6 +33,9 @@ FILENAME = "_filename"
 # yetl table properties
 YETL_TBLP_SCHEMA_CREATE_IF_NOT_EXISTS = "yetl.schema.createIfNotExists"
 YETL_TBLP_METADATA_TIMESLICE = "yetl.metadata.timeslice"
+YETL_TBLP_METADATA_FILEPATH_FILENAME = "yetl.metadata.filepath_filename"
+YETL_TBLP_METADATA_FILEPATH = "yetl.metadata.filepath"
+YETL_TBLP_METADATA_FILENAME = "yetl.metadata.filename"
 
 
 class Format(Enum):

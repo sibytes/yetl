@@ -15,6 +15,9 @@ dataflow:
 
           # derive a timeslice column timestamp from the filepath
           yetl.metadata.timeslice: timeslice_file_date_format
+          yetl.metadata.filepath_filename: true
+          yetl.metadata.filepath: true
+          yetl.metadata.filename: true
           # this will automatically default to an inferred schema load on the 1st load 
           # and use it to create a schema in the repo.
           # this is handy in dev workflows to create a starter schema.

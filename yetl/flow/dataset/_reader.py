@@ -48,11 +48,7 @@ class Reader(Dataset, Source):
 
         # get the table properties
         properties: dict = self._get_table_properties(config["table"])
-
-        self._create_schema_if_not_exists = properties.get(
-            YETL_TBLP_SCHEMA_CREATE_IF_NOT_EXISTS, False
-        )
-        self._set_metadata_timeslice_enabled(properties)
+        self._set_table_properties(properties)
 
         self.thresholds_warnings = self._get_thresholds(config, ThresholdLevels.WARNING)
         self.thresholds_error = self._get_thresholds(config, ThresholdLevels.ERROR)
@@ -109,13 +105,25 @@ class Reader(Dataset, Source):
             )
             self.create_or_alter_table()
 
-    def _set_metadata_timeslice_enabled(self, properties:dict):
+    def _set_table_properties(self, properties: dict):
 
         self._metadata_timeslice_enabled = properties.get(
             YETL_TBLP_METADATA_TIMESLICE, None
         )
         if isinstance(self._metadata_timeslice_enabled, str):
-            self._metadata_timeslice_enabled = JinjaVariables[self._metadata_timeslice_enabled.upper()]
+            self._metadata_timeslice_enabled = JinjaVariables[
+                self._metadata_timeslice_enabled.upper()
+            ]
+
+        self._create_schema_if_not_exists = properties.get(
+            YETL_TBLP_SCHEMA_CREATE_IF_NOT_EXISTS, False
+        )
+
+        self.metadata_filepath_filename = properties.get(
+            YETL_TBLP_METADATA_FILEPATH_FILENAME, False
+        )
+        self.metadata_filepath = properties.get(YETL_TBLP_METADATA_FILEPATH, False)
+        self.metadata_filename = properties.get(YETL_TBLP_METADATA_FILENAME, False)
 
     def _get_thresholds(self, config: dict, level: ThresholdLevels):
         thresholds: dict = config.get("thresholds")
@@ -401,6 +409,27 @@ class Reader(Dataset, Source):
 
         return df
 
+    def _add_source_metadata(self,  df: DataFrame):
+
+        if self.metadata_filepath_filename:
+            df: DataFrame = (
+                df.withColumn("_filepath_filename", fn.input_file_name())
+            )
+
+        if self.metadata_filepath:
+            df: DataFrame = (
+                df.withColumn("_filepath", fn.input_file_name())
+                .withColumn("_filepath", fn.substring_index(fn.col("_filepath"), "/", -1))
+            )
+
+        if self.metadata_filename:
+            df: DataFrame = (
+                df.withColumn("_filename", fn.input_file_name())
+                .withColumn("_filename", fn.substring_index(fn.col("_filename"), "/", -1))
+            )
+
+        return df
+
     def read(self):
         self.context.log.info(
             f"Reading data for {self.database_table} from {self.path} with options {self.options} {CONTEXT_ID}={str(self.context_id)}"
@@ -424,6 +453,7 @@ class Reader(Dataset, Source):
         )
 
         df = self._add_timeslice(df)
+        df = self._add_source_metadata(df)
 
         # if there isn't a schema and it's configured to create one the save it to repo.
         if self._creating_inferred_schema:

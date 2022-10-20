@@ -219,8 +219,6 @@ def render_jinja(data: str, replacements: dict[JinjaVariables, str]):
     return data
 
 
-
-
 def reduce_whitespace(sentence: str):
 
     pattern = re.compile(r"\s+")
