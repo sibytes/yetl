@@ -398,6 +398,7 @@ class Reader(Dataset, Source):
                     fn.to_timestamp(TIMESLICE, spark_format_string),
                 )
             )
+
         return df
 
     def read(self):

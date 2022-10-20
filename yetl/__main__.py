@@ -50,7 +50,7 @@ def build(
     build_dir: str,
 ):
 
-    # landing/{{timeslice(path_date_format)}}/{{adworks_tables_table_name}}_{{timeslice(file_date_format)}}.jsonl
+    # landing/{{timeslice_path_date_format}}/{{adworks_tables_table_name}}_{{timeslice_file_date_format}}.jsonl
     project_dir = os.path.abspath(project_dir)
     template_dir = os.path.join(project_dir, project, "pipeline")
 
@@ -80,7 +80,7 @@ def build(
         filename = os.path.join(pipeline_build_path, filename)
         data = {
             f"{project}_tables_table_name": table_name,
-            "timeslice(path_date_format)": "timeslice(path_date_format)",
+            "timeslice_path_date_format": "timeslice_path_date_format",
             "timeslice(file_date_format)": "timeslice(file_date_format)",
         }
         content = template.render(data)
