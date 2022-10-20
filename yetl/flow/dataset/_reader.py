@@ -419,7 +419,7 @@ class Reader(Dataset, Source):
         if self.metadata_filepath:
             df: DataFrame = (
                 df.withColumn("_filepath", fn.input_file_name())
-                .withColumn("_filepath", fn.substring_index(fn.col("_filepath"), "/", -1))
+                .withColumn("_filepath", fn.expr("replace(_filepath, concat('/', substring_index(_filepath, '/', -1)))"))
             )
 
         if self.metadata_filename:
