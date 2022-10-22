@@ -17,8 +17,13 @@ def yetl_flow(name: str = None, app_name: str = None, log_level="INFO"):
         def wrap_function(*args, **kwargs):
 
             # default the name to the function name of the deltaflow
+
             if not name:
                 _name = function.__name__
+
+            else:
+                table = kwargs.get("table")
+                _name = f"{table}_{name}"
 
             audit_kwargs = {k: str(v) for k, v in kwargs.items()}
             auditor = Audit()

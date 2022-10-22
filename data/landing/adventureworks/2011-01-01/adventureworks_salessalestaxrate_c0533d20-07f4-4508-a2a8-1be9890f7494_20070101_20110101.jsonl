@@ -1,0 +1,29 @@
+﻿{"SalesTaxRateID":1,"StateProvinceID":1,"TaxType":1,"TaxRate":14.0000,"Name":"Canadian GST + Alberta Provincial Tax","rowguid":"683de5dd-521a-47d4-a573-06a3cdb1bc5d","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":2,"StateProvinceID":57,"TaxType":1,"TaxRate":14.2500,"Name":"Canadian GST + Ontario Provincial Tax","rowguid":"05c4ffdb-4f84-4cdf-abe5-fdf3216ea74e","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":3,"StateProvinceID":63,"TaxType":1,"TaxRate":14.2500,"Name":"Canadian GST + Quebec Provincial Tax","rowguid":"d4edb557-56d7-403c-b538-4df5e7302588","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":4,"StateProvinceID":1,"TaxType":2,"TaxRate":7.0000,"Name":"Canadian GST","rowguid":"f0d76907-b433-453f-b95e-16fce73b807a","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":5,"StateProvinceID":57,"TaxType":2,"TaxRate":7.0000,"Name":"Canadian GST","rowguid":"7e0e97a2-878b-476f-a648-05a3dd4450ed","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":6,"StateProvinceID":63,"TaxType":2,"TaxRate":7.0000,"Name":"Canadian GST","rowguid":"1e285d2c-8af7-47aa-b06a-762cf4d93acd","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":7,"StateProvinceID":7,"TaxType":3,"TaxRate":7.0000,"Name":"Canadian GST","rowguid":"590ccb14-cb20-49bf-8fee-e0c3abc4c2b1","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":8,"StateProvinceID":29,"TaxType":3,"TaxRate":7.0000,"Name":"Canadian GST","rowguid":"a8365f30-78b7-4dbe-8985-f8260560126b","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":9,"StateProvinceID":31,"TaxType":3,"TaxRate":7.0000,"Name":"Canadian GST","rowguid":"f4fde24b-7a53-4340-9d10-173e9424864a","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":10,"StateProvinceID":41,"TaxType":3,"TaxRate":7.0000,"Name":"Canadian GST","rowguid":"383d465b-e1d1-492a-83f3-ab3e9cbf3282","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":11,"StateProvinceID":45,"TaxType":3,"TaxRate":7.0000,"Name":"Canadian GST","rowguid":"8451909f-8a8d-4789-9f87-16a335d28053","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":12,"StateProvinceID":49,"TaxType":3,"TaxRate":7.0000,"Name":"Canadian GST","rowguid":"fb7607ee-8f12-41ea-b461-10885c6f1533","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":13,"StateProvinceID":51,"TaxType":3,"TaxRate":7.0000,"Name":"Canadian GST","rowguid":"06df529d-eb11-446f-9570-9ee97b8ea1bf","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":16,"StateProvinceID":69,"TaxType":3,"TaxRate":7.0000,"Name":"Canadian GST","rowguid":"89d447a8-239a-4f31-a529-478821e8f714","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":17,"StateProvinceID":83,"TaxType":3,"TaxRate":7.0000,"Name":"Canadian GST","rowguid":"3847b431-f939-4e89-83fc-864912e3cfd2","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":18,"StateProvinceID":6,"TaxType":1,"TaxRate":7.7500,"Name":"Arizona State Sales Tax","rowguid":"89dd0e3a-c018-449e-a86b-885adf684c5c","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":19,"StateProvinceID":9,"TaxType":1,"TaxRate":8.7500,"Name":"California State Sales Tax","rowguid":"90e3090e-df71-407a-8059-04c3104523af","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":20,"StateProvinceID":15,"TaxType":1,"TaxRate":8.0000,"Name":"Florida State Sales Tax","rowguid":"630ae36f-6e76-4a1f-ab25-6342159c80d2","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":21,"StateProvinceID":30,"TaxType":1,"TaxRate":7.0000,"Name":"Massachusetts State Sales Tax","rowguid":"207c7024-85fe-42cb-bf74-9fe88e2f4e1b","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":22,"StateProvinceID":35,"TaxType":1,"TaxRate":7.2500,"Name":"Michigan State Sales Tax","rowguid":"f9d1a85d-6474-43b5-a7ea-bed59e00439a","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":23,"StateProvinceID":36,"TaxType":1,"TaxRate":6.7500,"Name":"Minnesota State Sales Tax","rowguid":"1753d75f-8357-4497-bc92-543f17bbf514","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":24,"StateProvinceID":72,"TaxType":1,"TaxRate":7.2500,"Name":"Tennessese State Sales Tax","rowguid":"ecba1bab-a7a6-4cc2-8d0f-c094a38e5c0e","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":25,"StateProvinceID":73,"TaxType":1,"TaxRate":7.5000,"Name":"Texas State Sales Tax","rowguid":"d50102e1-0150-43f3-93ad-12ab6c1deb06","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":26,"StateProvinceID":74,"TaxType":1,"TaxRate":5.0000,"Name":"Utah State Sales Tax","rowguid":"5e6d8621-36af-40ce-972b-61aaef0556d8","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":27,"StateProvinceID":79,"TaxType":1,"TaxRate":8.8000,"Name":"Washington State Sales Tax","rowguid":"9c84c0af-41cd-4670-98bc-5026e188541f","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":28,"StateProvinceID":77,"TaxType":3,"TaxRate":10.0000,"Name":"Taxable Supply","rowguid":"f53b6a7e-7da4-49e8-ac09-d57fefac64d3","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":29,"StateProvinceID":20,"TaxType":3,"TaxRate":16.0000,"Name":"Germany Output Tax","rowguid":"78c8a559-4d0f-45b6-b7a3-e11ff9a702f4","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":30,"StateProvinceID":84,"TaxType":3,"TaxRate":19.6000,"Name":"France Output Tax","rowguid":"5446ea04-fa7c-4b02-a157-a05f44bf47b6","ModifiedDate":"2008-04-30T00:00:00"}
+{"SalesTaxRateID":31,"StateProvinceID":14,"TaxType":3,"TaxRate":17.5000,"Name":"United Kingdom Output Tax","rowguid":"abd185a9-5367-44e1-8a6e-71d083943f3c","ModifiedDate":"2008-04-30T00:00:00"}

@@ -29,9 +29,12 @@ CONTEXT_ID = "_context_id"
 LOAD_TIMESTAMP = "_load_timestamp"
 TIMESLICE = "_timeslice"
 FILENAME = "_filename"
+FILEPATH_FILENAME = "_filepath_filename"
+FILEPATH = "_filepath"
 
 # yetl table properties
 YETL_TBLP_SCHEMA_CREATE_IF_NOT_EXISTS = "yetl.schema.createIfNotExists"
+YETL_TBLP_SCHEMA_CORRUPT_RECORD = "yetl.schema.corrupt_record"
 YETL_TBLP_METADATA_TIMESLICE = "yetl.metadata.timeslice"
 YETL_TBLP_METADATA_FILEPATH_FILENAME = "yetl.metadata.filepath_filename"
 YETL_TBLP_METADATA_FILEPATH = "yetl.metadata.filepath"

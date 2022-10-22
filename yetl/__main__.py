@@ -57,8 +57,8 @@ def build(
     metadata_path = os.path.join(project_dir, project, metadata_file)
 
     build_path = os.path.abspath(build_dir)
-    if os.path.exists(build_path):
-        shutil.rmtree(build_path)
+    if os.path.exists(os.path.join(build_path, "pipeline")):
+        shutil.rmtree(os.path.join(build_path, "pipeline"))
 
     pipeline_build_path = os.path.join(build_path, "pipeline")
     os.makedirs(pipeline_build_path)
@@ -78,11 +78,7 @@ def build(
         table_name = table["table"]
         filename = f"{table_name}_{template_file}"
         filename = os.path.join(pipeline_build_path, filename)
-        data = {
-            f"{project}_tables_table_name": table_name,
-            "timeslice_path_date_format": "timeslice_path_date_format",
-            "timeslice(file_date_format)": "timeslice(file_date_format)",
-        }
+        data = {f"{project}_tables_table_name": table_name}
         content = template.render(data)
         with open(filename, mode="w", encoding="utf-8") as pipeline:
             pipeline.write(content)

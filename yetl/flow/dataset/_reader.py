@@ -6,7 +6,7 @@ from ..parser.parser import (
 )
 from ._dataset import Dataset
 from pyspark.sql import functions as fn
-from pyspark.sql.types import StructType
+from pyspark.sql.types import StructType, StringType
 from ..parser._constants import *
 
 from ..schema_repo import ISchemaRepo, SchemaNotFound
@@ -118,6 +118,7 @@ class Reader(Dataset, Source):
         self._create_schema_if_not_exists = properties.get(
             YETL_TBLP_SCHEMA_CREATE_IF_NOT_EXISTS, False
         )
+        self._add_corrupt_record = properties.get(YETL_TBLP_SCHEMA_CORRUPT_RECORD, True)
 
         self.metadata_filepath_filename = properties.get(
             YETL_TBLP_METADATA_FILEPATH_FILENAME, False
@@ -251,9 +252,6 @@ class Reader(Dataset, Source):
         schema = self.schema_repo.load_schema(self.database, self.table)
         return schema
 
-    def _save_schema(self, schema: StructType):
-        schema = self.schema_repo.save_schema(schema, self.database, self.table)
-
     def configure_badrecords_path(
         self, options: dict, datalake_protocol: str, datalake: str
     ):
@@ -369,7 +367,6 @@ class Reader(Dataset, Source):
 
     def _add_timeslice(self, df: DataFrame):
 
-        # TODO .withColumn(input_file_name, fn.input_file_name())
         if (
             self._metadata_timeslice_enabled
             == JinjaVariables.TIMESLICE_PATH_DATE_FORMAT
@@ -380,9 +377,7 @@ class Reader(Dataset, Source):
 
             df: DataFrame = (
                 df.withColumn(TIMESLICE, fn.input_file_name())
-                .withColumn(
-                    "TIMESLICE", fn.regexp_extract(fn.col("filename"), pattern, 0)
-                )
+                .withColumn(TIMESLICE, fn.regexp_extract(fn.col(TIMESLICE), pattern, 0))
                 .withColumn(
                     TIMESLICE,
                     fn.to_timestamp(TIMESLICE, spark_format_string),
@@ -409,23 +404,22 @@ class Reader(Dataset, Source):
 
         return df
 
-    def _add_source_metadata(self,  df: DataFrame):
+    def _add_source_metadata(self, df: DataFrame):
 
         if self.metadata_filepath_filename:
-            df: DataFrame = (
-                df.withColumn("_filepath_filename", fn.input_file_name())
-            )
+            df: DataFrame = df.withColumn(FILEPATH_FILENAME, fn.input_file_name())
 
         if self.metadata_filepath:
-            df: DataFrame = (
-                df.withColumn("_filepath", fn.input_file_name())
-                .withColumn("_filepath", fn.expr("replace(_filepath, concat('/', substring_index(_filepath, '/', -1)))"))
+            df: DataFrame = df.withColumn(FILEPATH, fn.input_file_name()).withColumn(
+                FILEPATH,
+                fn.expr(
+                    f"replace({FILEPATH}, concat('/', substring_index({FILEPATH}, '/', -1)))"
+                ),
             )
 
         if self.metadata_filename:
-            df: DataFrame = (
-                df.withColumn("_filename", fn.input_file_name())
-                .withColumn("_filename", fn.substring_index(fn.col("_filename"), "/", -1))
+            df: DataFrame = df.withColumn(FILENAME, fn.input_file_name()).withColumn(
+                FILENAME, fn.substring_index(fn.col(FILENAME), "/", -1)
             )
 
         return df
@@ -436,8 +430,6 @@ class Reader(Dataset, Source):
         )
 
         self.context.log.debug(json.dumps(self.options, indent=4, default=str))
-
-        input_file_name = f"_path_{self.database}_{self.table}"
 
         start_datetime = datetime.now()
 
@@ -461,6 +453,8 @@ class Reader(Dataset, Source):
                 f"Saving inferred schema for {self.database}.{self.table} into schema repository. {CONTEXT_ID}={str(self.context_id)}"
             )
             self.schema = df.schema
+            if self._add_corrupt_record:
+                self.schema.add(CORRUPT_RECORD, StringType(), nullable=True)
             self.schema_repo.save_schema(self.schema, self.database, self.table)
 
         self.context.log.debug(

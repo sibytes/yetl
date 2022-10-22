@@ -117,7 +117,14 @@ There is a CI build configured for this repo that builds on main origin and publ
 # Releases
 
 Version: 0.0.21
+- Adjusted table creation on delta writer so that when schema is inferred the table is created afterwards to avoid schema partition synchronisation errors
 - Added in Jinja for variables replacements as more robust solution than simple string replacements.
+- Added in configuration for putting file origin into the source dataframes
+- Added configuration to add _corrupt_record on schema creation
+- Auto generating sql schema's on schema creation
+- Adding options for dynamic template loading from a single function so that it can be re-used across tables
+- deprecated custom parsing timeslice features in favour of jinja templating
+- Added in a new cli lib for build out templates and maintenance tasks using typer
 
 Version: 0.0.20
 - Fixed missing packages in build

@@ -1,270 +1,73 @@
-22/10/06 13:00:58 WARN Utils: Your hostname, Shauns-MacBook-Pro.local resolves to a loopback address: 127.0.0.1; using 192.168.0.16 instead (on interface en0)
-22/10/06 13:00:58 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
+22/10/22 23:53:12 WARN Utils: Your hostname, Shauns-MacBook-Pro.local resolves to a loopback address: 127.0.0.1; using 192.168.0.16 instead (on interface en0)
+22/10/22 23:53:12 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
 :: loading settings :: url = jar:file:/Users/shaunryan/opt/spark-3.3.0-bin-hadoop3/jars/ivy-2.5.0.jar!/org/apache/ivy/core/settings/ivysettings.xml
-22/10/06 13:00:59 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
-You are setting a property: delta.autoOptimize.autoCompact that is not recognized by this version of Delta
-You are setting a property: delta.autoOptimize.optimizeWrite that is not recognized by this version of Delta
-{
-    "dataflow": {
-        "datasets": {
-            "97bcbff2-b381-4ba5-8ccb-842436158ef3": {
-                "type": "Reader",
-                "dataflow_id": "a6e4d236-6996-44e2-b25e-51bb5790baa7",
-                "database": "landing",
-                "table": "customer",
-                "path": "file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_2022**.csv",
-                "tasks": {
-                    "0": {
-                        "task": "lazy_read",
-                        "message": {
-                            "path": "file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_2022**.csv",
-                            "options": {
-                                "mode": "PERMISSIVE",
-                                "inferSchema": false,
-                                "header": true
-                            }
-                        },
-                        "start_datetime": "2022-10-06 13:01:12",
-                        "end_datetime": "2022-10-06 13:01:13",
-                        "seconds_duration": 0.31842
-                    },
-                    "1": {
-                        "task": "schema_on_read_validation",
-                        "message": {
-                            "validation": {
-                                "thresholds": {
-                                    "warning": {
-                                        "min_rows": 1,
-                                        "max_rows": 1000,
-                                        "exception_count": 0,
-                                        "exception_percent": 0
-                                    },
-                                    "error": {
-                                        "min_rows": 0,
-                                        "max_rows": 100000000,
-                                        "exception_count": 50,
-                                        "exception_percent": 80
-                                    }
-                                },
-                                "schema_on_read": {
-                                    "landing.customer": {
-                                        "total_count": 20,
-                                        "valid_count": 20,
-                                        "exception_count": 0,
-                                        "exception_percent": 0.0
-                                    }
-                                }
-                            }
-                        },
-                        "start_datetime": "2022-10-06 13:01:13",
-                        "end_datetime": "2022-10-06 13:01:14",
-                        "seconds_duration": 1.479603
-                    }
-                }
-            },
-            "8359c637-3ee7-4665-8155-f3c025827c97": {
-                "type": "Reader",
-                "dataflow_id": "a6e4d236-6996-44e2-b25e-51bb5790baa7",
-                "database": "landing",
-                "table": "customer_preferences",
-                "path": "file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_preferences_2022**.csv",
-                "tasks": {
-                    "0": {
-                        "task": "lazy_read",
-                        "message": {
-                            "path": "file:/Users/shaunryan/AzureDevOps/yetl/data/landing/2022**/customer_preferences_2022**.csv",
-                            "options": {
-                                "mode": "PERMISSIVE",
-                                "inferSchema": false,
-                                "header": true
-                            }
-                        },
-                        "start_datetime": "2022-10-06 13:01:14",
-                        "end_datetime": "2022-10-06 13:01:14",
-                        "seconds_duration": 0.034754
-                    },
-                    "1": {
-                        "task": "schema_on_read_validation",
-                        "message": {
-                            "validation": {
-                                "thresholds": {
-                                    "warning": {
-                                        "min_rows": 0,
-                                        "max_rows": 1000,
-                                        "exception_count": 0,
-                                        "exception_percent": 0
-                                    },
-                                    "error": {
-                                        "min_rows": 0,
-                                        "max_rows": 100000000,
-                                        "exception_count": 50,
-                                        "exception_percent": 80
-                                    }
-                                },
-                                "schema_on_read": {
-                                    "landing.customer_preferences": {
-                                        "total_count": 20,
-                                        "valid_count": 20,
-                                        "exception_count": 0,
-                                        "exception_percent": 0.0
-                                    }
-                                }
-                            }
-                        },
-                        "start_datetime": "2022-10-06 13:01:14",
-                        "end_datetime": "2022-10-06 13:01:15",
-                        "seconds_duration": 0.807431
-                    }
-                }
-            },
-            "5baceead-3f12-4f64-9e5b-7baea7daaa7a": {
-                "type": "Writer",
-                "dataflow_id": "a6e4d236-6996-44e2-b25e-51bb5790baa7",
-                "database": "raw",
-                "table": "customer",
-                "path": "file:/Users/shaunryan/AzureDevOps/yetl/data/delta_lake/raw/customer",
-                "tasks": {
-                    "0": {
-                        "task": "sql",
-                        "message": "CREATE DATABASE IF NOT EXISTS raw",
-                        "start_datetime": "2022-10-06 13:01:15",
-                        "end_datetime": "2022-10-06 13:01:15",
-                        "seconds_duration": 0.020079
-                    },
-                    "1": {
-                        "task": "get_table_properties",
-                        "message": {
-                            "raw.customer": {
-                                "constraints": {
-                                    "amount_lower_bound": "amount > - 1000",
-                                    "amount_upper_bound": "amount < 10000"
-                                },
-                                "properties": {
-                                    "delta.appendOnly": "False",
-                                    "delta.autoOptimize.autoCompact": "True",
-                                    "delta.autoOptimize.optimizeWrite": "True",
-                                    "delta.checkpoint.writeStatsAsJson": "True",
-                                    "delta.compatibility.symlinkFormatManifest.enabled": "False",
-                                    "delta.dataSkippingNumIndexedCols": "-1",
-                                    "delta.deletedFileRetentionDuration": "interval 1 week",
-                                    "delta.enableChangeDataFeed": "True",
-                                    "delta.logRetentionDuration": "interval 30 days",
-                                    "delta.minReaderVersion": "1",
-                                    "delta.minWriterVersion": "4",
-                                    "delta.randomPrefixLength": "2",
-                                    "delta.randomizeFilePrefixes": "False"
-                                },
-                                "partitions": [
-                                    "_partition_key",
-                                    "allow_contact"
-                                ]
-                            }
-                        },
-                        "start_datetime": "2022-10-06 13:01:15",
-                        "end_datetime": "2022-10-06 13:01:24",
-                        "seconds_duration": 8.453327
-                    },
-                    "2": {
-                        "task": "set_table_properties",
-                        "message": "ALTER TABLE `raw`.`customer` SET TBLPROPERTIES ('delta.appendOnly' = 'False', 'delta.autoOptimize.autoCompact' = 'True', 'delta.autoOptimize.optimizeWrite' = 'True', 'delta.checkpoint.writeStatsAsJson' = 'True', 'delta.compatibility.symlinkFormatManifest.enabled' = 'False', 'delta.dataSkippingNumIndexedCols' = '-1', 'delta.deletedFileRetentionDuration' = 'interval 1 week', 'delta.enableChangeDataFeed' = 'True', 'delta.logRetentionDuration' = 'interval 30 days', 'delta.minReaderVersion' = '1', 'delta.minWriterVersion' = '2', 'delta.randomPrefixLength' = '2', 'delta.randomizeFilePrefixes' = 'False');",
-                        "start_datetime": "2022-10-06 13:01:24",
-                        "end_datetime": "2022-10-06 13:01:27",
-                        "seconds_duration": 2.974332
-                    },
-                    "3": {
-                        "task": "delta_table_write",
-                        "message": {
-                            "version": 7,
-                            "timestamp": "2022-10-06 13:01:30.051000",
-                            "userId": null,
-                            "userName": null,
-                            "operation": "WRITE",
-                            "operationParameters": {
-                                "mode": "Overwrite",
-                                "partitionBy": "[\"_partition_key\",\"allow_contact\"]"
-                            },
-                            "job": null,
-                            "notebook": null,
-                            "clusterId": null,
-                            "readVersion": 6,
-                            "isolationLevel": "Serializable",
-                            "isBlindAppend": false,
-                            "operationMetrics": {
-                                "numOutputRows": "20",
-                                "numOutputBytes": "13107",
-                                "numFiles": "4"
-                            },
-                            "userMetadata": null,
-                            "engineInfo": "Apache-Spark/3.3.0 Delta-Lake/2.1.0"
-                        },
-                        "start_datetime": "2022-10-06 13:01:27",
-                        "end_datetime": "2022-10-06 13:01:33",
-                        "seconds_duration": 5.886687
-                    },
-                    "4": {
-                        "task": "delta_table_optimize",
-                        "message": {
-                            "version": 8,
-                            "timestamp": "2022-10-06 13:01:35.834000",
-                            "userId": null,
-                            "userName": null,
-                            "operation": "OPTIMIZE",
-                            "operationParameters": {
-                                "predicate": "[\"((_partition_key IN (20220711, 20220712)) AND (allow_contact IN (false, true)))\"]",
-                                "zOrderBy": "[\"email\",\"id\"]"
-                            },
-                            "job": null,
-                            "notebook": null,
-                            "clusterId": null,
-                            "readVersion": 7,
-                            "isolationLevel": "SnapshotIsolation",
-                            "isBlindAppend": false,
-                            "operationMetrics": {
-                                "numRemovedBytes": "13107",
-                                "p50FileSize": "3302",
-                                "p25FileSize": "3233",
-                                "numAddedFiles": "4",
-                                "minFileSize": "3201",
-                                "p75FileSize": "3371",
-                                "numAddedBytes": "13107",
-                                "maxFileSize": "3371",
-                                "numRemovedFiles": "4"
-                            },
-                            "userMetadata": null,
-                            "engineInfo": "Apache-Spark/3.3.0 Delta-Lake/2.1.0"
-                        },
-                        "start_datetime": "2022-10-06 13:01:33",
-                        "end_datetime": "2022-10-06 13:01:38",
-                        "seconds_duration": 5.629961
-                    }
-                }
-            }
-        },
-        "name": "batch_text_csv_to_delta_permissive_1",
-        "args": {
-            "timeslice": "2022-*-* 00:00:00.000000",
-            "save": "<class 'yetl_flow.save._saves.OverwriteSave'>"
-        },
-        "started": "2022-10-06 13:00:56",
-        "started_utc": "2022-10-06 13:00:56",
-        "context_id": "9f813be2-934e-4896-862b-50eaf173afdd",
-        "lineage": {
-            "a6e4d236-6996-44e2-b25e-51bb5790baa7": {
-                "5baceead-3f12-4f64-9e5b-7baea7daaa7a": {
-                    "depends_on": [
-                        "97bcbff2-b381-4ba5-8ccb-842436158ef3",
-                        "8359c637-3ee7-4665-8155-f3c025827c97"
-                    ]
-                }
-            }
-        },
-        "finished": "2022-10-06 13:01:38",
-        "finished_utc": "2022-10-06 13:01:38"
-    },
-    "warning": {
-        "count": 0
-    },
-    "error": {
-        "count": 0
-    }
-}
+22/10/22 23:53:12 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Loaded adworks.personcountryregion
+Loaded adworks.salessalesorderdetail
+Loaded adworks.productionproduct
+Loaded adworks.productionproductreview
+Loaded adworks.personbusinessentitycontact
+Loaded adworks.productiontransactionhistoryarchive
+Loaded adworks.salessalesorderheader
+Loaded adworks.productionproductmodelproductdescriptionculture
+Loaded adworks.salescurrency
+Loaded adworks.salessalesterritoryhistory
+Loaded adworks.productionproductmodel
+Loaded adworks.purchasingshipmethod
+Loaded adworks.salessalesreason
+Loaded adworks.humanresourcesjobcandidate
+Loaded adworks.salescustomer
+Loaded adworks.productionscrapreason
+Loaded adworks.productionproductlistpricehistory
+Loaded adworks.personpersonphone
+Loaded adworks.personaddresstype
+Loaded adworks.salessalesorderheadersalesreason
+Loaded adworks.humanresourcesemployeepayhistory
+Loaded adworks.productionproductdescription
+Loaded adworks.personstateprovince
+Loaded adworks.productionculture
+Loaded adworks.salescreditcard
+Loaded adworks.salesspecialoffer
+Loaded adworks.salessalespersonquotahistory
+Loaded adworks.productionillustration
+Loaded adworks.purchasingpurchaseorderheader
+Loaded adworks.salescountryregioncurrency
+Loaded adworks.purchasingpurchaseorderdetail
+Loaded adworks.productionproductproductphoto
+Loaded adworks.humanresourcesemployeedepartmenthistory
+Loaded adworks.personaddress
+Loaded adworks.personbusinessentityaddress
+Loaded adworks.personemailaddress
+Loaded adworks.humanresourcesshift
+Loaded adworks.productionproductinventory
+Loaded adworks.personbusinessentity
+Loaded adworks.productionproductcategory
+Loaded adworks.salessalestaxrate
+Loaded adworks.productionworkorder
+Loaded adworks.productiondocument
+Loaded adworks.productiontransactionhistory
+Loaded adworks.productionworkorderrouting
+Loaded adworks.salescurrencyrate
+Loaded adworks.purchasingvendor
+Loaded adworks.salesspecialofferproduct
+Loaded adworks.productionproductphoto
+Loaded adworks.personphonenumbertype
+Loaded adworks.productionunitmeasure
+Loaded adworks.personperson
+Loaded adworks.personpassword
+Loaded adworks.salessalesterritory
+Loaded adworks.salessalesperson
+Loaded adworks.personcontacttype
+Loaded adworks.purchasingproductvendor
+Loaded adworks.salespersoncreditcard
+Loaded adworks.productionproductdocument
+Loaded adworks.salesstore
+Loaded adworks.productionproductcosthistory
+Loaded adworks.humanresourcesemployee
+Loaded adworks.productionproductsubcategory
+Loaded adworks.productionbillofmaterials
+Loaded adworks.productionproductmodelillustration
+Loaded adworks.salesshoppingcartitem
+Loaded adworks.humanresourcesdepartment
+Loaded adworks.productionlocation
+[]

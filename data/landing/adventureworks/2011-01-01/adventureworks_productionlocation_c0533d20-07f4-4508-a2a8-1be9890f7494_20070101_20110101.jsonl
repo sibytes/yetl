@@ -1,0 +1,14 @@
+﻿{"LocationID":1,"Name":"Tool Crib","CostRate":0.0000,"Availability":0.00,"ModifiedDate":"2008-04-30T00:00:00"}
+{"LocationID":2,"Name":"Sheet Metal Racks","CostRate":0.0000,"Availability":0.00,"ModifiedDate":"2008-04-30T00:00:00"}
+{"LocationID":3,"Name":"Paint Shop","CostRate":0.0000,"Availability":0.00,"ModifiedDate":"2008-04-30T00:00:00"}
+{"LocationID":4,"Name":"Paint Storage","CostRate":0.0000,"Availability":0.00,"ModifiedDate":"2008-04-30T00:00:00"}
+{"LocationID":5,"Name":"Metal Storage","CostRate":0.0000,"Availability":0.00,"ModifiedDate":"2008-04-30T00:00:00"}
+{"LocationID":6,"Name":"Miscellaneous Storage","CostRate":0.0000,"Availability":0.00,"ModifiedDate":"2008-04-30T00:00:00"}
+{"LocationID":7,"Name":"Finished Goods Storage","CostRate":0.0000,"Availability":0.00,"ModifiedDate":"2008-04-30T00:00:00"}
+{"LocationID":10,"Name":"Frame Forming","CostRate":22.5000,"Availability":96.00,"ModifiedDate":"2008-04-30T00:00:00"}
+{"LocationID":20,"Name":"Frame Welding","CostRate":25.0000,"Availability":108.00,"ModifiedDate":"2008-04-30T00:00:00"}
+{"LocationID":30,"Name":"Debur and Polish","CostRate":14.5000,"Availability":120.00,"ModifiedDate":"2008-04-30T00:00:00"}
+{"LocationID":40,"Name":"Paint","CostRate":15.7500,"Availability":120.00,"ModifiedDate":"2008-04-30T00:00:00"}
+{"LocationID":45,"Name":"Specialized Paint","CostRate":18.0000,"Availability":80.00,"ModifiedDate":"2008-04-30T00:00:00"}
+{"LocationID":50,"Name":"Subassembly","CostRate":12.2500,"Availability":120.00,"ModifiedDate":"2008-04-30T00:00:00"}
+{"LocationID":60,"Name":"Final Assembly","CostRate":12.2500,"Availability":120.00,"ModifiedDate":"2008-04-30T00:00:00"}

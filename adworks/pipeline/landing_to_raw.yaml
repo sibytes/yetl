@@ -5,16 +5,21 @@ dataflow:
       type: Reader
       table:
         properties:
-          yetl.metadata.timeslice: true
           yetl.schema.createIfNotExists: true
+          yetl.schema.corrupt_record: true
+          yetl.metadata.timeslice: timeslice_path_date_format
+          yetl.metadata.filepath_filename: true
+          # yetl.metadata.filepath: true
+          # yetl.metadata.filename: true
 
       path_date_format: "%Y-%m-%d"
       file_date_format: "%Y%m%d"
-      format: jsonl
-      path: landing/{{timeslice_path_date_format}}/{{adworks_tables_table_name}}_{{timeslice_file_date_format}}.jsonl
+      format: json
+      path: landing/adventureworks/{{timeslice_path_date_format}}/*_{{adworks_tables_table_name}}_*_{{timeslice_file_date_format}}.jsonl
       read:
         auto: true
         options:
+          mode: PERMISSIVE
           inferSchema: false
           header: true
 
@@ -36,25 +41,21 @@ dataflow:
           exception_percent: 80
   
 
-  {{adworks_tables_table_name}}_raw:
-    customer:
+  adworks_raw:
+    {{adworks_tables_table_name}}:
       type: DeltaWriter
       table:
 
         partitioned_by:
           - _partition_key
 
-        zorder_by:
-          - email
-          - id
-
-        ddl: "{{root}}/deltalake"
+        # ddl: "{{root}}/deltalake"
         properties:
 
           delta.appendOnly: false
           delta.checkpoint.writeStatsAsJson: true
-          delta.autoOptimize.autoCompact: true        # Databricks, but supported by yetl
-          delta.autoOptimize.optimizeWrite: true      # Databricks, but supported by yetl
+          # delta.autoOptimize.autoCompact: true        # Databricks, but supported by yetl
+          # delta.autoOptimize.optimizeWrite: true      # Databricks, but supported by yetl
           delta.compatibility.symlinkFormatManifest.enabled: false
           delta.dataSkippingNumIndexedCols: -1
           delta.logRetentionDuration: interval 30 days
@@ -66,12 +67,12 @@ dataflow:
           delta.randomPrefixLength: 2
 
         # table constraints can be declared inline or via a SQL include file on the ddl
-        check_constraints:
-          amount_lower_bound: "amount > -1000"
-          amount_upper_bound: "amount < 10000"
+        # check_constraints:
+        #   amount_lower_bound: "amount > -1000"
+        #   amount_upper_bound: "amount < 10000"
       
       format: delta
-      path: delta_lake/raw/customer
+      path: delta_lake/adworks_raw/{{adworks_tables_table_name}}
       write:
         mode: append
         options:

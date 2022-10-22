@@ -1,6 +1,7 @@
 import json
 from pyspark.sql import DataFrame
 from enum import Enum
+from pyspark.sql.types import StructType
 
 
 class DeltaLakeProperties(Enum):

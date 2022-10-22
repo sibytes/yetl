@@ -25,6 +25,7 @@ class DeltaWriter(Dataset, Destination):
     ) -> None:
         super().__init__(context, database, table, config, io_type, auditor)
 
+        self._config = config
         self._replacements = {
             parser.JinjaVariables.DATABASE_NAME: self.database,
             parser.JinjaVariables.TABLE_NAME: self.table,
@@ -72,21 +73,16 @@ class DeltaWriter(Dataset, Destination):
                 self.mode = "merge"
 
         self.save: Save = save_factory.get_save_type(self)
-
         self._initial_load = super().initial_load
 
-        if self.auto_io:
+        # if auto on and there is a schema configured then handle table creation
+        # and changes before the data is written
+        # or we create the table after the data is written
+        if self.auto_io and self.table_ddl:
             self.context.log.info(
                 f"auto_io = {self.auto_io} automatically creating or altering delta table {self.database}.{self.table}"
             )
-
-            # returns the table properties and partitions if the table already exists.
-            current_properties = self.create_or_alter_table()
-
-            # alter, drop or create any constraints defined that are not on the table
-            self._set_table_constraints(current_properties, config)
-            # alter, drop or create any properties that are not on the table
-            self._set_table_properties(current_properties, config)
+            self.create_or_alter_table()
 
     def _get_merge_match(self, mode: dict, crud: str):
 
@@ -172,7 +168,7 @@ class DeltaWriter(Dataset, Destination):
 
     def create_or_alter_table(self):
 
-        properties = None
+        current_properties = None
         start_datetime = datetime.now()
         detail = dl.create_database(self.context, self.database)
         self.auditor.dataset_task(self.id, AuditTask.SQL, detail, start_datetime)
@@ -188,15 +184,18 @@ class DeltaWriter(Dataset, Destination):
             # on non initial loads get the constraints and properties
             # to them to and sync with the declared constraints and properties.
             # TODO: consolidate details and properties fetch since the properties are in the details. The delta lake api may have some improvements.
-            properties = dl.get_table_properties(
+            current_properties = dl.get_table_properties(
                 self.context, self.database, self.table
             )
             details = dl.get_table_details(self.context, self.database, self.table)
             # get the partitions from the table details and add them to the properties.
             table_name = f"{self.database}.{self.table}"
-            properties[table_name][PARTITIONS] = details[table_name][PARTITIONS]
+            current_properties[table_name][PARTITIONS] = details[table_name][PARTITIONS]
             self.auditor.dataset_task(
-                self.id, AuditTask.GET_TABLE_PROPERTIES, properties, start_datetime
+                self.id,
+                AuditTask.GET_TABLE_PROPERTIES,
+                current_properties,
+                start_datetime,
             )
 
         else:
@@ -207,7 +206,10 @@ class DeltaWriter(Dataset, Destination):
             self.auditor.dataset_task(self.id, AuditTask.SQL, detail, start_datetime)
             self.initial_load = True
 
-        return properties
+        # alter, drop or create any constraints defined that are not on the table
+        self._set_table_constraints(current_properties, self._config)
+        # alter, drop or create any properties that are not on the table
+        self._set_table_properties(current_properties, self._config)
 
     def _get_conf_dl_property(self, config: dict, property: dl.DeltaLakeProperties):
         return (
@@ -370,7 +372,20 @@ class DeltaWriter(Dataset, Destination):
             # this by setting the Spark session configuration spark.databricks.delta.merge.repartitionBeforeWrite.enabled to true."
             start_datetime = datetime.now()
             self._prepare_write()
+            self.context.log.debug("Save options:")
+            self.context.log.debug(json.dumps(self.options, indent=4, default=str))
+
             self.save.write()
+
+            # if auto on and there is a schema configured then handle table creation
+            # and changes before the data is written
+            # or we create the table after the data is written
+            if self.auto_io and not self.table_ddl:
+                self.context.log.info(
+                    f"auto_io = {self.auto_io} automatically creating or altering delta table {self.database}.{self.table}"
+                )
+                self.create_or_alter_table()
+
             write_audit = dl.get_audit(self.context, f"{self.database}.{self.table}")
             self.auditor.dataset_task(
                 self.id, AuditTask.DELTA_TABLE_WRITE, write_audit, start_datetime

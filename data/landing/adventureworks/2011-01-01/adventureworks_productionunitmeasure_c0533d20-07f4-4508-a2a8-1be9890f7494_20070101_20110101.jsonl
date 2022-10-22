@@ -1,0 +1,38 @@
+﻿{"UnitMeasureCode":"BOX","Name":"Boxes","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"BTL","Name":"Bottle","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"C  ","Name":"Celsius","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"CAN","Name":"Canister","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"CAR","Name":"Carton","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"CBM","Name":"Cubic meters","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"CCM","Name":"Cubic centimeter","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"CDM","Name":"Cubic decimeter","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"CM ","Name":"Centimeter","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"CM2","Name":"Square centimeter","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"CR ","Name":"Crate","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"CS ","Name":"Case","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"CTN","Name":"Container","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"DM ","Name":"Decimeter","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"DZ ","Name":"Dozen","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"EA ","Name":"Each","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"FT3","Name":"Cubic foot","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"G  ","Name":"Gram","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"GAL","Name":"Gallon","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"IN ","Name":"Inch","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"KG ","Name":"Kilogram","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"KGV","Name":"Kilogram/cubic meter","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"KM ","Name":"Kilometer","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"KT ","Name":"Kiloton","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"L  ","Name":"Liter","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"LB ","Name":"US pound","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"M  ","Name":"Meter","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"M2 ","Name":"Square meter","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"M3 ","Name":"Cubic meter","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"MG ","Name":"Milligram","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"ML ","Name":"Milliliter","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"MM ","Name":"Millimeter","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"OZ ","Name":"Ounces","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"PAK","Name":"Pack","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"PAL","Name":"Pallet","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"PC ","Name":"Piece","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"PCT","Name":"Percentage","ModifiedDate":"2008-04-30T00:00:00"}
+{"UnitMeasureCode":"PT ","Name":"Pint, US liquid","ModifiedDate":"2008-04-30T00:00:00"}
