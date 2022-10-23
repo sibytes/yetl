@@ -9,6 +9,9 @@ from yetl.flow import (
 from pyspark.sql.functions import *
 from typing import Type
 import json
+from yetl.flow.parser.parser import create_table_dll
+
+
 
 
 @yetl_flow(log_level="ERROR")
@@ -26,8 +29,11 @@ def humanresourcesdepartment_landing_to_raw(
     df = df.withColumn(
         "_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer")
     )
-    df.show()
-    dataflow.destination_df(f"adworks_raw.{table}", df, save=save)
+    print(create_table_dll(df.schema, partition_fields=['_partition_key'], always_identity_column="key"))
+
+
+
+    # dataflow.destination_df(f"adworks_raw.{table}", df, save=save)
 
 
 # incremental load
@@ -35,7 +41,7 @@ timeslice = Timeslice(2011, 1, 1)
 results = humanresourcesdepartment_landing_to_raw(
     timeslice=timeslice, table="humanresourcesdepartment"
 )
-print(json.dumps(results, indent=4, default=str))
+# print(json.dumps(results, indent=4, default=str))
 
 # reload load
 # timeslice = Timeslice(2022, "*", "*")

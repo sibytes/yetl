@@ -6,7 +6,7 @@ from datetime import datetime
 import regex
 from ._constants import NAME, REPLACE, ARGS
 import jinja2
-
+from pyspark.sql.types import StructType, StructField
 
 class JinjaVariables(Enum):
     DATABASE_NAME = "database_name"
@@ -224,3 +224,52 @@ def reduce_whitespace(sentence: str):
     pattern = re.compile(r"\s+")
 
     return pattern.sub(" ", sentence).strip()
+
+
+def create_column_ddl(field:StructField):
+    nullable = "" if field.nullable else "NOT NULL"
+    comment = f"COMMENT {field.metadata}" if field.metadata else ""
+    field_type = field.dataType.typeName()
+    field_name = f"`{field.name}`"
+
+    return f"\t{field_name} {field_type} {nullable} {comment}"
+
+
+def create_table_dll(schema:StructType, partition_fields:list=[], format:str="DELTA", always_identity_column:str=None):
+
+    field_ddl = [create_column_ddl(f) for f in schema.fields]
+    if always_identity_column:
+        always_identity_column = f"\t`{always_identity_column}` GENERATED ALWAYS AS IDENTITY"
+        field_ddl = [always_identity_column] + field_ddl
+
+    field_ddl = ",\n".join(field_ddl)
+
+
+    template_partition = jinja2.Template("PARTITIONED BY ({{partition_fields}})")
+    template_ddl = jinja2.Template("""CREATE TABLE {{database_name}}.{{table_name}}
+(
+{{field_ddl}}
+)
+USING {{format}} LOCATION '{{path}}'
+{{partition_ddl}}""", undefined=jinja2.DebugUndefined)
+
+    if partition_fields:
+        partition_fields = [f"`{p}`" for p in partition_fields]
+        partition_fields = ",".join(partition_fields)
+        partition_ddl:str = template_partition.render(partition_fields=partition_fields)
+    else:
+        partition_ddl = ""
+
+    replace = {
+        "field_ddl": field_ddl, 
+        "partition_ddl": partition_ddl, 
+        "format": format
+    }
+
+    table_ddl = template_ddl.render(replace)
+    table_ddl = f"{table_ddl};"
+
+    return table_ddl
+
+
+    
