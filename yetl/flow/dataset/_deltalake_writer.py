@@ -1,5 +1,6 @@
+from multiprocessing import context
 from ..parser._constants import *
-from ..schema_repo import ISchemaRepo
+from ..schema_repo import ISchemaRepo, SchemaNotFound
 from .. import _delta_lake as dl
 from pyspark.sql import DataFrame
 from typing import ChainMap
@@ -33,9 +34,14 @@ class DeltaWriter(Dataset, Destination):
             **self._replacements,
         }
 
+        # get the table properties
+        properties: dict = self._get_table_properties(config["table"])
+        self._set_table_properties(properties)
+
         self.dataframe: DataFrame = None
         # try and load a schema if schema on read
         self.table_ddl: str = self._get_table_sql(config)
+
         self.zorder_by: list = self._get_table_zorder(config)
         self.context.log.debug(f"DeltaWriter table ddl = {self.table_ddl}")
 
@@ -83,6 +89,20 @@ class DeltaWriter(Dataset, Destination):
                 f"auto_io = {self.auto_io} automatically creating or altering delta table {self.database}.{self.table}"
             )
             self.create_or_alter_table()
+
+
+    def _set_table_properties(self, properties: dict):
+
+        self._create_schema_if_not_exists = properties.get(
+            YETL_TBLP_SCHEMA_CREATE_IF_NOT_EXISTS, False
+        )
+
+
+    def _get_table_properties(self, table_config: dict):
+        properties = table_config.get(PROPERTIES, {})
+        if properties == None:
+            properties = {}
+        return properties
 
     def _get_merge_match(self, mode: dict, crud: str):
 
@@ -145,7 +165,7 @@ class DeltaWriter(Dataset, Destination):
                     start_datetime,
                 )
 
-    def _set_table_properties(self, existing_properties: dict, config: dict):
+    def _set_delta_table_properties(self, existing_properties: dict, config: dict):
         _existing_properties = {}
         if existing_properties:
             _existing_properties = existing_properties.get(self.database_table)
@@ -209,7 +229,7 @@ class DeltaWriter(Dataset, Destination):
         # alter, drop or create any constraints defined that are not on the table
         self._set_table_constraints(current_properties, self._config)
         # alter, drop or create any properties that are not on the table
-        self._set_table_properties(current_properties, self._config)
+        self._set_delta_table_properties(current_properties, self._config)
 
     def _get_conf_dl_property(self, config: dict, property: dl.DeltaLakeProperties):
         return (
@@ -304,8 +324,15 @@ class DeltaWriter(Dataset, Destination):
                         self.context, config["deltalake_schema_repo"]
                     )
                 )
-                ddl = self.schema_repo.load_schema(self.database, self.table, ddl)
-                ddl = parser.render_jinja(ddl, self._replacements)
+
+                try:
+                    ddl = self.schema_repo.load_schema(self.database, self.table, ddl)
+                except SchemaNotFound as e:
+                    if self._create_schema_if_not_exists:
+                        self.context.log.info(f"{e}, automatically creating SQL ddl schema.")
+                        ddl = None
+                    else:
+                        raise SchemaNotFound
         else:
             ddl = None
 

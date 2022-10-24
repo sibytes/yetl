@@ -49,9 +49,9 @@ dataflow:
         partitioned_by:
           - _partition_key
 
-        # ddl: "{{root}}/deltalake"
+        ddl: "{{root}}/deltalake"
         properties:
-
+          yetl.schema.createIfNotExists: true
           delta.appendOnly: false
           delta.checkpoint.writeStatsAsJson: true
           # delta.autoOptimize.autoCompact: true        # Databricks, but supported by yetl

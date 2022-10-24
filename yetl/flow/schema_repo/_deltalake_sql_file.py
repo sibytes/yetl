@@ -4,7 +4,7 @@ from pyspark.sql.types import StructType
 from ..file_system import FileFormat, IFileSystem, file_system_factory, FileSystemType
 import os
 from ..parser.parser import render_jinja, JinjaVariables
-
+from ._exceptions import SchemaNotFound
 
 class DeltalakeSchemaFile(ISchemaRepo):
 
@@ -51,10 +51,10 @@ class DeltalakeSchemaFile(ISchemaRepo):
             f"Loading schema for dataset {database_name}.{table_name} from {path} using {type(fs)}"
         )
 
-        schema = fs.read_file(path, FileFormat.TEXT)
-        if not schema:
-            msg = f"Failed to load schema for dataset {database_name}.{table_name} from {path}"
-            raise Exception(msg)
+        try:
+            schema = fs.read_file(path, FileFormat.TEXT)
+        except Exception as e:
+            raise SchemaNotFound(path) from e
 
         msg = json.dumps(schema)
         self.context.log.debug(msg)

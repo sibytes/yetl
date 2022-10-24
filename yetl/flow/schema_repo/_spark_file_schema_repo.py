@@ -4,13 +4,7 @@ from ._ischema_repo import ISchemaRepo
 from pyspark.sql.types import StructType
 from ..file_system import FileFormat, IFileSystem, file_system_factory, FileSystemType
 import os
-
-
-class SchemaNotFound(Exception):
-    def __init__(self, path: str):
-        self.path = path
-        super().__init__(self.path)
-
+from ._exceptions import SchemaNotFound
 
 class SparkFileSchemaRepo(ISchemaRepo):
 
@@ -71,7 +65,6 @@ class SparkFileSchemaRepo(ISchemaRepo):
         try:
             schema = fs.read_file(path, FileFormat.YAML)
         except Exception as e:
-            msg = f"Failed to load schema for dataset {database_name}.{table_name} from {path}"
             raise SchemaNotFound(path) from e
 
         msg = json.dumps(schema, indent=4, default=str)

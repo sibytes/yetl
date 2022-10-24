@@ -1,21 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 from yetl.flow import (
     yetl_flow,
     IDataflow,
@@ -47,13 +29,12 @@ def humanresourcesdepartment_landing_to_raw(
     df = df.withColumn(
         "_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer")
     )
-    print(str(df.schema))
-    print("************************************************************************")
-    print(create_table_dll(df.schema, partition_fields=['_partition_key'], always_identity_column="key"))
 
+    # print(str(df.schema))
+    # print("************************************************************************")
+    # print(create_table_dll(df.schema, partition_fields=['_partition_key'], always_identity_column="key"))
 
-
-    # dataflow.destination_df(f"adworks_raw.{table}", df, save=save)
+    dataflow.destination_df(f"adworks_raw.{table}", df, save=save)
 
 
 # incremental load
