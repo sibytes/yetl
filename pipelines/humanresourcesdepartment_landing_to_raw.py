@@ -12,8 +12,6 @@ import json
 from yetl.flow.parser.parser import create_table_dll
 
 
-
-
 @yetl_flow(log_level="ERROR")
 def humanresourcesdepartment_landing_to_raw(
     table: str,

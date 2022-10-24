@@ -10,7 +10,8 @@ from pyspark.sql.functions import *
 from typing import Type
 import json
 import yaml
-from yetl import async_load
+# from yetl import async_load
+
 
 @yetl_flow(log_level="ERROR", name="landing_to_raw")
 def landing_to_raw(
@@ -30,24 +31,8 @@ def landing_to_raw(
     dataflow.destination_df(f"adworks_raw.{table}", df, save=save)
 
 
-results = async_load(tables="./adworks/adworks_tables.yml", parallelism=4)
-print(json.dumps(results, indent=4, default=str))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# results = async_load(tables="./adworks/adworks_tables.yml", parallelism=4)
+# print(json.dumps(results, indent=4, default=str))
 
 
 def load():
@@ -68,3 +53,6 @@ def load():
             print(f"Loaded adworks.{table}")
 
     print(json.dumps(failed, indent=4, default=str))
+
+
+load()

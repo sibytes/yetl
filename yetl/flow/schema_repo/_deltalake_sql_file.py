@@ -6,6 +6,7 @@ import os
 from ..parser.parser import render_jinja, JinjaVariables
 from ._exceptions import SchemaNotFound
 
+
 class DeltalakeSchemaFile(ISchemaRepo):
 
     _SCHEMA_ROOT = "./config/schema"
@@ -26,10 +27,16 @@ class DeltalakeSchemaFile(ISchemaRepo):
         return path
 
     def save_schema(
-        self, schema: StructType, database_name: str, table_name: str, sub_location: str
+        self, schema: str, database_name: str, table_name: str, sub_location: str
     ):
         """Serialise delta table to a create table sql file."""
-        raise NotImplementedError
+        path = self._mkpath(database_name, table_name, sub_location)
+        path = os.path.abspath(path)
+        dir_path = os.path.dirname(path)
+        os.makedirs(dir_path, exist_ok=True)
+
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(schema)
 
     def load_schema(self, database_name: str, table_name: str, sub_location: str):
         """Loads a spark from a yaml file and deserialises to a spark schema."""

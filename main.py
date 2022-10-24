@@ -6,6 +6,6 @@
 
 # from yetl import __main__
 
-from pipelines import humanresourcesdepartment_landing_to_raw
+# from pipelines import humanresourcesdepartment_landing_to_raw
 
-# from pipelines import adworks_landing_to_raw
+from pipelines import adworks_landing_to_raw

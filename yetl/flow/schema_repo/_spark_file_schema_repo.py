@@ -6,6 +6,7 @@ from ..file_system import FileFormat, IFileSystem, file_system_factory, FileSyst
 import os
 from ._exceptions import SchemaNotFound
 
+
 class SparkFileSchemaRepo(ISchemaRepo):
 
     _SCHEMA_ROOT = "./config/schema/spark"
@@ -37,7 +38,7 @@ class SparkFileSchemaRepo(ISchemaRepo):
         path = os.path.abspath(path)
 
         schema_dict = json.loads(schema.json())
-        with open(path, "w") as f:
+        with open(path, "w", encoding="utf-8") as f:
             f.write(yaml.safe_dump(schema_dict))
 
     def load_schema(

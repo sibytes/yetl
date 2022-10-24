@@ -90,13 +90,11 @@ class DeltaWriter(Dataset, Destination):
             )
             self.create_or_alter_table()
 
-
     def _set_table_properties(self, properties: dict):
 
         self._create_schema_if_not_exists = properties.get(
             YETL_TBLP_SCHEMA_CREATE_IF_NOT_EXISTS, False
         )
-
 
     def _get_table_properties(self, table_config: dict):
         properties = table_config.get(PROPERTIES, {})
@@ -220,8 +218,10 @@ class DeltaWriter(Dataset, Destination):
 
         else:
             start_datetime = datetime.now()
+            if self.table_ddl:
+                rendered_table_ddl = parser.render_jinja(self.table_ddl, self._replacements)
             detail = dl.create_table(
-                self.context, self.database, self.table, self.path, self.table_ddl
+                self.context, self.database, self.table, self.path, rendered_table_ddl
             )
             self.auditor.dataset_task(self.id, AuditTask.SQL, detail, start_datetime)
             self.initial_load = True
@@ -319,6 +319,7 @@ class DeltaWriter(Dataset, Destination):
         if table:
             ddl: str = table.get("ddl")
             if ddl and not "\n" in ddl:
+                self._schema_root = ddl
                 self.schema_repo: ISchemaRepo = (
                     self.context.schema_repo_factory.get_schema_repo_type(
                         self.context, config["deltalake_schema_repo"]
@@ -326,10 +327,13 @@ class DeltaWriter(Dataset, Destination):
                 )
 
                 try:
-                    ddl = self.schema_repo.load_schema(self.database, self.table, ddl)
+                    ddl = self.schema_repo.load_schema(self.database, self.table, self._schema_root)
+                    self._create_schema_if_not_exists = False
                 except SchemaNotFound as e:
                     if self._create_schema_if_not_exists:
-                        self.context.log.info(f"{e}, automatically creating SQL ddl schema.")
+                        self.context.log.info(
+                            f"{e}, automatically creating SQL ddl schema."
+                        )
                         ddl = None
                     else:
                         raise SchemaNotFound
@@ -391,6 +395,13 @@ class DeltaWriter(Dataset, Destination):
         self.context.log.info(f"Writing data to {self.database_table} at {self.path}")
         if self.dataframe:
 
+            if self._create_schema_if_not_exists:
+                self.table_ddl = parser.create_table_dll(
+                    self.dataframe.schema, self.partitions
+                )
+                self.create_or_alter_table()
+                self.schema_repo.save_schema(self.table_ddl, self.database, self.table, self._schema_root)
+
             # don't think this is needed because from the docs
             # "Repartition output data before write: For partitioned tables, merge can produce a much larger number
             # of small files than the number of shuffle partitions. This is because every shuffle task can write
@@ -404,10 +415,10 @@ class DeltaWriter(Dataset, Destination):
 
             self.save.write()
 
-            # if auto on and there is a schema configured then handle table creation
+            # if auto on and there is a schema configured or to create one automatically then handle table creation
             # and changes before the data is written
-            # or we create the table after the data is written
-            if self.auto_io and not self.table_ddl:
+            # or we create the table after the data is written based on the data written
+            if not self.table_ddl and not self._create_schema_if_not_exists:
                 self.context.log.info(
                     f"auto_io = {self.auto_io} automatically creating or altering delta table {self.database}.{self.table}"
                 )

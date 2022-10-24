@@ -1,7 +1,8 @@
-22/10/22 23:53:12 WARN Utils: Your hostname, Shauns-MacBook-Pro.local resolves to a loopback address: 127.0.0.1; using 192.168.0.16 instead (on interface en0)
-22/10/22 23:53:12 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
+22/10/24 21:08:08 WARN Utils: Your hostname, Shauns-MacBook-Pro.local resolves to a loopback address: 127.0.0.1, but we couldn't find any external IP address!
+22/10/24 21:08:08 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
 :: loading settings :: url = jar:file:/Users/shaunryan/opt/spark-3.3.0-bin-hadoop3/jars/ivy-2.5.0.jar!/org/apache/ivy/core/settings/ivysettings.xml
-22/10/22 23:53:12 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+22/10/24 21:08:09 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+22/10/24 21:08:09 WARN MacAddressUtil: Failed to find a usable hardware address from the network interfaces; using random bytes: 75:bc:ee:7c:6a:4e:3a:7a
 Loaded adworks.personcountryregion
 Loaded adworks.salessalesorderdetail
 Loaded adworks.productionproduct
