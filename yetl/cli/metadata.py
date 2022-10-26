@@ -9,7 +9,7 @@ class MetadataStore:
 
 
 class MetadataFileStore(MetadataStore):
-    def __init__(self, project: str, directory_path: str = ".") -> None:
+    def __init__(self, project: str, directory_path:str) -> None:
 
         super().__init__()
 

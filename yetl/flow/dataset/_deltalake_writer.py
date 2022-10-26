@@ -219,7 +219,9 @@ class DeltaWriter(Dataset, Destination):
         else:
             start_datetime = datetime.now()
             if self.table_ddl:
-                rendered_table_ddl = parser.render_jinja(self.table_ddl, self._replacements)
+                rendered_table_ddl = parser.render_jinja(
+                    self.table_ddl, self._replacements
+                )
             detail = dl.create_table(
                 self.context, self.database, self.table, self.path, rendered_table_ddl
             )
@@ -327,7 +329,9 @@ class DeltaWriter(Dataset, Destination):
                 )
 
                 try:
-                    ddl = self.schema_repo.load_schema(self.database, self.table, self._schema_root)
+                    ddl = self.schema_repo.load_schema(
+                        self.database, self.table, self._schema_root
+                    )
                     self._create_schema_if_not_exists = False
                 except SchemaNotFound as e:
                     if self._create_schema_if_not_exists:
@@ -400,7 +404,9 @@ class DeltaWriter(Dataset, Destination):
                     self.dataframe.schema, self.partitions
                 )
                 self.create_or_alter_table()
-                self.schema_repo.save_schema(self.table_ddl, self.database, self.table, self._schema_root)
+                self.schema_repo.save_schema(
+                    self.table_ddl, self.database, self.table, self._schema_root
+                )
 
             # don't think this is needed because from the docs
             # "Repartition output data before write: For partitioned tables, merge can produce a much larger number

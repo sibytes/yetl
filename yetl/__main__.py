@@ -1,29 +1,25 @@
-
 from .cli.manifest_tables import FileSource
 import typer
 from .cli.metadata import MetadataFileStore
 from .cli.build import build_config
+
 app = typer.Typer()
-
-
-
 
 
 @app.command()
 def build(
     project: str,
-    project_dir: str,
     metadata_file: str,
     template_file: str,
     build_dir: str,
 ):
-    build_config(project, project_dir, metadata_file, template_file, build_dir)
+    build_config(project, metadata_file, template_file, build_dir)
 
 
 @app.command()
 def create_table_manifest(
     project: str,
-    project_dir: str,
+    build_dir: str,
     source_type: str,
     source_dir: str,
     filename: str = "*",
@@ -37,7 +33,7 @@ def create_table_manifest(
     """
     source = FileSource(source_dir, filename, extract_regex)
     files = source.tables()
-    metadata = MetadataFileStore(project, project_dir)
+    metadata = MetadataFileStore(project, build_dir)
     metadata.save_table_manifest(files)
 
 

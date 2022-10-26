@@ -4,6 +4,7 @@ import shutil
 import yaml
 from jinja2.utils import missing, object_type_repr
 
+
 class YetlDebugUndefined(Undefined):
 
     __slots__ = ()
@@ -26,11 +27,13 @@ class YetlDebugUndefined(Undefined):
     def _fail_with_undefined_error(self, *args, **kwargs):
         return ""
 
-def build_config(    project: str,
-    project_dir: str,
+
+def build_config(
+    project: str,
     metadata_file: str,
     template_file: str,
-    build_dir: str,):
+    build_dir: str,
+):
 
     project_dir = os.path.abspath(os.path.join(build_dir, "project", project))
     template_dir = project_dir

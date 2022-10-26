@@ -7,7 +7,11 @@ class ISchemaRepo:
         self.context = context
 
     def save_schema(
-        self, schema: Union[StructType, str], database_name: str, table_name: str, sub_location: str = None,
+        self,
+        schema: Union[StructType, str],
+        database_name: str,
+        table_name: str,
+        sub_location: str = None,
     ):
         """Save a schema into the repo."""
         pass

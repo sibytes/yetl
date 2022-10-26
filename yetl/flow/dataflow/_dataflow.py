@@ -7,7 +7,6 @@ from enum import Enum
 from ._exceptions import SourceNotFound, DestinationNotFound
 
 
-
 class Dataflow(IDataflow):
     def __init__(self, context, dataflow_config: dict) -> None:
 
@@ -60,7 +59,6 @@ class Dataflow(IDataflow):
         except KeyError as e:
             raise SourceNotFound(str(e), self.sources)
 
-
         if source.auto_io:
             source.read()
         return source.dataframe
@@ -73,7 +71,7 @@ class Dataflow(IDataflow):
             dst: Destination = self.destinations[database_table]
         except KeyError as e:
             raise DestinationNotFound(str(e), self.destinations)
-            
+
         dst.dataframe = dataframe
         if save:
             dst.save = save(dst)
