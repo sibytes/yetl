@@ -36,7 +36,9 @@ class SparkFileSchemaRepo(ISchemaRepo):
 
         path = self._mkpath(database_name, table_name, sub_location)
         path = os.path.abspath(path)
-
+        dir_path = os.path.dirname(path)
+        os.makedirs(dir_path, exist_ok=True)
+        
         schema_dict = json.loads(schema.json())
         with open(path, "w", encoding="utf-8") as f:
             f.write(yaml.safe_dump(schema_dict))

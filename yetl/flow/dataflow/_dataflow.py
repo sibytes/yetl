@@ -4,6 +4,8 @@ from ._i_dataflow import IDataflow
 from ..dataset import dataset_factory
 from typing import Callable
 from enum import Enum
+from ._exceptions import SourceNotFound, DestinationNotFound
+
 
 
 class Dataflow(IDataflow):
@@ -53,7 +55,12 @@ class Dataflow(IDataflow):
 
     def source_df(self, database_table: str):
 
-        source: Source = self.sources[database_table]
+        try:
+            source: Source = self.sources[database_table]
+        except KeyError as e:
+            raise SourceNotFound(str(e), self.sources)
+
+
         if source.auto_io:
             source.read()
         return source.dataframe
@@ -62,7 +69,11 @@ class Dataflow(IDataflow):
         self, database_table: str, dataframe: DataFrame, save: Callable = None
     ):
 
-        dst: Destination = self.destinations[database_table]
+        try:
+            dst: Destination = self.destinations[database_table]
+        except KeyError as e:
+            raise DestinationNotFound(str(e), self.destinations)
+            
         dst.dataframe = dataframe
         if save:
             dst.save = save(dst)

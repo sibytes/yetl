@@ -1,0 +1,79 @@
+dataflow:
+
+  adworks_landing:
+    salessalesorderdetail:
+      type: Reader
+      table:
+        properties:
+          yetl.schema.createIfNotExists: true
+          yetl.schema.corrupt_record: true
+          yetl.metadata.timeslice: timeslice_path_date_format
+          yetl.metadata.filepath_filename: true
+          # yetl.metadata.filepath: true
+          # yetl.metadata.filename: true
+
+      path_date_format: "%Y-%m-%d"
+      file_date_format: "%Y%m%d"
+      format: json
+      path: landing/adventureworks/{{ timeslice_path_date_format }}/*_salessalesorderdetail_*_{{ timeslice_file_date_format }}.jsonl
+      read:
+        auto: true
+        options:
+          mode: PERMISSIVE
+          inferSchema: false
+          header: true
+
+      exceptions:
+          path: "delta_lake/{{ table_name }}_exceptions"
+          database: landing
+          table: "{{ table_name }}_exceptions"
+
+      thresholds:
+        warning:
+          min_rows: 1
+          max_rows: 1000
+          exception_count: 0
+          exception_percent: 0
+        error:
+          min_rows: 0
+          max_rows: 100000000
+          exception_count: 50
+          exception_percent: 80
+  
+
+  adworks_raw:
+    salessalesorderdetail:
+      type: DeltaWriter
+      table:
+
+        partitioned_by:
+          - _partition_key
+
+        ddl: "{{ root }}/deltalake"
+        properties:
+          yetl.schema.createIfNotExists: true
+          delta.appendOnly: false
+          delta.checkpoint.writeStatsAsJson: true
+          # delta.autoOptimize.autoCompact: true        # Databricks, but supported by yetl
+          # delta.autoOptimize.optimizeWrite: true      # Databricks, but supported by yetl
+          delta.compatibility.symlinkFormatManifest.enabled: false
+          delta.dataSkippingNumIndexedCols: -1
+          delta.logRetentionDuration: interval 30 days
+          delta.deletedFileRetentionDuration: interval 1 week
+          delta.enableChangeDataFeed: true
+          delta.minReaderVersion: 1
+          delta.minWriterVersion: 2
+          delta.randomizeFilePrefixes: false
+          delta.randomPrefixLength: 2
+
+        # table constraints can be declared inline or via a SQL include file on the ddl
+        # check_constraints:
+        #   amount_lower_bound: "amount > -1000"
+        #   amount_upper_bound: "amount < 10000"
+      
+      format: delta
+      path: delta_lake/adworks_raw/salessalesorderdetail
+      write:
+        mode: append
+        options:
+          mergeSchema: true

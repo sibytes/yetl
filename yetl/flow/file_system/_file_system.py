@@ -148,6 +148,9 @@ class FileSystem(IFileSystem):
         if not isinstance(data, (str, dict)):
             raise TypeError()
 
+        dir_path = os.path.dirname()
+        os.makedirs(dir_path, exist_ok=True)
+        
         with open(path, "w") as f:
             if file_format == FileFormat.JSON:
                 data_formatted = json.dumps(data, indent=4, default=str)

@@ -22,7 +22,7 @@ def humanresourcesdepartment_landing_to_raw(
 ) -> dict:
     """Load raw delta tables"""
 
-    df = dataflow.source_df(f"landing.{table}")
+    df = dataflow.source_df(f"adworks_landing.{table}")
 
     df = df.withColumn(
         "_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer")
