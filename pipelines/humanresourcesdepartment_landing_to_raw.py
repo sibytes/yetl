@@ -9,10 +9,9 @@ from yetl.flow import (
 from pyspark.sql.functions import *
 from typing import Type
 import json
-from yetl.flow.parser.parser import create_table_dll
 
 
-@yetl_flow(log_level="ERROR")
+@yetl_flow(log_level="ERROR", project="adworks")
 def humanresourcesdepartment_landing_to_raw(
     table: str,
     context: IContext,

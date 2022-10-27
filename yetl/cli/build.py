@@ -41,7 +41,7 @@ def build_config(
     metadata_path = os.path.join(project_dir, metadata_file)
 
     build_path = os.path.abspath(build_dir)
-    pipeline_build_path = os.path.join(build_path, project, "pipeline")
+    pipeline_build_path = os.path.join(build_path, project, "pipelines")
     if os.path.exists(pipeline_build_path):
         shutil.rmtree(pipeline_build_path)
     os.makedirs(pipeline_build_path)

@@ -13,29 +13,28 @@ from abc import ABC
 class IContext(ABC):
     def __init__(
         self,
-        app_name: str,
+        project: str,
         log_level: str,
         name: str,
         auditor: Audit,
         timeslice: datetime = None,
     ) -> None:
-        pass
 
         self.auditor = auditor
         self.context_id = uuid.uuid4()
         auditor.dataflow({"context_id": str(self.context_id)})
         self.name = name
-        self.app_name = app_name
-        if not app_name:
-            self.app_name = self.name
+        self.project = project
+        if not project:
+            self.project = self.name
         self.timeslice: Timeslice = timeslice
         if not self.timeslice:
             self.timeslice = TimesliceUtcNow()
-        self.log = logging.getLogger(self.app_name)
+        self.log = logging.getLogger(self.project)
         self.log_level = log_level
 
         # load the context configuration
-        self.config: dict = cp.load_config(self.app_name)
+        self.config: dict = cp.load_config(self.project)
 
         # abstraction of the filesystem for driver file commands e.g. rm, ls, mv, cp
         self.fs: IFileSystem = file_system_factory.get_file_system_type(

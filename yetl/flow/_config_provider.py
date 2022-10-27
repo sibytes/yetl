@@ -3,47 +3,46 @@ import os
 import logging
 import json
 from enum import Enum
-
+import jinja2
 
 _EXT = "yaml"
 _VAR_CWD = "{{cwd}}"
 
 
 class EnvVariables(Enum):
-    YETL_PIPELINE_ROOT = "./config/pipeline"
-    YETL_ENVIRONEMNT_ROOT = "./config/environment"
+    YETL_ROOT = "./config"
     YETL_ENVIRONMENT = "local"
 
 
 def _mk_env_path():
     root = os.getenv(
-        EnvVariables.YETL_ENVIRONEMNT_ROOT.name,
-        EnvVariables.YETL_ENVIRONEMNT_ROOT.value,
+        EnvVariables.YETL_ROOT.name,
+        EnvVariables.YETL_ROOT.value,
     )
     env = os.getenv(
         EnvVariables.YETL_ENVIRONMENT.name, EnvVariables.YETL_ENVIRONMENT.value
     )
-    path = f"{root}/{env}.{_EXT}"
+    path = f"{root}/environment/{env}.{_EXT}"
     path = os.path.abspath(path)
     return path
 
 
-def _mk_pipeline_path(pipeline_name: str, project_name: str = "."):
+def _mk_pipeline_path(project: str, pipeline_name: str):
     root = os.getenv(
-        EnvVariables.YETL_PIPELINE_ROOT.name,
-        EnvVariables.YETL_PIPELINE_ROOT.value,
+        EnvVariables.YETL_ROOT.name,
+        EnvVariables.YETL_ROOT.value,
     )
-    path = f"{root}/{project_name}/{pipeline_name}.{_EXT}"
+    path = f"{root}/{project}/pipelines/{pipeline_name}.{_EXT}"
     path = os.path.abspath(path)
     return path
 
 
-def load_pipeline_config(app_name: str, pipeline_name: str):
+def load_pipeline_config(project: str, pipeline_name: str):
     """Loads a spark configuration to load data from landing to raw."""
-    _logger = logging.getLogger(app_name)
-    path = _mk_pipeline_path(pipeline_name)
+    _logger = logging.getLogger(project)
+    path = _mk_pipeline_path(project, pipeline_name)
     _logger.info(f"Loading Dataflow configuration from file {path}")
-    with open(path, "r") as f:
+    with open(path, "r", encoding="utf-8") as f:
         pipeline = yaml.safe_load(f.read())
 
     _logger.debug(json.dumps(pipeline, indent=4, sort_keys=True, default=str))
@@ -51,14 +50,16 @@ def load_pipeline_config(app_name: str, pipeline_name: str):
     return pipeline
 
 
-def load_config(app_name: str):
-    _logger = logging.getLogger(app_name)
+def load_config(project: str):
+    _logger = logging.getLogger(project)
     path = _mk_env_path()
     _logger.info(f"Loading Dataflow configuration from file {path}")
-    with open(path, "r") as f:
+    with open(path, "r", encoding="utf-8") as f:
         config = f.read()
 
-    config = config.replace(_VAR_CWD, os.getcwd())
+    template_partition: jinja2.Template = jinja2.Template(config)
+
+    config = template_partition.render(cwd=os.getcwd())
     config = yaml.safe_load(config)
     _logger.debug(json.dumps(config, indent=4, sort_keys=True, default=str))
 

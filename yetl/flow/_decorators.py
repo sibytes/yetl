@@ -12,18 +12,18 @@ class YetlFlowException(Exception):
         self.message = message
 
 
-def yetl_flow(name: str = None, app_name: str = None, log_level="INFO"):
+def yetl_flow(project: str, pipeline_name: str = None, log_level="INFO"):
     def decorate(function):
         def wrap_function(*args, **kwargs):
 
             # default the name to the function name of the deltaflow
 
-            if not name:
+            if not pipeline_name:
                 _name = function.__name__
 
             else:
                 table = kwargs.get("table")
-                _name = f"{table}_{name}"
+                _name = f"{table}_{pipeline_name}"
 
             audit_kwargs = {k: str(v) for k, v in kwargs.items()}
             auditor = Audit()
@@ -40,11 +40,11 @@ def yetl_flow(name: str = None, app_name: str = None, log_level="INFO"):
 
             # TODO: abstract out spark context to IContext
             # create the context for the pipeline to run
-            context = SparkContext(app_name, log_level, _name, auditor, timeslice)
+            context = SparkContext(project, log_level, _name, auditor, timeslice)
 
             # run the pipeline
             context.log.info(
-                f"Executing Dataflow {context.app_name} with timeslice={timeslice}"
+                f"Executing Dataflow {context.project} with timeslice={timeslice}"
             )
 
             try:
@@ -56,7 +56,7 @@ def yetl_flow(name: str = None, app_name: str = None, log_level="INFO"):
                     **kwargs,
                 )
             except Exception as e:
-                msg = f"Dataflow application {context.app_name} failed due to {e}."
+                msg = f"Dataflow application {context.project} failed due to {e}."
                 context.log.error(msg)
                 auditor.error(e)
 

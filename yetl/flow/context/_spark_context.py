@@ -11,16 +11,16 @@ from ._icontext import IContext
 class SparkContext(IContext):
     def __init__(
         self,
-        app_name: str,
+        project: str,
         log_level: str,
         name: str,
         auditor: Audit,
         timeslice: datetime = None,
     ) -> None:
 
-        super().__init__(app_name, log_level, name, auditor, timeslice)
+        super().__init__(project, log_level, name, auditor, timeslice)
 
-        self.spark = self._get_spark_context(app_name, self.config)
+        self.spark = self._get_spark_context(project, self.config)
 
         # set up the spark logger, the application has a python logger built in
         # but we also make the spark logger available should it be needed
@@ -28,7 +28,7 @@ class SparkContext(IContext):
         # to set the level and use python native logging.
         self.log.info(f"Setting application context spark logger at level {log_level}")
         self.spark_logger = self._get_spark_logger(
-            self.spark, self.app_name, self.log_level
+            self.spark, self.project, self.log_level
         )
 
         self.log.info(f"Checking spark and databricks versions")
@@ -68,7 +68,7 @@ class SparkContext(IContext):
 
         return version, databricks_version
 
-    def _get_spark_context(self, app_name: str, config: dict):
+    def _get_spark_context(self, project: str, config: dict):
         self.log.info("Setting spark context")
         spark_config = config["spark"]
 
@@ -80,24 +80,22 @@ class SparkContext(IContext):
         for k, v in spark_config.items():
             builder = builder.config(k, v)
 
-        builder.appName(app_name)
+        builder.appName(project)
         spark = configure_spark_with_delta_pip(builder).getOrCreate()
-
-        # spark = builder.appName(app_name).getOrCreate()
 
         return spark
 
-    def _get_spark_logger(self, spark: SparkSession, app_name: str, log_level: str):
+    def _get_spark_logger(self, spark: SparkSession, project: str, log_level: str):
         sc = spark.sparkContext
         sc.setLogLevel(log_level)
         log4j_logger = sc._jvm.org.apache.log4j
-        logger = log4j_logger.LogManager.getLogger(app_name)
+        logger = log4j_logger.LogManager.getLogger(project)
 
         return logger
 
     def _get_deltalake_flow(self):
         # load the data pipeline provider
-        dataflow_config: dict = cp.load_pipeline_config(self.app_name, self.name)
+        dataflow_config: dict = cp.load_pipeline_config(self.project, self.name)
         dataflow_config = dataflow_config.get("dataflow")
 
         self.log.debug("Deserializing configuration into Dataflow")
