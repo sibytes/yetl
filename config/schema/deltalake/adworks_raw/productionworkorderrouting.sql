@@ -1,0 +1,21 @@
+CREATE TABLE {{ database_name }}.{{ table_name }}
+(
+	`ActualCost` double  ,
+	`ActualEndDate` string  ,
+	`ActualResourceHrs` double  ,
+	`ActualStartDate` string  ,
+	`LocationID` long  ,
+	`ModifiedDate` string  ,
+	`OperationSequence` long  ,
+	`PlannedCost` double  ,
+	`ProductID` long  ,
+	`ScheduledEndDate` string  ,
+	`ScheduledStartDate` string  ,
+	`WorkOrderID` long  ,
+	`_context_id` string NOT NULL ,
+	`_timeslice` timestamp  ,
+	`_filepath_filename` string NOT NULL ,
+	`_partition_key` integer  
+)
+USING DELTA LOCATION '{{ path }}'
+PARTITIONED BY (`_partition_key`);

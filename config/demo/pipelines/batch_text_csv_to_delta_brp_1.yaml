@@ -1,0 +1,157 @@
+# Loads data from text files to a delta table.
+# This load tests the following features:
+#   - badrecordspath data validation.
+
+dataflow:
+
+  demo_landing:
+    customer:
+      type: Reader
+      table:
+        properties:
+          #### YETL TABLE PROPERTIES ####
+
+          # derive a timeslice column timestamp from the filepath
+          yetl.metadata.timeslice: true
+          # this will automatically default to an inferred schema load on the 1st load 
+          # and use it to create a schema in the repo.
+          # this is handy in dev workflows to create a starter schema.
+          # best practice strongly recommends that inferred schema's are reviewed
+          yetl.schema.createIfNotExists: true
+
+      path_date_format: "%Y%m%d"
+      file_date_format: "%Y%m%d"
+      format: csv
+      path: landing/demo/{{timeslice_path_date_format}}/customer_{{timeslice_file_date_format}}.csv
+      read:
+        # datasets that have auto_io will automatically action the read.
+        # where it is false the dataframe can be retrieved in the user implemented
+        # dataflow and handled manually as desired.
+        auto: true
+        options:
+          # if infer schema if true the schema will be ingored, generally speaking this is a bad approach for prod pipelines
+          # however if you set to true you have to do the work of creating the schema and placing into the schema repo
+          # So! if inferSchema is false and yetl.schema.createIfNotExists=True and there isn't one, the 1st time
+          # you run the pipeline it will infer it, save the schema into the repo. You either leave it as is or 
+          # it gives you a starter schema to refine.
+          inferSchema: false
+          header: true
+          badRecordsPath: "exceptions/demo_landing/customer/{{timeslice_path_date_format}}"
+      exceptions:
+          path: "delta_lake/demo_landing/{{table_name}}_exceptions"
+          database: demo_landing
+          table: "{{table_name}}_exceptions"
+
+      thresholds:
+        warning:
+          min_rows: 1
+          max_rows: 1000
+          exception_count: 0
+          exception_percent: 0
+        error:
+          min_rows: 0
+          max_rows: 100000000
+          exception_count: 50
+          exception_percent: 80
+          
+    customer_preferences:
+      type: Reader
+      table:
+        properties:
+          #### YETL TABLE PROPERTIES ####
+
+          # logs the etl metadata to the configured metadata provider.
+          yetl.schema.createIfNotExists: true
+          yetl.metadata.timeslice: false
+
+      path_date_format: "%Y%m%d"
+      file_date_format: "%Y%m%d"
+      format: csv
+      path: landing/demo/{{timeslice_path_date_format}}/customer_preferences_{{timeslice_file_date_format}}.csv
+      read:
+        options:
+          inferSchema: false
+          header: true
+          badRecordsPath: "exceptions/demo_landing/customer_preferences/{{timeslice_path_date_format}}"
+      exceptions:
+          path: "delta_lake/demo_landing/{{table_name}}_exceptions"
+          database: demo_landing
+          table: "{{table_name}}_exceptions"
+      thresholds:
+        warning:
+          min_rows: 0
+          max_rows: 1000
+          exception_count: 0
+          exception_percent: 0
+        error:
+          min_rows: 0
+          max_rows: 100000000
+          exception_count: 50
+          exception_percent: 80
+
+  demo_raw:
+    customer:
+      type: DeltaWriter
+      table:
+        # defining a partition key here is an option if
+        # we haven't defined the table using DDL with a partition key
+        # if you define it in the ddl statement (PARTITIONED BY) and here, then
+        # yetl will default to the ddl definition and throw a warning.
+
+        partitioned_by:
+          - _partition_key
+
+        zorder_by:
+          - email
+          - id
+        # table ddl is optional to provide full flexbility of how you can manaage the datalake (house)
+        # it can be declared inline or via sql include files. If not provided an empty schema table is
+        # created and merge schema (if false) is flipped to true on the initial load.
+
+        ddl: "{{root}}/deltalake"
+
+
+        # https://docs.databricks.com/delta/table-properties.html
+        # https://docs.delta.io/2.1.0/table-properties.html
+        properties:
+
+          #### DELTA LAKE TABLE PROPERTIES ####
+
+          # https://docs.databricks.com/delta/table-properties.html
+          # https://docs.delta.io/2.0.0/table-properties.html
+
+          delta.appendOnly: false
+          delta.checkpoint.writeStatsAsJson: true
+          # delta.checkpoint.writeStatsAsStruct: None # Not Supported
+          # delta.columnMapping.mode: true # not released yet
+          
+          delta.autoOptimize.autoCompact: true        # Databricks, but supported by yetl
+          delta.autoOptimize.optimizeWrite: true      # Databricks, but supported by yetl
+          # delta.targetFileSize: 104857600             # Databricks only
+          # delta.autoCompact.maxFileSize: 134217728    # Databricks only
+          # delta.isolationLevel:  WriteSerializable    # Databricks only
+          # delta.setTransactionRetentionDuration: None # Databricks only
+          # delta.targetFileSize: None                  # Databricks only
+          # delta.tuneFileSizesForRewrites: None        # Databricks only
+          # delta.schema.autoMerge.enabled: false       # Databricms only, best to set this in the options but can be set on a table.
+          delta.compatibility.symlinkFormatManifest.enabled: false
+          delta.dataSkippingNumIndexedCols: -1
+          delta.logRetentionDuration: interval 30 days
+          delta.deletedFileRetentionDuration: interval 1 week
+          delta.enableChangeDataFeed: true
+          delta.minReaderVersion: 1
+          delta.minWriterVersion: 2
+          delta.randomizeFilePrefixes: false
+          delta.randomPrefixLength: 2
+
+        # table constraints can be declared inline or via a SQL include file on the ddl
+        check_constraints:
+          amount_lower_bound: "amount > -1000"
+          amount_upper_bound: "amount < 10000"
+      
+      format: delta
+      path: delta_lake/demo_raw/customer
+      write:
+        mode: append
+        options:
+          mergeSchema: true

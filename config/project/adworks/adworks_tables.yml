@@ -3,11 +3,9 @@ tables:
 - table: personcountryregion
 - table: salessalesorderdetail
 - table: productionproduct
-- table: dbodatabaselog
 - table: productionproductreview
 - table: personbusinessentitycontact
 - table: productiontransactionhistoryarchive
-- table: dboawbuildversion
 - table: salessalesorderheader
 - table: productionproductmodelproductdescriptionculture
 - table: salescurrency
@@ -49,7 +47,6 @@ tables:
 - table: productionworkorderrouting
 - table: salescurrencyrate
 - table: purchasingvendor
-- table: dboerrorlog
 - table: salesspecialofferproduct
 - table: productionproductphoto
 - table: personphonenumbertype

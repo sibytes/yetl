@@ -70,7 +70,7 @@ class SparkContext(IContext):
 
     def _get_spark_context(self, project: str, config: dict):
         self.log.info("Setting spark context")
-        spark_config = config["spark"]
+        spark_config = config["spark"]["config"]
 
         msg = json.dumps(spark_config, indent=4, default=str)
         self.log.debug(msg)
