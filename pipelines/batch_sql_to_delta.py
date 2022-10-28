@@ -12,7 +12,7 @@ from typing import Type
 import json
 
 
-@yetl_flow(log_level="ERROR")
+@yetl_flow(log_level="ERROR", project="demo")
 def batch_sql_to_delta(
     context: IContext,
     dataflow: IDataflow,
@@ -21,9 +21,9 @@ def batch_sql_to_delta(
 ) -> dict:
     """Load the demo customer data from Raw delta table using SQL to a DW dimension delta table"""
 
-    df_dim_cust = dataflow.source_df("raw.customer")
-    context.log.info("Loading dw.dim_customer type 2 dimension")
-    dataflow.destination_df("dw.dim_customer", df_dim_cust, save=save)
+    df_dim_cust = dataflow.source_df(f"{context.project}_raw.customer")
+    context.log.info(f"Loading {context.project}_dw.dim_customer type 2 dimension")
+    dataflow.destination_df(f"{context.project}_dw.dim_customer", df_dim_cust, save=save)
 
 
 # incremental load

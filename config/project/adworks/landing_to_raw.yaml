@@ -24,7 +24,7 @@ dataflow:
           header: true
 
       exceptions:
-          path: "delta_lake/{{table_name}}_exceptions"
+          path: "delta_lake/adventureworks/{{table_name}}_exceptions"
           database: landing
           table: "{{table_name}}_exceptions"
 
