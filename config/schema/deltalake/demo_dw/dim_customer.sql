@@ -1,18 +1,18 @@
-CREATE TABLE {{database_name}}.{{table_name}}
+CREATE TABLE {{ database_name }}.{{ table_name }}
 (
-    id             integer not null,
-    first_name     string not null,
-    last_name      string,
-    email          string,
-    gender         string,
-    job_title      string,
-    amount         double,
-    allow_contact  boolean,
-    _from_datetime timestamp,
-    _to_datetime   timestamp,
-    _current       boolean,
-    _deleted       boolean,
-    _partition_key int,
-    _context_id    string
+	`id` integer NOT NULL ,
+	`first_name` string NOT NULL ,
+	`last_name` string  ,
+	`email` string  ,
+	`gender` string  ,
+	`job_title` string  ,
+	`amount` double  ,
+	`allow_contact` boolean  ,
+	`_from_datetime` timestamp NOT NULL ,
+	`_to_datetime` timestamp  ,
+	`_current` boolean NOT NULL ,
+	`_deleted` boolean NOT NULL ,
+	`_context_id` string NOT NULL 
 )
-USING DELTA LOCATION '{{path}}';
+USING DELTA LOCATION '{{ path }}'
+;

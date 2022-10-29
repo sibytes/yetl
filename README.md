@@ -117,6 +117,9 @@ There is a CI build configured for this repo that builds on main origin and publ
 # Releases
 
 Version: 0.0.21
+- Introduced YETL optimize table property since there are still reasons to optimise on databricks
+- Regression tested/fixes SQL Reader
+- Fixed bug that was missing lineage columns off automatic schema table creation.
 - Adjusted table creation on delta writer so that when schema is inferred the table is created afterwards to avoid schema partition synchronisation errors
 - Added in Jinja for variables replacements as more robust solution than simple string replacements.
 - Added in configuration for putting file origin into the source dataframes

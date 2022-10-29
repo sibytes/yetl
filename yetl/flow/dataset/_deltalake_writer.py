@@ -47,10 +47,6 @@ class DeltaWriter(Dataset, Destination):
 
         # get the configured partitions.
         self.partitions: list = self._get_conf_partitions(config, self.table_ddl)
-        # get the configured table property for auto optimise.
-        self.auto_optimize = self._get_conf_dl_property(
-            config, dl.DeltaLakeProperties.OPTIMIZE_WRITE
-        )
 
         # gets the read, write, etc options based on the type
         io_properties = config.get("write")
@@ -94,6 +90,9 @@ class DeltaWriter(Dataset, Destination):
 
         self._create_schema_if_not_exists = properties.get(
             YETL_TBLP_SCHEMA_CREATE_IF_NOT_EXISTS, False
+        )
+        self._optimize_zorder_by = properties.get(
+            YETL_TBLP_OPTIMIZE_ZORDER_BY, False
         )
 
     def _get_table_properties(self, table_config: dict):
@@ -395,34 +394,35 @@ class DeltaWriter(Dataset, Destination):
                 f"""IO operations for {self.database}.{self.table} will be paritioned by: \n{msg_partition_values}"""
             )
 
+    def create_schema(self):
+        self.table_ddl = parser.create_table_dll(
+            self.dataframe.schema, self.partitions
+        )
+        self.create_or_alter_table()
+        self.schema_repo.save_schema(
+            self.table_ddl, self.database, self.table, self._schema_root
+        )
+
     def write(self):
         self.context.log.info(f"Writing data to {self.database_table} at {self.path}")
         if self.dataframe:
 
-            if self._create_schema_if_not_exists:
-                self.table_ddl = parser.create_table_dll(
-                    self.dataframe.schema, self.partitions
-                )
-                self.create_or_alter_table()
-                self.schema_repo.save_schema(
-                    self.table_ddl, self.database, self.table, self._schema_root
-                )
-
-            # don't think this is needed because from the docs
-            # "Repartition output data before write: For partitioned tables, merge can produce a much larger number
-            # of small files than the number of shuffle partitions. This is because every shuffle task can write
-            # multiple files in multiple partitions, and can become a performance bottleneck. In many cases, it
-            # helps to repartition the output data by the table’s partition columns before writing it. You enable
-            # this by setting the Spark session configuration spark.databricks.delta.merge.repartitionBeforeWrite.enabled to true."
             start_datetime = datetime.now()
             self._prepare_write()
+
+            # create the sql table ddl in the schema repo and create the table in th metastore
+            # do this after prepare_write since that will add lineage columns
+            if self._create_schema_if_not_exists:
+                self.create_schema()
+
             self.context.log.debug("Save options:")
             self.context.log.debug(json.dumps(self.options, indent=4, default=str))
 
+            # write the dataframe to the lake path
             self.save.write()
 
             # if auto on and there is a schema configured or to create one automatically then handle table creation
-            # and changes before the data is written
+            # and changes before the data is written as above
             # or we create the table after the data is written based on the data written
             if not self.table_ddl and not self._create_schema_if_not_exists:
                 self.context.log.info(
@@ -435,8 +435,7 @@ class DeltaWriter(Dataset, Destination):
                 self.id, AuditTask.DELTA_TABLE_WRITE, write_audit, start_datetime
             )
 
-            auto_optimize = all([self.auto_optimize, not self.context.is_databricks])
-            if auto_optimize:
+            if self._optimize_zorder_by:
                 self.context.log.info(
                     f"Auto optimizing {self.database_table} where {self.partition_values} zorder by {self.zorder_by}"
                 )

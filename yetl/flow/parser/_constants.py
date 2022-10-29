@@ -39,6 +39,7 @@ YETL_TBLP_METADATA_TIMESLICE = "yetl.metadata.timeslice"
 YETL_TBLP_METADATA_FILEPATH_FILENAME = "yetl.metadata.filepath_filename"
 YETL_TBLP_METADATA_FILEPATH = "yetl.metadata.filepath"
 YETL_TBLP_METADATA_FILENAME = "yetl.metadata.filename"
+YETL_TBLP_OPTIMIZE_ZORDER_BY = "yetl.delta.optimizeZOrderBy"
 
 
 class Format(Enum):
