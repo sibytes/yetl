@@ -126,6 +126,16 @@ class Reader(Dataset, Source):
         self.metadata_filepath = properties.get(YETL_TBLP_METADATA_FILEPATH, False)
         self.metadata_filename = properties.get(YETL_TBLP_METADATA_FILENAME, False)
 
+        self._metadata_context_id_enabled = properties.get(
+            YETL_TBLP_METADATA_CONTEXT_ID, False
+        )
+        self._metadata_dataflow_id_enabled = properties.get(
+            YETL_TBLP_METADATA_DATAFLOW_ID, False
+        )
+        self._metadata_dataset_id_enabled = properties.get(
+            YETL_TBLP_METADATA_DATASET_ID, False
+        )
+
     def _get_thresholds(self, config: dict, level: ThresholdLevels):
         thresholds: dict = config.get("thresholds")
         if thresholds:
@@ -421,6 +431,15 @@ class Reader(Dataset, Source):
             df: DataFrame = df.withColumn(FILENAME, fn.input_file_name()).withColumn(
                 FILENAME, fn.substring_index(fn.col(FILENAME), "/", -1)
             )
+
+        if self._metadata_context_id_enabled:
+            df: DataFrame = df.withColumn(CONTEXT_ID, fn.lit(self.context_id))
+
+        if self._metadata_dataflow_id_enabled:
+            df: DataFrame = df.withColumn(DATAFLOW_ID, fn.lit(self.dataflow_id))
+
+        if self._metadata_dataset_id_enabled:
+            df: DataFrame = df.withColumn(DATASET_ID, fn.lit(self.id))
 
         return df
 

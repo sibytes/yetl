@@ -91,8 +91,16 @@ class DeltaWriter(Dataset, Destination):
         self._create_schema_if_not_exists = properties.get(
             YETL_TBLP_SCHEMA_CREATE_IF_NOT_EXISTS, False
         )
-        self._optimize_zorder_by = properties.get(
-            YETL_TBLP_OPTIMIZE_ZORDER_BY, False
+        self._optimize_zorder_by = properties.get(YETL_TBLP_OPTIMIZE_ZORDER_BY, False)
+
+        self._metadata_context_id_enabled = properties.get(
+            YETL_TBLP_METADATA_CONTEXT_ID, False
+        )
+        self._metadata_dataflow_id_enabled = properties.get(
+            YETL_TBLP_METADATA_DATAFLOW_ID, False
+        )
+        self._metadata_dataset_id_enabled = properties.get(
+            YETL_TBLP_METADATA_DATASET_ID, False
         )
 
     def _get_table_properties(self, table_config: dict):
@@ -368,6 +376,12 @@ class DeltaWriter(Dataset, Destination):
 
         return partition_values
 
+    def _add_df_metadata(self, column: str, value: str):
+
+        if column in self.dataframe.columns:
+            self.dataframe = self.dataframe.drop(column)
+        self.dataframe = self.dataframe.withColumn(column, fn.lit(value))
+
     def _prepare_write(self):
 
         self.context.log.debug(
@@ -375,9 +389,14 @@ class DeltaWriter(Dataset, Destination):
         )
         # remove a re-add the _context_id since there will be dupplicate columns
         # when dataframe is built from multiple sources.
-        self.dataframe = self.dataframe.drop(CONTEXT_ID).withColumn(
-            CONTEXT_ID, fn.lit(str(self.context_id))
-        )
+        if self._metadata_context_id_enabled:
+            self._add_df_metadata(CONTEXT_ID, str(self.context_id))
+
+        if self._metadata_dataflow_id_enabled:
+            self._add_df_metadata(DATAFLOW_ID, str(self.dataflow_id))
+
+        if self._metadata_dataset_id_enabled:
+            self._add_df_metadata(DATASET_ID, str(self.id))
 
         # clean up the column ordering
         sys_columns = [c for c in self.dataframe.columns if c.startswith("_")]
@@ -395,9 +414,7 @@ class DeltaWriter(Dataset, Destination):
             )
 
     def create_schema(self):
-        self.table_ddl = parser.create_table_dll(
-            self.dataframe.schema, self.partitions
-        )
+        self.table_ddl = parser.create_table_dll(self.dataframe.schema, self.partitions)
         self.create_or_alter_table()
         self.schema_repo.save_schema(
             self.table_ddl, self.database, self.table, self._schema_root

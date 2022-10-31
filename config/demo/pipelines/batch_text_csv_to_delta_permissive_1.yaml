@@ -115,7 +115,10 @@ dataflow:
         # https://docs.databricks.com/delta/table-properties.html
         # https://docs.delta.io/2.1.0/table-properties.html
         properties:
-
+          #### YETL PROPERTIES ####
+          yetl.metadata.context_id: true
+          yetl.metadata.dataflow_id: true
+          yetl.metadata.dataset_id: true
           #### DELTA LAKE TABLE PROPERTIES ####
 
           # https://docs.databricks.com/delta/table-properties.html

@@ -84,7 +84,7 @@ class SparkContext(IContext):
         return spark
 
     def _get_spark_logger(self, spark: SparkSession, project: str, config: dict):
-        
+
         log_level = config["spark"].get("logging_level", "ERROR")
         self.log.info(f"Setting application context spark logger at level {log_level}")
         sc = spark.sparkContext

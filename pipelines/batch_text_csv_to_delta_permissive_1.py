@@ -13,6 +13,7 @@ from pyspark.sql.functions import *
 from typing import Type
 import json
 
+
 @yetl_flow(project="demo")
 def batch_text_csv_to_delta_permissive_1(
     context: IContext,
