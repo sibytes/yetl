@@ -116,6 +116,8 @@ There is a CI build configured for this repo that builds on main origin and publ
 
 # Releases
 
+Version: 0.0.23
+- Removed spark logging argument from decorator to the config since allows context to be more abstract and is less confusing.
 
 Version: 0.0.22
 - Introduced YETL optimize table property since there are still reasons to optimise on databricks

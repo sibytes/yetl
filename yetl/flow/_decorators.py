@@ -12,7 +12,7 @@ class YetlFlowException(Exception):
         self.message = message
 
 
-def yetl_flow(project: str, pipeline_name: str = None, log_level="INFO"):
+def yetl_flow(project: str, pipeline_name: str = None):
     def decorate(function):
         def wrap_function(*args, **kwargs):
 
@@ -40,7 +40,7 @@ def yetl_flow(project: str, pipeline_name: str = None, log_level="INFO"):
 
             # TODO: abstract out spark context to IContext
             # create the context for the pipeline to run
-            context = SparkContext(project, log_level, _name, auditor, timeslice)
+            context = SparkContext(project, _name, auditor, timeslice)
 
             # run the pipeline
             context.log.info(

@@ -12,13 +12,12 @@ class SparkContext(IContext):
     def __init__(
         self,
         project: str,
-        log_level: str,
         name: str,
         auditor: Audit,
         timeslice: datetime = None,
     ) -> None:
 
-        super().__init__(project, log_level, name, auditor, timeslice)
+        super().__init__(project, name, auditor, timeslice)
 
         self.spark = self._get_spark_context(project, self.config)
 
@@ -26,9 +25,8 @@ class SparkContext(IContext):
         # but we also make the spark logger available should it be needed
         # because the spark logger is extremely verbose it's useful to the able
         # to set the level and use python native logging.
-        self.log.info(f"Setting application context spark logger at level {log_level}")
         self.spark_logger = self._get_spark_logger(
-            self.spark, self.project, self.log_level
+            self.spark, self.project, self.config
         )
 
         self.log.info(f"Checking spark and databricks versions")
@@ -85,7 +83,10 @@ class SparkContext(IContext):
 
         return spark
 
-    def _get_spark_logger(self, spark: SparkSession, project: str, log_level: str):
+    def _get_spark_logger(self, spark: SparkSession, project: str, config: dict):
+        
+        log_level = config["spark"].get("logging_level", "ERROR")
+        self.log.info(f"Setting application context spark logger at level {log_level}")
         sc = spark.sparkContext
         sc.setLogLevel(log_level)
         log4j_logger = sc._jvm.org.apache.log4j

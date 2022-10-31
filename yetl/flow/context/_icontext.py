@@ -14,7 +14,6 @@ class IContext(ABC):
     def __init__(
         self,
         project: str,
-        log_level: str,
         name: str,
         auditor: Audit,
         timeslice: datetime = None,
@@ -31,7 +30,6 @@ class IContext(ABC):
         if not self.timeslice:
             self.timeslice = TimesliceUtcNow()
         self.log = logging.getLogger(self.project)
-        self.log_level = log_level
 
         # load the context configuration
         self.config: dict = cp.load_config(self.project)

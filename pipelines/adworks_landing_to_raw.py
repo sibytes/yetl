@@ -14,7 +14,7 @@ import yaml
 # from yetl import async_load
 
 
-@yetl_flow(log_level="ERROR", project="adworks", pipeline_name="landing_to_raw")
+@yetl_flow(project="adworks", pipeline_name="landing_to_raw")
 def landing_to_raw(
     table: str,
     context: IContext,
