@@ -51,6 +51,7 @@ dataflow:
 
         ddl: "{{ root }}/deltalake"
         properties:
+          yetl.metadata.dataset_id: true
           yetl.schema.createIfNotExists: true
           delta.appendOnly: false
           delta.checkpoint.writeStatsAsJson: true
