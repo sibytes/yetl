@@ -41,6 +41,8 @@ setup(
         "yetl.flow.save",
         "yetl.flow.schema_repo",
         "yetl.flow.warnings",
+        "yetl.workflow",
+        "yetl.workflow.multi_threaded",
     ],
     install_requires=["pyyaml", "pyspark", "regex", "delta-spark", "Jinja2"],
     zip_safe=False,
