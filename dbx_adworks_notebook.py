@@ -31,9 +31,9 @@ def landing_to_raw(
 
     df = dataflow.source_df(f"{context.project}_landing.{table}")
 
-    # df = df.withColumn(
-    #     "_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer")
-    # )
+    df = df.withColumn(
+        "_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer")
+    )
     dataflow.destination_df(f"{context.project}_raw.{table}", df, save=save)
 
 
@@ -59,13 +59,53 @@ def load():
     print(json.dumps(failed, indent=4, default=str))
 
 
-load()
+
+
+
+
+# COMMAND ----------
+
+from queue import Queue
+from threading import Thread
+
+def load(q):
+  while True:
+    table = q.get()
+    timeslice = Timeslice(2011, 1, 1)
+    results = landing_to_raw(timeslice=timeslice, table=table)
+    if results["error"].get("count", 0) > 0:
+        print(results)
+    else:
+        print(f"Loaded {project}.{table}")
+    q.task_done()
+
+q = Queue(maxsize=0)
+num_threads = 4
+
+for i in range(num_threads):
+  worker = Thread(target=load, args=(q,))
+  worker.setDaemon(True)
+  worker.start()
+
+
+with open(
+    f"./config/project/{project}/{project}_tables.yml", "r", encoding="utf-8"
+) as f:
+    metdata = yaml.safe_load(f)
+
+tables: list = [t["table"] for t in metdata.get("tables")]
+failed = []
+
+for table in tables:
+  q.put(table)
+
+q.join()
 
 # COMMAND ----------
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC select * from demo_raw.customer
+# MAGIC select * from adworks_raw.productionproduct
 
 # COMMAND ----------
 
