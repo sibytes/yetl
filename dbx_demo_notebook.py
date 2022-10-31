@@ -19,7 +19,7 @@ from typing import Type
 import json
 
 
-@yetl_flow(log_level="ERROR")
+@yetl_flow(project="demo")
 def batch_text_csv_to_delta_permissive_1(
     context: IContext,
     dataflow: IDataflow,
@@ -32,12 +32,14 @@ def batch_text_csv_to_delta_permissive_1(
     correctly.
     """
 
+    context.project
+
     # the config for this dataflow has 2 landing sources that are joined
     # and written to delta table
     # delta tables are automatically created and if configured schema exceptions
     # are loaded syphened into a schema exception table
-    df_cust = dataflow.source_df("landing.customer")
-    df_prefs = dataflow.source_df("landing.customer_preferences")
+    df_cust = dataflow.source_df(f"{context.project}_landing.customer")
+    df_prefs = dataflow.source_df(f"{context.project}_landing.customer_preferences")
 
     context.log.info("Joining customers with customer_preferences")
     df = df_cust.join(df_prefs, "id", "inner")
@@ -45,20 +47,23 @@ def batch_text_csv_to_delta_permissive_1(
         "_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer")
     )
 
-    dataflow.destination_df("raw.customer", df, save=save)
+    dataflow.destination_df(f"{context.project}_raw.customer", df, save=save)
 
 
 # COMMAND ----------
 
 
 # incremental load
-timeslice = Timeslice(2021, 1, 1)
+# timeslice = Timeslice(2021, 1, 1)
 # timeslice = Timeslice(2022, 7, 12)
 # timeslice = Timeslice(2022, 7, "*")
-results = batch_text_csv_to_delta_permissive_1(timeslice=timeslice)
+
+
 
 # reload load
-# timeslice = Timeslice(2022, "*", "*")
+timeslice = Timeslice(2022, "*", "*")
+
+results = batch_text_csv_to_delta_permissive_1(timeslice=timeslice)
 
 
 # COMMAND ----------
@@ -68,14 +73,14 @@ results
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC
-# MAGIC select * from raw.customer
+# MAGIC 
+# MAGIC select * from demo_raw.customer
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC
-# MAGIC select * from landing.exceptions
+# MAGIC 
+# MAGIC select * from demo_landing.exceptions
 
 # COMMAND ----------
 
@@ -83,17 +88,21 @@ dbutils.notebook.exit("YETL!")
 
 # COMMAND ----------
 
+dbutils.fs.ls("/mnt/datalake/yetl_data")
+
+# COMMAND ----------
+
 # MAGIC %python
-# MAGIC
+# MAGIC 
 # MAGIC #clear down
-# MAGIC
+# MAGIC 
 # MAGIC spark.sql("drop database if exists landing cascade")
 # MAGIC spark.sql("drop database if exists raw cascade")
 # MAGIC files = dbutils.fs.ls("/mnt/datalake/yetl_data")
 # MAGIC print(files)
-# MAGIC
+# MAGIC 
 # MAGIC for f in files:
-# MAGIC
+# MAGIC 
 # MAGIC   if f.name != "landing/":
 # MAGIC     print(f"deleting the path {f.path}")
 # MAGIC     dbutils.fs.rm(f.path, True)
