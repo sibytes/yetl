@@ -119,6 +119,7 @@ There is a CI build configured for this repo that builds on main origin and publ
 Version: 0.0.23
 - Added metadata lineage configuration into sources and destinations for context, dataflow and dataset id's
 - Removed spark logging argument from decorator to the config since allows context to be more abstract and is less confusing.
+- Added workflow module and prototype for multithreaded loading
 
 Version: 0.0.22
 - Introduced YETL optimize table property since there are still reasons to optimise on databricks

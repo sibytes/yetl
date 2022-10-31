@@ -11,6 +11,7 @@ from yetl.flow import (
     TimesliceUtcNow,
     Save,
 )
+from yetl.workflow import multithreaded as yetl_wf
 from pyspark.sql.functions import *
 from typing import Type
 import json
@@ -41,14 +42,15 @@ def landing_to_raw(
 # COMMAND ----------
 
 
-timeslice = Timeslice(2011, 1, 1)
 with open(
     f"./config/project/{project}/{project}_tables.yml", "r", encoding="utf-8"
 ) as f:
     metdata = yaml.safe_load(f)
 
 tables: list = [t["table"] for t in metdata.get("tables")]
-load(project, tables, landing_to_raw, timeslice)
+timeslice = Timeslice(2011, 1, 1)
+
+yetl_wf.load(project, tables, landing_to_raw, timeslice)
 
 # COMMAND ----------
 
