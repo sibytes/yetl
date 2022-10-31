@@ -4,7 +4,7 @@ from typing import Callable
 from ..flow import Timeslice
 
 
-def load(database: str, tables: list, function: Callable, timeslice: Timeslice):
+def load(database: str, tables: list, function: Callable, timeslice: Timeslice, maxparallel:int = 4):
     """Prototype multi-threaded loader"""
 
     def _load(q):
@@ -19,9 +19,8 @@ def load(database: str, tables: list, function: Callable, timeslice: Timeslice):
             q.task_done()
 
     q = Queue(maxsize=0)
-    num_threads = 4
 
-    for _ in range(num_threads):
+    for _ in range(maxparallel):
         worker = Thread(target=_load, args=(q,))
         worker.setDaemon(True)
         worker.start()

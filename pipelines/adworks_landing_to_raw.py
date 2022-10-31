@@ -15,6 +15,7 @@ from yetl.workflow import multithreaded as yetl_wf
 project = "adworks"
 pipeline_name = "landing_to_raw"
 timeslice = Timeslice(2011, 1, 1)
+maxparallel = 4
 
 
 @yetl_flow(project=project, pipeline_name=pipeline_name)
@@ -41,4 +42,4 @@ with open(
     metdata = yaml.safe_load(f)
 tables: list = [t["table"] for t in metdata.get("tables")]
 
-yetl_wf.load(project, tables, landing_to_raw, timeslice)
+yetl_wf.load(project, tables, landing_to_raw, timeslice, maxparallel)
