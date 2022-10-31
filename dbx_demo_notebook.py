@@ -59,7 +59,6 @@ def batch_text_csv_to_delta_permissive_1(
 # timeslice = Timeslice(2022, 7, "*")
 
 
-
 # reload load
 timeslice = Timeslice(2022, "*", "*")
 
@@ -73,13 +72,13 @@ results
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC 
+# MAGIC
 # MAGIC select * from demo_raw.customer
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC 
+# MAGIC
 # MAGIC select * from demo_landing.exceptions
 
 # COMMAND ----------
@@ -93,16 +92,16 @@ dbutils.fs.ls("/mnt/datalake/yetl_data")
 # COMMAND ----------
 
 # MAGIC %python
-# MAGIC 
+# MAGIC
 # MAGIC #clear down
-# MAGIC 
+# MAGIC
 # MAGIC spark.sql("drop database if exists landing cascade")
 # MAGIC spark.sql("drop database if exists raw cascade")
 # MAGIC files = dbutils.fs.ls("/mnt/datalake/yetl_data")
 # MAGIC print(files)
-# MAGIC 
+# MAGIC
 # MAGIC for f in files:
-# MAGIC 
+# MAGIC
 # MAGIC   if f.name != "landing/":
 # MAGIC     print(f"deleting the path {f.path}")
 # MAGIC     dbutils.fs.rm(f.path, True)

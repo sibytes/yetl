@@ -27,8 +27,6 @@ def batch_text_csv_to_delta_permissive_1(
     correctly.
     """
 
-    context.project
-
     # the config for this dataflow has 2 landing sources that are joined
     # and written to delta table
     # delta tables are automatically created and if configured schema exceptions

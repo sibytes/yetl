@@ -3,7 +3,8 @@ from threading import Thread
 from typing import Callable
 from ..flow import Timeslice
 
-def load(database:str, tables:list, function:Callable, timeslice:Timeslice):
+
+def load(database: str, tables: list, function: Callable, timeslice: Timeslice):
     """Prototype multi-threaded loader"""
 
     def _load(q):
@@ -16,7 +17,6 @@ def load(database:str, tables:list, function:Callable, timeslice:Timeslice):
             else:
                 print(f"Loaded {database}.{table}")
             q.task_done()
-
 
     q = Queue(maxsize=0)
     num_threads = 4

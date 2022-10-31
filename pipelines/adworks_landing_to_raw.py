@@ -10,11 +10,14 @@ from pyspark.sql.functions import *
 from typing import Type
 import json
 import yaml
+from yetl.workflow import multithreaded as yetl_wf
 
-# from yetl import async_load
+project = "adworks"
+pipeline_name = "landing_to_raw"
+timeslice = Timeslice(2011, 1, 1)
 
 
-@yetl_flow(project="adworks", pipeline_name="landing_to_raw")
+@yetl_flow(project=project, pipeline_name=pipeline_name)
 def landing_to_raw(
     table: str,
     context: IContext,
@@ -32,26 +35,10 @@ def landing_to_raw(
     dataflow.destination_df(f"adworks_raw.{table}", df, save=save)
 
 
-def load():
+with open(
+    f"./config/project/{project}/{project}_tables.yml", "r", encoding="utf-8"
+) as f:
+    metdata = yaml.safe_load(f)
+tables: list = [t["table"] for t in metdata.get("tables")]
 
-    with open(
-        "./config/project/adworks/adworks_tables.yml", "r", encoding="utf-8"
-    ) as f:
-        metdata = yaml.safe_load(f)
-
-    tables: list = [t["table"] for t in metdata.get("tables")]
-    failed = []
-
-    for table in tables:
-
-        timeslice = Timeslice(2011, 1, 1)
-        results = landing_to_raw(timeslice=timeslice, table=table)
-        if results["error"].get("count", 0) > 0:
-            failed.append(results)
-        else:
-            print(f"Loaded adworks.{table}")
-
-    print(json.dumps(failed, indent=4, default=str))
-
-
-load()
+yetl_wf.load(project, tables, landing_to_raw, timeslice)
