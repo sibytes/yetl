@@ -59,12 +59,6 @@ yetl_wf.load(project, tables, landing_to_raw, timeslice)
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC 
-# MAGIC select * from demo_landing.exceptions
-
-# COMMAND ----------
-
 dbutils.notebook.exit("YETL!")
 
 # COMMAND ----------
