@@ -121,6 +121,7 @@ There is a CI build configured for this repo that builds on main origin and publ
 
 Version: 0.0.24
 - Added maxparallel parameter to prototype for multithreaded loading
+- Fixed partition bug on initial load causing failure when schema exist but no data
 
 Version: 0.0.23
 - Added metadata lineage configuration into sources and destinations for context, dataflow and dataset id's

@@ -41,6 +41,7 @@ def sql_partitioned_by(sql: str):
         partitions_clause = partitions_clause.replace(")", "")
         partitions_clause = partitions_clause.replace("partitionedby", "")
         partitions_lst = partitions_clause.split(",")
+        partitions_lst = [p.replace("`", "") for p in partitions_lst]
         return partitions_lst
     else:
         return None

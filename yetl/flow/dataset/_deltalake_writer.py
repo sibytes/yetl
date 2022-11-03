@@ -356,7 +356,7 @@ class DeltaWriter(Dataset, Destination):
     def _get_partitions_values(self):
 
         partition_values = {}
-        if self.partitions:
+        if self.partitions and not self.initial_load:
             partition_values_df = self.dataframe.select(*self.partitions).distinct()
 
             for p in self.partitions:
