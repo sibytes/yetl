@@ -120,6 +120,7 @@ There is a CI build configured for this repo that builds on main origin and publ
 # Releases
 
 Version: 0.0.24
+- Added cli init comman to initialise a yetl project directory
 - Added maxparallel parameter to prototype for multithreaded loading
 - Fixed partition bug on initial load causing failure when schema exist but no data
 

@@ -2,8 +2,21 @@ from .cli.manifest_tables import FileSource
 import typer
 from .cli.metadata import MetadataFileStore
 from .cli.build import build_config
+from .cli.init import init as _init
 
 app = typer.Typer()
+
+
+@app.command()
+def init(
+    project:str,
+    home_dir:str = "."
+    
+):
+    """Initialise the configuration directory with the required structure and start config files
+    """
+    _init(project, home_dir)
+
 
 
 @app.command()
@@ -13,6 +26,8 @@ def build(
     template_file: str,
     build_dir: str,
 ):
+    """Use manifest config file and the pipeline jinja template to build a pipeline configuration for each table
+    """
     build_config(project, metadata_file, template_file, build_dir)
 
 

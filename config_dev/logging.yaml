@@ -1,3 +1,4 @@
+
 version: 1
 formatters:
   default:
@@ -10,4 +11,3 @@ handlers:
 root:
   level: ERROR
   handlers: [console]
-  
