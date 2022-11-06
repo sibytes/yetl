@@ -112,9 +112,10 @@ def get_local_environment_config(config_dir:str = _CONFIG_DIR):
 
 
 def _get_dot_env_config(config_dir:str = _CONFIG_DIR):
-  env_config = (''
-    f'YETL_ROOT=./{config_dir}'
-    f'YETL_ENVIRONMENT=local')
+  env_config = _strip_margin(
+    """YETL_ROOT=./{config}
+      |YETL_ENVIRONMENT=local
+    """.format(config=config_dir)) 
   return env_config
 
 
