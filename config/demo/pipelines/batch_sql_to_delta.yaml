@@ -15,7 +15,7 @@ dataflow:
         # name is optional, it will default to the table name customer as defined above
         # it's used to locate the sql definition at the lowest level in the schema repo
         name: dim_customer
-        sql: "{{root}}/sql"
+        sql: "{{root}}"
 
       timeslice_format: "%Y%m%d"
       format: delta

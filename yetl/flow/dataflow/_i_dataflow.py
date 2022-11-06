@@ -22,6 +22,7 @@ class IDataflow(ABC):
 
         self._spark_schema_repo = context.config["spark_schema_repo"]
         self._deltalake_schema_repo = context.config["deltalake_schema_repo"]
+        self._pipeline_repo = context.config["pipeline_repo"]
 
         self.datalake_protocol = context.fs.datalake_protocol
         self.context = context

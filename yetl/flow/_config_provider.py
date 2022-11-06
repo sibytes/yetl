@@ -32,6 +32,7 @@ def _mk_pipeline_path(project: str, pipeline_name: str):
         EnvVariables.YETL_ROOT.name,
         EnvVariables.YETL_ROOT.value,
     )
+    # TODO - replace with path from environment file.
     path = f"{root}/{project}/pipelines/{pipeline_name}.{_EXT}"
     path = os.path.abspath(path)
     return path
@@ -59,7 +60,7 @@ def load_config(project: str):
 
     template_partition: jinja2.Template = jinja2.Template(config)
 
-    config = template_partition.render(cwd=os.getcwd())
+    config = template_partition.render(cwd=os.getcwd(), project=project)
     config = yaml.safe_load(config)
     _logger.debug(json.dumps(config, indent=4, sort_keys=True, default=str))
 

@@ -18,6 +18,7 @@ class Dataflow(IDataflow):
                 table_config["datalake_protocol"] = self.datalake_protocol
                 table_config["spark_schema_repo"] = self._spark_schema_repo
                 table_config["deltalake_schema_repo"] = self._deltalake_schema_repo
+                table_config["pipeline_repo"] = self._pipeline_repo
                 table_config["context_id"] = self.context.context_id
                 table_config["dataflow_id"] = self.id
                 table_config["timeslice"] = self.context.timeslice

@@ -3,6 +3,7 @@ from enum import Enum
 
 from ._spark_file_schema_repo import SparkFileSchemaRepo
 from ._deltalake_sql_file import DeltalakeSchemaFile
+from ._sql_reader_file import SqlReaderFile
 from ._ischema_repo import ISchemaRepo
 import logging
 
@@ -10,6 +11,8 @@ import logging
 class SchemaRepoType(Enum):
     SPARK_SCHEMA_FILE = 1
     DELTALAKE_SQL_FILE = 2
+    PIPELINE_FILE = 3
+
 
 
 class _SchemaRepoFactory:
@@ -54,4 +57,7 @@ factory = _SchemaRepoFactory()
 factory.register_schema_repo_type(SchemaRepoType.SPARK_SCHEMA_FILE, SparkFileSchemaRepo)
 factory.register_schema_repo_type(
     SchemaRepoType.DELTALAKE_SQL_FILE, DeltalakeSchemaFile
+)
+factory.register_schema_repo_type(
+    SchemaRepoType.PIPELINE_FILE, SqlReaderFile
 )

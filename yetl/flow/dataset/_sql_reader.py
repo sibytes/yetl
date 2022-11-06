@@ -60,7 +60,7 @@ class SQLReader(Dataset, Source):
             if sql and not "\n" in sql:
                 self.schema_repo: ISchemaRepo = (
                     self.context.schema_repo_factory.get_schema_repo_type(
-                        self.context, config["deltalake_schema_repo"]
+                        self.context, config["pipeline_repo"]
                     )
                 )
 
