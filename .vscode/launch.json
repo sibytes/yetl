@@ -13,12 +13,16 @@
             "console": "integratedTerminal",
             "envFile": "${workspaceFolder}/.env",
             "args": [
-                "build",
-                "adworks",
-                "." ,
-                "adworks_tables.yml", 
-                "landing_to_raw.yaml",
-                "./config"
+                
+                "init", "demo", "--overwrite"
+                
+                // "build",
+                // "adworks",
+                // "." ,
+                // "adworks_tables.yml", 
+                // "landing_to_raw.yaml",
+                // "./config"
+
                 // "create-table-manifest", 
                 // "File", 
                 // "/Users/shaunryan/AzureDevOps/yetl-patterns/data/landing/adventureworks", 

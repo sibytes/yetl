@@ -29,7 +29,7 @@ dataflow:
     dim_customer:
       type: DeltaWriter
       table:
-        ddl: "{{root}}/deltalake"
+        ddl: "{{root}}"
 
         properties:
           yetl.schema.createIfNotExists: true

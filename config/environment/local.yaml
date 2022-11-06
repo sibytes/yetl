@@ -14,7 +14,8 @@ spark:
 
 pipeline_repo:
   pipeline_file:
-    pipeline_root: "./config/{project}/pipelines"
+    pipeline_root: "./config/{{project}}/pipelines"
+    sql_root: "./config/{{project}}/sql"
 
 spark_schema_repo:
   spark_schema_file:

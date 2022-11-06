@@ -4,8 +4,8 @@
 
 # from pipelines import batch_sql_to_delta
 
-# from yetl import __main__
+from yetl import __main__
 
 # from pipelines import humanresourcesdepartment_landing_to_raw
 
-from pipelines import adworks_landing_to_raw
+# from pipelines import adworks_landing_to_raw

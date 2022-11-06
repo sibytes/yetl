@@ -1,8 +1,18 @@
 import os
-from enum import Enum
 import re
+import yaml
+from enum import Enum
+import jinja2
 
 _CONFIG_DIR = "config"
+_DBX_CONFIG_FILE = "dbx_dev.yaml"
+_LOCAL_CONFIG_FILE = "local.yaml"
+
+class SchemaRepo(Enum):
+  SPARK_SCHEMA_REPO = "spark_schema_file"
+  DELTALAKE_SCHEMA_REPO = "deltalake_sql_file"
+  PIPELINE_REPO = "pipeline_file"
+
 
 def _strip_margin(text):
 
@@ -39,8 +49,8 @@ def get_dbx_environment_config(config_dir:str = _CONFIG_DIR):
       |
       |pipeline_repo:
       |  pipeline_file:
-      |    pipeline_root: "./{config}/{{project}}/pipelines"
-      |    pipeline_root: "./{config}/{{project}}/sql"
+      |    pipeline_root: "./{config}/{{{{project}}}}/pipelines"
+      |    sql_root: "./{config}/{{{{project}}}}/sql"
       |
       |spark_schema_repo:
       |  spark_schema_file:
@@ -72,8 +82,8 @@ def get_local_environment_config(config_dir:str = _CONFIG_DIR):
       |
       |pipeline_repo:
       |  pipeline_file:
-      |    pipeline_root: "./{config}/{{project}}/pipelines"
-      |    pipeline_root: "./{config}/{{project}}/sql"
+      |    pipeline_root: "./{config}/{{{{project}}}}/pipelines"
+      |    sql_root: "./{config}/{{{{project}}}}/sql"
       |
       |spark_schema_repo:
       |  spark_schema_file:
@@ -100,33 +110,55 @@ def _make_config_file(directory:str, filename:str, data:str, overwrite:bool=Fals
         with open(filepath, mode="w", encoding="utf-8") as f:
             f.write(data)
 
+def _make_config_path(project:str, config:dict, repo:SchemaRepo):
+
+  repo_name = repo.name.lower()
+  repo_key = repo.value.lower()
+
+  path_config = config[repo_name].get(repo_key)
+  if path_config:
+    for _, v in path_config.items():
+      template: jinja2.Template = jinja2.Template(v)
+      dir_path = template.render(project=project)
+      dir_path = os.path.abspath(dir_path)
+      os.makedirs(dir_path, exist_ok=True)
+
+
+
 def init(project:str, home_dir:str=".", config_folder:str=_CONFIG_DIR, overwrite:bool = False):
 
-    _make_config_file(home_dir, ".env", _get_dot_env_config())
+    
+  # make the root dir
+  root_dir = os.path.join(home_dir, _CONFIG_DIR)
+  root_dir = os.path.abspath(root_dir)
+  os.makedirs(root_dir, exist_ok=True)
 
-    root_dir = os.path.join(home_dir, _CONFIG_DIR)
-    root_dir = os.path.abspath(root_dir)
-    os.makedirs(root_dir, exist_ok=True)
+  # make root configuration files.
+  _make_config_file(home_dir, ".env", _get_dot_env_config())
+  _make_config_file(root_dir, "logging.yaml", get_log_configuration(), overwrite)
 
-    _make_config_file(root_dir, "logging.yaml", get_log_configuration(), overwrite)
+  # make the environment dir and configuration files.
+  environment_path = os.path.join(root_dir, "environment")
+  os.makedirs(environment_path, exist_ok=True)
 
-    project_pipeline_path = os.path.join(root_dir, project, "pipelines")
-    os.makedirs(project_pipeline_path, exist_ok=True)
 
-    project_path = os.path.join(root_dir, "project", project)
-    os.makedirs(project_path, exist_ok=True)
+  _make_config_file(environment_path, _DBX_CONFIG_FILE, get_dbx_environment_config(config_folder), overwrite)
+  _make_config_file(environment_path, _LOCAL_CONFIG_FILE, get_local_environment_config(config_folder), overwrite)
 
-    environment_path = os.path.join(root_dir, "environment")
-    os.makedirs(environment_path, exist_ok=True)
+  # load the local configuration file
+  local_config_path = os.path.join(environment_path, _LOCAL_CONFIG_FILE)
+  with open(local_config_path, "r", encoding="utf-8") as f:
+    local_config = yaml.safe_load(f)
 
-    _make_config_file(environment_path, "dbx_dev.yaml", get_dbx_environment_config(config_folder), overwrite)
-    _make_config_file(environment_path, "local.yaml", get_local_environment_config(config_folder), overwrite)
+  # make the schema repository dirs
+  _make_config_path(project, local_config, SchemaRepo.SPARK_SCHEMA_REPO)
+  _make_config_path(project, local_config, SchemaRepo.DELTALAKE_SCHEMA_REPO)
 
-    schema_dirs = ["spark", "deltalake", "sql"]
-    for sd in schema_dirs:
-        schema_path = os.path.join(root_dir, "schema", sd)
-        os.makedirs(schema_path, exist_ok=True)
-            
+  # make project pipeline paths
+  _make_config_path(project, local_config, SchemaRepo.PIPELINE_REPO)
+
+
+
 
 
     
