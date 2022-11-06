@@ -1,0 +1,59 @@
+# Loads data using SQL from the a delta table called customer in to a table called dim_customer
+# A pattern that we would use to load golden tables such as a data warehouse or feature store.
+
+dataflow:
+
+  demo_raw:
+    customer:
+      type: SqlReader
+      table:
+        # schema is optional, it will default to the database name raw as defined above
+        # it's used to locate the sql definition in the schema repo, sometimes
+        # you may not want it to live with the source schema
+        schema: demo_dw
+
+        # name is optional, it will default to the table name customer as defined above
+        # it's used to locate the sql definition at the lowest level in the schema repo
+        name: dim_customer
+        sql: "{{root}}/sql"
+
+      timeslice_format: "%Y%m%d"
+      format: delta
+      read:
+        # datasets that have auto_io will automatically action the read.
+        # where it is false the dataframe can be retrieved in the user implemented
+        # dataflow and handled manually as desired.
+        auto: true
+
+  demo_dw:
+    dim_customer:
+      type: DeltaWriter
+      table:
+        ddl: "{{root}}"
+
+        properties:
+          yetl.schema.createIfNotExists: true
+          yetl.delta.optimizeZOrderBy: true
+          delta.appendOnly: false
+          delta.checkpoint.writeStatsAsJson: true
+          delta.compatibility.symlinkFormatManifest.enabled: false
+          delta.dataSkippingNumIndexedCols: -1
+          delta.logRetentionDuration: interval 30 days
+          delta.deletedFileRetentionDuration: interval 1 week
+          delta.enableChangeDataFeed: true
+          delta.minReaderVersion: 1
+          delta.minWriterVersion: 2
+          delta.randomizeFilePrefixes: false
+          delta.randomPrefixLength: 2
+
+        # table constraints can be declared inline or via a SQL include file on the ddl
+        check_constraints:
+          amount_lower_bound: "amount > -1000"
+          amount_upper_bound: "amount < 10000"
+      
+      format: delta
+      path: delta_lake/demo_dw/dim_customer
+      write:
+        mode: append
+        options:
+          mergeSchema: true

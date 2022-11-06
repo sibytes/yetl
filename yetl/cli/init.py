@@ -59,6 +59,13 @@ def get_dbx_environment_config(config_dir:str = _CONFIG_DIR):
       |deltalake_schema_repo:
       |  deltalake_sql_file:
       |    deltalake_schema_root: ./{config}/schema
+      |
+      |# used to write data lineage to
+      |metadata_repo:
+      |  metadata_file:
+      |    metadata_root: ./config/runs
+      |    metadata_dataset: dataset.json
+      |    metadata_index: index.json
     """.format(config=config_dir))
 
     return env_config
@@ -66,7 +73,7 @@ def get_dbx_environment_config(config_dir:str = _CONFIG_DIR):
 
 def get_local_environment_config(config_dir:str = _CONFIG_DIR):
     env_config = _strip_margin(
-    """datalake: "{{cwd}}/data"
+    """datalake: "{{{{cwd}}}}/data"
       |datalake_protocol: "file:"
       |spark:
       |  logging_level: ERROR
@@ -92,6 +99,13 @@ def get_local_environment_config(config_dir:str = _CONFIG_DIR):
       |deltalake_schema_repo:
       |  deltalake_sql_file:
       |    deltalake_schema_root: ./{config}/schema/deltalake
+      |
+      |# used to write data lineage to
+      |metadata_repo:
+      |  metadata_file:
+      |    metadata_root: ./config/runs
+      |    metadata_dataset: dataset.json
+      |    metadata_index: index.json
     """.format(config=config_dir))
 
     return env_config
