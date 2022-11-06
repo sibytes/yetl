@@ -119,6 +119,9 @@ There is a CI build configured for this repo that builds on main origin and publ
 
 # Releases
 
+Version: 0.0.25
+- Added typer dependency
+
 Version: 0.0.24
 - Added cli init comman to initialise a yetl project directory
 - Added maxparallel parameter to prototype for multithreaded loading
