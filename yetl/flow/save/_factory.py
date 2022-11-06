@@ -1,5 +1,3 @@
-from enum import Enum
-from typing import Type
 from ._saves import (
     Save,
     AppendSave,

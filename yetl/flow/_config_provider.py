@@ -27,21 +27,17 @@ def _mk_env_path():
     return path
 
 
-def _mk_pipeline_path(project: str, pipeline_name: str):
-    root = os.getenv(
-        EnvVariables.YETL_ROOT.name,
-        EnvVariables.YETL_ROOT.value,
-    )
+def _mk_pipeline_path(pipeline_root: str, pipeline_name: str):
     # TODO - replace with path from environment file.
-    path = f"{root}/{project}/pipelines/{pipeline_name}.{_EXT}"
+    path = os.path.join(pipeline_root, f"{pipeline_name}.{_EXT}")
     path = os.path.abspath(path)
     return path
 
 
-def load_pipeline_config(project: str, pipeline_name: str):
+def load_pipeline_config(project:str, root: str, pipeline_name: str):
     """Loads a spark configuration to load data from landing to raw."""
     _logger = logging.getLogger(project)
-    path = _mk_pipeline_path(project, pipeline_name)
+    path = _mk_pipeline_path(root, pipeline_name)
     _logger.info(f"Loading Dataflow configuration from file {path}")
     with open(path, "r", encoding="utf-8") as f:
         pipeline = yaml.safe_load(f.read())

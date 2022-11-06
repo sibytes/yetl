@@ -96,7 +96,8 @@ class SparkContext(IContext):
 
     def _get_deltalake_flow(self):
         # load the data pipeline provider
-        dataflow_config: dict = cp.load_pipeline_config(self.project, self.name)
+        path = self.config["pipeline_repo"]["pipeline_file"]["pipeline_root"]
+        dataflow_config: dict = cp.load_pipeline_config(self.project, path, self.name)
         dataflow_config = dataflow_config.get("dataflow")
 
         self.log.debug("Deserializing configuration into Dataflow")
