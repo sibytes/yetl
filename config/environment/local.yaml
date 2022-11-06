@@ -22,5 +22,5 @@ spark_schema_repo:
 
 deltalake_schema_repo:
   deltalake_sql_file:
-    deltalake_schema_root: ./config/schema
+    deltalake_schema_root: ./config/schema/deltalake
     

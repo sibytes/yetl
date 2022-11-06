@@ -40,6 +40,7 @@ def get_dbx_environment_config(config_dir:str = _CONFIG_DIR):
       |pipeline_repo:
       |  pipeline_file:
       |    pipeline_root: "./{config}/{{project}}/pipelines"
+      |    pipeline_root: "./{config}/{{project}}/sql"
       |
       |spark_schema_repo:
       |  spark_schema_file:
@@ -72,6 +73,7 @@ def get_local_environment_config(config_dir:str = _CONFIG_DIR):
       |pipeline_repo:
       |  pipeline_file:
       |    pipeline_root: "./{config}/{{project}}/pipelines"
+      |    pipeline_root: "./{config}/{{project}}/sql"
       |
       |spark_schema_repo:
       |  spark_schema_file:
@@ -92,13 +94,13 @@ def _get_dot_env_config(config_dir:str = _CONFIG_DIR):
   return env_config
 
 
-def _make_config_file(directory:str, filename:str, data:str):
+def _make_config_file(directory:str, filename:str, data:str, overwrite:bool=False):
     filepath = os.path.join(directory, filename)
-    if not os.path.exists(filepath):
+    if not os.path.exists(filepath) or overwrite:
         with open(filepath, mode="w", encoding="utf-8") as f:
             f.write(data)
 
-def init(project:str, home_dir:str=".", config_folder:str=_CONFIG_DIR):
+def init(project:str, home_dir:str=".", config_folder:str=_CONFIG_DIR, overwrite:bool = False):
 
     _make_config_file(home_dir, ".env", _get_dot_env_config())
 
@@ -106,7 +108,7 @@ def init(project:str, home_dir:str=".", config_folder:str=_CONFIG_DIR):
     root_dir = os.path.abspath(root_dir)
     os.makedirs(root_dir, exist_ok=True)
 
-    _make_config_file(root_dir, "logging.yaml", get_log_configuration())
+    _make_config_file(root_dir, "logging.yaml", get_log_configuration(), overwrite)
 
     project_pipeline_path = os.path.join(root_dir, project, "pipelines")
     os.makedirs(project_pipeline_path, exist_ok=True)
@@ -117,8 +119,8 @@ def init(project:str, home_dir:str=".", config_folder:str=_CONFIG_DIR):
     environment_path = os.path.join(root_dir, "environment")
     os.makedirs(environment_path, exist_ok=True)
 
-    _make_config_file(environment_path, "dbx_dev.yaml", get_dbx_environment_config(config_folder))
-    _make_config_file(environment_path, "local.yaml", get_local_environment_config(config_folder))
+    _make_config_file(environment_path, "dbx_dev.yaml", get_dbx_environment_config(config_folder), overwrite)
+    _make_config_file(environment_path, "local.yaml", get_local_environment_config(config_folder), overwrite)
 
     schema_dirs = ["spark", "deltalake", "sql"]
     for sd in schema_dirs:

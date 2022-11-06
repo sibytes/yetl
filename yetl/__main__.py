@@ -11,7 +11,8 @@ app = typer.Typer()
 def init(
     project:str,
     home_dir:str = ".",
-    config_folder:str = "config"
+    config_folder:str = "config",
+    overwrite: bool = False
     
 ):
     """Initialise the configuration directory with the required structure and start config files
@@ -20,8 +21,9 @@ def init(
 
     --config-folder:str - The name of the configuration folder
 
+    --overwrite:bool - Overwrite the files already there with defaults, any new files added will remain.
     """
-    _init(project, home_dir, config_folder)
+    _init(project, home_dir, config_folder, overwrite)
 
 
 
