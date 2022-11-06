@@ -10,12 +10,18 @@ app = typer.Typer()
 @app.command()
 def init(
     project:str,
-    home_dir:str = "."
+    home_dir:str = ".",
+    config_folder:str = "config"
     
 ):
     """Initialise the configuration directory with the required structure and start config files
+
+    --home-dir:str - What you want the configuration folder to be built
+
+    --config-folder:str - The name of the configuration folder
+
     """
-    _init(project, home_dir)
+    _init(project, home_dir, config_folder)
 
 
 

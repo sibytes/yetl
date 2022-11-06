@@ -1,4 +1,3 @@
-
 datalake: "/mnt/datalake/yetl_data"
 datalake_protocol: "dbfs:"
 spark:
@@ -22,3 +21,7 @@ metadata_repo:
     metadata_dataset: dataset.json
     metadata_index: index.json
 
+  # metadata_deltalake:
+  #   metadata_database: yetl
+  #   metadata_table: dataset
+  #   metadata_index: index

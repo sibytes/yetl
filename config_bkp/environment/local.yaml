@@ -1,4 +1,3 @@
-
 datalake: "{{cwd}}/data"
 datalake_protocol: "file:"
 spark:
@@ -28,3 +27,8 @@ metadata_repo:
     metadata_root: ./config/runs
     metadata_dataset: dataset.json
     metadata_index: index.json
+
+  # metadata_deltalake:
+  #   metadata_database: yetl
+  #   metadata_table: dataset
+  #   metadata_index: index
