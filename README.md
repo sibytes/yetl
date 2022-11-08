@@ -119,8 +119,9 @@ There is a CI build configured for this repo that builds on main origin and publ
 
 # Releases
 
-Version: 0.0.25.dev1
+Version: 0.0.25.dev2
 - Removed reader bug that adds the contecxt_id by default
+- Removed lineage columns on reader from schema creation
 
 Version: 0.0.25
 - Added typer dependency
