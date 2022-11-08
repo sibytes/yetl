@@ -462,9 +462,6 @@ class Reader(Dataset, Source):
             .load(self.path)
         )
 
-        df = self._add_timeslice(df)
-        df = self._add_source_metadata(df)
-
         # if there isn't a schema and it's configured to create one the save it to repo.
         if self._creating_inferred_schema:
             self.context.log.info(
@@ -474,6 +471,11 @@ class Reader(Dataset, Source):
             if self._add_corrupt_record:
                 self.schema.add(CORRUPT_RECORD, StringType(), nullable=True)
             self.schema_repo.save_schema(self.schema, self.database, self.table)
+
+        # add metadata after schema is created since we don't want these 
+        # derived columns in the read metadata, only the _corrupt_column if present
+        df = self._add_timeslice(df)
+        df = self._add_source_metadata(df)
 
         self.context.log.debug(
             f"Reordering sys_columns to end for {self.database_table} from {self.path}. {CONTEXT_ID}={str(self.context_id)}"
