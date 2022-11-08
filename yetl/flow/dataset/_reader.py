@@ -460,7 +460,6 @@ class Reader(Dataset, Source):
         df = (
             df.options(**self.options)
             .load(self.path)
-            .withColumn(CONTEXT_ID, fn.lit(str(self.context_id)))
         )
 
         df = self._add_timeslice(df)

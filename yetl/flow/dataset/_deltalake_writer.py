@@ -379,6 +379,8 @@ class DeltaWriter(Dataset, Destination):
     def _add_df_metadata(self, column: str, value: str):
 
         if column in self.dataframe.columns:
+            # We have to drop the column first if it exists since it may have been added
+            # to incoming dataframe specific to source dataset
             self.dataframe = self.dataframe.drop(column)
         self.dataframe = self.dataframe.withColumn(column, fn.lit(value))
 
@@ -388,7 +390,8 @@ class DeltaWriter(Dataset, Destination):
             f"Reordering sys_columns to end for {self.database_table} from {self.path} {CONTEXT_ID}={str(self.context_id)}"
         )
         # remove a re-add the _context_id since there will be dupplicate columns
-        # when dataframe is built from multiple sources.
+        # when dataframe is built from multiple sources and they are specific 
+        # to the source not this dataset.
         if self._metadata_context_id_enabled:
             self._add_df_metadata(CONTEXT_ID, str(self.context_id))
 
@@ -398,7 +401,7 @@ class DeltaWriter(Dataset, Destination):
         if self._metadata_dataset_id_enabled:
             self._add_df_metadata(DATASET_ID, str(self.id))
 
-        # clean up the column ordering
+        # clean up the column ordering, put all the system columns at the end
         sys_columns = [c for c in self.dataframe.columns if c.startswith("_")]
         data_columns = [c for c in self.dataframe.columns if not c.startswith("_")]
         data_columns = data_columns + sys_columns
@@ -406,7 +409,7 @@ class DeltaWriter(Dataset, Destination):
 
         # get the partitions values for efficient IO patterns
         self.partition_values = self._get_partitions_values()
-
+        # if there are any then log them out.
         if self.partition_values:
             msg_partition_values = json.dumps(self.partition_values, indent=4)
             self.context.log.info(
