@@ -13,17 +13,13 @@ dataflow:
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: csv
-      path: "landing/demo/{{timeslice_path_date_format}}/customer_{{timeslice_file_date_format}}.csv"
+      path: "landing/demo/{{timeslice_path_date_format}}/{{demo_tables_table_name}}_{{timeslice_file_date_format}}.csv"
       read:
         auto: true
         options:
           mode: PERMISSIVE
           inferSchema: false
           header: true
-      exceptions:
-          path: "delta_lake/demo_landing/{{table_name}}_exceptions"
-          database: demo_landing
-          table: "{{table_name}}_exceptions"
   
 
   demo_raw:

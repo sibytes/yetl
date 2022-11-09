@@ -1,6 +1,6 @@
 CREATE TABLE {{ database_name }}.{{ table_name }}
 (
-	`id` string  ,
+	`id` integer  ,
 	`first_name` string  ,
 	`last_name` string  ,
 	`email` string  ,
