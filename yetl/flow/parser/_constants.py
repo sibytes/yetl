@@ -49,12 +49,12 @@ YETL_TBLP_OPTIMIZE_ZORDER_BY = "yetl.delta.optimizeZOrderBy"
 
 # lineages columns that will be added to datasets
 YETL_TBLP_METADATA_TIMESLICE = "yetl.metadata.timeslice"
-YETL_TBLP_METADATA_FILEPATH_FILENAME = "yetl.metadata.filepath_filename"
+YETL_TBLP_METADATA_FILEPATH_FILENAME = "yetl.metadata.filepathFilename"
 YETL_TBLP_METADATA_FILEPATH = "yetl.metadata.filepath"
 YETL_TBLP_METADATA_FILENAME = "yetl.metadata.filename"
-YETL_TBLP_METADATA_CONTEXT_ID = "yetl.metadata.context_id"
-YETL_TBLP_METADATA_DATAFLOW_ID = "yetl.metadata.dataflow_id"
-YETL_TBLP_METADATA_DATASET_ID = "yetl.metadata.dataset_id"
+YETL_TBLP_METADATA_CONTEXT_ID = "yetl.metadata.contextId"
+YETL_TBLP_METADATA_DATAFLOW_ID = "yetl.metadata.dataflowId"
+YETL_TBLP_METADATA_DATASET_ID = "yetl.metadata.datasetId"
 
 
 class Format(Enum):

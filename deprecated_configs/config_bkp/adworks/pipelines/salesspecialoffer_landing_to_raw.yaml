@@ -8,7 +8,7 @@ dataflow:
           yetl.schema.createIfNotExists: true
           yetl.schema.corrupt_record: true
           yetl.metadata.timeslice: timeslice_path_date_format
-          yetl.metadata.filepath_filename: true
+          yetl.metadata.filepathFilename: true
           # yetl.metadata.filepath: true
           # yetl.metadata.filename: true
 
@@ -51,7 +51,7 @@ dataflow:
 
         ddl: "{{ root }}/deltalake"
         properties:
-          yetl.metadata.dataset_id: true
+          yetl.metadata.datasetId: true
           yetl.schema.createIfNotExists: true
           delta.appendOnly: false
           delta.checkpoint.writeStatsAsJson: true

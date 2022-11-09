@@ -15,7 +15,7 @@ dataflow:
 
           # derive a timeslice column timestamp from the filepath
           yetl.metadata.timeslice: timeslice_file_date_format
-          yetl.metadata.filepath_filename: true
+          yetl.metadata.filepathFilename: true
           yetl.metadata.filepath: true
           yetl.metadata.filename: true
           # this will automatically default to an inferred schema load on the 1st load 
@@ -116,9 +116,9 @@ dataflow:
         # https://docs.delta.io/2.1.0/table-properties.html
         properties:
           #### YETL PROPERTIES ####
-          yetl.metadata.context_id: true
-          yetl.metadata.dataflow_id: true
-          yetl.metadata.dataset_id: true
+          yetl.metadata.contextId: true
+          yetl.metadata.dataflowId: true
+          yetl.metadata.datasetId: true
           #### DELTA LAKE TABLE PROPERTIES ####
 
           # https://docs.databricks.com/delta/table-properties.html

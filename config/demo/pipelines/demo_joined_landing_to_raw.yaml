@@ -7,8 +7,8 @@ dataflow:
         properties:
           yetl.schema.createIfNotExists: true
           yetl.metadata.timeslice: timeslice_file_date_format
-          yetl.metadata.filepath_filename: true
-          yetl.metadata.context_id: false
+          yetl.metadata.filepathFilename: true
+          yetl.metadata.contextId: false
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: csv
@@ -41,7 +41,7 @@ dataflow:
       table:
         properties:
           yetl.schema.createIfNotExists: true
-          yetl.metadata.context_id: false
+          yetl.metadata.contextId: false
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: csv
@@ -83,7 +83,7 @@ dataflow:
 
         properties:
 
-          yetl.metadata.dataset_id: true
+          yetl.metadata.datasetId: true
           yetl.schema.createIfNotExists: true
           delta.appendOnly: false
           delta.checkpoint.writeStatsAsJson: true
