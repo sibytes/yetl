@@ -35,7 +35,7 @@ class DeltaWriter(Dataset, Destination):
         }
 
         # get the table properties
-        properties: dict = self._get_table_properties(config["table"])
+        properties: dict = self._get_table_properties(config)
         self._set_table_properties(properties)
 
         self.dataframe: DataFrame = None
@@ -103,8 +103,8 @@ class DeltaWriter(Dataset, Destination):
             YETL_TBLP_METADATA_DATASET_ID, False
         )
 
-    def _get_table_properties(self, table_config: dict):
-        properties = table_config.get(PROPERTIES, {})
+    def _get_table_properties(self, config: dict):
+        properties = config.get(PROPERTIES, {})
         if properties == None:
             properties = {}
         return properties
@@ -135,9 +135,8 @@ class DeltaWriter(Dataset, Destination):
 
         # if there is no sql ddl then take it from the yaml parameters
         if not partitions:
-            table: dict = config[TABLE]
             # otherwise there are no partitioned columns and default to None
-            partitions = table.get("partitioned_by", [])
+            partitions = config.get("partitioned_by", [])
             msg = f"Parsed partitioning columns from dataflow yaml config for {self.database}.{self.table} as {partitions}"
 
         return partitions
@@ -242,18 +241,16 @@ class DeltaWriter(Dataset, Destination):
 
     def _get_conf_dl_property(self, config: dict, property: dl.DeltaLakeProperties):
         return (
-            config.get(TABLE)
-            and config.get(TABLE).get(PROPERTIES)
-            and config.get(TABLE).get(PROPERTIES).get(property.value)
+            config.get(PROPERTIES)
+            and config.get(PROPERTIES).get(property.value)
         )
 
     def _get_check_constraints_sql(
         self, config: dict, existing_constraints: dict = None
     ):
-        table = config.get(TABLE)
+
         sql_constraints = []
-        if table:
-            check_constraints = table.get(CHECK_CONSTRAINTS)
+        check_constraints = config.get(CHECK_CONSTRAINTS)
 
         if not check_constraints:
             check_constraints = {}
@@ -299,9 +296,8 @@ class DeltaWriter(Dataset, Destination):
 
     def _get_table_properties_sql(self, config: dict, existing_properties: dict = None):
 
-        table = config.get("table")
-        if table:
-            tbl_properties = table.get(PROPERTIES)
+        tbl_properties = config.get(PROPERTIES)
+        if tbl_properties:
             if existing_properties:
                 tbl_properties = dict(ChainMap(tbl_properties, existing_properties))
             tbl_properties = [f"'{k}' = '{v}'" for k, v in tbl_properties.items()]
@@ -314,42 +310,35 @@ class DeltaWriter(Dataset, Destination):
             return None
 
     def _get_table_zorder(self, config: dict):
-
-        table = config.get(TABLE)
-        zorder_by: list = []
-        if table:
-            zorder_by = table.get("zorder_by", [])
+        zorder_by = config.get("zorder_by", [])
 
         return zorder_by
 
     def _get_table_sql(self, config: dict):
 
-        table = config.get(TABLE)
-        if table:
-            ddl: str = table.get("ddl")
-            if ddl and not "\n" in ddl:
-                self._schema_root = ddl
-                self.schema_repo: ISchemaRepo = (
-                    self.context.schema_repo_factory.get_schema_repo_type(
-                        self.context, config["deltalake_schema_repo"]
-                    )
-                )
 
-                try:
-                    ddl = self.schema_repo.load_schema(
-                        self.database, self.table, self._schema_root
+        ddl: str = config.get("ddl")
+        if ddl and not "\n" in ddl:
+            self._schema_root = ddl
+            self.schema_repo: ISchemaRepo = (
+                self.context.schema_repo_factory.get_schema_repo_type(
+                    self.context, config["deltalake_schema_repo"]
+                )
+            )
+
+            try:
+                ddl = self.schema_repo.load_schema(
+                    self.database, self.table, self._schema_root
+                )
+                self._create_schema_if_not_exists = False
+            except SchemaNotFound as e:
+                if self._create_schema_if_not_exists:
+                    self.context.log.info(
+                        f"{e}, automatically creating SQL ddl schema."
                     )
-                    self._create_schema_if_not_exists = False
-                except SchemaNotFound as e:
-                    if self._create_schema_if_not_exists:
-                        self.context.log.info(
-                            f"{e}, automatically creating SQL ddl schema."
-                        )
-                        ddl = None
-                    else:
-                        raise SchemaNotFound
-        else:
-            ddl = None
+                    ddl = None
+                else:
+                    raise SchemaNotFound
 
         return ddl
 

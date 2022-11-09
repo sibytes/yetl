@@ -47,7 +47,7 @@ class Reader(Dataset, Source):
         io_properties = config.get("read")
 
         # get the table properties
-        properties: dict = self._get_table_properties(config["table"])
+        properties: dict = self._get_table_properties(config)
         self._set_table_properties(properties)
 
         self.thresholds_warnings = self._get_thresholds(config, ThresholdLevels.WARNING)
@@ -215,8 +215,8 @@ class Reader(Dataset, Source):
             self.context.log.warning(msg)
             self.options[INFER_SCHEMA] = True
 
-    def _get_table_properties(self, table_config: dict):
-        properties = table_config.get(PROPERTIES, {})
+    def _get_table_properties(self, config: dict):
+        properties = config.get(PROPERTIES, {})
         if properties == None:
             properties = {}
 

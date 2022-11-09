@@ -30,11 +30,11 @@ class SQLReader(Dataset, Source):
         self.auto_io = io_properties.get(AUTO_IO, True)
 
         # get the table properties
-        properties: dict = self._get_table_properties(config["table"])
+        properties: dict = self._get_table_properties(config)
         self._set_table_properties(properties)
 
-    def _get_table_properties(self, table_config: dict):
-        properties = table_config.get(PROPERTIES, {})
+    def _get_table_properties(self, config: dict):
+        properties = config.get(PROPERTIES, {})
         if properties == None:
             properties = {}
 
@@ -52,11 +52,10 @@ class SQLReader(Dataset, Source):
 
     def _get_select_sql(self, config: dict):
 
-        table = config.get(TABLE)
-        if table:
-            sql: str = table.get("sql")
-            name = table.get("name", self.table)
-            schema = table.get("schema", self.database)
+        sql: str = config.get("sql", None)
+        if sql:
+            name = config.get("name", self.table)
+            schema = config.get("schema", self.database)
             if sql and not "\n" in sql:
                 self.schema_repo: ISchemaRepo = (
                     self.context.schema_repo_factory.get_schema_repo_type(
@@ -67,9 +66,6 @@ class SQLReader(Dataset, Source):
                 sql = self.schema_repo.load_schema(schema, name, sql)
                 sql = sql.replace("{{database_name}}", self.database)
                 sql = sql.replace("{{table_name}}", self.table)
-
-        else:
-            sql = None
 
         return sql
 
