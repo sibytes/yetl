@@ -2,7 +2,7 @@ fields:
 - metadata: {}
   name: id
   nullable: true
-  type: integer
+  type: string
 - metadata: {}
   name: first_name
   nullable: true

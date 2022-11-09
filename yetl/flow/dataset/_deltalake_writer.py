@@ -224,7 +224,7 @@ class DeltaWriter(Dataset, Destination):
 
         else:
             start_datetime = datetime.now()
-            rendered_table_ddl = None
+            rendered_table_ddl = self.table_ddl
             if self.table_ddl:
                 rendered_table_ddl = parser.render_jinja(
                     self.table_ddl, self._replacements
