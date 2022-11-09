@@ -1,9 +1,8 @@
 dataflow:
 
   demo_landing:
-    type: Reader
     {{demo_tables_table_name}}:
-      
+      type: Reader     
 
       properties:
         yetl.schema.createIfNotExists: true
@@ -28,9 +27,9 @@ dataflow:
   
 
   demo_raw:
-    type: DeltaWriter
-    {{demo_tables_table_name}}:
 
+    {{demo_tables_table_name}}:
+      type: DeltaWriter
       partitioned_by:
         - _partition_key
 

@@ -1,8 +1,9 @@
 dataflow:
 
   demo_landing:
-    type: Reader
+
     customer_preferences:
+      type: Reader
       properties:
         yetl.schema.createIfNotExists: true
         yetl.metadata.timeslice: timeslice_file_date_format
@@ -35,9 +36,9 @@ dataflow:
   
 
   demo_raw:
-    type: DeltaWriter
-    customer_preferences:
 
+    customer_preferences:
+      type: DeltaWriter
       partitioned_by:
         - _partition_key
 

@@ -16,4 +16,4 @@ Demo
 ---------------
 
 python -m yetl create-table-manifest "demo" "./config/project"  File "/Users/shaunryan/AzureDevOps/yetl.tutorial/data/landing/demo" --filename "*" --extract-regex "^[a-zA-Z_]+[a-zA-Z]+"
-python -m yetl build adworks demo_tables.yml landing_to_raw.yaml ./config
+python -m yetl build demo demo_tables.yml landing_to_raw.yaml ./config

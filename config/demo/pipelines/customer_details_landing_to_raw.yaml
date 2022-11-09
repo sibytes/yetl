@@ -1,8 +1,8 @@
 dataflow:
 
   demo_landing:
-    type: Reader
     customer_details:
+      type: Reader
       properties:
         yetl.schema.createIfNotExists: true
         yetl.metadata.timeslice: timeslice_file_date_format
@@ -34,9 +34,9 @@ dataflow:
           exception_percent: 80
 
   demo_raw:
-    type: DeltaWriter
-    customer_details:
 
+    customer_details:
+      type: DeltaWriter
       partitioned_by:
         - _partition_key
 

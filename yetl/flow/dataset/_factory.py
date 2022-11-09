@@ -34,10 +34,10 @@ class _DatasetFactory:
             return None
 
     def get_dataset_type(
-        self, context, table_type:str, database: str, table: str, dataset_config: dict, auditor: Audit
+        self, context, database: str, table: str, dataset_config: dict, auditor: Audit
     ) -> Dataset:
 
-        dataset_type: str = table_type
+        dataset_type: str = dataset_config["type"]
         type: IOType = self._get_io_type(dataset_type)
 
         self._logger.info(f"Get {type.name} from factory dataset")
