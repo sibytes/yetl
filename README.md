@@ -119,12 +119,13 @@ There is a CI build configured for this repo that builds on main origin and publ
 
 # Releases
 
-Version: 0.0.25.dev5
+Version: 0.0.25.dev6
 - Bug fix of loads failing when schema exceptions not configured
 - Refactored table node from configuration of datasets in order to simply
 - Standardized yetl properties to capialised naming convention
 - Removed reader bug that adds the contecxt_id by default
 - Removed lineage columns on reader from schema creation
+- Extended parallel process to take the save type injection
 
 Version: 0.0.25
 - Added typer dependency
