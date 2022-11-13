@@ -7,8 +7,4 @@ fields:
   name: allow_contact
   nullable: true
   type: boolean
-- metadata: {}
-  name: _corrupt_record
-  nullable: true
-  type: string
 type: struct

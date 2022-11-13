@@ -6,6 +6,7 @@ dataflow:
 
       properties:
         yetl.schema.createIfNotExists: true
+        yetl.schema.corruptRecord: false
         yetl.metadata.timeslice: timeslice_file_date_format
         yetl.metadata.filepathFilename: true
 

@@ -180,9 +180,10 @@ class PermissiveSchemaOnRead(IValidator):
 
         self.valid_count = self.dataframe.count()
         self.exceptions_count = self.exceptions_handler(self.exceptions)
-
-        super().raise_thresholds(self.warning_thresholds, ThresholdLevels.WARNING)
-        super().raise_thresholds(self.error_thresholds, ThresholdLevels.ERROR)
+        if self.warning_thresholds:
+            super().raise_thresholds(self.warning_thresholds, ThresholdLevels.WARNING)
+        if self.error_thresholds:
+            super().raise_thresholds(self.error_thresholds, ThresholdLevels.ERROR)
 
         return self.get_result()
 

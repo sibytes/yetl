@@ -27,8 +27,4 @@ fields:
   name: amount
   nullable: true
   type: double
-- metadata: {}
-  name: _corrupt_record
-  nullable: true
-  type: string
 type: struct

@@ -483,6 +483,9 @@ class Reader(Dataset, Source):
         self.dataframe = df
         detail = {"path": self.path, "options": self.options}
         self.auditor.dataset_task(self.id, AuditTask.LAZY_READ, detail, start_datetime)
-        self.validation_result = self.validate()
+
+        # only run the validator if exception handling has ben configured.
+        if self.has_exception_configured:
+            self.validation_result = self.validate()
 
         return self.dataframe
