@@ -119,7 +119,7 @@ There is a CI build configured for this repo that builds on main origin and publ
 
 # Releases
 
-Version: 0.0.25
+Version: 0.0.26
 - Bug fix of loads failing when schema exceptions not configured
 - Refactored table node from configuration of datasets in order to simply
 - Standardized yetl properties to capialised naming convention
