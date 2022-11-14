@@ -82,7 +82,7 @@ def get_local_environment_config(config_dir:str = _CONFIG_DIR):
       |    # yetl uses table properties so this must be set as a table
       |    # property or globally like here in the spark context
       |    spark.databricks.delta.allowArbitraryProperties.enabled: true
-      |    spark.jars.packages: io.delta:delta-core_2.12:2.1.0
+      |    spark.jars.packages: io.delta:delta-core_2.12:2.1.1
       |    park.sql.extensions: io.delta.sql.DeltaSparkSessionExtension
       |    spark.sql.catalog.spark_catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
       |    spark.databricks.delta.merge.repartitionBeforeWrite.enabled: true

@@ -119,6 +119,10 @@ There is a CI build configured for this repo that builds on main origin and publ
 
 # Releases
 
+Version: 0.0.27
+- bumping spark version 3.3.2
+- bumping delta lake version 2.1.1
+
 Version: 0.0.26
 - Bug fix of loads failing when schema exceptions not configured
 - Refactored table node from configuration of datasets in order to simply
