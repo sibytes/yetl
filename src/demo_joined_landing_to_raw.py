@@ -21,8 +21,8 @@ def demo_joined_landing_to_raw(
 ) -> dict:
     """Load the demo customer data as is into a raw delta hive registered table.
 
-        The config for this dataflow has 2 landing sources that are joined
-        and written to delta table
+    The config for this dataflow has 2 landing sources that are joined
+    and written to delta table
     """
 
     df_cust = dataflow.source_df(f"{context.project}_landing.customer_details")
@@ -52,7 +52,7 @@ def demo_joined_landing_to_raw(
 
 
 # reload all
-timeslice = Timeslice("*","*","*")
+timeslice = Timeslice("*", "*", "*")
 results = demo_joined_landing_to_raw(timeslice=timeslice, save=OverwriteSave)
 results = json.dumps(results, indent=4, default=str)
 print(results)

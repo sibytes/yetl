@@ -9,11 +9,10 @@ app = typer.Typer()
 
 @app.command()
 def init(
-    project:str,
-    home_dir:str = ".",
-    config_folder:str = "config",
-    overwrite: bool = False
-    
+    project: str,
+    home_dir: str = ".",
+    config_folder: str = "config",
+    overwrite: bool = False,
 ):
     """Initialise the configuration directory with the required structure and start config files
 
@@ -26,7 +25,6 @@ def init(
     _init(project, home_dir, config_folder, overwrite)
 
 
-
 @app.command()
 def build(
     project: str,
@@ -34,8 +32,7 @@ def build(
     template_file: str,
     build_dir: str,
 ):
-    """Use manifest config file and the pipeline jinja template to build a pipeline configuration for each table
-    """
+    """Use manifest config file and the pipeline jinja template to build a pipeline configuration for each table"""
     build_config(project, metadata_file, template_file, build_dir)
 
 

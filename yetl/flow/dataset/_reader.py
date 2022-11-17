@@ -457,10 +457,7 @@ class Reader(Dataset, Source):
         if self.has_schema:
             df = df.schema(self.schema)
 
-        df = (
-            df.options(**self.options)
-            .load(self.path)
-        )
+        df = df.options(**self.options).load(self.path)
 
         # if there isn't a schema and it's configured to create one the save it to repo.
         if self._creating_inferred_schema:
@@ -472,7 +469,7 @@ class Reader(Dataset, Source):
                 self.schema.add(CORRUPT_RECORD, StringType(), nullable=True)
             self.schema_repo.save_schema(self.schema, self.database, self.table)
 
-        # add metadata after schema is created since we don't want these 
+        # add metadata after schema is created since we don't want these
         # derived columns in the read metadata, only the _corrupt_column if present
         df = self._add_timeslice(df)
         df = self._add_source_metadata(df)

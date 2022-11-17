@@ -54,7 +54,7 @@ yetl_wf.load(project, tables, landing_to_raw, timeslice)
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC 
+# MAGIC
 # MAGIC select * from adworks_raw.productionproduct
 
 # COMMAND ----------
@@ -68,16 +68,16 @@ dbutils.fs.ls("/mnt/datalake/yetl_data/landing")
 # COMMAND ----------
 
 # MAGIC %python
-# MAGIC 
+# MAGIC
 # MAGIC #clear down
-# MAGIC 
+# MAGIC
 # MAGIC spark.sql("drop database if exists adworks_landing cascade")
 # MAGIC spark.sql("drop database if exists adworks_raw cascade")
 # MAGIC files = dbutils.fs.ls("/mnt/datalake/yetl_data")
 # MAGIC print(files)
-# MAGIC 
+# MAGIC
 # MAGIC for f in files:
-# MAGIC 
+# MAGIC
 # MAGIC   if f.name != "landing/":
 # MAGIC     print(f"deleting the path {f.path}")
 # MAGIC     dbutils.fs.rm(f.path, True)

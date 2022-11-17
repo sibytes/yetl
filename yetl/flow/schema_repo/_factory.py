@@ -14,7 +14,6 @@ class SchemaRepoType(Enum):
     PIPELINE_FILE = 3
 
 
-
 class _SchemaRepoFactory:
     def __init__(self) -> None:
         self._logger = logging.getLogger(__name__)
@@ -58,6 +57,4 @@ factory.register_schema_repo_type(SchemaRepoType.SPARK_SCHEMA_FILE, SparkFileSch
 factory.register_schema_repo_type(
     SchemaRepoType.DELTALAKE_SQL_FILE, DeltalakeSchemaFile
 )
-factory.register_schema_repo_type(
-    SchemaRepoType.PIPELINE_FILE, SqlReaderFile
-)
+factory.register_schema_repo_type(SchemaRepoType.PIPELINE_FILE, SqlReaderFile)

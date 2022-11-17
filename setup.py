@@ -43,6 +43,14 @@ setup(
         "yetl.flow.warnings",
         "yetl.workflow",
     ],
-    install_requires=["pyyaml", "pyspark", "regex", "delta-spark", "Jinja2", "typer"],
+    install_requires=[
+        "pyyaml",
+        "pyspark",
+        "regex",
+        "delta-spark",
+        "Jinja2",
+        "typer",
+        "pydantic",
+    ],
     zip_safe=False,
 )

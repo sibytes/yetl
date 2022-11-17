@@ -34,7 +34,7 @@ def _mk_pipeline_path(pipeline_root: str, pipeline_name: str):
     return path
 
 
-def load_pipeline_config(project:str, root: str, pipeline_name: str):
+def load_pipeline_config(project: str, root: str, pipeline_name: str):
     """Loads a spark configuration to load data from landing to raw."""
     _logger = logging.getLogger(project)
     path = _mk_pipeline_path(root, pipeline_name)

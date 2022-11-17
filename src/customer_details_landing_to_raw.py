@@ -19,8 +19,7 @@ def customer_details_landing_to_raw(
     timeslice: Timeslice = TimesliceUtcNow(),
     save: Type[Save] = None,
 ) -> dict:
-    """Load the demo customer data as is into a raw delta hive registered table.
-    """
+    """Load the demo customer data as is into a raw delta hive registered table."""
 
     df = dataflow.source_df(f"{context.project}_landing.customer_details")
 
@@ -47,7 +46,7 @@ def customer_details_landing_to_raw(
 
 
 # reload all
-timeslice = Timeslice("*","*","*")
+timeslice = Timeslice("*", "*", "*")
 results = customer_details_landing_to_raw(timeslice=timeslice, save=OverwriteSave)
 results = json.dumps(results, indent=4, default=str)
 print(results)

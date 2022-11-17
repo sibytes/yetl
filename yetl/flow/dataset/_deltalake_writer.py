@@ -241,10 +241,7 @@ class DeltaWriter(Dataset, Destination):
         self._set_delta_table_properties(current_properties, self._config)
 
     def _get_conf_dl_property(self, config: dict, property: dl.DeltaLakeProperties):
-        return (
-            config.get(PROPERTIES)
-            and config.get(PROPERTIES).get(property.value)
-        )
+        return config.get(PROPERTIES) and config.get(PROPERTIES).get(property.value)
 
     def _get_check_constraints_sql(
         self, config: dict, existing_constraints: dict = None
@@ -317,7 +314,6 @@ class DeltaWriter(Dataset, Destination):
 
     def _get_table_sql(self, config: dict):
 
-
         ddl: str = config.get("ddl")
         if ddl and not "\n" in ddl:
             self._schema_root = ddl
@@ -380,7 +376,7 @@ class DeltaWriter(Dataset, Destination):
             f"Reordering sys_columns to end for {self.database_table} from {self.path} {CONTEXT_ID}={str(self.context_id)}"
         )
         # remove a re-add the _context_id since there will be dupplicate columns
-        # when dataframe is built from multiple sources and they are specific 
+        # when dataframe is built from multiple sources and they are specific
         # to the source not this dataset.
         if self._metadata_context_id_enabled:
             self._add_df_metadata(CONTEXT_ID, str(self.context_id))
