@@ -36,6 +36,25 @@ reader_config = {
         "auto": True,
         "options": {"mode": "PERMISSIVE", "inferSchema": False, "header": True},
     },
+    "exceptions": {
+        "path": "delta_lake/demo_landing/{{table_name}}_exceptions",
+        "database": "demo_landing",
+        "table": "{{table_name}}_exceptions"
+    },
+    "thresholds": {
+        "warning": {
+            "min_rows": 1,
+            "max_rows": 1000,
+            "exception_count": 0,
+            "exception_percent": 0
+        },
+        "error": {
+            "min_rows": 0,
+            "max_rows": 100000000,
+            "exception_count": 50,
+            "exception_percent": 80
+        }
+    }
 }
 
 reader = Reader.parse_obj(reader_config)
