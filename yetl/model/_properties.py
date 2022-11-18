@@ -6,37 +6,19 @@
 from pydantic import BaseModel, Field
 from ..flow.parser._constants import YetlTableProperties, CORRUPT_RECORD
 from ..flow.parser.parser import JinjaVariables
+from ._decoder import parse_properties
 import json
-
-
-def _parse_name(name: str):
-    """Converts a string class property name
-    to a string of yetl config property name
-
-    Given namepart1_name_part2
-    Returns yetl.namepart1.namePart2
-    """
-
-    name_parts = name.split("_")
-    part_1 = name_parts[0]
-    name_parts = [name_parts[1]] + [n.capitalize() for n in name_parts[2:]]
-    part_2 = "".join(name_parts)
-    # ensures that it's a valid yetl property
-    name = YetlTableProperties(f"yetl.{part_1}.{part_2}").value
-
-    return name
 
 
 def _yetl_properties_dumps(obj: dict, *, default):
     """Decodes the data back into a dictionary with yetl configuration properties names"""
-    
-    obj = {_parse_name(k): obj for k, obj in obj.items()}
+    obj = parse_properties(obj)
     return json.dumps(obj, default=default)
 
 
 class BaseProperties(BaseModel):
     """Yetl table properies that drives various features of a data flow for all types of datasets"""
-    
+
     # Create the schema in the schema repo if it does not exist
     schema_create_if_not_exists: bool = Field(
         default=True, alias=YetlTableProperties.SCHEMA_CREATE_IF_NOT_EXISTS.value
@@ -97,7 +79,6 @@ class ReaderProperties(BaseProperties):
         default=False, alias=YetlTableProperties.METADATA_FILENAME.value
     )
 
-
     class Config:
         # use a custom decoder to convert the field names
         # back into yetl configuration names
@@ -106,12 +87,11 @@ class ReaderProperties(BaseProperties):
 
 class DeltaWriterProperties(BaseProperties):
     """Yetl table properies that drives various features of a data flow for DeltaWriter destintation"""
-    
+
     # whether or not to optimize z orderby deltatable partitions after the are written
     delta_optimize_z_order_by: bool = Field(
         default=False, alias=YetlTableProperties.OPTIMIZE_ZORDER_BY.value
     )
-
 
     class Config:
         # use a custom decoder to convert the field names
