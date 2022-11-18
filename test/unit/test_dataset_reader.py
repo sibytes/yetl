@@ -3,7 +3,8 @@ import json
 from collections import OrderedDict
 
 reader_config = {
-    "type": "Reader",
+    "database": "customer",
+    "table": "landing",
     "properties": {
         "yetl.schema.createIfNotExists": True,
         "yetl.schema.corruptRecord": False,
@@ -27,30 +28,41 @@ reader_config = {
     "exceptions": {
         "path": "delta_lake/demo_landing/{{table_name}}_exceptions",
         "database": "demo_landing",
-        "table": "{{table_name}}_exceptions"
+        "table": "{{table_name}}_exceptions",
     },
     "thresholds": {
         "warning": {
             "min_rows": 1,
             "max_rows": 1000,
             "exception_count": 0,
-            "exception_percent": 0
+            "exception_percent": 0,
         },
         "error": {
             "min_rows": 0,
             "max_rows": 100000000,
             "exception_count": 50,
-            "exception_percent": 80
-        }
-    }
+            "exception_percent": 80,
+        },
+    },
 }
 
 
-def test_delta_writer_properties():
+def test_reader():
 
     reader = Reader.parse_obj(reader_config)
     actual: dict = OrderedDict(json.loads(reader.json()))
-    expected = OrderedDict(dict(reader_config))
-    del expected["type"]
+    expected = dict(reader_config)
+    expected = OrderedDict(expected)
+
+    assert expected == actual
+
+
+def test_reader_database_table():
+
+    reader = Reader.parse_obj(reader_config)
+    database = reader_config["database"]
+    table = reader_config["table"]
+    expected = f"`{database}`.`{table}`"
+    actual = reader.database_table
 
     assert expected == actual
