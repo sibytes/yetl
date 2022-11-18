@@ -63,6 +63,16 @@ def test_reader_database_table():
     database = reader_config["database"]
     table = reader_config["table"]
     expected = f"`{database}`.`{table}`"
+    actual = reader.sql_database_table
+
+    assert expected == actual
+
+def test_reader_database_table():
+
+    reader = Reader.parse_obj(reader_config)
+    database = reader_config["database"]
+    table = reader_config["table"]
+    expected = f"{database}.{table}"
     actual = reader.database_table
 
     assert expected == actual

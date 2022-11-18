@@ -32,8 +32,12 @@ class Reader(BaseModel):
     thresholds: Thresholds = Field(default=None)
 
     @property
-    def database_table(self) -> str:
-        return f"`{self.database}`.`{self.table}`"
+    def sql_database_table(self, sep:str=".", qualifier:str="`") -> str:
+        return f"{qualifier}{self.database}{qualifier}{sep}{qualifier}{self.table}{qualifier}"
+
+    @property
+    def database_table(self, sep:str=".") -> str:
+        return f"{self.database}{sep}{self.table}"
 
     class Config:
         # use a custom decoder to convert the field names
