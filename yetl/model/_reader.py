@@ -33,10 +33,12 @@ class Reader(BaseModel):
 
     @property
     def sql_database_table(self, sep:str=".", qualifier:str="`") -> str:
+        "Concatenated fully qualified database table for SQL"
         return f"{qualifier}{self.database}{qualifier}{sep}{qualifier}{self.table}{qualifier}"
 
     @property
     def database_table(self, sep:str=".") -> str:
+        "Concatenated database table for readability"
         return f"{self.database}{sep}{self.table}"
 
     class Config:
