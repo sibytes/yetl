@@ -11,6 +11,12 @@ def _yetl_properties_dumps(obj: dict, *, default):
     obj = {parse_properties_key(k):parse_properties_values(k,v) for k, v in obj.items()}
     return json.dumps(obj, default=default)
 
+class ThresholdLimit(BaseModel):
+    min_rows:int = Field(default=0)
+    max_rows:int = Field(default=None)
+    exception_count:int = Field(default=0)
+    exception_percent:int = Field(default=0)
+
 
 class Read(BaseModel):
     _DEFAULT_OPTIONS = {
@@ -19,6 +25,18 @@ class Read(BaseModel):
     }
     auto:bool = Field(default=True)
     options:Dict[str,Any] = Field(default=_DEFAULT_OPTIONS)
+
+
+class Exceptions(BaseModel):
+    path:str = Field(...)
+    database:str = Field(...)
+    table:str = Field(...)
+
+
+class Thresholds(BaseModel):
+    warnging:ThresholdLimit = Field(default=ThresholdLimit())
+    error:ThresholdLimit = Field(default=ThresholdLimit())
+
 
 class Reader(BaseModel):
 
@@ -31,6 +49,8 @@ class Reader(BaseModel):
     format:str = Field(default="json")
     path:str = Field(...)
     read:Read = Field(default=Read())
+    exceptions = Field(default=Exceptions())
+    thresholds = Field(default=Thresholds())
 
     class Config:
         # use a custom decoder to convert the field names
@@ -58,4 +78,19 @@ class Reader(BaseModel):
     #       mode: PERMISSIVE
     #       inferSchema: false
     #       header: true
-  
+    #   exceptions:
+    #     path: "delta_lake/demo_landing/{{table_name}}_exceptions"
+    #     database: demo_landing
+    #     table: "{{table_name}}_exceptions"
+
+    # thresholds:
+    #     warning:
+        #     min_rows: 1
+        #     max_rows: 1000
+        #     exception_count: 0
+        #     exception_percent: 0
+    #     error:
+        #     min_rows: 0
+        #     max_rows: 100000000
+        #     exception_count: 50
+        #     exception_percent: 80
