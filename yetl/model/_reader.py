@@ -18,6 +18,8 @@ class Reader(BaseModel):
     def __init__(__pydantic_self__, **data: Any) -> None:
         super().__init__(**data)
 
+    database:str = Field(...)
+    table:str = Field(...)
     yetl_properties:ReaderProperties = Field(default=ReaderProperties(), alias="properties")
     path_date_format:str = Field(default="%Y%m%d")
     file_date_format:str = Field(default="%Y%m%d")
