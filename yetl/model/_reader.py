@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from ._properties import ReaderProperties
 from ._decoder import parse_properties_key, parse_properties_values
-from typing import Any
+from typing import Any, Optional
 import json
 from ._source_components import Thresholds, Exceptions, Read
 
@@ -24,8 +24,8 @@ class Reader(BaseModel):
     format:str = Field(default="json")
     path:str = Field(...)
     read:Read = Field(default=Read())
-    exceptions:Exceptions = Field(...)
-    thresholds:Thresholds = Field(default=Thresholds())
+    exceptions:Exceptions = Field(default=None)
+    thresholds:Thresholds = Field(default=None)
 
     class Config:
         # use a custom decoder to convert the field names
