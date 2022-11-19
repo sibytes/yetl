@@ -91,3 +91,10 @@ class Format(Enum):
     CSV = "csv"
     PARQUET = "parquet"
     DELTA = "delta"
+
+
+class FormatOptions(Enum):
+    JSON = "json"
+    CSV = "csv"
+    PARQUET = "parquet"
+    DELTA = "delta"

@@ -15,11 +15,17 @@
 from yetl.model._reader import Reader
 import json
 from collections import OrderedDict
+import uuid
 
 reader_config = {
-    "type": "Reader",
-    "table": "test",
-    "database": "db_test",
+    "context_id": "bf76fc9b-94d0-4e86-bf80-7e74893dd487",
+    "database": "customer",
+    "dataframe": None,
+    "dataflow_id": "26658212-b2b4-4aaa-8173-393829d57bd2",
+    "datalake_protocol": "file:",
+    "datalake": "c/mylake",
+    "dataset_id": "decb22d6-1dee-450c-8c20-9b09b6684159",
+    "table": "landing",
     "properties": {
         "yetl.schema.createIfNotExists": True,
         "yetl.schema.corruptRecord": False,
@@ -66,4 +72,5 @@ reader = Reader.parse_obj(reader_config)
 actual: dict = OrderedDict(json.loads(reader.json()))
 expected = OrderedDict(dict(reader_config))
 
-print(json.dumps(expected, indent=4))
+print(json.dumps(actual, indent=4, default=str))
+
