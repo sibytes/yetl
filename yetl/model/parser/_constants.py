@@ -35,6 +35,7 @@ FILENAME = "_filename"
 FILEPATH_FILENAME = "_filepath_filename"
 FILEPATH = "_filepath"
 
+
 class YetlTableProperties(Enum):
     # If the SQL or Spark Schema depending on the type doesn't exist
     # then it will be inferred and created automatically
@@ -55,13 +56,16 @@ class YetlTableProperties(Enum):
     METADATA_DATAFLOW_ID = "yetl.metadata.dataflowId"
     METADATA_DATASET_ID = "yetl.metadata.datasetId"
 
+
 class TimesliceOptions(Enum):
     TIMESLICE_FILE_DATE_FORMAT = "timeslice_file_date_format"
     TIMESLICE_PATH_DATE_FORMAT = "timeslice_path_date_format"
 
+
 class DatalakeProtocolOptions(Enum):
     FILE = "file:"
     DBFS = "dbfs:"
+
 
 class FormatOptions(Enum):
     JSON = "json"

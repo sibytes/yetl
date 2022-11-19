@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
 from ._properties import ReaderProperties
 from ._decoder import parse_properties_key, parse_properties_values
 from typing import Any, Dict
@@ -7,41 +7,9 @@ from ._source_components import Thresholds, Exceptions, Read
 from ..parser.parser import JinjaVariables, render_jinja
 from ..parser._constants import DatalakeProtocolOptions, FormatOptions
 import uuid
-from abc import ABC, abstractmethod
+from ._source import Source
 from pyspark.sql import DataFrame
 from .._timeslice import Timeslice
-
-class Source(BaseModel, ABC):
-
-    @abstractmethod
-    def initialise(self):
-        pass
-
-    @abstractmethod
-    def execute(self):
-        pass
-
-    @abstractmethod
-    def validate(self):
-        pass
-
-    @property
-    def is_source(self):
-        return True
-
-    @property
-    def is_destination(self):
-        return False
-
-    @property
-    def initial_load(self):
-
-        return self._initial_load
-
-    @initial_load.setter
-    def initial_load(self, value: bool):
-        self._initial_load = value
-
 
 
 def _yetl_properties_dumps(obj: dict, *, default):
@@ -50,8 +18,6 @@ def _yetl_properties_dumps(obj: dict, *, default):
         parse_properties_key(k): parse_properties_values(k, v) for k, v in obj.items()
     }
     return json.dumps(obj, default=default)
-
-
 
 
 class Reader(Source):
@@ -63,13 +29,15 @@ class Reader(Source):
         path = f"{self.datalake_protocol.value}{self.datalake}/{self.path}"
         self.path = render_jinja(path, self._replacements)
 
-    timeslice:Timeslice = Field(default=Timeslice(year="*")) 
-    context_id:uuid.UUID
-    dataflow_id:uuid.UUID
-    dataframe:DataFrame = Field(default=None)
-    dataset_id:uuid.UUID = Field(default=uuid.uuid4())
-    datalake_protocol:DatalakeProtocolOptions = Field(default=DatalakeProtocolOptions.FILE)
-    datalake:str = Field(...)
+    timeslice: Timeslice = Field(default=Timeslice(year="*"))
+    context_id: uuid.UUID
+    dataflow_id: uuid.UUID
+    dataframe: DataFrame = Field(default=None)
+    dataset_id: uuid.UUID = Field(default=uuid.uuid4())
+    datalake_protocol: DatalakeProtocolOptions = Field(
+        default=DatalakeProtocolOptions.FILE
+    )
+    datalake: str = Field(...)
     database: str = Field(...)
     table: str = Field(...)
     yetl_properties: ReaderProperties = Field(
@@ -91,12 +59,12 @@ class Reader(Source):
         pass
 
     @property
-    def sql_database_table(self, sep:str=".", qualifier:str="`") -> str:
+    def sql_database_table(self, sep: str = ".", qualifier: str = "`") -> str:
         "Concatenated fully qualified database table for SQL"
         return f"{qualifier}{self.database}{qualifier}{sep}{qualifier}{self.table}{qualifier}"
 
     @property
-    def database_table(self, sep:str=".") -> str:
+    def database_table(self, sep: str = ".") -> str:
         "Concatenated database table for readability"
         return f"{self.database}{sep}{self.table}"
 
@@ -122,8 +90,12 @@ class Reader(Source):
         return {
             JinjaVariables.DATABASE_NAME: self.database,
             JinjaVariables.TABLE_NAME: self.table,
-            JinjaVariables.TIMESLICE_FILE_DATE_FORMAT: self.timeslice.strftime(self.file_date_format),
-            JinjaVariables.TIMESLICE_PATH_DATE_FORMAT: self.timeslice.strftime(self.path_date_format)
+            JinjaVariables.TIMESLICE_FILE_DATE_FORMAT: self.timeslice.strftime(
+                self.file_date_format
+            ),
+            JinjaVariables.TIMESLICE_PATH_DATE_FORMAT: self.timeslice.strftime(
+                self.path_date_format
+            ),
         }
 
     class Config:

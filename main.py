@@ -73,4 +73,3 @@ actual: dict = OrderedDict(json.loads(reader.json()))
 expected = OrderedDict(dict(reader_config))
 
 print(json.dumps(actual, indent=4, default=str))
-

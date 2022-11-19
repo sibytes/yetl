@@ -26,19 +26,16 @@ _UNSUPPORTED_FORMAT_CODES = [
 
 
 class Timeslice(BaseModel):
-
     def __init__(__pydantic_self__, **data: Any) -> None:
         super().__init__(**data)
 
-
-    year:Union[int, Wildcard] = Field(...)
-    month:Union[int, Wildcard] = Field(default=_WILDCARD)
-    day:Union[int, Wildcard] = Field(default=_WILDCARD)
-    hour:Union[int, Wildcard] = Field(default=0)
-    minute:Union[int, Wildcard] = Field(default=0)
-    second:Union[int, Wildcard] = Field(default=0)
-    microsecond:Union[int, Wildcard] = Field(default=0)
-
+    year: Union[int, Wildcard] = Field(...)
+    month: Union[int, Wildcard] = Field(default=_WILDCARD)
+    day: Union[int, Wildcard] = Field(default=_WILDCARD)
+    hour: Union[int, Wildcard] = Field(default=0)
+    minute: Union[int, Wildcard] = Field(default=0)
+    second: Union[int, Wildcard] = Field(default=0)
+    microsecond: Union[int, Wildcard] = Field(default=0)
 
     def strftime(self, format: str):
         """This will format and return the timeslice using python format codes. Only a subset of format codes are suppoered by design
@@ -103,7 +100,9 @@ class Timeslice(BaseModel):
         format, _second = self._format_wildcard(format, self.second, "%S")
         format, _microsecond = self._format_wildcard(format, self.microsecond, "%f")
 
-        timeslice = datetime(_year, _month, _day, _hour, _minutue, _second, _microsecond)
+        timeslice = datetime(
+            _year, _month, _day, _hour, _minutue, _second, _microsecond
+        )
 
         formatted = timeslice.strftime(format)
         return formatted
