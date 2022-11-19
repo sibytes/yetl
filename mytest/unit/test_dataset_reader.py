@@ -1,7 +1,5 @@
 from yetl.model.dataset import Reader
 import json
-from collections import OrderedDict
-import uuid
 from unittest import TestCase
 
 reader_config = {
@@ -40,6 +38,8 @@ reader_config = {
     "path": "landing/demo/{{ timeslice_path_date_format }}/customer_details_{{ timeslice_file_date_format }}.csv",
     "read": {
         "auto": True,
+        "infer_schema": True,
+        "mode": "PERMISSIVE",
         "options": {"mode": "PERMISSIVE", "inferSchema": True, "header": True},
     },
     "exceptions": {
@@ -71,7 +71,9 @@ def test_reader():
     expected = reader_config
     expected["path"] = "file:c/mylake/landing/demo/***/customer_details_***.csv"
 
-    TestCase().assertDictEqual(expected, actual)
+    test = TestCase()
+    test.maxDiff = None
+    test.assertDictEqual(expected, actual)
 
 
 def test_reader_database_table():
