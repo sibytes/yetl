@@ -1,10 +1,19 @@
-from yetl.model._reader import Reader
+from yetl.model.dataset import Reader
 import json
 from collections import OrderedDict
 import uuid
 from unittest import TestCase
 
 reader_config = {
+    "timeslice": {
+        "year": "*",
+        "month": "*",
+        "day": "*",
+        "hour": 0,
+        "minute": 0,
+        "second": 0,
+        "microsecond": 0
+    },
     "context_id": "bf76fc9b-94d0-4e86-bf80-7e74893dd487",
     "dataflow_id": "26658212-b2b4-4aaa-8173-393829d57bd2",
     "dataframe": None,
@@ -64,7 +73,7 @@ def test_reader():
     reader = Reader.parse_obj(reader_config)
     actual: dict = json.loads(reader.json())
     expected = reader_config
-    expected["path"] = "file:c/mylake/landing/demo//customer_details_.csv"
+    expected["path"] = "file:c/mylake/landing/demo/***/customer_details_***.csv"
 
     TestCase().assertDictEqual(expected, actual)
 

@@ -1,4 +1,4 @@
-from yetl.model import BaseProperties, DeltaWriterProperties, ReaderProperties
+from yetl.model.dataset import BaseProperties, DeltaWriterProperties, ReaderProperties
 import json
 from unittest import TestCase
 

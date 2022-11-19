@@ -4,11 +4,12 @@ from ._decoder import parse_properties_key, parse_properties_values
 from typing import Any, Optional
 import json
 from ._source_components import Thresholds, Exceptions, Read
-from ..flow.parser.parser import JinjaVariables, render_jinja
-from ..flow.parser._constants import DatalakeProtocolOptions, FormatOptions
+from ..parser.parser import JinjaVariables, render_jinja
+from ..parser._constants import DatalakeProtocolOptions, FormatOptions
 import uuid
 from abc import ABC, abstractmethod
 from pyspark.sql import DataFrame
+from .._timeslice import Timeslice
 
 class Source(BaseModel, ABC):
 
@@ -56,14 +57,22 @@ def _yetl_properties_dumps(obj: dict, *, default):
 class Reader(Source):
     def __init__(__pydantic_self__, **data: Any) -> None:
         super().__init__(**data)
+
         __pydantic_self__.initialise()
 
     def initialise(self):
+        replacements = {
+            JinjaVariables.DATABASE_NAME: self.database,
+            JinjaVariables.TABLE_NAME: self.table,
+            JinjaVariables.TIMESLICE_FILE_DATE_FORMAT: self.timeslice.strftime(self.file_date_format),
+            JinjaVariables.TIMESLICE_PATH_DATE_FORMAT: self.timeslice.strftime(self.path_date_format)
+        }
         path = f"{self.datalake_protocol.value}{self.datalake}/{self.path}"
-        self.path = render_jinja(path, self._replacements)
-        print(self.path)
+        self.path = render_jinja(path, replacements)
 
 
+
+    timeslice:Timeslice = Field(default=Timeslice(year="*")) 
     context_id:uuid.UUID
     dataflow_id:uuid.UUID
     dataframe:DataFrame = Field(default=None)
@@ -82,12 +91,7 @@ class Reader(Source):
     read: Read = Field(default=Read())
     exceptions: Exceptions = Field(default=None)
     thresholds: Thresholds = Field(default=None)
-    _replacements:list = {
-            JinjaVariables.DATABASE_NAME: database,
-            JinjaVariables.TABLE_NAME: table,
-            # JinjaVariables.TIMESLICE_FILE_DATE_FORMAT: context.timeslice.strftime(file_date_format),
-            # JinjaVariables.TIMESLICE_PATH_DATE_FORMAT: context.timeslice.strftime(path_date_format)
-    }
+    # _replacements:list = None
     _initial_load = False
 
     def validate(self):

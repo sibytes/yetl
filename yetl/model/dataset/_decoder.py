@@ -1,4 +1,4 @@
-from ..flow.parser._constants import YetlTableProperties
+from ..parser._constants import YetlTableProperties
 from typing import Dict
 
 
