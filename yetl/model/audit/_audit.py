@@ -9,6 +9,7 @@ from ..warnings import Warning
 from pydantic import BaseModel, Field, PrivateAttr
 from typing import Union, Any, Dict
 
+
 class AuditLevel(Enum):
     DATAFLOW = "dataflow"
     DATASETS = "datasets"
@@ -36,16 +37,15 @@ class Audit(BaseModel):
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
-        
+
         self.audit_log = {
             AuditLevel.DATAFLOW.value: {AuditLevel.DATASETS.value: {}},
             AuditLevel.WARNING.value: {self._COUNT: 0},
             AuditLevel.ERROR.value: {self._COUNT: 0},
         }
 
-
-    audit_log:Dict[str, dict] = Field(default=None)
-    _task_counter:dict = PrivateAttr(default={})
+    audit_log: Dict[str, dict] = Field(default=None)
+    _task_counter: dict = PrivateAttr(default={})
 
     def error(self, exception: Exception):
         data = {"exception": exception.__class__.__name__, "message": str(exception)}

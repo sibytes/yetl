@@ -7,6 +7,7 @@ def test_timeslice_date():
 
     assert timeslice.strftime("%Y_%m_%d") == "2000_01_01"
 
+
 def test_timeslice_wildcard_daymonth():
 
     timeslice = Timeslice(year="2000", month="*", day="*")
@@ -19,6 +20,7 @@ def test_timeslice_wildcard_year():
     timeslice = Timeslice(year="2000")
 
     assert timeslice.strftime("%Y/%m/%d") == "2000/*/*"
+
 
 def test_timeslice_wildcard():
 

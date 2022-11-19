@@ -132,26 +132,28 @@ class Timeslice(BaseModel):
 class TimesliceNow(Timeslice):
     def __init__(self) -> None:
         now = datetime.now()
-        super().__init__(
-            now.year,
-            now.month,
-            now.day,
-            now.hour,
-            now.minute,
-            now.second,
-            now.microsecond,
-        )
+        args = {
+            "year": now.year,
+            "month": now.month,
+            "day": now.day,
+            "hour": now.hour,
+            "minute": now.minute,
+            "second": now.second,
+            "microsecond": now.microsecond,
+        }
+        super().__init__(**args)
 
 
 class TimesliceUtcNow(Timeslice):
     def __init__(self) -> None:
         now = datetime.utcnow()
-        super().__init__(
-            now.year,
-            now.month,
-            now.day,
-            now.hour,
-            now.minute,
-            now.second,
-            now.microsecond,
-        )
+        args = {
+            "year": now.year,
+            "month": now.month,
+            "day": now.day,
+            "hour": now.hour,
+            "minute": now.minute,
+            "second": now.second,
+            "microsecond": now.microsecond,
+        }
+        super().__init__(**args)

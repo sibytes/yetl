@@ -12,7 +12,13 @@
 # from src import demo_landing_to_raw
 
 
-from mytest.unit.test_audit import *
+from yetl.model.context import BaseContext
+from yetl.model.audit import Audit
 
-test_audit_exceptions()
+context = BaseContext(
+    auditor=Audit(),
+    project="demo",
+    name="demo",
+)
 
+print(context.config)

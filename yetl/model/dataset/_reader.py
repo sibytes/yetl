@@ -60,8 +60,8 @@ class Reader(Source):
     read: Read = Field(default=Read())
     exceptions: Exceptions = Field(default=None)
     thresholds: Thresholds = Field(default=None)
-    _initial_load:bool = PrivateAttr(default=False)
-    _replacements:Dict[JinjaVariables, str] = PrivateAttr(default=None)
+    _initial_load: bool = PrivateAttr(default=False)
+    _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
 
     def validate(self):
         pass
