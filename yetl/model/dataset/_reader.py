@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from ._properties import ReaderProperties
 from ._decoder import parse_properties_key, parse_properties_values
-from typing import Any, Optional
+from typing import Any, Dict
 import json
 from ._source_components import Thresholds, Exceptions, Read
 from ..parser.parser import JinjaVariables, render_jinja
@@ -55,22 +55,13 @@ def _yetl_properties_dumps(obj: dict, *, default):
 
 
 class Reader(Source):
-    def __init__(__pydantic_self__, **data: Any) -> None:
+    def __init__(self, **data: Any) -> None:
         super().__init__(**data)
-
-        __pydantic_self__.initialise()
+        self.initialise()
 
     def initialise(self):
-        replacements = {
-            JinjaVariables.DATABASE_NAME: self.database,
-            JinjaVariables.TABLE_NAME: self.table,
-            JinjaVariables.TIMESLICE_FILE_DATE_FORMAT: self.timeslice.strftime(self.file_date_format),
-            JinjaVariables.TIMESLICE_PATH_DATE_FORMAT: self.timeslice.strftime(self.path_date_format)
-        }
         path = f"{self.datalake_protocol.value}{self.datalake}/{self.path}"
-        self.path = render_jinja(path, replacements)
-
-
+        self.path = render_jinja(path, self._replacements)
 
     timeslice:Timeslice = Field(default=Timeslice(year="*")) 
     context_id:uuid.UUID
@@ -91,7 +82,6 @@ class Reader(Source):
     read: Read = Field(default=Read())
     exceptions: Exceptions = Field(default=None)
     thresholds: Thresholds = Field(default=None)
-    # _replacements:list = None
     _initial_load = False
 
     def validate(self):
@@ -125,6 +115,16 @@ class Reader(Source):
             return True
         else:
             False
+
+    @property
+    def _replacements(self) -> Dict[JinjaVariables, str]:
+        """Holds and returns a dictionary of jinja varables and values to performce replacements on configuration"""
+        return {
+            JinjaVariables.DATABASE_NAME: self.database,
+            JinjaVariables.TABLE_NAME: self.table,
+            JinjaVariables.TIMESLICE_FILE_DATE_FORMAT: self.timeslice.strftime(self.file_date_format),
+            JinjaVariables.TIMESLICE_PATH_DATE_FORMAT: self.timeslice.strftime(self.path_date_format)
+        }
 
     class Config:
         # use a custom decoder to convert the field names

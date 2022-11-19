@@ -12,7 +12,7 @@
 # from src import demo_landing_to_raw
 
 
-from yetl.model._reader import Reader
+from yetl.model.dataset import Reader
 import json
 from collections import OrderedDict
 import uuid
