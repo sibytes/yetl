@@ -7,32 +7,32 @@ from ..schema_repo import schema_repo_factory
 from .._timeslice import Timeslice, TimesliceUtcNow
 from ..audit import Audit
 from ..metadata_repo import metadata_repo_factory, IMetadataRepo
-from abc import ABC
+from abc import ABC, abstractmethod
+from pydantic import BaseModel, Field
+from typing import Any
+
+class BaseContext(BaseModel, ABC):
+
+    auditor:Audit = Field(...)
+    project:str = Field(...)
+    name:str = Field(...)
+    timeslice:Timeslice = Field(default=TimesliceUtcNow())
+    context_id:uuid.UUID = Field(default=uuid.uuid4())
+    config:dict = Field(default=None)
+    metadata_repo: IMetadataRepo = None
+    log:logging.Logger = None
+    fs: IFileSystem = None
+    schema_repo_factory = None
 
 
-class IContext(ABC):
-    def __init__(
-        self,
-        project: str,
-        name: str,
-        auditor: Audit,
-        timeslice: datetime = None,
-    ) -> None:
-
-        self.auditor = auditor
-        self.context_id = uuid.uuid4()
-        auditor.dataflow({"context_id": str(self.context_id)})
-        self.name = name
-        self.project = project
-        if not project:
-            self.project = self.name
-        self.timeslice: Timeslice = timeslice
-        if not self.timeslice:
-            self.timeslice = TimesliceUtcNow()
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
         self.log = logging.getLogger(self.project)
+        self.auditor.dataflow({"context_id": str(self.context_id)})
+
 
         # load the context configuration
-        self.config: dict = cp.load_config(self.project)
+        self.config = cp.load_config(self.project)
 
         # abstraction of the filesystem for driver file commands e.g. rm, ls, mv, cp
         self.fs: IFileSystem = file_system_factory.get_file_system_type(
@@ -47,5 +47,9 @@ class IContext(ABC):
         # abstraction of the schema repo
         self.schema_repo_factory = schema_repo_factory
 
+    @abstractmethod
     def _get_deltalake_flow(self):
-        None
+        pass
+
+    class Config:
+        arbitrary_types_allowed = True

@@ -1,4 +1,4 @@
-from pydantic import Field
+from pydantic import Field, PrivateAttr
 from ._properties import ReaderProperties
 from ._decoder import parse_properties_key, parse_properties_values
 from typing import Any, Dict
@@ -26,6 +26,16 @@ class Reader(Source):
         self.initialise()
 
     def initialise(self):
+        self._replacements = {
+            JinjaVariables.DATABASE_NAME: self.database,
+            JinjaVariables.TABLE_NAME: self.table,
+            JinjaVariables.TIMESLICE_FILE_DATE_FORMAT: self.timeslice.strftime(
+                self.file_date_format
+            ),
+            JinjaVariables.TIMESLICE_PATH_DATE_FORMAT: self.timeslice.strftime(
+                self.path_date_format
+            ),
+        }
         path = f"{self.datalake_protocol.value}{self.datalake}/{self.path}"
         self.path = render_jinja(path, self._replacements)
 
@@ -50,7 +60,8 @@ class Reader(Source):
     read: Read = Field(default=Read())
     exceptions: Exceptions = Field(default=None)
     thresholds: Thresholds = Field(default=None)
-    _initial_load = False
+    _initial_load:bool = PrivateAttr(default=False)
+    _replacements:Dict[JinjaVariables, str] = PrivateAttr(default=None)
 
     def validate(self):
         pass
@@ -83,20 +94,6 @@ class Reader(Source):
             return True
         else:
             False
-
-    @property
-    def _replacements(self) -> Dict[JinjaVariables, str]:
-        """Holds and returns a dictionary of jinja varables and values to performce replacements on configuration"""
-        return {
-            JinjaVariables.DATABASE_NAME: self.database,
-            JinjaVariables.TABLE_NAME: self.table,
-            JinjaVariables.TIMESLICE_FILE_DATE_FORMAT: self.timeslice.strftime(
-                self.file_date_format
-            ),
-            JinjaVariables.TIMESLICE_PATH_DATE_FORMAT: self.timeslice.strftime(
-                self.path_date_format
-            ),
-        }
 
     class Config:
         # use a custom decoder to convert the field names

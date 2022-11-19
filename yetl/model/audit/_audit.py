@@ -6,7 +6,7 @@ import yaml
 import time
 from ..parser.parser import reduce_whitespace
 from ..warnings import Warning
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PrivateAttr
 from typing import Union, Any, Dict
 
 class AuditLevel(Enum):
@@ -42,10 +42,10 @@ class Audit(BaseModel):
             AuditLevel.WARNING.value: {self._COUNT: 0},
             AuditLevel.ERROR.value: {self._COUNT: 0},
         }
-        self._task_counter = {}
+
 
     audit_log:Dict[str, dict] = Field(default=None)
-    _task_counter:dict = {}
+    _task_counter:dict = PrivateAttr(default={})
 
     def error(self, exception: Exception):
         data = {"exception": exception.__class__.__name__, "message": str(exception)}
