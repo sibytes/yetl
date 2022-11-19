@@ -3,6 +3,8 @@ import json
 from collections import OrderedDict
 
 reader_config = {
+    "datalake_protocol": "file:",
+    "datalake": "c/mylake",
     "database": "customer",
     "table": "landing",
     "properties": {

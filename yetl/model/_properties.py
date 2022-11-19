@@ -5,7 +5,8 @@
 
 from pydantic import BaseModel, Field
 from ..flow.parser._constants import YetlTableProperties, CORRUPT_RECORD
-from ..flow.parser.parser import JinjaVariables
+# from ..flow.parser.parser import JinjaVariables
+from ..flow.parser._constants import TimesliceOptions
 from ._decoder import parse_properties
 import json
 
@@ -59,8 +60,8 @@ class ReaderProperties(BaseProperties):
     """Yetl table properies that drives various features of a data flow for Reader source"""
 
     # which timeslice property format to use to shred the timeslice from the datapath of files
-    metadata_timeslice: str = Field(
-        default=JinjaVariables.TIMESLICE_FILE_DATE_FORMAT.value,
+    metadata_timeslice: TimesliceOptions = Field(
+        default=TimesliceOptions.TIMESLICE_FILE_DATE_FORMAT,
         alias=YetlTableProperties.METADATA_TIMESLICE.value,
     )
 
