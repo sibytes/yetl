@@ -1,5 +1,5 @@
-from yetl.model.context import IContext
-from yetl.model.audit import Audit
+from yetl.v2.context import IContext
+from yetl.v2.audit import Audit
 from unittest import TestCase
 
 config = {

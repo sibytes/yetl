@@ -1,4 +1,4 @@
-from yetl.model.audit._audit import Audit, AuditLevel
+from yetl.v2.audit._audit import Audit, AuditLevel
 from unittest import TestCase
 
 audit_log = {

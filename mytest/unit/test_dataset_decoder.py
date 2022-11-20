@@ -1,4 +1,4 @@
-from yetl.model.dataset._decoder import _parse_name
+from yetl.v2.dataset._decoder import _parse_name
 from yetl.flow.parser._constants import YetlTableProperties
 
 

@@ -7,7 +7,7 @@ from ._source_components import Thresholds, Exceptions, Read
 from ..parser.parser import JinjaVariables, render_jinja
 from ..parser._constants import DatalakeProtocolOptions, FormatOptions
 import uuid
-from ._source import Source
+from ._base import Source
 from pyspark.sql import DataFrame
 from .._timeslice import Timeslice
 

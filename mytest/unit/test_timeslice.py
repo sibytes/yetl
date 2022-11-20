@@ -1,4 +1,4 @@
-from yetl.model._timeslice import Timeslice
+from yetl.v2._timeslice import Timeslice
 
 
 def test_timeslice_date():
