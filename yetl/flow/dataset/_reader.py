@@ -3,7 +3,6 @@ from ._properties import ReaderProperties
 from ._decoder import parse_properties_key, parse_properties_values
 from typing import Any, Dict
 import json
-from ._source_components import Thresholds, Exceptions, Read
 from ..parser.parser import JinjaVariables, render_jinja
 from ..parser._constants import DatalakeProtocolOptions, FormatOptions
 import uuid
