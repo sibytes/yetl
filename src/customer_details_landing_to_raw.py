@@ -46,7 +46,7 @@ def customer_details_landing_to_raw(
 
 
 # reload all
-timeslice = Timeslice("*", "*", "*")
+timeslice = Timeslice(year="*", month="*", day="*")
 results = customer_details_landing_to_raw(timeslice=timeslice, save=OverwriteSave)
 results = json.dumps(results, indent=4, default=str)
 print(results)

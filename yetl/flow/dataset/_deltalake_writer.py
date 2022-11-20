@@ -10,7 +10,7 @@ import uuid
 # from ..save import save_factory, Save
 # from ..audit import Audit, AuditTask
 # from datetime import datetime
-from .._timeslice import Timeslice
+from .._timeslice import Timeslice, TimesliceUtcNow
 from pyspark.sql import functions as fn
 import json
 from ._base import Destination
@@ -57,7 +57,8 @@ class DeltaWriter(Destination):
         path = f"{self.datalake_protocol.value}{self.datalake}/{self.path}"
         self.path = render_jinja(path, self._replacements)
 
-    timeslice: Timeslice = Field(default=Timeslice(year="*"))
+    timeslice: Timeslice = Field(default=TimesliceUtcNow())
+    catalog:str = Field(None)
     context_id: uuid.UUID
     dataflow_id: uuid.UUID
     dataframe: DataFrame = Field(default=None)
@@ -132,3 +133,9 @@ class DeltaWriter(Destination):
         if not self.write.merge_schema and value:
             self.write.merge_schema = value
         self._initial_load = value
+
+    class Config:
+        # use a custom decoder to convert the field names
+        # back into yetl configuration names
+        # json_dumps = _yetl_properties_dumps
+        arbitrary_types_allowed = True

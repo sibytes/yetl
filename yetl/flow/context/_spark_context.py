@@ -1,4 +1,4 @@
-from ..dataflow import Dataflow
+# from ..dataflow import Dataflow
 from .. import _config_provider as cp
 from pyspark.sql import SparkSession
 import json
@@ -6,7 +6,7 @@ from delta import configure_spark_with_delta_pip
 from ._i_context import IContext
 from typing import Any
 from pydantic import Field
-
+from ..schema_repo import schema_repo_factory, ISchemaRepo
 
 class SparkContext(IContext):
     def __init__(self, **data: Any) -> None:
@@ -32,16 +32,28 @@ class SparkContext(IContext):
                 f"Databricks Runtime version detected as : {self.databricks_version}"
             )
 
+        # abstraction of the schema repo
+        self.spark_schema_repo: ISchemaRepo = (
+            schema_repo_factory.get_schema_repo_type(self, config=self.config)
+        )
+
         # Load and deserialise the spark dataflow configuration in to metaclasses (see dataset module)
         # The configuration file is loaded using the app name. This keeps intuitive tight
         # naming convention between datadlows and the config files that store them
         self.log.info(f"Setting application context dataflow {self.name}")
         self.dataflow = self._get_deltalake_flow()
 
-    spark_version = Field(default=None)
-    databricks_version = Field(default=None)
-    is_databricks = Field(default=False)
-    dataflow: Dataflow = Field(default=None)
+    spark_version:str = Field(default=None)
+    databricks_version:dict = Field(default=None)
+    is_databricks:bool = Field(default=False)
+    # dataflow: Dataflow = Field(default=None)
+    spark_schema_repo:dict = Field(...)
+    pipeline_repo:dict = Field(...)
+    
+
+    spark_schema_repo_config:dict = Field(...)
+    spark_schema_repo: ISchemaRepo = None
+    deltalake_schema_repo: ISchemaRepo = None
     spark: SparkSession = None
     spark_logger: Any = None
 
@@ -90,15 +102,14 @@ class SparkContext(IContext):
 
     def _get_deltalake_flow(self):
         # load the data pipeline provider
-        path = self.config["pipeline_repo"]["pipeline_file"]["pipeline_root"]
-        dataflow_config: dict = cp.load_pipeline_config(self.project, path, self.name)
+        dataflow_config: dict = cp.load_pipeline_config(self.project, self._pipeline_root, self.name)
         dataflow_config = dataflow_config.get("dataflow")
 
         self.log.debug("Deserializing configuration into Dataflow")
 
-        dataflow = Dataflow(self, dataflow_config)
+        # dataflow = Dataflow(self, dataflow_config)
 
-        return dataflow
+        # return dataflow
 
     class Config:
         arbitrary_types_allowed = True

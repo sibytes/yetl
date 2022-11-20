@@ -4,7 +4,7 @@ from . import _logging_config
 from .context import SparkContext
 from .audit import Audit
 from datetime import datetime
-
+from ._config_provider import load_config
 
 class YetlFlowException(Exception):
     def __init__(self, message):
@@ -38,9 +38,10 @@ def yetl_flow(project: str, pipeline_name: str = None):
             if "timeslice" in kwargs.keys():
                 del kwargs["timeslice"]
 
+            config = load_config(project=project)
             # TODO: abstract out spark context to IContext
             # create the context for the pipeline to run
-            context = SparkContext(project, _name, auditor, timeslice)
+            context = SparkContext(project=project, name=_name, auditor=auditor, timeslice=timeslice)
 
             # run the pipeline
             context.log.info(

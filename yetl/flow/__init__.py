@@ -1,8 +1,8 @@
 from .dataset import (
     Reader,
     DeltaWriter,
-    StreamReader,
-    StreamWriter,
+    # StreamReader,5
+    # StreamWriter,
 )
 
 from .save import (
@@ -24,8 +24,8 @@ from ._timeslice import Timeslice, TimesliceUtcNow, TimesliceNow
 __all__ = [
     "Reader",
     "DeltaWriter",
-    "StreamReader",
-    "StreamWriter",
+    # "StreamReader",
+    # "StreamWriter",
     "yetl_flow",
     "IContext",
     "IDataflow",

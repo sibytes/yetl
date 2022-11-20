@@ -23,6 +23,7 @@ class IDataflow(BaseModel, ABC):
         self.datalake = self.context.config["datalake"]
 
     audit: Audit = Field(default=None)
+    context: IContext = Field(...)
     dataflow_id: uuid.UUID = Field(default=uuid.uuid4())
     datalake: str = Field(default=None)
     sources: dict = Field(default={})
@@ -31,7 +32,6 @@ class IDataflow(BaseModel, ABC):
     _spark_schema_repo: dict = PrivateAttr(default=None)
     _deltalake_schema_repo: dict = PrivateAttr(default=None)
     _pipeline_repo: dict = PrivateAttr(default=None)
-    context: IContext = Field(...)
     log: Any
 
     @abstractmethod

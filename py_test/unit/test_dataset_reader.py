@@ -12,6 +12,7 @@ reader_config = {
         "second": 0,
         "microsecond": 0,
     },
+    "catalog": None,
     "context_id": "bf76fc9b-94d0-4e86-bf80-7e74893dd487",
     "dataflow_id": "26658212-b2b4-4aaa-8173-393829d57bd2",
     "dataframe": None,

@@ -8,7 +8,7 @@ from ..parser._constants import DatalakeProtocolOptions, FormatOptions
 import uuid
 from ._base import Source
 from pyspark.sql import DataFrame
-from .._timeslice import Timeslice
+from .._timeslice import Timeslice, TimesliceUtcNow
 from pydantic import BaseModel, Field
 from enum import Enum
 
@@ -75,7 +75,8 @@ class Reader(Source):
         path = f"{self.datalake_protocol.value}{self.datalake}/{self.path}"
         self.path = render_jinja(path, self._replacements)
 
-    timeslice: Timeslice = Field(default=Timeslice(year="*"))
+    timeslice: Timeslice = Field(default=TimesliceUtcNow())
+    catalog:str = Field(None)
     context_id: uuid.UUID
     dataflow_id: uuid.UUID
     dataframe: DataFrame = Field(default=None)

@@ -1,10 +1,10 @@
 from enum import Enum
-from ._dataset import Dataset
+from ._base import Dataset
 from ._reader import Reader
 from ._deltalake_writer import DeltaWriter
-from ._stream_reader import StreamReader
-from ._stream_writer import StreamWriter
-from ._sql_reader import SQLReader
+# from ._stream_reader import StreamReader
+# from ._stream_writer import StreamWriter
+# from ._sql_reader import SQLReader
 import logging
 from ..audit import Audit
 
@@ -57,6 +57,6 @@ class _DatasetFactory:
 factory = _DatasetFactory()
 factory.register_dataset_type(IOType.READER, Reader)
 factory.register_dataset_type(IOType.DELTAWRITER, DeltaWriter)
-factory.register_dataset_type(IOType.SQLREADER, SQLReader)
-factory.register_dataset_type(IOType.STREAMREADER, StreamReader)
-factory.register_dataset_type(IOType.STREAMWRITER, StreamWriter)
+# factory.register_dataset_type(IOType.SQLREADER, SQLReader)
+# factory.register_dataset_type(IOType.STREAMREADER, StreamReader)
+# factory.register_dataset_type(IOType.STREAMWRITER, StreamWriter)
