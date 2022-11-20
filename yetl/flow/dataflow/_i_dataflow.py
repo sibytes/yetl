@@ -3,31 +3,36 @@ from abc import ABC, abstractmethod
 from pyspark.sql import DataFrame
 import json
 import uuid
+from pydantic import BaseModel, Field, PrivateAttr
+from typing import Any
+from ..audit import Audit
+from ..context import IContext
 
 
-class IDataflow(ABC):
-    def __init__(self, context, dataflow_config: dict) -> None:
-
-        self.auditor = context.auditor
+class IDataflow(BaseModel, ABC):
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+        self.auditor = self.context.auditor
         self.id = uuid.uuid4()
-        self.log = context.log
+        self.log = self.context.log
+        # needs validation handling.
+        self._spark_schema_repo = self.context.config["spark_schema_repo"]
+        self._deltalake_schema_repo = self.context.config["deltalake_schema_repo"]
+        self._pipeline_repo = self.context.config["pipeline_repo"]
+        self.datalake_protocol = self.context.fs.datalake_protocol
+        self.datalake = self.context.config["datalake"]
 
-        self.log.debug("initialise dataflow with config")
-        self.log.debug(json.dumps(context.config, indent=4, default=str))
-
-        self.log.debug("initialise dataflow with dataflow_config")
-        self.log.debug(json.dumps(dataflow_config, indent=4, default=str))
-
-        self.datalake = context.config["datalake"]
-
-        self._spark_schema_repo = context.config["spark_schema_repo"]
-        self._deltalake_schema_repo = context.config["deltalake_schema_repo"]
-        self._pipeline_repo = context.config["pipeline_repo"]
-
-        self.datalake_protocol = context.fs.datalake_protocol
-        self.context = context
-        self.sources = {}
-        self.destinations = {}
+    audit: Audit = Field(default=None)
+    dataflow_id: uuid.UUID = Field(default=uuid.uuid4())
+    datalake: str = Field(default=None)
+    sources: dict = Field(default={})
+    destinations: dict = Field(default={})
+    datalake_protocol: str = Field(default=None)
+    _spark_schema_repo: dict = PrivateAttr(default=None)
+    _deltalake_schema_repo: dict = PrivateAttr(default=None)
+    _pipeline_repo: dict = PrivateAttr(default=None)
+    context: IContext = Field(...)
+    log: Any
 
     @abstractmethod
     def append(self, dataset: Dataset) -> None:

@@ -1,18 +1,11 @@
-from ._dataset import Dataset
-from ._base import Destination, Source
-from ._reader import Reader
-from ._deltalake_writer import DeltaWriter
-from ._stream_reader import StreamReader
-from ._stream_writer import StreamWriter
-from ._factory import factory as dataset_factory
+from ._properties import BaseProperties, ReaderProperties, DeltaWriterProperties
+from ._reader import Read, Reader
+from ._base import Source, Destination, Dataset
 
 __all__ = [
-    "Source",
-    "Destination",
-    "Dataset",
+    "BaseProperties",
+    "ReaderProperties",
+    "DeltaWriterProperties",
+    "Read",
     "Reader",
-    "DeltaWriter",
-    "StreamReader",
-    "StreamWriter",
-    "dataset_factory",
 ]

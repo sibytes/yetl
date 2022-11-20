@@ -1,4 +1,3 @@
-from curses import meta
 from enum import Enum
 from datetime import datetime
 import json
@@ -7,8 +6,8 @@ import yaml
 import time
 from ..parser.parser import reduce_whitespace
 from ..warnings import Warning
-
-from typing import Union
+from pydantic import BaseModel, Field, PrivateAttr
+from typing import Union, Any, Dict
 
 
 class AuditLevel(Enum):
@@ -33,16 +32,20 @@ class AuditTask(Enum):
     LAZY_READ = "lazy_read"
 
 
-class Audit:
+class Audit(BaseModel):
     _COUNT = "count"
 
-    def __init__(self) -> None:
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+
         self.audit_log = {
             AuditLevel.DATAFLOW.value: {AuditLevel.DATASETS.value: {}},
             AuditLevel.WARNING.value: {self._COUNT: 0},
             AuditLevel.ERROR.value: {self._COUNT: 0},
         }
-        self._task_counter = {}
+
+    audit_log: Dict[str, dict] = Field(default=None)
+    _task_counter: dict = PrivateAttr(default={})
 
     def error(self, exception: Exception):
         data = {"exception": exception.__class__.__name__, "message": str(exception)}
@@ -104,15 +107,6 @@ class Audit:
             self.audit_log[level.value][self._COUNT] += 1
 
     def get(self, format: AuditFormat = AuditFormat.JSON):
-
-        # For python 10
-        # match format:
-        #     case AuditFormat.JSON:
-        #         metadata = json.dumps(self.audit_log, indent=4, default=str)
-        #     case AuditFormat.YAML:
-        #         metadata = yaml.safe_dump(self.audit_log, indent=4)
-        #     case _:
-        #         metadata = json.dumps(self.audit_log, indent=4, default=str)
 
         if format == AuditFormat.JSON:
             metadata = json.dumps(self.audit_log, indent=4, default=str)

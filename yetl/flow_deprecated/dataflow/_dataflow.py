@@ -5,18 +5,14 @@ from ..dataset import dataset_factory
 from typing import Callable
 from enum import Enum
 from ._exceptions import SourceNotFound, DestinationNotFound
-from typing import Any
-from ..context import IContext
-from pydantic import Field
+
 
 class Dataflow(IDataflow):
+    def __init__(self, context, dataflow_config: dict) -> None:
 
-    dataflow_config:dict = Field(...)
+        super().__init__(context, dataflow_config)
 
-    def __init__(self, context:IContext) -> None:
-        super().__init__(context)
-
-        for database, table in self.dataflow_config.items():
+        for database, table in dataflow_config.items():
             for table, table_config in table.items():
                 table_config["datalake"] = self.datalake
                 table_config["datalake_protocol"] = self.datalake_protocol
@@ -24,7 +20,7 @@ class Dataflow(IDataflow):
                 table_config["deltalake_schema_repo"] = self._deltalake_schema_repo
                 table_config["pipeline_repo"] = self._pipeline_repo
                 table_config["context_id"] = self.context.context_id
-                table_config["dataflow_id"] = self.dataflow_id
+                table_config["dataflow_id"] = self.id
                 table_config["timeslice"] = self.context.timeslice
                 md = dataset_factory.get_dataset_type(
                     self.context, database, table, table_config, self.auditor
@@ -34,8 +30,6 @@ class Dataflow(IDataflow):
                 )
                 self.append(md)
                 self.audit_lineage()
-
-
 
     def audit_lineage(self):
         lineage = {"lineage": {str(self.id): {}}}
@@ -67,7 +61,7 @@ class Dataflow(IDataflow):
             raise SourceNotFound(str(e), self.sources)
 
         if source.auto_io:
-            source.execute()
+            source.read()
         return source.dataframe
 
     def destination_df(
@@ -84,4 +78,4 @@ class Dataflow(IDataflow):
             dst.save = save(dst)
 
         if dst.auto_io:
-            dst.execute()
+            dst.write()

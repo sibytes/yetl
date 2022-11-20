@@ -1,6 +1,9 @@
+from pydantic import BaseModel, Field
+
+
 class Warning:
-    def __init__(self, message: str) -> None:
-        self.message = message
+
+    message: str = Field(...)
 
     def __str__(self) -> str:
         return self.message

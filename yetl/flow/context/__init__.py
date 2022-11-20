@@ -1,3 +1,5 @@
-from ._spark_context import IContext, SparkContext
+from ._i_context import IContext
 
-__all__ = ["IContext", "SparkContext"]
+# from ._spark_context import SparkContext
+
+__all__ = ["IContext"]

@@ -1,4 +1,4 @@
-from yetl.v2.dataset import Reader
+from yetl.flow.dataset import Reader
 import json
 from unittest import TestCase
 

@@ -1,17 +1,25 @@
 from ..dataflow import Dataflow
 from .. import _config_provider as cp
 from pyspark.sql import SparkSession
+from datetime import datetime
 import json
+from ..audit import Audit
 from delta import configure_spark_with_delta_pip
-from ._i_context import IContext
-from typing import Any
-from pydantic import Field
+from ._icontext import IContext
 
 
 class SparkContext(IContext):
-    def __init__(self, **data: Any) -> None:
-        super().__init__(**data)
-        self.spark = self._get_spark_context(self.project, self.config)
+    def __init__(
+        self,
+        project: str,
+        name: str,
+        auditor: Audit,
+        timeslice: datetime = None,
+    ) -> None:
+
+        super().__init__(project, name, auditor, timeslice)
+
+        self.spark = self._get_spark_context(project, self.config)
 
         # set up the spark logger, the application has a python logger built in
         # but we also make the spark logger available should it be needed
@@ -21,29 +29,27 @@ class SparkContext(IContext):
             self.spark, self.project, self.config
         )
 
+        self.log.info(f"Checking spark and databricks versions")
         self.spark_version, self.databricks_version = self._get_spark_version(
             self.spark
         )
-        self.log.info(f"Spark version detected as : {self.spark_version}")
 
         if self.databricks_version:
             self.is_databricks = True
             self.log.info(
                 f"Databricks Runtime version detected as : {self.databricks_version}"
             )
+        else:
+            self.is_databricks = False
+            self.log.info(f"Databricks Runtime version not detected.")
+
+        self.log.info(f"Spark version detected as : {self.spark_version}")
 
         # Load and deserialise the spark dataflow configuration in to metaclasses (see dataset module)
         # The configuration file is loaded using the app name. This keeps intuitive tight
         # naming convention between datadlows and the config files that store them
         self.log.info(f"Setting application context dataflow {self.name}")
         self.dataflow = self._get_deltalake_flow()
-
-    spark_version = Field(default=None)
-    databricks_version = Field(default=None)
-    is_databricks = Field(default=False)
-    dataflow: Dataflow = Field(default=None)
-    spark: SparkSession = None
-    spark_logger: Any = None
 
     def _get_spark_version(self, spark: SparkSession):
 
@@ -99,6 +105,3 @@ class SparkContext(IContext):
         dataflow = Dataflow(self, dataflow_config)
 
         return dataflow
-
-    class Config:
-        arbitrary_types_allowed = True
