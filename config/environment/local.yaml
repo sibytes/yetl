@@ -12,14 +12,10 @@ spark:
     spark.sql.catalog.spark_catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
     spark.databricks.delta.merge.repartitionBeforeWrite.enabled: true
 
-  pipeline_file_repo:
+pipeline_repo:
+  pipeline_file:
     pipeline_root: "./config/{{project}}/pipelines"
     sql_root: "./config/{{project}}/sql"
-
-# pipeline_repo:
-#   pipeline_file:
-#     pipeline_root: "./config/{{project}}/pipelines"
-#     sql_root: "./config/{{project}}/sql"
 
 spark_schema_repo:
   spark_schema_file:

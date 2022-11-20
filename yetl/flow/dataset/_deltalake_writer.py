@@ -19,6 +19,7 @@ from typing import Any, Dict, List
 from ..parser.parser import JinjaVariables, render_jinja
 from ._properties import DeltaWriterProperties
 from ..save._save_mode_type import SaveModeType
+from ..file_system import FileSystemType
 
 
 class Write(BaseModel):
@@ -63,8 +64,8 @@ class DeltaWriter(Destination):
     dataflow_id: uuid.UUID
     dataframe: DataFrame = Field(default=None)
     dataset_id: uuid.UUID = Field(default=uuid.uuid4())
-    datalake_protocol: DatalakeProtocolOptions = Field(
-        default=DatalakeProtocolOptions.FILE
+    datalake_protocol: FileSystemType = Field(
+        default=FileSystemType.FILE
     )
     datalake: str = Field(...)
     database: str = Field(...)

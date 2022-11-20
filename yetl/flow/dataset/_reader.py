@@ -4,7 +4,8 @@ from ._decoder import parse_properties_key, parse_properties_values
 from typing import Any, Dict
 import json
 from ..parser.parser import JinjaVariables, render_jinja
-from ..parser._constants import DatalakeProtocolOptions, FormatOptions
+from ..parser._constants import FormatOptions
+from ..file_system import FileSystemType
 import uuid
 from ._base import Source
 from pyspark.sql import DataFrame
@@ -81,8 +82,8 @@ class Reader(Source):
     dataflow_id: uuid.UUID
     dataframe: DataFrame = Field(default=None)
     dataset_id: uuid.UUID = Field(default=uuid.uuid4())
-    datalake_protocol: DatalakeProtocolOptions = Field(
-        default=DatalakeProtocolOptions.FILE
+    datalake_protocol: FileSystemType = Field(
+        default=FileSystemType.FILE
     )
     datalake: str = Field(...)
     database: str = Field(...)

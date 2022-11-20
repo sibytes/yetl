@@ -62,11 +62,6 @@ class TimesliceOptions(Enum):
     TIMESLICE_PATH_DATE_FORMAT = "timeslice_path_date_format"
 
 
-class DatalakeProtocolOptions(Enum):
-    FILE = "file:"
-    DBFS = "dbfs:"
-
-
 class FormatOptions(Enum):
     JSON = "json"
     CSV = "csv"
