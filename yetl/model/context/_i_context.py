@@ -8,9 +8,10 @@ from .._timeslice import Timeslice, TimesliceUtcNow
 from ..audit import Audit
 from pydantic import BaseModel, Field
 from typing import Any
+from abc import ABC, abstractmethod
 
 
-class BaseContext(BaseModel):
+class IContext(BaseModel, ABC):
 
     auditor: Audit = Field(...)
     project: str = Field(...)
@@ -38,6 +39,7 @@ class BaseContext(BaseModel):
         # abstraction of the schema repo
         self.schema_repo_factory = schema_repo_factory
 
+    @abstractmethod
     def _get_deltalake_flow(self):
         pass
 

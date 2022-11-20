@@ -10,15 +10,3 @@
 # from src import customer_preferences_landing_to_raw
 # from src import demo_joined_landing_to_raw
 # from src import demo_landing_to_raw
-
-
-from yetl.model.context import BaseContext
-from yetl.model.audit import Audit
-
-context = BaseContext(
-    auditor=Audit(),
-    project="demo",
-    name="demo",
-)
-
-print(context.config)
