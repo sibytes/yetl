@@ -1,13 +1,10 @@
-from .. import _config_provider as cp
-from datetime import datetime
 from ..file_system import file_system_factory, IFileSystem, FileSystemType
 import logging
 import uuid
-from ..schema_repo import schema_repo_factory, ISchemaRepo
 from ..pipeline_repo import pipeline_repo_factory, IPipelineRepo
 from .._timeslice import Timeslice, TimesliceUtcNow
 from ..audit import Audit
-from pydantic import BaseModel, Field, PrivateAttr
+from pydantic import BaseModel, Field
 from typing import Any
 from abc import ABC, abstractmethod
 
@@ -40,7 +37,7 @@ class IContext(BaseModel, ABC):
             self, self.datalake_protocol
         )
 
-        # this we would pass into a factory, TODO: pipeline repo factory
+        # abstraction of the pipeline repo, used for loading pipeline configuration 
         self.pipeline_repository = pipeline_repo_factory.get_pipeline_repo_type(self.log, self.pipeline_repo_config)
 
     @abstractmethod

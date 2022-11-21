@@ -1,4 +1,4 @@
-datalake: "{{cwd}}/data"
+datalake: "./test/config/demo/data"
 datalake_protocol: "file:"
 spark:
   logging_level: ERROR
@@ -14,5 +14,5 @@ spark:
 
 pipeline_repo:
   pipeline_file:
-    pipeline_root: "./config/{{project}}/pipelines"
-    sql_root: "./config/{{project}}/sql"
+    pipeline_root: "./test/config/demo/pipelines"
+    sql_root: "./test/config/demo/sql"

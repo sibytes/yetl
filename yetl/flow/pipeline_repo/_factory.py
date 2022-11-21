@@ -33,13 +33,9 @@ class _PipelineRepoFactory:
         log.debug(f"Setting PipelineRepoType using type {pr_type}")
         pipeline_repo: IPipelineRepo = self._pipeline_repo.get(pr_type)
 
-        if not pipeline_repo:
-            self._logger.error(
-                f"PipelineRepoType {pr_type.name} not registered in the pipeline_repo factory"
-            )
-            raise ValueError(pr_type)
-
-        return pipeline_repo(**config)
+        pipeline_args = config.get(pipeline_repo_store, {})
+        
+        return pipeline_repo(**pipeline_args)
 
 
 factory = _PipelineRepoFactory()

@@ -4,8 +4,8 @@ from ._ipipeline_repo import IPipelineRepo
 
 class PipelineFileRepo(IPipelineRepo):
 
-    pipeline_root:str = Field(default="./config/{{project}}/pipelines")
-    sql_root:str = Field(default="./config/{{project}}/sql")
+    pipeline_root:str = Field(...)
+    sql_root:str = Field(...)
 
     def load_pipeline(self, name:str):
         pass

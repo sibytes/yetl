@@ -4,11 +4,12 @@ from unittest import TestCase
 import json
 from yetl.flow.file_system import FileSystemType
 from .fixtures_config import i_context_config
+from typing import Callable
 
 
 
 
-def test_icontext(i_context_config):
+def test_icontext(i_context_config:Callable):
     class TestContext(IContext):
         def _get_deltalake_flow(self):
             pass

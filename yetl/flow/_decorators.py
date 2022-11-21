@@ -41,7 +41,13 @@ def yetl_flow(project: str, pipeline_name: str = None):
             config = load_config(project=project)
             # TODO: abstract out spark context to IContext
             # create the context for the pipeline to run
-            context = SparkContext(project=project, name=_name, auditor=auditor, timeslice=timeslice)
+            context = SparkContext(
+                project=project, 
+                name=_name, 
+                auditor=auditor, 
+                timeslice=timeslice,
+                **config
+            )
 
             # run the pipeline
             context.log.info(
