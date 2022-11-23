@@ -11,12 +11,7 @@ from ..schema_repo import schema_repo_factory, ISchemaRepo
 
 class SparkContext(IContext):
     def __init__(self, **data: Any) -> None:
-        # _data = data
-        # super_fields:dict = super().__fields__
-        # super_alias:list = [v.alias for _,v in super_fields.items()]
-        # i_data = {k:v for k, v in data.items() if k in super_fields or k in super_alias}
-        # print(data)
-        
+                
         super().__init__(**data)
         self.spark = self._get_spark_context(self.project, self.spark_config)
 
