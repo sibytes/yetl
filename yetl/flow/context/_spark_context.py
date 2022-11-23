@@ -8,10 +8,9 @@ from pydantic import Field, BaseModel
 from ..schema_repo import schema_repo_factory, ISchemaRepo
 
 
-
 class SparkContext(IContext):
     def __init__(self, **data: Any) -> None:
-                
+
         super().__init__(**data)
         self.spark = self._get_spark_context(self.project, self.spark_config)
 
@@ -45,7 +44,6 @@ class SparkContext(IContext):
         self.log.info(f"Setting application context dataflow {self.name}")
         self.dataflow = self._get_deltalake_flow()
 
-
     spark_version: str = Field(default=None)
     databricks_version: dict = Field(default=None)
     is_databricks: bool = Field(default=False)
@@ -55,7 +53,7 @@ class SparkContext(IContext):
 
     deltalake_schema_repo_config: dict = Field(alias="deltalake_schema_repo")
     deltalake_schema_repository: ISchemaRepo = None
-    spark_config:dict = Field(...)
+    spark_config: dict = Field(...)
     spark: SparkSession = None
     spark_logger: Any = None
 
@@ -76,7 +74,7 @@ class SparkContext(IContext):
 
     def _get_spark_context(self, project: str, config: dict):
         self.log.info("Setting spark context")
-        spark_config = config.get("config",{})
+        spark_config = config.get("config", {})
 
         msg = json.dumps(spark_config, indent=4, default=str)
         self.log.debug(msg)

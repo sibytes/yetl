@@ -19,7 +19,7 @@ def yetl_flow(project: str, pipeline_name: str = None):
 
             # load the environment settings and configuration provider
             environment = Environment()
-            
+
             # default the name to the function name of the deltaflow
             if not pipeline_name:
                 _name = function.__name__

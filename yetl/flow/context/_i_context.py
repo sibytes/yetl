@@ -9,6 +9,7 @@ from typing import Any
 from abc import ABC, abstractmethod
 from .._environment import Environment
 
+
 class IContext(BaseModel, ABC):
 
     auditor: Audit = Field(...)
@@ -22,8 +23,8 @@ class IContext(BaseModel, ABC):
     context_id: uuid.UUID = Field(default=uuid.uuid4())
     log: logging.Logger = None
     fs: IFileSystem = None
-    environment:Environment = Field(...)
-    
+    environment: Environment = Field(...)
+
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
         self.log = logging.getLogger(self.project)

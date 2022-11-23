@@ -8,6 +8,7 @@ from typing import Any
 
 _EXT = "yaml"
 
+
 class EnvironmentSettings(BaseSettings):
 
     root: str = Field(default="./config", env="YETL_ROOT")
@@ -38,9 +39,7 @@ class Environment(BaseModel):
     def load(self, project: str):
         _logger = logging.getLogger(project)
         path = self.environment_filepath()
-        _logger.info(
-            f"Loading Dataflow configuration from file {path}"
-        )
+        _logger.info(f"Loading Dataflow configuration from file {path}")
         with open(path, "r", encoding="utf-8") as f:
             config = f.read()
 
@@ -57,9 +56,7 @@ class Environment(BaseModel):
 
         _logger = logging.getLogger(project)
         path = self.pipeline_filepath(root, pipeline_name)
-        _logger.info(
-            f"Loading Dataflow configuration from file {path}"
-        )
+        _logger.info(f"Loading Dataflow configuration from file {path}")
         with open(path, "r", encoding="utf-8") as f:
             pipeline = yaml.safe_load(f.read())
 

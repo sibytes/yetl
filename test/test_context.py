@@ -5,6 +5,7 @@ import json
 from yetl.flow.file_system import FileSystemType
 from .fixtures_config import i_context_config
 from typing import Callable
+from yetl.flow._environment import Environment
 
 
 def test_icontext(i_context_config: Callable):
@@ -12,8 +13,13 @@ def test_icontext(i_context_config: Callable):
         def _get_deltalake_flow(self):
             pass
 
+    environment = Environment()
     context = TestContext(
-        auditor=Audit(), project="demo", name="demo", **i_context_config
+        auditor=Audit(),
+        project="demo",
+        name="demo",
+        environment=environment,
+        **i_context_config
     )
 
     assert context.datalake == i_context_config["datalake"]
