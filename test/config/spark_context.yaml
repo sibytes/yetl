@@ -1,6 +1,6 @@
 datalake: "./test/config/demo/data"
 datalake_protocol: "file:"
-spark:
+spark_config:
   logging_level: ERROR
   config:
     spark.master: local

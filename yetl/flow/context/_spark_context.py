@@ -4,22 +4,28 @@ import json
 from delta import configure_spark_with_delta_pip
 from ._i_context import IContext
 from typing import Any
-from pydantic import Field
+from pydantic import Field, BaseModel
 from ..schema_repo import schema_repo_factory, ISchemaRepo
 
 
 
 class SparkContext(IContext):
     def __init__(self, **data: Any) -> None:
+        # _data = data
+        # super_fields:dict = super().__fields__
+        # super_alias:list = [v.alias for _,v in super_fields.items()]
+        # i_data = {k:v for k, v in data.items() if k in super_fields or k in super_alias}
+        # print(data)
+        
         super().__init__(**data)
-        self.spark = self._get_spark_context(self.project, self.config)
+        self.spark = self._get_spark_context(self.project, self.spark_config)
 
         # set up the spark logger, the application has a python logger built in
         # but we also make the spark logger available should it be needed
         # because the spark logger is extremely verbose it's useful to the able
         # to set the level and use python native logging.
         self.spark_logger = self._get_spark_logger(
-            self.spark, self.project, self.config
+            self.spark, self.project, self.spark_config
         )
 
         self.spark_version, self.databricks_version = self._get_spark_version(
@@ -48,13 +54,13 @@ class SparkContext(IContext):
     spark_version: str = Field(default=None)
     databricks_version: dict = Field(default=None)
     is_databricks: bool = Field(default=False)
-    # TODO: Convert to pydantic models
-    spark_schema_repo: dict = Field(...)
-    pipeline_repo: dict = Field(...)
 
-    spark_schema_repo_config: dict = Field(...)
-    spark_schema_repo: ISchemaRepo = None
-    deltalake_schema_repo: ISchemaRepo = None
+    spark_schema_repo_config: dict = Field(alias="spark_schema_repo")
+    spark_schema_repository: ISchemaRepo = None
+
+    deltalake_schema_repo_config: dict = Field(alias="deltalake_schema_repo")
+    deltalake_schema_repository: ISchemaRepo = None
+    spark_config:dict = Field(...)
     spark: SparkSession = None
     spark_logger: Any = None
 
@@ -75,7 +81,7 @@ class SparkContext(IContext):
 
     def _get_spark_context(self, project: str, config: dict):
         self.log.info("Setting spark context")
-        spark_config = config["spark"]["config"]
+        spark_config = config.get("config",{})
 
         msg = json.dumps(spark_config, indent=4, default=str)
         self.log.debug(msg)
@@ -92,7 +98,7 @@ class SparkContext(IContext):
 
     def _get_spark_logger(self, spark: SparkSession, project: str, config: dict):
 
-        log_level = config["spark"].get("logging_level", "ERROR")
+        log_level = config.get("logging_level", "ERROR")
         self.log.info(f"Setting application context spark logger at level {log_level}")
         sc = spark.sparkContext
         sc.setLogLevel(log_level)
