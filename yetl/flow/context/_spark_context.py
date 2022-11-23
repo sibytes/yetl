@@ -1,5 +1,4 @@
 # from ..dataflow import Dataflow
-from .. import _config_provider as cp
 from pyspark.sql import SparkSession
 import json
 from delta import configure_spark_with_delta_pip
@@ -7,6 +6,8 @@ from ._i_context import IContext
 from typing import Any
 from pydantic import Field
 from ..schema_repo import schema_repo_factory, ISchemaRepo
+
+
 
 class SparkContext(IContext):
     def __init__(self, **data: Any) -> None:
@@ -33,8 +34,8 @@ class SparkContext(IContext):
             )
 
         # abstraction of the schema repo
-        self.spark_schema_repo: ISchemaRepo = (
-            schema_repo_factory.get_schema_repo_type(self, config=self.config)
+        self.spark_schema_repo: ISchemaRepo = schema_repo_factory.get_schema_repo_type(
+            self, config=self.config
         )
 
         # Load and deserialise the spark dataflow configuration in to metaclasses (see dataset module)
@@ -43,15 +44,15 @@ class SparkContext(IContext):
         self.log.info(f"Setting application context dataflow {self.name}")
         self.dataflow = self._get_deltalake_flow()
 
-    spark_version:str = Field(default=None)
-    databricks_version:dict = Field(default=None)
-    is_databricks:bool = Field(default=False)
-    # dataflow: Dataflow = Field(default=None)
-    spark_schema_repo:dict = Field(...)
-    pipeline_repo:dict = Field(...)
-    
 
-    spark_schema_repo_config:dict = Field(...)
+    spark_version: str = Field(default=None)
+    databricks_version: dict = Field(default=None)
+    is_databricks: bool = Field(default=False)
+    # TODO: Convert to pydantic models
+    spark_schema_repo: dict = Field(...)
+    pipeline_repo: dict = Field(...)
+
+    spark_schema_repo_config: dict = Field(...)
     spark_schema_repo: ISchemaRepo = None
     deltalake_schema_repo: ISchemaRepo = None
     spark: SparkSession = None
@@ -102,7 +103,9 @@ class SparkContext(IContext):
 
     def _get_deltalake_flow(self):
         # load the data pipeline provider
-        dataflow_config: dict = cp.load_pipeline_config(self.project, self._pipeline_root, self.name)
+        dataflow_config: dict = self.environment.load_pipeline(
+            self.project, self._pipeline_root, self.name
+        )
         dataflow_config = dataflow_config.get("dataflow")
 
         self.log.debug("Deserializing configuration into Dataflow")

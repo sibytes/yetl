@@ -6,11 +6,9 @@
 # from pipelines import adworks_landing_to_raw
 
 
-# from src import customer_details_landing_to_raw
+from src import customer_details_landing_to_raw
 # from src import customer_preferences_landing_to_raw
 # from src import demo_joined_landing_to_raw
 # from src import demo_landing_to_raw
 
-from py_test.unit import test_context
-from py_test.unit.fixtures_config import i_context_config
-test_context.test_icontext(i_context_config)
+

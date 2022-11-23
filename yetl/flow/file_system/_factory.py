@@ -42,7 +42,9 @@ class _FileSystemFactory:
             return file_system(context)
 
         else:
-            raise Exception(f"FileSystemType cannot be produced using {type(fileSystemType)}")
+            raise Exception(
+                f"FileSystemType cannot be produced using {type(fileSystemType)}"
+            )
 
 
 factory = _FileSystemFactory()

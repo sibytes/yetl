@@ -1,8 +1,8 @@
 from pydantic import BaseModel
 from abc import ABC, abstractmethod, abstractproperty
 
-class Dataset(BaseModel, ABC):
 
+class Dataset(BaseModel, ABC):
     @abstractmethod
     def initialise(self):
         pass
@@ -48,7 +48,6 @@ class Destination(Dataset, ABC):
 
 
 class Source(Dataset):
-
     @property
     def is_source(self):
         return True

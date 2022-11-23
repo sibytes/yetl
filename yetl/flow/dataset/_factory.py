@@ -2,6 +2,7 @@ from enum import Enum
 from ._base import Dataset
 from ._reader import Reader
 from ._deltalake_writer import DeltaWriter
+
 # from ._stream_reader import StreamReader
 # from ._stream_writer import StreamWriter
 # from ._sql_reader import SQLReader

@@ -4,7 +4,8 @@ from . import _logging_config
 from .context import SparkContext
 from .audit import Audit
 from datetime import datetime
-from ._config_provider import load_config
+from ._environment import Environment
+
 
 class YetlFlowException(Exception):
     def __init__(self, message):
@@ -16,8 +17,10 @@ def yetl_flow(project: str, pipeline_name: str = None):
     def decorate(function):
         def wrap_function(*args, **kwargs):
 
+            # load the environment settings and configuration provider
+            environment = Environment()
+            
             # default the name to the function name of the deltaflow
-
             if not pipeline_name:
                 _name = function.__name__
 
@@ -38,15 +41,16 @@ def yetl_flow(project: str, pipeline_name: str = None):
             if "timeslice" in kwargs.keys():
                 del kwargs["timeslice"]
 
-            config = load_config(project=project)
+            config = environment.load(project=project)
             # TODO: abstract out spark context to IContext
             # create the context for the pipeline to run
             context = SparkContext(
-                project=project, 
-                name=_name, 
-                auditor=auditor, 
+                project=project,
+                name=_name,
+                auditor=auditor,
                 timeslice=timeslice,
-                **config
+                environment=environment,
+                **config,
             )
 
             # run the pipeline

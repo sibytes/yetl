@@ -1,10 +1,12 @@
 # from multiprocessing import context
 from ..parser._constants import *
+
 # from ..schema_repo import ISchemaRepo, SchemaNotFound
 
 from .. import _delta_lake as dl
 from pyspark.sql import DataFrame
 import uuid
+
 # from typing import ChainMap
 # from ..parser import parser
 # from ..save import save_factory, Save
@@ -33,7 +35,6 @@ class Write(BaseModel):
     mode: SaveModeType = Field(default=SaveModeType.APPEND)
     _merge_schema: bool = PrivateAttr(default=False)
 
-
     @property
     def merge_schema(self) -> bool:
         return self.merge_schema
@@ -45,7 +46,6 @@ class Write(BaseModel):
 
 
 class DeltaWriter(Destination):
-
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
         self.initialise()
@@ -53,20 +53,18 @@ class DeltaWriter(Destination):
     def initialise(self):
         self._replacements = {
             JinjaVariables.DATABASE_NAME: self.database,
-            JinjaVariables.TABLE_NAME: self.table
+            JinjaVariables.TABLE_NAME: self.table,
         }
         path = f"{self.datalake_protocol.value}{self.datalake}/{self.path}"
         self.path = render_jinja(path, self._replacements)
 
     timeslice: Timeslice = Field(default=TimesliceUtcNow())
-    catalog:str = Field(None)
+    catalog: str = Field(None)
     context_id: uuid.UUID
     dataflow_id: uuid.UUID
     dataframe: DataFrame = Field(default=None)
     dataset_id: uuid.UUID = Field(default=uuid.uuid4())
-    datalake_protocol: FileSystemType = Field(
-        default=FileSystemType.FILE
-    )
+    datalake_protocol: FileSystemType = Field(default=FileSystemType.FILE)
     datalake: str = Field(...)
     database: str = Field(...)
     table: str = Field(...)
@@ -75,10 +73,10 @@ class DeltaWriter(Destination):
     )
     format: FormatOptions = Field(default=FormatOptions.DELTA)
     path: str = Field(...)
-    check_constraints:Dict[str, str] = Field(default=None)
-    partitioned_by:List[str] = Field(default=None)
-    zorder_by:List[str] = Field(default=None)
-    write:Write = Field(default=Write())
+    check_constraints: Dict[str, str] = Field(default=None)
+    partitioned_by: List[str] = Field(default=None)
+    zorder_by: List[str] = Field(default=None)
+    write: Write = Field(default=Write())
     _initial_load: bool = PrivateAttr(default=False)
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
 
@@ -128,7 +126,7 @@ class DeltaWriter(Destination):
     def initial_load(self, value: bool):
         # when it's the initial load and schema's aren't declared
         # the delta table is created 1st with no schema and the
-        # data schema loads into it. To do this we override the 
+        # data schema loads into it. To do this we override the
         # merge schema options so the data schema is merged in
         # on the 1st load without requiring changes to pipeline.
         if not self.write.merge_schema and value:

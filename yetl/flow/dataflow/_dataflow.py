@@ -9,11 +9,12 @@ from typing import Any
 from ..context import IContext
 from pydantic import Field
 
+
 class Dataflow(IDataflow):
 
-    dataflow_config:dict = Field(...)
+    dataflow_config: dict = Field(...)
 
-    def __init__(self, context:IContext) -> None:
+    def __init__(self, context: IContext) -> None:
         super().__init__(context)
 
         for database, table in self.dataflow_config.items():
@@ -34,8 +35,6 @@ class Dataflow(IDataflow):
                 )
                 self.append(md)
                 self.audit_lineage()
-
-
 
     def audit_lineage(self):
         lineage = {"lineage": {str(self.id): {}}}

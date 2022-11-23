@@ -3,6 +3,7 @@ from ._reader import Read, Reader
 from ._base import Source, Destination, Dataset
 from ._deltalake_writer import Write, DeltaWriter
 from ._factory import factory as dataset_factory
+
 __all__ = [
     "Source",
     "Destination",
@@ -14,5 +15,5 @@ __all__ = [
     "Reader",
     "Write",
     "DeltaWriter",
-    "dataset_factory"
+    "dataset_factory",
 ]

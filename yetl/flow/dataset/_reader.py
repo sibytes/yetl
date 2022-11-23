@@ -13,12 +13,14 @@ from .._timeslice import Timeslice, TimesliceUtcNow
 from pydantic import BaseModel, Field
 from enum import Enum
 
+
 def _yetl_properties_dumps(obj: dict, *, default):
     """Decodes the data back into a dictionary with yetl configuration properties names"""
     obj = {
         parse_properties_key(k): parse_properties_values(k, v) for k, v in obj.items()
     }
     return json.dumps(obj, default=default)
+
 
 class ReadModeOptions(Enum):
     PERMISSIVE = "PERMISSIVE"
@@ -57,6 +59,7 @@ class Thresholds(BaseModel):
     warning: ThresholdLimit = Field(default=ThresholdLimit())
     error: ThresholdLimit = Field(default=ThresholdLimit())
 
+
 class Reader(Source):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
@@ -77,14 +80,12 @@ class Reader(Source):
         self.path = render_jinja(path, self._replacements)
 
     timeslice: Timeslice = Field(default=TimesliceUtcNow())
-    catalog:str = Field(None)
+    catalog: str = Field(None)
     context_id: uuid.UUID
     dataflow_id: uuid.UUID
     dataframe: DataFrame = Field(default=None)
     dataset_id: uuid.UUID = Field(default=uuid.uuid4())
-    datalake_protocol: FileSystemType = Field(
-        default=FileSystemType.FILE
-    )
+    datalake_protocol: FileSystemType = Field(default=FileSystemType.FILE)
     datalake: str = Field(...)
     database: str = Field(...)
     table: str = Field(...)
