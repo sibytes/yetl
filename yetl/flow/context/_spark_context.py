@@ -33,9 +33,18 @@ class SparkContext(IContext):
                 f"Databricks Runtime version detected as : {self.databricks_version}"
             )
 
-        # abstraction of the schema repo
-        self.spark_schema_repo: ISchemaRepo = schema_repo_factory.get_schema_repo_type(
-            self, config=self.config
+        # abstraction of the spark schema repo
+        self.spark_schema_repository: ISchemaRepo = (
+            schema_repo_factory.get_schema_repo_type(
+                self, config=self.spark_schema_repo_config
+            )
+        )
+
+        # abstraction of the deltalake schema repo
+        self.deltalake_schema_repository: ISchemaRepo = (
+            schema_repo_factory.get_schema_repo_type(
+                self, config=self.deltalake_schema_repo_config
+            )
         )
 
         # Load and deserialise the spark dataflow configuration in to metaclasses (see dataset module)
@@ -49,10 +58,10 @@ class SparkContext(IContext):
     is_databricks: bool = Field(default=False)
 
     spark_schema_repo_config: dict = Field(alias="spark_schema_repo")
-    spark_schema_repository: ISchemaRepo = None
+    spark_schema_repository: ISchemaRepo = Field(default=None)
 
     deltalake_schema_repo_config: dict = Field(alias="deltalake_schema_repo")
-    deltalake_schema_repository: ISchemaRepo = None
+    deltalake_schema_repository: ISchemaRepo = Field(default=None)
     spark_config: dict = Field(...)
     spark: SparkSession = None
     spark_logger: Any = None

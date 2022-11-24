@@ -31,6 +31,7 @@ class IContext(BaseModel, ABC):
         self.auditor.dataflow({"context_id": str(self.context_id)})
 
         # abstraction of the filesystem for driver file commands e.g. rm, ls, mv, cp
+        # not sure this is needed in context?
         self.fs: IFileSystem = file_system_factory.get_file_system_type(
             self, self.datalake_protocol
         )

@@ -1,29 +1,40 @@
 import json
 import yaml
-from ._ischema_repo import ISchemaRepo
+from ._i_schema_repo import ISchemaRepo
 from pyspark.sql.types import StructType
 from ..file_system import FileFormat, IFileSystem, file_system_factory, FileSystemType
 import os
 from ._exceptions import SchemaNotFound
+from pydantic import Field
+import logging
+from typing import Any
+
+_SCHEMA_ROOT = "./config/schema/spark"
+_EXT = "yaml"
 
 
 class SparkFileSchemaRepo(ISchemaRepo):
 
-    _SCHEMA_ROOT = "./config/schema/spark"
-    _EXT = "yaml"
+    root: str = Field(default=_SCHEMA_ROOT, alias="spark_schema_root")
+    log: logging.Logger = None
+    # TODO: mkae private after FS is pydantic
+    fs: IFileSystem = None
 
-    def __init__(self, context, config: dict) -> None:
-        super().__init__(context, config)
-        self.root_path = config["spark_schema_file"].get(
-            "spark_schema_root", self._SCHEMA_ROOT
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+        # abstraction of the filesystem for driver file commands e.g. rm, ls, mv, cp
+        self.fs: IFileSystem = file_system_factory.get_file_system_type(
+            self, FileSystemType.FILE
         )
 
     def _mkpath(self, database_name: str, table_name: str, sub_location: str):
         """Function that builds the schema path"""
         if sub_location:
-            return f"{self.root_path}/{sub_location}/{database_name}/{table_name}.{self._EXT}"
+            return (
+                f"{self.root_path}/{sub_location}/{database_name}/{table_name}.{_EXT}"
+            )
         else:
-            return f"{self.root_path}/{database_name}/{table_name}.{self._EXT}"
+            return f"{self.root_path}/{database_name}/{table_name}.{_EXT}"
 
     def save_schema(
         self,
@@ -51,22 +62,11 @@ class SparkFileSchemaRepo(ISchemaRepo):
         path = self._mkpath(database_name, table_name, sub_location)
         path = os.path.abspath(path)
 
-        # this was in thought that schema's could be maintain and loaded off DBFS for databricks
-        # it actually works much better using the local repo files
-        # maybe considered for a future use case - we need more configuration to set the schema store
-        # type, since it's explicitly hand in hand with databricks spark env.
-        # fs: IFileSystem = self.context.fs
-
-        # file system is working fine for databricks and vanilla spark deployments.
-        fs: IFileSystem = file_system_factory.get_file_system_type(
-            self.context, FileSystemType.FILE
-        )
-
-        self.context.log.info(
-            f"Loading schema for dataset {database_name}.{table_name} from {path} using {type(fs)}"
+        self.log.info(
+            f"Loading schema for dataset {database_name}.{table_name} from {path} using {type(self.fs)}"
         )
         try:
-            schema = fs.read_file(path, FileFormat.YAML)
+            schema = self.fs.read_file(path, FileFormat.YAML)
         except Exception as e:
             raise SchemaNotFound(path) from e
 
@@ -82,3 +82,6 @@ class SparkFileSchemaRepo(ISchemaRepo):
             raise Exception(msg) from e
 
         return spark_schema
+
+    class Config:
+        arbitrary_types_allowed = True

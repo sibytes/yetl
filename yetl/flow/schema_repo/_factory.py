@@ -4,14 +4,14 @@ from enum import Enum
 from ._spark_file_schema_repo import SparkFileSchemaRepo
 from ._deltalake_sql_file import DeltalakeSchemaFile
 from ._sql_reader_file import SqlReaderFile
-from ._ischema_repo import ISchemaRepo
+from ._i_schema_repo import ISchemaRepo
 import logging
 
 
 class SchemaRepoType(Enum):
-    SPARK_SCHEMA_FILE = 1
-    DELTALAKE_SQL_FILE = 2
-    PIPELINE_FILE = 3
+    SPARK_SCHEMA_FILE = "spark_schema_file"
+    DELTALAKE_SQL_FILE = "deltalake_sql_file"
+    PIPELINE_FILE = "sql_root"
 
 
 class _SchemaRepoFactory:
@@ -25,18 +25,10 @@ class _SchemaRepoFactory:
         self._logger.debug(f"Register file system type {schema_repo_type} as {type}")
         self._schema_repo[sr_type] = schema_repo_type
 
-    def _get_sr_type(self, name: str):
-        name = name.strip().upper()
-        try:
-            if SchemaRepoType[name] in SchemaRepoType:
-                return SchemaRepoType[name]
-        except:
-            return None
-
     def get_schema_repo_type(self, context, config: dict) -> ISchemaRepo:
 
         schema_repo_store: str = next(iter(config))
-        sr_type: SchemaRepoType = self._get_sr_type(schema_repo_store)
+        sr_type: SchemaRepoType = SchemaRepoType(schema_repo_store)
 
         context.log.info(f"Setting up schema repo on {schema_repo_store} ")
 
@@ -49,7 +41,7 @@ class _SchemaRepoFactory:
             )
             raise ValueError(sr_type)
 
-        return schema_repo(context, config)
+        return schema_repo(log=context.log, **config)
 
 
 factory = _SchemaRepoFactory()
