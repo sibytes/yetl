@@ -2,7 +2,7 @@ from enum import Enum
 
 from ._dbfs_file_system import DbfsFileSystem
 from ._file_system import FileSystem
-from ._ifile_system import IFileSystem
+from ._i_file_system import IFileSystem
 from typing import Union
 import logging
 

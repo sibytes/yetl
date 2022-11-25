@@ -1,15 +1,21 @@
 from pyspark.sql import SparkSession
-from ._ifile_system import IFileSystem, FileFormat
-from ._ifile_system import IFileSystem, FileFormat
-from typing import Union
+from ._i_file_system import IFileSystem, FileFormat
+from ._i_file_system import IFileSystem, FileFormat
+from typing import Union, Callable, Any
 import yaml
 import json
+from pydantic import PrivateAttr, Field
 
 
 class DbfsFileSystem(IFileSystem):
-    def __init__(self, context: str, datalake_protocol: str = "dbfs:") -> None:
-        super().__init__(context, datalake_protocol)
-        self._fs = self._get_dbutils(context.spark).fs
+
+    _fs: Callable = PrivateAttr(...)
+    project: str = Field(...)
+
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+        spark = SparkSession.builder.appName().getOrCreate
+        self._fs = self._get_dbutils(spark).fs
 
     def _get_dbutils(self, spark: SparkSession):
         from pyspark.dbutils import DBUtils
@@ -120,3 +126,6 @@ class DbfsFileSystem(IFileSystem):
                 raise Exception(
                     f"File format not supported {file_format} when writing file {path}"
                 )
+
+    class Config:
+        arbitrary_types_allowed = True
