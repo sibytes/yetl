@@ -13,8 +13,11 @@ class DbfsFileSystem(IFileSystem):
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
-        spark = SparkSession.builder.appName().getOrCreate()
-        self._fs = self._get_dbutils(spark).fs
+        spark = SparkSession.builder.getOrCreate()
+        try:
+            self._fs = self._get_dbutils(spark).fs
+        except ModuleNotFoundError as e:
+            raise Exception("Cannot import DBUtils, most likely cause is having DBFS configured for environment that isn't databricks and doesn't support.") from e
 
     def _get_dbutils(self, spark: SparkSession):
         from pyspark.dbutils import DBUtils
@@ -125,6 +128,10 @@ class DbfsFileSystem(IFileSystem):
                 raise Exception(
                     f"File format not supported {file_format} when writing file {path}"
                 )
+
+    def exists(self, path: str) -> bool:
+        raise NotImplementedError()
+
 
     class Config:
         arbitrary_types_allowed = True

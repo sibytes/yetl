@@ -3,10 +3,19 @@ from pyspark.sql import SparkSession
 from ._spark_context import SparkContext
 from typing import Any
 from pydantic import Field
+from ..file_system import file_system_factory, IFileSystem, FileSystemType
 
 class DatabricksContext(SparkContext):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
+
+        # abstraction of the filesystem for driver file commands e.g. rm, ls, mv, cp
+        # this is the datalake file system which is where the data is held
+        # this is so we can perform commands directly on the datalake store.
+        self.datalake_protocol = FileSystemType.DBFS
+        self.datalake_fs: IFileSystem = file_system_factory.get_file_system_type(
+            self.datalake_protocol
+        )
 
         self.databricks_version = self._get_databricks_version(
             self.spark

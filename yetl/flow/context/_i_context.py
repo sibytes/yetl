@@ -1,4 +1,4 @@
-from ..file_system import file_system_factory, IFileSystem, FileSystemType
+from ..file_system import IFileSystem, FileSystemType
 import logging
 import uuid
 from ..pipeline_repo import pipeline_repo_factory, IPipelineRepo
@@ -6,11 +6,11 @@ from .._timeslice import Timeslice, TimesliceUtcNow
 from ..audit import Audit
 from pydantic import BaseModel, Field
 from typing import Any
-from abc import ABC, abstractmethod
 from .._environment import Environment
+from ._context_options import ContextType
 
 
-class IContext(BaseModel, ABC):
+class IContext(BaseModel):
 
     auditor: Audit = Field(...)
     project: str = Field(...)
@@ -24,18 +24,12 @@ class IContext(BaseModel, ABC):
     log: logging.Logger = None
     datalake_fs: IFileSystem = None
     environment: Environment = Field(...)
+    context_type:ContextType = Field(...)
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
         self.log = logging.getLogger(self.project)
         self.auditor.dataflow({"context_id": str(self.context_id)})
-
-        # abstraction of the filesystem for driver file commands e.g. rm, ls, mv, cp
-        # this is the datalake file system which is where the data is held
-        # this is so we can perform commands directly on the datalake store.
-        self.datalake_fs: IFileSystem = file_system_factory.get_file_system_type(
-            self.datalake_protocol
-        )
 
         # abstraction of the pipeline repo, used for loading pipeline configuration
         self.pipeline_repository = pipeline_repo_factory.get_pipeline_repo_type(

@@ -17,3 +17,11 @@ def load_config(name: str) -> dict:
 @pytest.fixture
 def i_context_config():
     return load_config("i_context")
+
+@pytest.fixture
+def spark_context_config():
+    return load_config("spark_context")
+
+@pytest.fixture
+def databricks_context_config():
+    return load_config("databricks_context")
