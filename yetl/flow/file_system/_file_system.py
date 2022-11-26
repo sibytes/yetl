@@ -1,12 +1,17 @@
 import os
 import shutil
-from ._i_file_system import IFileSystem, FileFormat
-from typing import Type, Union
+from ._i_file_system import IFileSystem
+from ._file_system_options import FileFormat
+from typing import Union
 import yaml
 import json
+from typing import Any
 
 
 class FileSystem(IFileSystem):
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+
     def rm(self, path: str, recurse=False) -> bool:
         """Removes a file or directory."""
 

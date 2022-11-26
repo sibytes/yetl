@@ -16,7 +16,7 @@ _EXT = "yaml"
 class SparkFileSchemaRepo(ISchemaRepo):
 
     root: str = Field(default=_SCHEMA_ROOT, alias="spark_schema_root")
-    log: logging.Logger = None
+    # TODO:log: logging.Logger = None
     # TODO: mkae private after FS is pydantic
     fs: IFileSystem = None
 
@@ -24,7 +24,7 @@ class SparkFileSchemaRepo(ISchemaRepo):
         super().__init__(**data)
         # abstraction of the filesystem for driver file commands e.g. rm, ls, mv, cp
         self.fs: IFileSystem = file_system_factory.get_file_system_type(
-            self, FileSystemType.FILE
+            FileSystemType.FILE
         )
 
     def _mkpath(self, database_name: str, table_name: str, sub_location: str):
@@ -62,9 +62,9 @@ class SparkFileSchemaRepo(ISchemaRepo):
         path = self._mkpath(database_name, table_name, sub_location)
         path = os.path.abspath(path)
 
-        self.log.info(
-            f"Loading schema for dataset {database_name}.{table_name} from {path} using {type(self.fs)}"
-        )
+        # self.log.info(
+        #     f"Loading schema for dataset {database_name}.{table_name} from {path} using {type(self.fs)}"
+        # )
         try:
             schema = self.fs.read_file(path, FileFormat.YAML)
         except Exception as e:

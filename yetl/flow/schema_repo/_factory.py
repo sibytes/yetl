@@ -25,14 +25,14 @@ class _SchemaRepoFactory:
         self._logger.debug(f"Register file system type {schema_repo_type} as {type}")
         self._schema_repo[sr_type] = schema_repo_type
 
-    def get_schema_repo_type(self, context, config: dict) -> ISchemaRepo:
+    def get_schema_repo_type(self, config: dict) -> ISchemaRepo:
 
         schema_repo_store: str = next(iter(config))
         sr_type: SchemaRepoType = SchemaRepoType(schema_repo_store)
 
-        context.log.info(f"Setting up schema repo on {schema_repo_store} ")
+        self._logger.info(f"Setting up schema repo on {schema_repo_store} ")
 
-        context.log.debug(f"Setting SchemaRepoType using type {sr_type}")
+        self._logger.debug(f"Setting SchemaRepoType using type {sr_type}")
         schema_repo: ISchemaRepo = self._schema_repo.get(sr_type)
 
         if not schema_repo:
@@ -41,7 +41,7 @@ class _SchemaRepoFactory:
             )
             raise ValueError(sr_type)
 
-        return schema_repo(log=context.log, **config)
+        return schema_repo(**config)
 
 
 factory = _SchemaRepoFactory()

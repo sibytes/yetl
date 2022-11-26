@@ -23,7 +23,7 @@ class SqlReaderFile(ISchemaRepo):
         # abstraction of the filesystem for driver file commands e.g. rm, ls, mv, cp
         # not sure this is needed in context?
         self.fs: IFileSystem = file_system_factory.get_file_system_type(
-            self, FileSystemType.FILE
+            FileSystemType.FILE
         )
 
     def __init__(self, context, config: dict) -> None:

@@ -36,14 +36,14 @@ class SparkContext(IContext):
         # abstraction of the spark schema repo
         self.spark_schema_repository: ISchemaRepo = (
             schema_repo_factory.get_schema_repo_type(
-                self, config=self.spark_schema_repo_config
+                self.spark_schema_repo_config
             )
         )
 
         # abstraction of the deltalake schema repo
         self.deltalake_schema_repository: ISchemaRepo = (
             schema_repo_factory.get_schema_repo_type(
-                self, config=self.deltalake_schema_repo_config
+                self.deltalake_schema_repo_config
             )
         )
 

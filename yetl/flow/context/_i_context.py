@@ -22,7 +22,7 @@ class IContext(BaseModel, ABC):
     timeslice: Timeslice = Field(default=TimesliceUtcNow())
     context_id: uuid.UUID = Field(default=uuid.uuid4())
     log: logging.Logger = None
-    fs: IFileSystem = None
+    datalake_fs: IFileSystem = None
     environment: Environment = Field(...)
 
     def __init__(self, **data: Any) -> None:
@@ -31,14 +31,15 @@ class IContext(BaseModel, ABC):
         self.auditor.dataflow({"context_id": str(self.context_id)})
 
         # abstraction of the filesystem for driver file commands e.g. rm, ls, mv, cp
-        # not sure this is needed in context?
-        self.fs: IFileSystem = file_system_factory.get_file_system_type(
-            self, self.datalake_protocol
+        # this is the datalake file system which is where the data is held
+        # this is so we can perform commands directly on the datalake store.
+        self.datalake_fs: IFileSystem = file_system_factory.get_file_system_type(
+            self.datalake_protocol
         )
 
         # abstraction of the pipeline repo, used for loading pipeline configuration
         self.pipeline_repository = pipeline_repo_factory.get_pipeline_repo_type(
-            self.log, self.pipeline_repo_config
+            self.pipeline_repo_config
         )
 
     @abstractmethod

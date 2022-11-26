@@ -1,15 +1,8 @@
-from enum import Enum
-
 from ._dbfs_file_system import DbfsFileSystem
 from ._file_system import FileSystem
 from ._i_file_system import IFileSystem
-from typing import Union
+from ._file_system_options import FileSystemType
 import logging
-
-
-class FileSystemType(Enum):
-    FILE = "file:"
-    DBFS = "dbfs:"
 
 
 class _FileSystemFactory:
@@ -31,15 +24,14 @@ class _FileSystemFactory:
         except:
             return None
 
-    def get_file_system_type(
-        self, context, fileSystemType: FileSystemType
-    ) -> IFileSystem:
+    def get_file_system_type(self, fileSystemType: FileSystemType) -> IFileSystem:
 
         if isinstance(fileSystemType, FileSystemType):
             # return based on the type asked for.
-            context.log.debug(f"Setting FileSystemType using type {fileSystemType}")
+            # TODO: log.debug(f"Setting FileSystemType using type {fileSystemType}")
             file_system: IFileSystem = self._file_system.get(fileSystemType)
-            return file_system(context)
+            # different file systems have different arguments
+            return file_system(protocol=fileSystemType)
 
         else:
             raise Exception(
@@ -49,5 +41,4 @@ class _FileSystemFactory:
 
 factory = _FileSystemFactory()
 factory.register_file_system_type(FileSystemType.FILE, FileSystem)
-# factory.register_file_system_type(FileSystemType.DBFS, DbfsFileSystem)
-factory.register_file_system_type(FileSystemType.DBFS, FileSystem)
+factory.register_file_system_type(FileSystemType.DBFS, DbfsFileSystem)

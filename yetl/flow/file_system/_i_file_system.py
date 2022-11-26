@@ -1,22 +1,15 @@
-from enum import Enum
 from pydantic import BaseModel, Field
 from abc import ABC, abstractmethod
-from ._factory import FileSystemType
+from ._file_system_options import FileSystemType, FileFormat
+from typing import Any
 
 
-class FileFormat(Enum):
-    TEXT = 1
-    JSON = 2
-    YAML = 3
-    JSONL = 4
-
-
-class IFileSystem(BaseModel):
+class IFileSystem(BaseModel, ABC):
 
     protocol: FileSystemType = Field(...)
 
-    # def __init__(__pydantic_self__, **data: Any) -> None:
-    #     super().__init__(**data)
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
 
     @abstractmethod
     def rm(self, path: str, recurse=False) -> bool:

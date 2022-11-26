@@ -1,20 +1,19 @@
 from pyspark.sql import SparkSession
-from ._i_file_system import IFileSystem, FileFormat
-from ._i_file_system import IFileSystem, FileFormat
+from ._i_file_system import IFileSystem
 from typing import Union, Callable, Any
 import yaml
 import json
 from pydantic import PrivateAttr, Field
+from ._file_system_options import FileFormat
 
 
 class DbfsFileSystem(IFileSystem):
 
     _fs: Callable = PrivateAttr(...)
-    project: str = Field(...)
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
-        spark = SparkSession.builder.appName().getOrCreate
+        spark = SparkSession.builder.appName().getOrCreate()
         self._fs = self._get_dbutils(spark).fs
 
     def _get_dbutils(self, spark: SparkSession):

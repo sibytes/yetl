@@ -20,16 +20,15 @@ class _PipelineRepoFactory:
         self._logger.debug(f"Register pipeline type {pipeline_repo_type} as {type}")
         self._pipeline_repo[pr_type] = pipeline_repo_type
 
-    def get_pipeline_repo_type(self, log, config: dict) -> IPipelineRepo:
+    def get_pipeline_repo_type(self, config: dict) -> IPipelineRepo:
 
         pipeline_repo_store: str = next(iter(config))
         pr_type: PipelineRepoType = PipelineRepoType(pipeline_repo_store)
 
-        log.info(f"Setting up pipeline repo on {pipeline_repo_store} ")
+        # TODO: log.info(f"Setting up pipeline repo on {pipeline_repo_store} ")
 
-        log.debug(f"Setting PipelineRepoType using type {pr_type}")
+        # TODO: log.debug(f"Setting PipelineRepoType using type {pr_type}")
         pipeline_repo: IPipelineRepo = self._pipeline_repo.get(pr_type)
-
         pipeline_args = config.get(pipeline_repo_store, {})
 
         return pipeline_repo(**pipeline_args)
