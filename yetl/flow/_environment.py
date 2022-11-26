@@ -31,11 +31,6 @@ class Environment(BaseModel):
         path = os.path.abspath(f"{root}/environment/{env}.{_EXT}")
         return path
 
-    def pipeline_filepath(self, pipeline_root: str, pipeline_name: str):
-        path = os.path.join(pipeline_root, f"{pipeline_name}.{_EXT}")
-        path = os.path.abspath(path)
-        return path
-
     def load(self, project: str):
         _logger = logging.getLogger(project)
         path = self.environment_filepath()
@@ -51,15 +46,3 @@ class Environment(BaseModel):
 
         return config
 
-    def load_pipeline(self, project: str, root: str, pipeline_name: str):
-        """Loads a pipeline configuration file."""
-
-        _logger = logging.getLogger(project)
-        path = self.pipeline_filepath(root, pipeline_name)
-        _logger.info(f"Loading Dataflow configuration from file {path}")
-        with open(path, "r", encoding="utf-8") as f:
-            pipeline = yaml.safe_load(f.read())
-
-        _logger.debug(json.dumps(pipeline, indent=4, sort_keys=True, default=str))
-
-        return pipeline

@@ -1,7 +1,7 @@
 from enum import Enum
 
 from ._pipeline_file_repo import PipelineFileRepo
-from ._ipipeline_repo import IPipelineRepo
+from ._i_pipeline_repo import IPipelineRepo
 import logging
 
 

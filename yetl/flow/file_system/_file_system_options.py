@@ -7,7 +7,8 @@ class FileSystemType(Enum):
 
 
 class FileFormat(Enum):
-    TEXT = 1
-    JSON = 2
-    YAML = 3
-    JSONL = 4
+    TEXT = "txt"
+    JSON = "json"
+    YAML = "yaml"
+    JSONL = "jsonl"
+    SQL = "sql"

@@ -4,7 +4,7 @@ import json
 from delta import configure_spark_with_delta_pip
 from ._i_context import IContext
 from typing import Any
-from pydantic import Field, BaseModel
+from pydantic import Field
 from ..schema_repo import schema_repo_factory, ISchemaRepo
 
 
@@ -22,16 +22,10 @@ class SparkContext(IContext):
             self.spark, self.project, self.spark_config
         )
 
-        self.spark_version, self.databricks_version = self._get_spark_version(
+        self.spark_version = self._get_spark_version(
             self.spark
         )
         self.log.info(f"Spark version detected as : {self.spark_version}")
-
-        if self.databricks_version:
-            self.is_databricks = True
-            self.log.info(
-                f"Databricks Runtime version detected as : {self.databricks_version}"
-            )
 
         # abstraction of the spark schema repo
         self.spark_schema_repository: ISchemaRepo = (
@@ -47,15 +41,8 @@ class SparkContext(IContext):
             )
         )
 
-        # Load and deserialise the spark dataflow configuration in to metaclasses (see dataset module)
-        # The configuration file is loaded using the app name. This keeps intuitive tight
-        # naming convention between datadlows and the config files that store them
-        self.log.info(f"Setting application context dataflow {self.name}")
-        self.dataflow = self._get_deltalake_flow()
-
     spark_version: str = Field(default=None)
     databricks_version: dict = Field(default=None)
-    is_databricks: bool = Field(default=False)
 
     spark_schema_repo_config: dict = Field(alias="spark_schema_repo")
     spark_schema_repository: ISchemaRepo = Field(default=None)
@@ -69,17 +56,7 @@ class SparkContext(IContext):
     def _get_spark_version(self, spark: SparkSession):
 
         version: str = spark.sql("select version() as version").collect()[0]["version"]
-
-        try:
-            databricks_version: dict = (
-                spark.sql("select current_version() as version")
-                .collect()[0]["version"]
-                .asDict()
-            )
-        except:
-            databricks_version: dict = {}
-
-        return version, databricks_version
+        return version
 
     def _get_spark_context(self, project: str, config: dict):
         self.log.info("Setting spark context")
@@ -109,18 +86,6 @@ class SparkContext(IContext):
 
         return logger
 
-    def _get_deltalake_flow(self):
-        # load the data pipeline provider
-        dataflow_config: dict = self.environment.load_pipeline(
-            self.project, self._pipeline_root, self.name
-        )
-        dataflow_config = dataflow_config.get("dataflow")
-
-        self.log.debug("Deserializing configuration into Dataflow")
-
-        # dataflow = Dataflow(self, dataflow_config)
-
-        # return dataflow
 
     class Config:
         arbitrary_types_allowed = True

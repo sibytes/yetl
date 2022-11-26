@@ -101,7 +101,7 @@ class FileSystem(IFileSystem):
             elif file_format == FileFormat.YAML:
                 data = f.read()
                 data = yaml.safe_load(data)
-            elif file_format == FileFormat.TEXT:
+            elif file_format in (FileFormat.TEXT, FileFormat.SQL):
                 data = f.read()
             else:
                 raise Exception(

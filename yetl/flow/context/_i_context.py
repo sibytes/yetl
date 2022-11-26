@@ -42,9 +42,5 @@ class IContext(BaseModel, ABC):
             self.pipeline_repo_config
         )
 
-    @abstractmethod
-    def _get_deltalake_flow(self):
-        pass
-
     class Config:
         arbitrary_types_allowed = True
