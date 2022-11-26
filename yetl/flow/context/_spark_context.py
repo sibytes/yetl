@@ -33,7 +33,7 @@ class SparkContext(IContext):
             self.datalake_protocol
         )
 
-        self.engine = self.engine.get(self.context_type.value,{})
+        self.engine = self.engine.get(self.context_type.value, {})
         self.spark = self._get_spark_context(self.project, self.engine)
 
         # set up the spark logger, the application has a python logger built in
@@ -44,23 +44,17 @@ class SparkContext(IContext):
             self.spark, self.project, self.engine
         )
 
-        self.spark_version = self._get_spark_version(
-            self.spark
-        )
+        self.spark_version = self._get_spark_version(self.spark)
         self.log.info(f"Spark version detected as : {self.spark_version}")
 
         # abstraction of the spark schema repo
         self.spark_schema_repository: ISchemaRepo = (
-            schema_repo_factory.get_schema_repo_type(
-                self.spark_schema_repo_config
-            )
+            schema_repo_factory.get_schema_repo_type(self.spark_schema_repo_config)
         )
 
         # abstraction of the deltalake schema repo
         self.deltalake_schema_repository: ISchemaRepo = (
-            schema_repo_factory.get_schema_repo_type(
-                self.deltalake_schema_repo_config
-            )
+            schema_repo_factory.get_schema_repo_type(self.deltalake_schema_repo_config)
         )
 
     def _get_spark_version(self, spark: SparkSession):
@@ -95,7 +89,6 @@ class SparkContext(IContext):
         logger = log4j_logger.LogManager.getLogger(project)
 
         return logger
-
 
     class Config:
         arbitrary_types_allowed = True

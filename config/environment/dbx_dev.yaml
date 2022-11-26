@@ -1,7 +1,7 @@
 datalake: "/mnt/datalake/yetl_data"
 
 engine:
-  databricks_config:
+  databricks:
     logging_level: ERROR
     config:
       spark.master: local

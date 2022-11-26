@@ -8,6 +8,7 @@ import os
 
 _EXT = "yaml"
 
+
 class PipelineFileRepo(IPipelineRepo):
 
     pipeline_root: str = Field(...)
@@ -35,5 +36,3 @@ class PipelineFileRepo(IPipelineRepo):
         pipeline = self._fs.read_file(path, FileFormat.SQL)
 
         return pipeline
-
-

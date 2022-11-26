@@ -5,6 +5,7 @@ from typing import Any
 from pydantic import Field
 from ..file_system import file_system_factory, IFileSystem, FileSystemType
 
+
 class DatabricksContext(SparkContext):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
@@ -17,9 +18,7 @@ class DatabricksContext(SparkContext):
             self.datalake_protocol
         )
 
-        self.databricks_version = self._get_databricks_version(
-            self.spark
-        )
+        self.databricks_version = self._get_databricks_version(self.spark)
 
         self.log.info(
             f"Databricks Runtime version detected as : {self.databricks_version}"
@@ -36,7 +35,6 @@ class DatabricksContext(SparkContext):
         )
 
         return databricks_version
-
 
     class Config:
         arbitrary_types_allowed = True

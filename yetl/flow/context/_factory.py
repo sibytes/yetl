@@ -10,17 +10,16 @@ class _ContextFactory:
         self._logger = logging.getLogger(__name__)
         self._context = {}
 
-    def register_context_type(
-        self, c_type: ContextType, context_type: type
-    ):
+    def register_context_type(self, c_type: ContextType, context_type: type):
         self._logger.debug(f"Register context type {context_type} as {type}")
         self._context[c_type] = context_type
 
+    def get_context_type(
+        self, project, name, auditor, timeslice, environment, config: dict
+    ) -> IContext:
 
-    def get_context_type(self, config:dict) -> IContext:
-
-
-        context_type_config: str = next(iter(config))
+        engine = config.get("engine")
+        context_type_config: str = next(iter(engine))
         context_type: ContextType = ContextType(context_type_config)
 
         self._logger.debug(f"Setting Context using type {context_type}")
@@ -32,10 +31,16 @@ class _ContextFactory:
             )
             raise ValueError(context_type)
 
-        config = config["context_type"] = context_type
+        config["context_type"] = context_type
 
-        return context(**config)
-
+        return context(
+            project=project,
+            name=name,
+            auditor=auditor,
+            timeslice=timeslice,
+            environment=environment,
+            **config,
+        )
 
 
 factory = _ContextFactory()

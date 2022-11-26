@@ -45,4 +45,3 @@ class Environment(BaseModel):
         _logger.debug(json.dumps(config, indent=4, sort_keys=True, default=str))
 
         return config
-

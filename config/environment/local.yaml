@@ -1,7 +1,7 @@
 datalake: "{{cwd}}/data"
 
 engine:
-  spark_config:
+  spark:
     logging_level: ERROR
     config:
       spark.master: local

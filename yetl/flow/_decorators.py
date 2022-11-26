@@ -1,7 +1,7 @@
 # implicit, not referenced - must be the 1st import
 from . import _logging_config
 
-from .context import SparkContext
+from .context import IContext, context_factory
 from .audit import Audit
 from datetime import datetime
 from ._environment import Environment
@@ -42,15 +42,14 @@ def yetl_flow(project: str, pipeline_name: str = None):
                 del kwargs["timeslice"]
 
             config = environment.load(project=project)
-            # TODO: abstract out spark context to IContext
             # create the context for the pipeline to run
-            context = SparkContext(
+            context:IContext = context_factory.get_context_type(
                 project=project,
                 name=_name,
                 auditor=auditor,
                 timeslice=timeslice,
                 environment=environment,
-                **config,
+                config=config,
             )
 
             # run the pipeline

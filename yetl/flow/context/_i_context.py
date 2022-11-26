@@ -24,7 +24,7 @@ class IContext(BaseModel):
     log: logging.Logger = None
     datalake_fs: IFileSystem = None
     environment: Environment = Field(...)
-    context_type:ContextType = Field(...)
+    context_type: ContextType = Field(...)
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)

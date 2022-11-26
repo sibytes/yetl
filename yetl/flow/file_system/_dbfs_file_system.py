@@ -17,7 +17,9 @@ class DbfsFileSystem(IFileSystem):
         try:
             self._fs = self._get_dbutils(spark).fs
         except ModuleNotFoundError as e:
-            raise Exception("Cannot import DBUtils, most likely cause is having DBFS configured for environment that isn't databricks and doesn't support.") from e
+            raise Exception(
+                "Cannot import DBUtils, most likely cause is having DBFS configured for environment that isn't databricks and doesn't support."
+            ) from e
 
     def _get_dbutils(self, spark: SparkSession):
         from pyspark.dbutils import DBUtils
@@ -131,7 +133,6 @@ class DbfsFileSystem(IFileSystem):
 
     def exists(self, path: str) -> bool:
         raise NotImplementedError()
-
 
     class Config:
         arbitrary_types_allowed = True

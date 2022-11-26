@@ -3,7 +3,11 @@ from yetl.flow.audit import Audit
 from unittest import TestCase
 import json
 from yetl.flow.file_system import FileSystemType
-from .fixtures_config import i_context_config, spark_context_config, databricks_context_config
+from .fixtures_config import (
+    i_context_config,
+    spark_context_config,
+    databricks_context_config,
+)
 from typing import Callable
 from yetl.flow._environment import Environment
 
@@ -55,6 +59,7 @@ def test_spark_context(spark_context_config: Callable):
         context.pipeline_repository.sql_root
         == spark_context_config["pipeline_repo"]["pipeline_file"]["sql_root"]
     )
+
 
 def test_databricks_context(databricks_context_config: Callable):
 
