@@ -2,6 +2,8 @@ from enum import Enum
 from ._base import Dataset
 from ._reader import Reader
 from ._deltalake_writer import DeltaWriter
+from ..context import IContext
+from ..dataflow import IDataflow
 
 # from ._stream_reader import StreamReader
 # from ._stream_writer import StreamWriter
@@ -27,19 +29,12 @@ class _DatasetFactory:
         self._logger.debug(f"Register dataset type {dataset_type} as {type}")
         self._dataset[io_type] = dataset_type
 
-    def _get_io_type(self, name: str):
-        try:
-            if IOType[name.upper()] in IOType:
-                return IOType[name.upper()]
-        except:
-            return None
-
     def get_dataset_type(
-        self, context, database: str, table: str, dataset_config: dict, auditor: Audit
+        self, context:IContext, database: str, table: str, dataset_config: dict
     ) -> Dataset:
 
         dataset_type: str = dataset_config["type"]
-        type: IOType = self._get_io_type(dataset_type)
+        type: IOType = IOType(dataset_type)
 
         self._logger.info(f"Get {type.name} from factory dataset")
         dataset_class = self._dataset.get(type)
@@ -51,7 +46,7 @@ class _DatasetFactory:
             raise ValueError(type)
 
         return dataset_class(
-            context, database, table, dataset_config, type.name.lower(), auditor
+            context=context, table=table, database=database, **dataset_config
         )
 
 

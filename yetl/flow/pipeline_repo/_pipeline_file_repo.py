@@ -17,7 +17,7 @@ class PipelineFileRepo(IPipelineRepo):
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
-        _fs = file_system_factory.get_file_system_type(FileSystemType.FILE)
+        self._fs = file_system_factory.get_file_system_type(FileSystemType.FILE)
 
     def load_pipeline(self, name: str):
         """Loads a pipeline configuration file."""

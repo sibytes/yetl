@@ -12,7 +12,8 @@ from pyspark.sql import DataFrame
 from .._timeslice import Timeslice, TimesliceUtcNow
 from pydantic import BaseModel, Field
 from enum import Enum
-
+from ..context import SparkContext, DatabricksContext
+from ..audit import Audit
 
 def _yetl_properties_dumps(obj: dict, *, default):
     """Decodes the data back into a dictionary with yetl configuration properties names"""
@@ -66,6 +67,7 @@ class Reader(Source):
         self.initialise()
 
     def initialise(self):
+        self.timeslice = self.context.timeslice
         self._replacements = {
             JinjaVariables.DATABASE_NAME: self.database,
             JinjaVariables.TABLE_NAME: self.table,
@@ -76,17 +78,24 @@ class Reader(Source):
                 self.path_date_format
             ),
         }
+        self.datalake_protocol = self.context.datalake_protocol
+        self.datalake = self.context.datalake
+        self.auditor = self.context.auditor
         path = f"{self.datalake_protocol.value}{self.datalake}/{self.path}"
         self.path = render_jinja(path, self._replacements)
+        self.context_id = self.context.context_id
 
+
+    context:SparkContext = Field(...)
     timeslice: Timeslice = Field(default=TimesliceUtcNow())
+    context_id: uuid.UUID = Field(default=None)
+    datalake_protocol: FileSystemType = Field(default=None)
+    datalake: str = Field(default=None)
+    auditor:Audit = Field(default=None)
+
     catalog: str = Field(None)
-    context_id: uuid.UUID
-    dataflow_id: uuid.UUID
     dataframe: DataFrame = Field(default=None)
     dataset_id: uuid.UUID = Field(default=uuid.uuid4())
-    datalake_protocol: FileSystemType = Field(default=FileSystemType.FILE)
-    datalake: str = Field(...)
     database: str = Field(...)
     table: str = Field(...)
     yetl_properties: ReaderProperties = Field(
@@ -139,3 +148,5 @@ class Reader(Source):
         # back into yetl configuration names
         json_dumps = _yetl_properties_dumps
         arbitrary_types_allowed = True
+
+

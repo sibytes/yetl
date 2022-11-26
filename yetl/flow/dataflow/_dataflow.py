@@ -1,40 +1,14 @@
 from pyspark.sql import DataFrame
 from ..dataset import Dataset, Source, Destination
-from ._i_dataflow import IDataflow
-from ..dataset import dataset_factory
 from typing import Callable
-from enum import Enum
 from ._exceptions import SourceNotFound, DestinationNotFound
 from typing import Any
-from ..context import IContext
-from pydantic import Field
-
+from ._i_dataflow import IDataflow
 
 class Dataflow(IDataflow):
 
-    dataflow_config: dict = Field(...)
-
-    def __init__(self, context: IContext) -> None:
-        super().__init__(context)
-
-        for database, table in self.dataflow_config.items():
-            for table, table_config in table.items():
-                table_config["datalake"] = self.datalake
-                table_config["datalake_protocol"] = self.datalake_protocol
-                table_config["spark_schema_repo"] = self._spark_schema_repo
-                table_config["deltalake_schema_repo"] = self._deltalake_schema_repo
-                table_config["pipeline_repo"] = self._pipeline_repo
-                table_config["context_id"] = self.context.context_id
-                table_config["dataflow_id"] = self.dataflow_id
-                table_config["timeslice"] = self.context.timeslice
-                md = dataset_factory.get_dataset_type(
-                    self.context, database, table, table_config, self.auditor
-                )
-                self.log.debug(
-                    f"Deserialized {database}.{table} configuration into {type(md)}"
-                )
-                self.append(md)
-                self.audit_lineage()
+    def __init__(self, **kwargs:Any) -> None:
+        super().__init__(**kwargs)
 
     def audit_lineage(self):
         lineage = {"lineage": {str(self.id): {}}}
@@ -46,16 +20,16 @@ class Dataflow(IDataflow):
 
     def append(self, dataset: Dataset):
 
-        if dataset.is_source():
-            self.log.debug(
-                f"Appending source {dataset.database_table} as {type(dataset)} to dataflow"
-            )
+        if dataset.is_source:
+            # self.log.debug(
+            #     f"Appending source {dataset.database_table} as {type(dataset)} to dataflow"
+            # )
             self.sources[dataset.database_table] = dataset
 
-        elif dataset.is_destination():
-            self.log.debug(
-                f"Appending destination {dataset.database_table} as {type(dataset)} to dataflow"
-            )
+        elif dataset.is_destination:
+            # self.log.debug(
+            #     f"Appending destination {dataset.database_table} as {type(dataset)} to dataflow"
+            # )
             self.destinations[dataset.database_table] = dataset
 
     def source_df(self, database_table: str):
@@ -84,3 +58,4 @@ class Dataflow(IDataflow):
 
         if dst.auto_io:
             dst.execute()
+

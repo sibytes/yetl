@@ -2,7 +2,9 @@ from .context import IContext, context_factory
 from .audit import Audit
 from datetime import datetime
 from ._environment import Environment
-
+from .dataflow import IDataflow, Dataflow
+from .dataset import dataset_factory
+import json
 
 def _build_context(pipeline_name: str, project: str, function_name: str, kwargs: dict):
 
@@ -43,3 +45,25 @@ def _build_context(pipeline_name: str, project: str, function_name: str, kwargs:
     context.log.info(f"Executing Dataflow {context.project} with timeslice={timeslice}")
 
     return context
+
+
+def _build_dataflow(context:IContext):
+    
+    dataflow:IDataflow = Dataflow(context=context)
+
+    dataflow_config = context.pipeline_repository.load_pipeline(context.name)
+    dataflow_config = dataflow_config.get("dataflow")
+
+    for database, table in dataflow_config.items():
+        for table, table_config in table.items():
+            md = dataset_factory.get_dataset_type(
+                context, database, table, table_config
+            )
+            context.log.debug(
+                f"Deserialized {database}.{table} configuration into {type(md)}"
+            )
+            dataflow.append(md)
+
+    dataflow.audit_lineage()
+
+    return dataflow

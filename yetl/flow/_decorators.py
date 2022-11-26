@@ -1,7 +1,8 @@
 # implicit, not referenced - must be the 1st import
 from . import _logging_config
-from ._builder import _build_context
+from ._builder import _build_context, _build_dataflow
 from datetime import datetime
+from .dataflow import IDataflow
 
 
 class YetlFlowException(Exception):
@@ -23,11 +24,12 @@ def yetl_flow(project: str, pipeline_name: str = None):
             )
             timeslice = context.timeslice
             auditor = context.auditor
+            dataflow:IDataflow = _build_dataflow(context=context)
 
             try:
                 function(
                     context=context,
-                    dataflow=context.dataflow,
+                    dataflow=dataflow,
                     timeslice=timeslice,
                     *args,
                     **kwargs,
