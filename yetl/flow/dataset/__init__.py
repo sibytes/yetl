@@ -4,9 +4,10 @@ from ._properties import (
     ReaderProperties, 
     DeltaWriterProperties
 )
-from ._reader import Read, Reader
 from ._base import Source, Destination, Dataset
-from ._deltalake_writer import Write, DeltaWriter
+from ._deltalake_writer import DeltaWriter
+from ._sql_reader import SQLReader
+from ._reader import Reader
 from ._factory import factory as dataset_factory
 
 __all__ = [
@@ -17,9 +18,8 @@ __all__ = [
     "LineageProperties",
     "ReaderProperties",
     "DeltaWriterProperties",
-    "Read",
+    "SQLReader",
     "Reader",
-    "Write",
     "DeltaWriter",
     "dataset_factory",
 ]

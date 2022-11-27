@@ -42,8 +42,6 @@ class SQLReader(Source):
         self.datalake_protocol = self.context.datalake_protocol
         self.datalake = self.context.datalake
         self.auditor = self.context.auditor
-        # path = f"{self.datalake_protocol.value}{self.datalake}/{self.path}"
-        # self.path = render_jinja(path, self._replacements)
         self.context_id = self.context.context_id
 
     context:SparkContext = Field(...)
@@ -71,7 +69,7 @@ class SQLReader(Source):
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
     
     def validate(self):
-            pass
+        pass
 
     def execute(self):
         pass

@@ -3,7 +3,7 @@ import yaml
 import os
 from yetl.flow.context import SparkContext
 from yetl.flow.audit import Audit
-from yetl.flow.dataset import Reader, DeltaWriter
+from yetl.flow.dataset import Reader, DeltaWriter, SQLReader
 from yetl.flow._environment import Environment
 
 def load_config(name: str) -> dict:
@@ -57,3 +57,13 @@ def deltalake_writer_dataset_config():
 def deltalake_writer_dataset(deltalake_writer_dataset_config:dict, spark_context:SparkContext):
     delta_writer = DeltaWriter(context=spark_context, **deltalake_writer_dataset_config)
     return delta_writer
+
+
+@pytest.fixture
+def sql_reader_dataset_config():
+    return load_config("sql_reader_dataset")
+
+@pytest.fixture
+def sql_reader_dataset(sql_reader_dataset_config:dict, spark_context:SparkContext):
+    sql_reader = SQLReader(context=spark_context, **sql_reader_dataset_config)
+    return sql_reader

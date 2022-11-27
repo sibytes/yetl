@@ -1,4 +1,4 @@
-databse: "demo_raw"
+database: "demo_raw"
 table: customer
 
 sql: "{{root}}/sql"
