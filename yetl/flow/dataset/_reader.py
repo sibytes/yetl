@@ -14,6 +14,8 @@ from pydantic import BaseModel, Field
 from enum import Enum
 from ..context import SparkContext, DatabricksContext
 from ..audit import Audit
+from pyspark.sql.types import StructType
+
 
 def _yetl_properties_dumps(obj: dict, *, default):
     """Decodes the data back into a dictionary with yetl configuration properties names"""
@@ -84,14 +86,16 @@ class Reader(Source, SQLTable):
         path = f"{self.datalake_protocol.value}{self.datalake}/{self.path}"
         self.path = render_jinja(path, self._replacements)
         self.context_id = self.context.context_id
+        self.spark_schema = self.context.spark_schema_repository.load_schema(
+            database=self.database, table=self.table
+        )
 
-
-    context:SparkContext = Field(...)
+    context: SparkContext = Field(...)
     timeslice: Timeslice = Field(default=TimesliceUtcNow())
     context_id: uuid.UUID = Field(default=None)
     datalake_protocol: FileSystemType = Field(default=None)
     datalake: str = Field(default=None)
-    auditor:Audit = Field(default=None)
+    auditor: Audit = Field(default=None)
 
     catalog: str = Field(None)
     dataframe: DataFrame = Field(default=None)
@@ -106,6 +110,7 @@ class Reader(Source, SQLTable):
     read: Read = Field(default=Read())
     exceptions: Exceptions = Field(default=None)
     thresholds: Thresholds = Field(default=None)
+    spark_schema: StructType = None
     _initial_load: bool = PrivateAttr(default=False)
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
 
@@ -136,5 +141,3 @@ class Reader(Source, SQLTable):
         # back into yetl configuration names
         json_dumps = _yetl_properties_dumps
         arbitrary_types_allowed = True
-
-

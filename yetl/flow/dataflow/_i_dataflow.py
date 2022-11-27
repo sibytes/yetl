@@ -15,7 +15,6 @@ class IDataflow(BaseModel, ABC):
         self.auditor = self.context.auditor
         self.dataflow_id = uuid.uuid4()
 
-
     auditor: Audit = Field(default=None)
     context: IContext = Field(...)
     dataflow_id: uuid.UUID = Field(default=uuid.uuid4())

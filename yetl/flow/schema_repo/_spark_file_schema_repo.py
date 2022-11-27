@@ -27,25 +27,25 @@ class SparkFileSchemaRepo(ISchemaRepo):
             FileSystemType.FILE
         )
 
-    def _mkpath(self, database_name: str, table_name: str, sub_location: str):
+    def _mkpath(self, database: str, table: str, sub_location: str):
         """Function that builds the schema path"""
         if sub_location:
             return (
-                f"{self.root_path}/{sub_location}/{database_name}/{table_name}.{_EXT}"
+                f"{self.root}/{sub_location}/{database}/{table}.{_EXT}"
             )
         else:
-            return f"{self.root_path}/{database_name}/{table_name}.{_EXT}"
+            return f"{self.root}/{database}/{table}.{_EXT}"
 
     def save_schema(
         self,
         schema: StructType,
-        database_name: str,
-        table_name: str,
+        database: str,
+        table: str,
         sub_location: str = None,
     ):
         """Serialise a spark schema to a yaml file and saves to a schema file in the schema folder."""
 
-        path = self._mkpath(database_name, table_name, sub_location)
+        path = self._mkpath(database, table, sub_location)
         path = os.path.abspath(path)
         dir_path = os.path.dirname(path)
         os.makedirs(dir_path, exist_ok=True)
@@ -54,12 +54,10 @@ class SparkFileSchemaRepo(ISchemaRepo):
         with open(path, "w", encoding="utf-8") as f:
             f.write(yaml.safe_dump(schema_dict))
 
-    def load_schema(
-        self, database_name: str, table_name: str, sub_location: str = None
-    ):
+    def load_schema(self, database: str, table: str, sub_location: str = None):
         """Loads a spark from a yaml file and deserialises to a spark schema."""
 
-        path = self._mkpath(database_name, table_name, sub_location)
+        path = self._mkpath(database, table, sub_location)
         path = os.path.abspath(path)
 
         # self.log.info(
@@ -70,15 +68,15 @@ class SparkFileSchemaRepo(ISchemaRepo):
         except Exception as e:
             raise SchemaNotFound(path) from e
 
-        msg = json.dumps(schema, indent=4, default=str)
-        self.context.log.debug(msg)
+        # msg = json.dumps(schema, indent=4, default=str)
+        # self.context.log.debug(msg)
 
         try:
             spark_schema = StructType.fromJson(schema)
         except Exception as e:
             msg = (
                 msg
-            ) = f"Failed to deserialise spark schema to StructType for dataset {database_name}.{table_name} from {path}"
+            ) = f"Failed to deserialise spark schema to StructType for dataset {database}.{table} from {path}"
             raise Exception(msg) from e
 
         return spark_schema

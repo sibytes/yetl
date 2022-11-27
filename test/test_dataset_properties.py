@@ -1,4 +1,9 @@
-from yetl.flow.dataset import SchemaProperties, LineageProperties, DeltaWriterProperties, ReaderProperties
+from yetl.flow.dataset import (
+    SchemaProperties,
+    LineageProperties,
+    DeltaWriterProperties,
+    ReaderProperties,
+)
 import json
 from unittest import TestCase
 
@@ -15,16 +20,24 @@ lienage_properties = {
     "yetl.metadata.datasetId": True,
 }
 
-reader_properties = lienage_properties | schema_properties | {
-    "yetl.metadata.timeslice": "timeslice_file_date_format",
-    "yetl.metadata.filepathFilename": True,
-    "yetl.metadata.filepath": True,
-    "yetl.metadata.filename": True,
-}
+reader_properties = (
+    lienage_properties
+    | schema_properties
+    | {
+        "yetl.metadata.timeslice": "timeslice_file_date_format",
+        "yetl.metadata.filepathFilename": True,
+        "yetl.metadata.filepath": True,
+        "yetl.metadata.filename": True,
+    }
+)
 
-delta_writer_properties = lienage_properties | schema_properties | {
-    "yetl.delta.optimizeZOrderBy": True,
-}
+delta_writer_properties = (
+    lienage_properties
+    | schema_properties
+    | {
+        "yetl.delta.optimizeZOrderBy": True,
+    }
+)
 
 
 def test_base_schema_properties():
@@ -34,6 +47,7 @@ def test_base_schema_properties():
     expected = schema_properties
 
     assert expected == actual
+
 
 def test_base_lienage_properties():
 

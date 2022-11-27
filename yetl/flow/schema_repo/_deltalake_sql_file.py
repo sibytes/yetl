@@ -26,19 +26,18 @@ class DeltalakeSchemaFile(ISchemaRepo):
             FileSystemType.FILE
         )
 
-    def _mkpath(self, database_name: str, table_name: str, sub_location: str):
+    def _mkpath(self, database_name: str, table_name: str, sub_location: str=None):
         """Function that builds the schema path"""
 
         replacements = {JinjaVariables.ROOT: self.root}
-        path = render_jinja(sub_location, replacements)
+        if sub_location:
+            path = render_jinja(sub_location, replacements)
         path = f"{path}/{database_name}/{table_name}.{_EXT}"
         return path
 
-    def save_schema(
-        self, schema: str, database_name: str, table_name: str, sub_location: str
-    ):
+    def save_schema(self, schema: str, database: str, table: str, sub_location: str=None):
         """Serialise delta table to a create table sql file."""
-        path = self._mkpath(database_name, table_name, sub_location)
+        path = self._mkpath(database, table, sub_location)
         path = os.path.abspath(path)
         dir_path = os.path.dirname(path)
         os.makedirs(dir_path, exist_ok=True)
@@ -46,10 +45,10 @@ class DeltalakeSchemaFile(ISchemaRepo):
         with open(path, "w", encoding="utf-8") as f:
             f.write(schema)
 
-    def load_schema(self, database_name: str, table_name: str, sub_location: str):
+    def load_schema(self, database: str, table: str, sub_location: str=None):
         """Loads a spark from a yaml file and deserialises to a spark schema."""
 
-        path = self._mkpath(database_name, table_name, sub_location)
+        path = self._mkpath(database, table, sub_location)
 
         # self.log.info(
         #     f"Loading schema for dataset {database_name}.{table_name} from {path} using {type(self.fs)}"

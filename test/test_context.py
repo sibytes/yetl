@@ -65,7 +65,7 @@ def test_databricks_context(databricks_context_config: Callable):
 
     environment = Environment()
     expected = "Cannot import DBUtils, most likely cause is having DBFS configured for environment that isn't databricks and doesn't support."
-    actual:str
+    actual: str
     try:
         context = DatabricksContext(
             auditor=Audit(),

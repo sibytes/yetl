@@ -12,16 +12,14 @@ class ISchemaRepo(BaseModel, ABC):
     def save_schema(
         self,
         schema: Union[StructType, str],
-        database_name: str,
-        table_name: str,
+        database: str,
+        table: str,
         sub_location: str = None,
     ):
         """Save a schema into the repo."""
         pass
 
     @abstractmethod
-    def load_schema(
-        self, database_name: str, table_name: str, sub_location: str = None
-    ):
+    def load_schema(self, database: str, table: str, sub_location: str = None):
         """Loads a spark from a file."""
         pass

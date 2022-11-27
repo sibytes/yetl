@@ -5,16 +5,18 @@ from ._exceptions import SourceNotFound, DestinationNotFound
 from typing import Any
 from ._i_dataflow import IDataflow
 
-class Dataflow(IDataflow):
 
-    def __init__(self, **kwargs:Any) -> None:
+class Dataflow(IDataflow):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
     def audit_lineage(self):
         lineage = {"lineage": {str(self.dataflow_id): {}}}
         for _, d in self.destinations.items():
             src_ids = [str(s.dataset_id) for _, s in self.sources.items()]
-            lineage["lineage"][str(self.dataflow_id)][str(d.dataset_id)] = {"depends_on": src_ids}
+            lineage["lineage"][str(self.dataflow_id)][str(d.dataset_id)] = {
+                "depends_on": src_ids
+            }
 
         self.auditor.dataflow(lineage)
 
@@ -58,4 +60,3 @@ class Dataflow(IDataflow):
 
         if dst.auto_io:
             dst.execute()
-

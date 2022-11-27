@@ -24,7 +24,7 @@ def yetl_flow(project: str, pipeline_name: str = None):
             )
             timeslice = context.timeslice
             auditor = context.auditor
-            dataflow:IDataflow = _build_dataflow(context=context)
+            dataflow: IDataflow = _build_dataflow(context=context)
 
             try:
                 function(

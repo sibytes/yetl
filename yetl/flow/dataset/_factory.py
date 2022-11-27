@@ -30,7 +30,7 @@ class _DatasetFactory:
         self._dataset[io_type] = dataset_type
 
     def get_dataset_type(
-        self, context:IContext, database: str, table: str, dataset_config: dict
+        self, context: IContext, database: str, table: str, dataset_config: dict
     ) -> Dataset:
 
         dataset_type: str = dataset_config["type"]

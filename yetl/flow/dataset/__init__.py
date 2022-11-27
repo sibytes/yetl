@@ -1,8 +1,8 @@
 from ._properties import (
-    SchemaProperties, 
-    LineageProperties, 
-    ReaderProperties, 
-    DeltaWriterProperties
+    SchemaProperties,
+    LineageProperties,
+    ReaderProperties,
+    DeltaWriterProperties,
 )
 from ._base import Source, Destination, Dataset
 from ._deltalake_writer import DeltaWriter

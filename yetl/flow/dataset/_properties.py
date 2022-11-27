@@ -35,10 +35,12 @@ class LineageProperties(BaseModel):
     metadata_dataset_id: bool = Field(
         default=True, alias=YetlTableProperties.METADATA_DATASET_ID.value
     )
+
     class Config:
         # use a custom decoder to convert the field names
         # back into yetl configuration names
         json_dumps = _yetl_properties_dumps
+
 
 class SchemaProperties(BaseModel):
     """Yetl table properies that drives various features of a data flow for all types of datasets"""

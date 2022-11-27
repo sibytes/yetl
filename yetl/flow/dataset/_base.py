@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from abc import ABC, abstractmethod, abstractproperty
 from pydantic import BaseModel, Field
 
+
 class Dataset(BaseModel, ABC):
     @abstractmethod
     def initialise(self):

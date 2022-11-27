@@ -6,6 +6,7 @@ from .dataflow import IDataflow, Dataflow
 from .dataset import dataset_factory
 import json
 
+
 def _build_context(pipeline_name: str, project: str, function_name: str, kwargs: dict):
 
     # load the environment settings and configuration provider
@@ -47,9 +48,9 @@ def _build_context(pipeline_name: str, project: str, function_name: str, kwargs:
     return context
 
 
-def _build_dataflow(context:IContext):
-    
-    dataflow:IDataflow = Dataflow(context=context)
+def _build_dataflow(context: IContext):
+
+    dataflow: IDataflow = Dataflow(context=context)
 
     dataflow_config = context.pipeline_repository.load_pipeline(context.name)
     dataflow_config = dataflow_config.get("dataflow")

@@ -11,6 +11,7 @@ import uuid
 # from ..parser import parser
 # from ..save import save_factory, Save
 from ..audit import Audit, AuditTask
+
 # from datetime import datetime
 from .._timeslice import Timeslice, TimesliceUtcNow
 from pyspark.sql import functions as fn
@@ -64,12 +65,12 @@ class DeltaWriter(Destination, SQLTable):
         self.path = render_jinja(path, self._replacements)
         self.context_id = self.context.context_id
 
-    context:SparkContext = Field(...)
+    context: SparkContext = Field(...)
     timeslice: Timeslice = Field(default=TimesliceUtcNow())
     context_id: uuid.UUID = Field(default=None)
     datalake_protocol: FileSystemType = Field(default=None)
     datalake: str = Field(default=None)
-    auditor:Audit = Field(default=None)
+    auditor: Audit = Field(default=None)
 
     catalog: str = Field(None)
     dataframe: DataFrame = Field(default=None)
@@ -77,7 +78,7 @@ class DeltaWriter(Destination, SQLTable):
     yetl_properties: DeltaWriterProperties = Field(
         default=DeltaWriterProperties(), alias="properties"
     )
-    deltalake_properties:dict = Field(default={})
+    deltalake_properties: dict = Field(default={})
     format: FormatOptions = Field(default=FormatOptions.DELTA)
     path: str = Field(...)
     check_constraints: Dict[str, str] = Field(default=None)
