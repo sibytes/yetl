@@ -19,6 +19,7 @@ from ..schema_repo import SchemaNotFound
 from .. import _delta_lake as dl
 from datetime import datetime
 
+
 def _yetl_properties_dumps(obj: dict, *, default):
     """Decodes the data back into a dictionary with yetl configuration properties names"""
     obj = {
@@ -58,6 +59,7 @@ class Exceptions(BaseModel):
     path: str = Field(...)
     database: str = Field(...)
     table: str = Field(...)
+    context:SparkContext = Field(...)
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
@@ -68,23 +70,20 @@ class Exceptions(BaseModel):
         self.database = render_jinja(self.database, replacements)
         self.path = render_jinja(self.path, replacements)
 
-    def table_exists(self, context:SparkContext):
+    def table_exists(self):
         dl.create_database(self.context, self.exceptions_database)
-        exists = dl.table_exists(
-            context, 
-            self.database, 
-            self.table
-        )
+        exists = dl.table_exists(self.context, self.database, self.table)
         return exists
 
-    def create_table(self, context:SparkContext):
+    def create_table(self):
         sql = dl.create_table(
-            context,
+            self.context,
             self.database,
             self.table,
             self.path,
         )
         return sql
+
 
 class Thresholds(BaseModel):
     warning: ThresholdLimit = Field(default=ThresholdLimit())
@@ -93,6 +92,7 @@ class Thresholds(BaseModel):
 
 class Reader(Source, SQLTable):
     def __init__(self, **data: Any) -> None:
+        self._cascade_context(data)
         super().__init__(**data)
         self.initialise()
 
@@ -104,6 +104,12 @@ class Reader(Source, SQLTable):
         self._render(self._replacements)
         self.context_id = self.context.context_id
         self._init_task_read_schema()
+        if self.read.auto:
+            self._init_task_create_exception_table()
+
+    def _cascade_context(self, data:dict):
+        if data.get("exceptions") and data.get("context"):
+            data["exceptions"]["context"] = data.get("context")
 
     context: SparkContext = Field(...)
     timeslice: Timeslice = Field(default=TimesliceUtcNow())
@@ -161,7 +167,7 @@ class Reader(Source, SQLTable):
 
     def _init_task_create_exception_table(self):
 
-        table_exists = self.exceptions.table_exists(self.context)
+        table_exists = self.exceptions.table_exists()
         if table_exists:
             # self.context.log.info(
             #     f"Exception table already exists {self.exceptions_database}.{self.exceptions_table} at {self.exceptions_path} {CONTEXT_ID}={str(self.context_id)}"
@@ -169,10 +175,9 @@ class Reader(Source, SQLTable):
             self.initial_load = False
         else:
             start_datetime = datetime.now()
-            sql = self.exceptions.create_table(self.context)
+            sql = self.exceptions.create_table()
             self.auditor.dataset_task(self.id, AuditTask.SQL, sql, start_datetime)
             self.initial_load = True
-            
 
     def validate(self):
         pass
