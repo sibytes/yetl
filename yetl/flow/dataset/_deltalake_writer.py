@@ -10,7 +10,7 @@ import uuid
 # from typing import ChainMap
 # from ..parser import parser
 # from ..save import save_factory, Save
-# from ..audit import Audit, AuditTask
+from ..audit import Audit, AuditTask
 # from datetime import datetime
 from .._timeslice import Timeslice, TimesliceUtcNow
 from pyspark.sql import functions as fn
@@ -22,6 +22,7 @@ from ..parser.parser import JinjaVariables, render_jinja
 from ._properties import DeltaWriterProperties
 from ..save._save_mode_type import SaveModeType
 from ..file_system import FileSystemType
+from ..context import SparkContext
 
 
 class Write(BaseModel):
@@ -51,21 +52,28 @@ class DeltaWriter(Destination):
         self.initialise()
 
     def initialise(self):
+        self.timeslice = self.context.timeslice
         self._replacements = {
             JinjaVariables.DATABASE_NAME: self.database,
             JinjaVariables.TABLE_NAME: self.table,
         }
+        self.datalake_protocol = self.context.datalake_protocol
+        self.datalake = self.context.datalake
+        self.auditor = self.context.auditor
         path = f"{self.datalake_protocol.value}{self.datalake}/{self.path}"
         self.path = render_jinja(path, self._replacements)
+        self.context_id = self.context.context_id
 
+    context:SparkContext = Field(...)
     timeslice: Timeslice = Field(default=TimesliceUtcNow())
+    context_id: uuid.UUID = Field(default=None)
+    datalake_protocol: FileSystemType = Field(default=None)
+    datalake: str = Field(default=None)
+    auditor:Audit = Field(default=None)
+
     catalog: str = Field(None)
-    context_id: uuid.UUID
-    dataflow_id: uuid.UUID
     dataframe: DataFrame = Field(default=None)
     dataset_id: uuid.UUID = Field(default=uuid.uuid4())
-    datalake_protocol: FileSystemType = Field(default=FileSystemType.FILE)
-    datalake: str = Field(...)
     database: str = Field(...)
     table: str = Field(...)
     yetl_properties: DeltaWriterProperties = Field(

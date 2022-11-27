@@ -31,11 +31,11 @@ class Dataset(BaseModel, ABC):
 class Destination(Dataset, ABC):
     @property
     def is_source(self):
-        return True
+        return False
 
     @property
     def is_destination(self):
-        return False
+        return True
 
     @property
     def initial_load(self):
