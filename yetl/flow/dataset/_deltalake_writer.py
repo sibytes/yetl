@@ -93,6 +93,12 @@ class DeltaWriter(Destination, SQLTable):
 
 
     def _init_task_read_schema(self):
+        # if table ddl not defined in the config
+        # or it is but it's not a SQL statement it self.
+        # We just look to see if it's multi-line at the moment
+        # and let spark handle the parsing of whether it's SQL or
+        # not. The assumption is that the paths will be single line
+        # and SQL will be multiline.
         if (not self.ddl) or (not "\n" in self.ddl):
             try:
                 self.ddl = self.context.deltalake_schema_repository.load_schema(
