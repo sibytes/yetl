@@ -15,7 +15,7 @@ from ..audit import Audit, AuditTask
 from .._timeslice import Timeslice, TimesliceUtcNow
 from pyspark.sql import functions as fn
 import json
-from ._base import Destination
+from ._base import Destination, SQLTable
 from pydantic import Field, PrivateAttr, BaseModel
 from typing import Any, Dict, List
 from ..parser.parser import JinjaVariables, render_jinja
@@ -46,7 +46,7 @@ class Write(BaseModel):
         self._merge_schema = value
 
 
-class DeltaWriter(Destination):
+class DeltaWriter(Destination, SQLTable):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
         self.initialise()
@@ -74,8 +74,6 @@ class DeltaWriter(Destination):
     catalog: str = Field(None)
     dataframe: DataFrame = Field(default=None)
     dataset_id: uuid.UUID = Field(default=uuid.uuid4())
-    database: str = Field(...)
-    table: str = Field(...)
     yetl_properties: DeltaWriterProperties = Field(
         default=DeltaWriterProperties(), alias="properties"
     )
@@ -94,16 +92,6 @@ class DeltaWriter(Destination):
 
     def execute(self):
         pass
-
-    @property
-    def sql_database_table(self, sep: str = ".", qualifier: str = "`") -> str:
-        "Concatenated fully qualified database table for SQL"
-        return f"{qualifier}{self.database}{qualifier}{sep}{qualifier}{self.table}{qualifier}"
-
-    @property
-    def database_table(self, sep: str = ".") -> str:
-        "Concatenated database table for readability"
-        return f"{self.database}{sep}{self.table}"
 
     @property
     def has_partitions(self) -> bool:

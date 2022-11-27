@@ -1,5 +1,4 @@
-from ._base import Source
-
+from ._base import Source, SQLTable
 from ._decoder import parse_properties_key, parse_properties_values
 from pyspark.sql import DataFrame
 from ._properties import LineageProperties
@@ -27,7 +26,7 @@ class Read(BaseModel):
 
 
 
-class SQLReader(Source):
+class SQLReader(Source, SQLTable):
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
@@ -54,8 +53,6 @@ class SQLReader(Source):
     catalog: str = Field(None)
     dataframe: DataFrame = Field(default=None)
     dataset_id: uuid.UUID = Field(default=uuid.uuid4())
-    database: str = Field(...)
-    table: str = Field(...)
     sql:str = Field(...)
     yetl_properties: LineageProperties = Field(
         default=LineageProperties(), alias="properties"
@@ -73,17 +70,6 @@ class SQLReader(Source):
 
     def execute(self):
         pass
-
-    @property
-    def sql_database_table(self, sep: str = ".", qualifier: str = "`") -> str:
-        "Concatenated fully qualified database table for SQL"
-        return f"{qualifier}{self.database}{qualifier}{sep}{qualifier}{self.table}{qualifier}"
-
-    @property
-    def database_table(self, sep: str = ".") -> str:
-        "Concatenated database table for readability"
-        return f"{self.database}{sep}{self.table}"
-
 
     class Config:
         # use a custom decoder to convert the field names

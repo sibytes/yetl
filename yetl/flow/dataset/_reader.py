@@ -7,7 +7,7 @@ from ..parser.parser import JinjaVariables, render_jinja
 from ..parser._constants import FormatOptions
 from ..file_system import FileSystemType
 import uuid
-from ._base import Source
+from ._base import Source, SQLTable
 from pyspark.sql import DataFrame
 from .._timeslice import Timeslice, TimesliceUtcNow
 from pydantic import BaseModel, Field
@@ -61,7 +61,7 @@ class Thresholds(BaseModel):
     error: ThresholdLimit = Field(default=ThresholdLimit())
 
 
-class Reader(Source):
+class Reader(Source, SQLTable):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
         self.initialise()
@@ -96,8 +96,6 @@ class Reader(Source):
     catalog: str = Field(None)
     dataframe: DataFrame = Field(default=None)
     dataset_id: uuid.UUID = Field(default=uuid.uuid4())
-    database: str = Field(...)
-    table: str = Field(...)
     yetl_properties: ReaderProperties = Field(
         default=ReaderProperties(), alias="properties"
     )
@@ -116,16 +114,6 @@ class Reader(Source):
 
     def execute(self):
         pass
-
-    @property
-    def sql_database_table(self, sep: str = ".", qualifier: str = "`") -> str:
-        "Concatenated fully qualified database table for SQL"
-        return f"{qualifier}{self.database}{qualifier}{sep}{qualifier}{self.table}{qualifier}"
-
-    @property
-    def database_table(self, sep: str = ".") -> str:
-        "Concatenated database table for readability"
-        return f"{self.database}{sep}{self.table}"
 
     @property
     def has_exceptions(self) -> bool:

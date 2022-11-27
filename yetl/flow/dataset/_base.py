@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from abc import ABC, abstractmethod, abstractproperty
-
+from pydantic import BaseModel, Field
 
 class Dataset(BaseModel, ABC):
     @abstractmethod
@@ -64,3 +64,19 @@ class Source(Dataset):
     @initial_load.setter
     def initial_load(self, value: bool):
         self._initial_load = value
+
+
+class SQLTable(BaseModel):
+
+    database: str = Field(...)
+    table: str = Field(...)
+
+    @property
+    def sql_database_table(self, sep: str = ".", qualifier: str = "`") -> str:
+        "Concatenated fully qualified database table for SQL"
+        return f"{qualifier}{self.database}{qualifier}{sep}{qualifier}{self.table}{qualifier}"
+
+    @property
+    def database_table(self, sep: str = ".") -> str:
+        "Concatenated database table for readability"
+        return f"{self.database}{sep}{self.table}"
