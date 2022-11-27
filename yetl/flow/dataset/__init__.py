@@ -1,4 +1,9 @@
-from ._properties import BaseProperties, ReaderProperties, DeltaWriterProperties
+from ._properties import (
+    SchemaProperties, 
+    LineageProperties, 
+    ReaderProperties, 
+    DeltaWriterProperties
+)
 from ._reader import Read, Reader
 from ._base import Source, Destination, Dataset
 from ._deltalake_writer import Write, DeltaWriter
@@ -8,7 +13,8 @@ __all__ = [
     "Source",
     "Destination",
     "Dataset",
-    "BaseProperties",
+    "SchemaProperties",
+    "LineageProperties",
     "ReaderProperties",
     "DeltaWriterProperties",
     "Read",

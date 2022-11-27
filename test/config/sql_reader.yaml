@@ -1,0 +1,17 @@
+databse: "demo_raw"
+table: customer
+
+sql: "{{root}}/sql"
+properties:
+  yetl.metadata.contextId: True
+  yetl.metadata.dataflowId: True
+  yetl.metadata.datasetId: True
+
+sql_schema_database: demo_dw
+sql_schema_name: dim_customer
+
+
+timeslice_format: "%Y%m%d"
+format: delta
+read:
+  auto: true

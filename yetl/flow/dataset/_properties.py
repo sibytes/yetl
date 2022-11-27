@@ -18,7 +18,29 @@ def _yetl_properties_dumps(obj: dict, *, default):
     return json.dumps(obj, default=default)
 
 
-class BaseProperties(BaseModel):
+class LineageProperties(BaseModel):
+    """Yetl table properies that drives various features of a data flow for all types of datasets"""
+
+    # whether or not to add the context_id
+    metadata_context_id: bool = Field(
+        default=False, alias=YetlTableProperties.METADATA_CONTEXT_ID.value
+    )
+
+    # whether or not to add the dataflow_id
+    metadata_dataflow_id: bool = Field(
+        default=False, alias=YetlTableProperties.METADATA_DATAFLOW_ID.value
+    )
+
+    # whether or not to add the dataset_id
+    metadata_dataset_id: bool = Field(
+        default=True, alias=YetlTableProperties.METADATA_DATASET_ID.value
+    )
+    class Config:
+        # use a custom decoder to convert the field names
+        # back into yetl configuration names
+        json_dumps = _yetl_properties_dumps
+
+class SchemaProperties(BaseModel):
     """Yetl table properies that drives various features of a data flow for all types of datasets"""
 
     # Create the schema in the schema repo if it does not exist
@@ -36,28 +58,13 @@ class BaseProperties(BaseModel):
         default=CORRUPT_RECORD, alias=YetlTableProperties.SCHEMA_CORRUPT_RECORD.value
     )
 
-    # whether or not to add the context_id
-    metadata_context_id: bool = Field(
-        default=False, alias=YetlTableProperties.METADATA_CONTEXT_ID.value
-    )
-
-    # whether or not to add the dataflow_id
-    metadata_dataflow_id: bool = Field(
-        default=False, alias=YetlTableProperties.METADATA_DATAFLOW_ID.value
-    )
-
-    # whether or not to add the dataset_id
-    metadata_dataset_id: bool = Field(
-        default=True, alias=YetlTableProperties.METADATA_DATASET_ID.value
-    )
-
     class Config:
         # use a custom decoder to convert the field names
         # back into yetl configuration names
         json_dumps = _yetl_properties_dumps
 
 
-class ReaderProperties(BaseProperties):
+class ReaderProperties(SchemaProperties, LineageProperties):
     """Yetl table properies that drives various features of a data flow for Reader source"""
 
     # which timeslice property format to use to shred the timeslice from the datapath of files
@@ -87,7 +94,7 @@ class ReaderProperties(BaseProperties):
         json_dumps = _yetl_properties_dumps
 
 
-class DeltaWriterProperties(BaseProperties):
+class DeltaWriterProperties(SchemaProperties, LineageProperties):
     """Yetl table properies that drives various features of a data flow for DeltaWriter destintation"""
 
     # whether or not to optimize z orderby deltatable partitions after the are written
