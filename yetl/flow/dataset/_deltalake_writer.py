@@ -76,7 +76,7 @@ class DeltaWriter(Destination, SQLTable):
     catalog: str = Field(None)
     dataframe: DataFrame = Field(default=None)
     dataset_id: uuid.UUID = Field(default=uuid.uuid4())
-    ddl:str = Field(default=None)
+    ddl: str = Field(default=None)
     yetl_properties: DeltaWriterProperties = Field(
         default=DeltaWriterProperties(), alias="properties"
     )
@@ -90,7 +90,6 @@ class DeltaWriter(Destination, SQLTable):
     _initial_load: bool = PrivateAttr(default=False)
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
     _create_spark_schema = PrivateAttr(default=False)
-
 
     def _init_task_read_schema(self):
         # if table ddl not defined in the config
@@ -106,7 +105,7 @@ class DeltaWriter(Destination, SQLTable):
                 )
             except SchemaNotFound as e:
                 # currently we're forcing the creation or management of delta lake schema
-                # this is somewhat opinionated since we could just load a table off the 
+                # this is somewhat opinionated since we could just load a table off the
                 # data and not create a schema to manage. Currently we don't allow this
                 # in the spirit of best practice.
                 if self.yetl_properties.schema_create_if_not_exists:

@@ -38,7 +38,9 @@ class SqlReaderFile(ISchemaRepo):
         path = f"{path}/{database_name}/{table_name}.{self._EXT}"
         return path
 
-    def save_schema(self, schema: str, database: str, table: str, sub_location: str=None):
+    def save_schema(
+        self, schema: str, database: str, table: str, sub_location: str = None
+    ):
         """Serialise delta table to a create table sql file."""
         path = self._mkpath(database, table, sub_location)
         path = os.path.abspath(path)
@@ -48,7 +50,7 @@ class SqlReaderFile(ISchemaRepo):
         with open(path, "w", encoding="utf-8") as f:
             f.write(schema)
 
-    def load_schema(self, database: str, table: str, sub_location: str=None):
+    def load_schema(self, database: str, table: str, sub_location: str = None):
         """Loads a spark from a yaml file and deserialises to a spark schema."""
 
         path = self._mkpath(database, table, sub_location)

@@ -30,9 +30,7 @@ class SparkFileSchemaRepo(ISchemaRepo):
     def _mkpath(self, database: str, table: str, sub_location: str):
         """Function that builds the schema path"""
         if sub_location:
-            return (
-                f"{self.root}/{sub_location}/{database}/{table}.{_EXT}"
-            )
+            return f"{self.root}/{sub_location}/{database}/{table}.{_EXT}"
         else:
             return f"{self.root}/{database}/{table}.{_EXT}"
 

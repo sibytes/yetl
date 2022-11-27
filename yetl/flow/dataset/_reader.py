@@ -13,10 +13,11 @@ from .._timeslice import Timeslice, TimesliceUtcNow
 from pydantic import BaseModel, Field
 from enum import Enum
 from ..context import SparkContext, DatabricksContext
-from ..audit import Audit
+from ..audit import Audit, AuditTask
 from pyspark.sql.types import StructType
 from ..schema_repo import SchemaNotFound
-
+from .. import _delta_lake as dl
+from datetime import datetime
 
 def _yetl_properties_dumps(obj: dict, *, default):
     """Decodes the data back into a dictionary with yetl configuration properties names"""
@@ -58,6 +59,32 @@ class Exceptions(BaseModel):
     database: str = Field(...)
     table: str = Field(...)
 
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+
+    def _render(self, replacements):
+
+        self.table = render_jinja(self.table, replacements)
+        self.database = render_jinja(self.database, replacements)
+        self.path = render_jinja(self.path, replacements)
+
+    def table_exists(self, context:SparkContext):
+        dl.create_database(self.context, self.exceptions_database)
+        exists = dl.table_exists(
+            context, 
+            self.database, 
+            self.table
+        )
+        return exists
+
+    def create_table(self, context:SparkContext):
+        sql = dl.create_table(
+            context,
+            self.database,
+            self.table,
+            self.path,
+        )
+        return sql
 
 class Thresholds(BaseModel):
     warning: ThresholdLimit = Field(default=ThresholdLimit())
@@ -71,25 +98,12 @@ class Reader(Source, SQLTable):
 
     def initialise(self):
         self.timeslice = self.context.timeslice
-        self._replacements = {
-            JinjaVariables.DATABASE_NAME: self.database,
-            JinjaVariables.TABLE_NAME: self.table,
-            JinjaVariables.TIMESLICE_FILE_DATE_FORMAT: self.timeslice.strftime(
-                self.file_date_format
-            ),
-            JinjaVariables.TIMESLICE_PATH_DATE_FORMAT: self.timeslice.strftime(
-                self.path_date_format
-            ),
-        }
         self.datalake_protocol = self.context.datalake_protocol
         self.datalake = self.context.datalake
         self.auditor = self.context.auditor
-        path = f"{self.datalake_protocol.value}{self.datalake}/{self.path}"
-        self.path = render_jinja(path, self._replacements)
+        self._render(self._replacements)
         self.context_id = self.context.context_id
         self._init_task_read_schema()
-
- 
 
     context: SparkContext = Field(...)
     timeslice: Timeslice = Field(default=TimesliceUtcNow())
@@ -116,6 +130,23 @@ class Reader(Source, SQLTable):
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
     _create_spark_schema: bool = PrivateAttr(default=False)
 
+    def _render(self, replacements):
+        self._replacements = {
+            JinjaVariables.DATABASE_NAME: self.database,
+            JinjaVariables.TABLE_NAME: self.table,
+            JinjaVariables.TIMESLICE_FILE_DATE_FORMAT: self.timeslice.strftime(
+                self.file_date_format
+            ),
+            JinjaVariables.TIMESLICE_PATH_DATE_FORMAT: self.timeslice.strftime(
+                self.path_date_format
+            ),
+        }
+        path = f"{self.datalake_protocol.value}{self.datalake}/{self.path}"
+        self.path = render_jinja(path, self._replacements)
+
+        if self.has_exceptions:
+            self.exceptions._render(self._replacements)
+
     def _init_task_read_schema(self):
         try:
             self.spark_schema = self.context.spark_schema_repository.load_schema(
@@ -127,6 +158,21 @@ class Reader(Source, SQLTable):
                 self.infer_schema = True
             elif not self._infer_schema:
                 raise e
+
+    def _init_task_create_exception_table(self):
+
+        table_exists = self.exceptions.table_exists(self.context)
+        if table_exists:
+            # self.context.log.info(
+            #     f"Exception table already exists {self.exceptions_database}.{self.exceptions_table} at {self.exceptions_path} {CONTEXT_ID}={str(self.context_id)}"
+            # )
+            self.initial_load = False
+        else:
+            start_datetime = datetime.now()
+            sql = self.exceptions.create_table(self.context)
+            self.auditor.dataset_task(self.id, AuditTask.SQL, sql, start_datetime)
+            self.initial_load = True
+            
 
     def validate(self):
         pass
@@ -142,7 +188,6 @@ class Reader(Source, SQLTable):
     @infer_schema.setter
     def infer_schema(self, value: bool):
         self.read.options["inferSchema"] = value
-
 
     @property
     def has_exceptions(self) -> bool:
