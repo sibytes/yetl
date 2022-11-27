@@ -79,6 +79,7 @@ class DeltaWriter(Destination):
     yetl_properties: DeltaWriterProperties = Field(
         default=DeltaWriterProperties(), alias="properties"
     )
+    deltalake_properties:dict = Field(default={})
     format: FormatOptions = Field(default=FormatOptions.DELTA)
     path: str = Field(...)
     check_constraints: Dict[str, str] = Field(default=None)

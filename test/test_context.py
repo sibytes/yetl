@@ -64,21 +64,17 @@ def test_spark_context(spark_context_config: Callable):
 def test_databricks_context(databricks_context_config: Callable):
 
     environment = Environment()
-    context = DatabricksContext(
-        auditor=Audit(),
-        project="demo",
-        name="demo",
-        environment=environment,
-        **databricks_context_config
-    )
+    expected = "Cannot import DBUtils, most likely cause is having DBFS configured for environment that isn't databricks and doesn't support."
+    actual:str
+    try:
+        context = DatabricksContext(
+            auditor=Audit(),
+            project="demo",
+            name="demo",
+            environment=environment,
+            **databricks_context_config
+        )
+    except Exception as e:
+        actual = str(e)
 
-    assert context.datalake == databricks_context_config["datalake"]
-    assert context.datalake_protocol == FileSystemType.FILE
-    assert (
-        context.pipeline_repository.pipeline_root
-        == databricks_context_config["pipeline_repo"]["pipeline_file"]["pipeline_root"]
-    )
-    assert (
-        context.pipeline_repository.sql_root
-        == databricks_context_config["pipeline_repo"]["pipeline_file"]["sql_root"]
-    )
+    assert actual == expected
