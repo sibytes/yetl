@@ -1,7 +1,7 @@
 # from multiprocessing import context
 from ..parser._constants import *
 
-# from ..schema_repo import ISchemaRepo, SchemaNotFound
+from ..schema_repo import SchemaNotFound
 
 from .. import _delta_lake as dl
 from pyspark.sql import DataFrame
@@ -64,6 +64,7 @@ class DeltaWriter(Destination, SQLTable):
         path = f"{self.datalake_protocol.value}{self.datalake}/{self.path}"
         self.path = render_jinja(path, self._replacements)
         self.context_id = self.context.context_id
+        self._init_task_read_schema()
 
     context: SparkContext = Field(...)
     timeslice: Timeslice = Field(default=TimesliceUtcNow())
@@ -75,6 +76,7 @@ class DeltaWriter(Destination, SQLTable):
     catalog: str = Field(None)
     dataframe: DataFrame = Field(default=None)
     dataset_id: uuid.UUID = Field(default=uuid.uuid4())
+    ddl:str = Field(default=None)
     yetl_properties: DeltaWriterProperties = Field(
         default=DeltaWriterProperties(), alias="properties"
     )
@@ -87,6 +89,25 @@ class DeltaWriter(Destination, SQLTable):
     write: Write = Field(default=Write())
     _initial_load: bool = PrivateAttr(default=False)
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
+    _create_spark_schema = PrivateAttr(default=False)
+
+
+    def _init_task_read_schema(self):
+        if (not self.ddl) or (not "\n" in self.ddl):
+            try:
+                self.ddl = self.context.deltalake_schema_repository.load_schema(
+                    database=self.database, table=self.table, sub_location=self.ddl
+                )
+            except SchemaNotFound as e:
+                # currently we're forcing the creation or management of delta lake schema
+                # this is somewhat opinionated since we could just load a table off the 
+                # data and not create a schema to manage. Currently we don't allow this
+                # in the spirit of best practice.
+                if self.yetl_properties.schema_create_if_not_exists:
+                    self._create_spark_schema = True
+
+                elif not self._infer_schema:
+                    raise e
 
     def validate(self):
         pass

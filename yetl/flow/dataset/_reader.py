@@ -15,6 +15,7 @@ from enum import Enum
 from ..context import SparkContext, DatabricksContext
 from ..audit import Audit
 from pyspark.sql.types import StructType
+from ..schema_repo import SchemaNotFound
 
 
 def _yetl_properties_dumps(obj: dict, *, default):
@@ -86,9 +87,9 @@ class Reader(Source, SQLTable):
         path = f"{self.datalake_protocol.value}{self.datalake}/{self.path}"
         self.path = render_jinja(path, self._replacements)
         self.context_id = self.context.context_id
-        self.spark_schema = self.context.spark_schema_repository.load_schema(
-            database=self.database, table=self.table
-        )
+        self._init_task_read_schema()
+
+ 
 
     context: SparkContext = Field(...)
     timeslice: Timeslice = Field(default=TimesliceUtcNow())
@@ -113,12 +114,35 @@ class Reader(Source, SQLTable):
     spark_schema: StructType = None
     _initial_load: bool = PrivateAttr(default=False)
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
+    _create_spark_schema: bool = PrivateAttr(default=False)
+
+    def _init_task_read_schema(self):
+        try:
+            self.spark_schema = self.context.spark_schema_repository.load_schema(
+                database=self.database, table=self.table
+            )
+        except SchemaNotFound as e:
+            if self.yetl_properties.schema_create_if_not_exists:
+                self._create_spark_schema = True
+                self.infer_schema = True
+            elif not self._infer_schema:
+                raise e
 
     def validate(self):
         pass
 
     def execute(self):
         pass
+
+    @property
+    def infer_schema(self):
+
+        return self.read.options.get("inferSchema", False)
+
+    @infer_schema.setter
+    def infer_schema(self, value: bool):
+        self.read.options["inferSchema"] = value
+
 
     @property
     def has_exceptions(self) -> bool:

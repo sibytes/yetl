@@ -41,6 +41,7 @@ class _SchemaRepoFactory:
             )
             raise ValueError(sr_type)
 
+        config = config[schema_repo_store]
         return schema_repo(**config)
 
 

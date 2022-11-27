@@ -32,6 +32,9 @@ class DeltalakeSchemaFile(ISchemaRepo):
         replacements = {JinjaVariables.ROOT: self.root}
         if sub_location:
             path = render_jinja(sub_location, replacements)
+        else:
+            path = self.root
+            
         path = f"{path}/{database_name}/{table_name}.{_EXT}"
         return path
 
