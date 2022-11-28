@@ -45,14 +45,28 @@ class ThresholdLimit(BaseModel):
 class Read(BaseModel):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
-        self.mode = self.options.get("mode", ReadModeOptions.PERMISSIVE)
-        self.infer_schema = self.options.get("inferSchema", False)
 
     _DEFAULT_OPTIONS = {"mode": ReadModeOptions.PERMISSIVE.value, "inferSchema": False}
     auto: bool = Field(default=True)
     options: Dict[str, Any] = Field(default=_DEFAULT_OPTIONS)
-    mode: ReadModeOptions = Field(default=ReadModeOptions.PERMISSIVE)
-    infer_schema: bool = Field(default=False)
+
+    @property
+    def infer_schema(self):
+        return self.options.get("inferSchema", False)
+
+    @infer_schema.setter
+    def infer_schema(self, value: bool):
+        self.read.options["inferSchema"] = value
+
+    @property
+    def mode(self):
+        return self.options.get("mode", False)
+
+    @mode.setter
+    def mode(self, value: ReadModeOptions):
+        self.read.options["mode"] = value.value
+
+
 
 
 class Exceptions(BaseModel):
@@ -160,8 +174,14 @@ class Reader(Source, SQLTable):
             )
         except SchemaNotFound as e:
             if self.yetl_properties.schema_create_if_not_exists:
+                # default all settings to allow a inferred schema load
+                # we're effectively the user is forcing this to they've configured it
+                # to create the schema automatically.
                 self._create_spark_schema = True
-                self.infer_schema = True
+                self.read.infer_schema = True
+                self.read.mode = ReadModeOptions.PERMISSIVE
+                self.initial_load = True
+                self.has_exceptions = False
             elif not self._infer_schema:
                 raise e
 
@@ -184,15 +204,6 @@ class Reader(Source, SQLTable):
 
     def execute(self):
         pass
-
-    @property
-    def infer_schema(self):
-
-        return self.read.options.get("inferSchema", False)
-
-    @infer_schema.setter
-    def infer_schema(self, value: bool):
-        self.read.options["inferSchema"] = value
 
     @property
     def has_exceptions(self) -> bool:
