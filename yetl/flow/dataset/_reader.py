@@ -59,19 +59,19 @@ class Exceptions(BaseModel):
     path: str = Field(...)
     database: str = Field(...)
     table: str = Field(...)
-    context:SparkContext = Field(...)
+    context: SparkContext = Field(...)
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
 
-    def _render(self, replacements):
+    def _render(self, replacements:Dict[JinjaVariables, str]):
 
         self.table = render_jinja(self.table, replacements)
         self.database = render_jinja(self.database, replacements)
         self.path = render_jinja(self.path, replacements)
 
     def table_exists(self):
-        dl.create_database(self.context, self.exceptions_database)
+        dl.create_database(self.context, self.database)
         exists = dl.table_exists(self.context, self.database, self.table)
         return exists
 
@@ -101,13 +101,13 @@ class Reader(Source, SQLTable):
         self.datalake_protocol = self.context.datalake_protocol
         self.datalake = self.context.datalake
         self.auditor = self.context.auditor
-        self._render(self._replacements)
+        self._render()
         self.context_id = self.context.context_id
         self._init_task_read_schema()
         if self.read.auto:
             self._init_task_create_exception_table()
 
-    def _cascade_context(self, data:dict):
+    def _cascade_context(self, data: dict):
         if data.get("exceptions") and data.get("context"):
             data["exceptions"]["context"] = data.get("context")
 
@@ -136,7 +136,7 @@ class Reader(Source, SQLTable):
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
     _create_spark_schema: bool = PrivateAttr(default=False)
 
-    def _render(self, replacements):
+    def _render(self):
         self._replacements = {
             JinjaVariables.DATABASE_NAME: self.database,
             JinjaVariables.TABLE_NAME: self.table,
@@ -170,14 +170,14 @@ class Reader(Source, SQLTable):
         table_exists = self.exceptions.table_exists()
         if table_exists:
             # self.context.log.info(
-            #     f"Exception table already exists {self.exceptions_database}.{self.exceptions_table} at {self.exceptions_path} {CONTEXT_ID}={str(self.context_id)}"
+            #     f"Exception table already exists {self.database}.{self.table} at {self.exceptions_path} {CONTEXT_ID}={str(self.context_id)}"
             # )
-            self.initial_load = False
+            self._initial_load = False
         else:
             start_datetime = datetime.now()
             sql = self.exceptions.create_table()
-            self.auditor.dataset_task(self.id, AuditTask.SQL, sql, start_datetime)
-            self.initial_load = True
+            self.auditor.dataset_task(self.dataset_id, AuditTask.SQL, sql, start_datetime)
+            self._initial_load = True
 
     def validate(self):
         pass

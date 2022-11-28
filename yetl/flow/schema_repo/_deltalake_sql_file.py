@@ -65,7 +65,7 @@ class DeltalakeSchemaFile(ISchemaRepo):
             raise SchemaNotFound(path) from e
 
         msg = json.dumps(schema)
-        self.log.debug(msg)
+        # self.log.debug(msg)
 
         return schema
 
