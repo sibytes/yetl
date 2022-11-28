@@ -3,7 +3,12 @@ from ._properties import ReaderProperties
 from ._decoder import parse_properties_key, parse_properties_values
 from typing import Any, Dict
 import json
-from ..parser.parser import JinjaVariables, render_jinja
+from ..parser.parser import (
+    JinjaVariables,
+    render_jinja,
+    to_regex_search_pattern,
+    to_spark_format_code,
+)
 from ..parser._constants import FormatOptions
 from ..file_system import FileSystemType
 import uuid
@@ -14,10 +19,12 @@ from pydantic import BaseModel, Field
 from enum import Enum
 from ..context import SparkContext, DatabricksContext
 from ..audit import Audit, AuditTask
-from pyspark.sql.types import StructType
+from pyspark.sql.types import StructType, StringType
+from pyspark.sql import functions as fn
 from ..schema_repo import SchemaNotFound
 from .. import _delta_lake as dl
 from datetime import datetime
+from ..parser._constants import *
 
 
 def _yetl_properties_dumps(obj: dict, *, default):
@@ -67,8 +74,6 @@ class Read(BaseModel):
         self.read.options["mode"] = value.value
 
 
-
-
 class Exceptions(BaseModel):
     path: str = Field(...)
     database: str = Field(...)
@@ -78,7 +83,7 @@ class Exceptions(BaseModel):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
 
-    def _render(self, replacements:Dict[JinjaVariables, str]):
+    def _render(self, replacements: Dict[JinjaVariables, str]):
 
         self.table = render_jinja(self.table, replacements)
         self.database = render_jinja(self.database, replacements)
@@ -120,6 +125,7 @@ class Reader(Source, SQLTable):
         self._init_task_read_schema()
         if self.read.auto:
             self._init_task_create_exception_table()
+        self._init_validate()
 
     def _cascade_context(self, data: dict):
         if data.get("exceptions") and data.get("context"):
@@ -196,14 +202,158 @@ class Reader(Source, SQLTable):
         else:
             start_datetime = datetime.now()
             sql = self.exceptions.create_table()
-            self.auditor.dataset_task(self.dataset_id, AuditTask.SQL, sql, start_datetime)
+            self.auditor.dataset_task(
+                self.dataset_id, AuditTask.SQL, sql, start_datetime
+            )
             self._initial_load = True
+
+    def _init_validate(self):
+
+        if self.yetl_properties.schema_create_if_not_exists:
+            if self.read.mode not in [
+                ReadModeOptions.BADRECORDSPATH,
+                ReadModeOptions.PERMISSIVE,
+            ]:
+                if self.has_exception_configured:
+                    msg = f"{MODE}={self.read.mode}, exceptions can only be handled on a mode={ReadModeOptions.PERMISSIVE.value} or {ReadModeOptions.BADRECORDSPATH.value}, {EXCEPTIONS} configuration will be disabled."
+                    self.context.log.warning(msg)
+                    self.has_exception_configured = False
+                else:
+                    msg = f"{MODE}={self.read.mode} requires Exceptions details configured."
+                    self.context.log.error(msg)
+                    raise Exception(msg)
+
+            if (
+                self.read.mode == ReadModeOptions.PERMISSIVE
+                and self.has_exception_configured
+                and not self.has_corrupt_column
+            ):
+                msg = f"""{MODE}={ReadModeOptions.PERMISSIVE} exceptions requires _corrupt_record column in the schema, 
+                if not schema exists yet use the properties to add one {YetlTableProperties.SCHEMA_CORRUPT_RECORD.name},
+                {YetlTableProperties.SCHEMA_CORRUPT_RECORD_NAME.name}."""
+                self.context.log.error(msg)
+                raise Exception(msg)
 
     def validate(self):
         pass
 
+    def _execute_add_source_metadata(self, df: DataFrame):
+
+        if self.yetl_properties.metadata_filepath_filename:
+            df: DataFrame = df.withColumn(FILEPATH_FILENAME, fn.input_file_name())
+
+        if self.yetl_properties.metadata_filepath:
+            df: DataFrame = df.withColumn(FILEPATH, fn.input_file_name()).withColumn(
+                FILEPATH,
+                fn.expr(
+                    f"replace({FILEPATH}, concat('/', substring_index({FILEPATH}, '/', -1)))"
+                ),
+            )
+
+        if self.yetl_properties.metadata_filename:
+            df: DataFrame = df.withColumn(FILENAME, fn.input_file_name()).withColumn(
+                FILENAME, fn.substring_index(fn.col(FILENAME), "/", -1)
+            )
+
+        if self.yetl_properties.metadata_context_id:
+            df: DataFrame = df.withColumn(CONTEXT_ID, fn.lit(self.context_id))
+
+        if self.yetl_properties.metadata_dataflow_id:
+            df: DataFrame = df.withColumn(DATAFLOW_ID, fn.lit(self.dataflow_id))
+
+        if self.yetl_properties.metadata_dataset_id:
+            df: DataFrame = df.withColumn(DATASET_ID, fn.lit(self.dataset_id))
+
+        return df
+
+    def _execute_add_timeslice(self, df: DataFrame):
+
+        if (
+            self.yetl_properties.metadata_timeslice.name
+            == JinjaVariables.TIMESLICE_PATH_DATE_FORMAT.name
+        ):
+
+            pattern = to_regex_search_pattern(self.path_date_format)
+            spark_format_string = to_spark_format_code(self.path_date_format)
+
+            df: DataFrame = (
+                df.withColumn(TIMESLICE, fn.input_file_name())
+                .withColumn(TIMESLICE, fn.regexp_extract(fn.col(TIMESLICE), pattern, 0))
+                .withColumn(
+                    TIMESLICE,
+                    fn.to_timestamp(TIMESLICE, spark_format_string),
+                )
+            )
+
+        elif (
+            self.yetl_properties.metadata_timeslice.name
+            == JinjaVariables.TIMESLICE_FILE_DATE_FORMAT.name
+        ):
+
+            pattern = to_regex_search_pattern(self.file_date_format)
+            spark_format_string = to_spark_format_code(self.file_date_format)
+
+            df: DataFrame = (
+                df.withColumn(TIMESLICE, fn.input_file_name())
+                .withColumn(TIMESLICE, fn.substring_index(fn.col(TIMESLICE), "/", -1))
+                .withColumn(TIMESLICE, fn.regexp_extract(fn.col(TIMESLICE), pattern, 0))
+                .withColumn(
+                    TIMESLICE,
+                    fn.to_timestamp(TIMESLICE, spark_format_string),
+                )
+            )
+
+        return df
+
+    def _execute_create_spark_schema(self, df: DataFrame):
+        if self._create_spark_schema:
+            self.context.log.info(
+                f"Saving inferred schema for {self.database}.{self.table} into schema repository. {CONTEXT_ID}={str(self.context_id)}"
+            )
+            self.spark_schema = df.schema
+            if self.yetl_properties.schema_corrupt_record:
+                self.spark_schema.add(
+                    self.yetl_properties.schema_corrupt_record_name,
+                    StringType(),
+                    nullable=True,
+                )
+            self.schema_repo.save_schema(self.spark_schema, self.database, self.table)
+
     def execute(self):
-        pass
+        self.context.log.info(
+            f"Reading data for {self.database_table} from {self.path} with options {self.read.options} {CONTEXT_ID}={str(self.context_id)}"
+        )
+
+        start_datetime = datetime.now()
+
+        df: DataFrame = self.context.spark.read.format(self.format.value)
+
+        if self.spark_schema:
+            df = df.schema(self.spark_schema)
+
+        df = df.options(**self.read.options).load(self.path)
+
+        # if there isn't a schema and it's configured to create one the save it to repo.
+        self._execute_create_spark_schema
+        # add metadata after schema is created since we don't want these
+        # derived columns in the read metadata, only the _corrupt_column if present
+        df = self._execute_add_timeslice(df)
+        df = self._execute_add_source_metadata(df)
+
+        self.context.log.debug(
+            f"Reordering sys_columns to end for {self.database_table} from {self.path}. {CONTEXT_ID}={str(self.context_id)}"
+        )
+        self.dataframe = df
+        detail = {"path": self.path, "options": self.options}
+        self.auditor.dataset_task(
+            self.dataset_id, AuditTask.LAZY_READ, detail, start_datetime
+        )
+
+        # only run the validator if exception handling has ben configured.
+        if self.has_exception_configured:
+            self.validation_result = self.validate()
+
+        return self.dataframe
 
     @property
     def has_exceptions(self) -> bool:
@@ -220,6 +370,17 @@ class Reader(Source, SQLTable):
             return True
         else:
             False
+
+    @property
+    def has_corrupt_column(self) -> bool:
+        "Readable property to determine if schema has a corrupt column"
+        if not self.spark_schema and self.yetl_properties.schema_create_if_not_exists:
+            return self.yetl_properties.schema_corrupt_record
+        if self.spark_schema:
+            return (
+                self.yetl_properties.schema_corrupt_record_name
+                in self.spark_schema.fieldNames()
+            )
 
     class Config:
         # use a custom decoder to convert the field names
