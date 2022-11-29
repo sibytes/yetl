@@ -41,6 +41,7 @@ class Dataset(BaseModel, ABC):
 
         return metadata
 
+
 class Destination(Dataset, ABC):
     @property
     def is_source(self):

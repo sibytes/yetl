@@ -16,7 +16,8 @@ class ThresholdLimit(BaseModel):
     max_rows: int = Field(default=None)
     exception_count: int = Field(default=0)
     exception_percent: int = Field(default=0)
-    
+
+
 class Thresholds(BaseModel):
     warning: ThresholdLimit = Field(default=ThresholdLimit())
     error: ThresholdLimit = Field(default=ThresholdLimit())
@@ -39,17 +40,17 @@ class IValidator(BaseModel, ABC):
     #     error_thresholds: dict = None,
     # ) -> None:
 
-    dataframe:DataFrame = None
-    exceptions_handler:Callable[[DataFrame], int] = Field(default=None)
-    exceptions = None
-    exceptions_count:int = Field(default=0)
-    valid_count:int = Field(default=0)
-    total_count:int = Field(default=0)
-    database:str = Field(default=None)
-    table:str = Field(default=None)
-    warning_thresholds:ThresholdLimit = Field(default=None)
-    error_thresholds:ThresholdLimit = Field(default=None)
-    level:ThresholdLevels = Field(default=ThresholdLevels.INFO)
+    dataframe: DataFrame = None
+    exceptions_handler: Callable[[DataFrame], int] = Field(default=None)
+    # exceptions = None
+    exceptions_count: int = Field(default=0)
+    valid_count: int = Field(default=0)
+    total_count: int = Field(default=0)
+    database: str = Field(default=None)
+    table: str = Field(default=None)
+    warning_thresholds: ThresholdLimit = Field(default=None)
+    error_thresholds: ThresholdLimit = Field(default=None)
+    level: ThresholdLevels = Field(default=ThresholdLevels.INFO)
 
     @abstractmethod
     def validate(self) -> dict:
@@ -133,19 +134,22 @@ class IValidator(BaseModel, ABC):
         }
         # validation_json = json.dumps(validation, indent=4, default=str)
         # if self.level == ThresholdLevels.INFO:
-            # self.context.log.info(validation_json)
+        # self.context.log.info(validation_json)
         # elif ThresholdLevels.WARNING:
-            # self.context.log.warning(validation_json)
+        # self.context.log.warning(validation_json)
         # elif ThresholdLevels.ERROR:
-            # self.context.log.error(validation_json)
+        # self.context.log.error(validation_json)
 
         return self.level, validation
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class PermissiveSchemaOnRead(IValidator):
     def __init__(
         self,
-        context:IContext,
+        context: IContext,
         dataframe: DataFrame,
         exceptions_handler: Callable[[DataFrame], int],
         database: str,
@@ -194,7 +198,7 @@ class PermissiveSchemaOnRead(IValidator):
 class BadRecordsPathSchemaOnRead(IValidator):
     def __init__(
         self,
-        context:IContext,
+        context: IContext,
         dataframe: DataFrame,
         exceptions_handler: Callable[[DataFrame], int],
         database: str,
@@ -213,8 +217,8 @@ class BadRecordsPathSchemaOnRead(IValidator):
             error_thresholds=error_thresholds,
         )
 
-    path:str = Field(...)
-    spark:SparkSession = None
+    path: str = Field(...)
+    spark: SparkSession = None
 
     def validate(self):
 

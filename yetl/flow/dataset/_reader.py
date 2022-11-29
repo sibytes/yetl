@@ -98,7 +98,6 @@ class Exceptions(SQLTable):
         return sql
 
 
-
 class Reader(Source, SQLTable):
     def __init__(self, **data: Any) -> None:
         self._cascade_context(data)
@@ -237,9 +236,9 @@ class Reader(Source, SQLTable):
                     self.context.log.warning(
                         f"Writing {exceptions_count} exception(s) from {self.database_table} to {self.exceptions.database_table} delta table {CONTEXT_ID}={str(self.context_id)}"
                     )
-                    exceptions.write.format(FormatOptions.DELTA.value).options(**options).mode(
-                        APPEND
-                    ).save(self.exceptions.path)
+                    exceptions.write.format(FormatOptions.DELTA.value).options(
+                        **options
+                    ).mode(APPEND).save(self.exceptions.path)
             return exceptions_count
 
         return handle_exceptions
@@ -267,7 +266,7 @@ class Reader(Source, SQLTable):
                 self.thresholds.error,
             )
 
-        if self.read.mode==ReadModeOptions.PERMISSIVE and self.has_corrupt_column():
+        if self.read.mode == ReadModeOptions.PERMISSIVE and self.has_corrupt_column():
             self.context.log.info(
                 f"Validating dataframe read using PERMISSIVE corrupt column at {CORRUPT_RECORD} {CONTEXT_ID}={str(self.context_id)}"
             )
@@ -288,7 +287,6 @@ class Reader(Source, SQLTable):
                 self.id, AuditTask.SCHEMA_ON_READ_VALIDATION, validation, start_datetime
             )
             self.dataframe = validator.dataframe
-
 
     def _execute_add_source_metadata(self, df: DataFrame):
 
