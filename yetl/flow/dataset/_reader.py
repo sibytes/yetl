@@ -25,6 +25,7 @@ from ..schema_repo import SchemaNotFound
 from .. import _delta_lake as dl
 from datetime import datetime
 from ..parser._constants import *
+from ._validation import PermissiveSchemaOnRead, BadRecordsPathSchemaOnRead, Thresholds
 
 
 def _yetl_properties_dumps(obj: dict, *, default):
@@ -40,13 +41,6 @@ class ReadModeOptions(Enum):
     FAILFAST = "FAILFAST"
     DROPMALFORMED = "DROPMALFORMED"
     BADRECORDSPATH = "badRecordsPath"
-
-
-class ThresholdLimit(BaseModel):
-    min_rows: int = Field(default=0)
-    max_rows: int = Field(default=None)
-    exception_count: int = Field(default=0)
-    exception_percent: int = Field(default=0)
 
 
 class Read(BaseModel):
@@ -74,10 +68,10 @@ class Read(BaseModel):
         self.read.options["mode"] = value.value
 
 
-class Exceptions(BaseModel):
+class Exceptions(SQLTable):
     path: str = Field(...)
-    database: str = Field(...)
-    table: str = Field(...)
+    # database: str = Field(...)
+    # table: str = Field(...)
     context: SparkContext = Field(...)
 
     def __init__(self, **data: Any) -> None:
@@ -103,10 +97,6 @@ class Exceptions(BaseModel):
         )
         return sql
 
-
-class Thresholds(BaseModel):
-    warning: ThresholdLimit = Field(default=ThresholdLimit())
-    error: ThresholdLimit = Field(default=ThresholdLimit())
 
 
 class Reader(Source, SQLTable):
@@ -190,7 +180,7 @@ class Reader(Source, SQLTable):
                 self.read.infer_schema = True
                 self.read.mode = ReadModeOptions.PERMISSIVE
                 self.initial_load = True
-                self.has_exceptions = False
+                self.exceptions = None
             elif not self._infer_schema:
                 raise e
 
@@ -212,7 +202,7 @@ class Reader(Source, SQLTable):
 
     def _init_validate(self):
 
-        if self.yetl_properties.schema_create_if_not_exists:
+        if self._create_spark_schema:
             if self.read.mode not in [
                 ReadModeOptions.BADRECORDSPATH,
                 ReadModeOptions.PERMISSIVE,
@@ -220,7 +210,7 @@ class Reader(Source, SQLTable):
                 if self.has_exceptions:
                     msg = f"{MODE}={self.read.mode}, exceptions can only be handled on a mode={ReadModeOptions.PERMISSIVE.value} or {ReadModeOptions.BADRECORDSPATH.value}, {EXCEPTIONS} configuration will be disabled."
                     self.context.log.warning(msg)
-                    self.has_exceptions = False
+                    self.exceptions = None
                 else:
                     msg = f"{MODE}={self.read.mode} requires Exceptions details configured."
                     self.context.log.error(msg)
@@ -237,8 +227,68 @@ class Reader(Source, SQLTable):
                 self.context.log.error(msg)
                 raise Exception(msg)
 
+    def _get_validation_exceptions_handler(self):
+        def handle_exceptions(exceptions: DataFrame):
+            exceptions_count = 0
+            if self.has_exceptions:
+                exceptions_count = exceptions.count()
+                if exceptions and exceptions_count > 0:
+                    options = {MERGE_SCHEMA: True}
+                    self.context.log.warning(
+                        f"Writing {exceptions_count} exception(s) from {self.database_table} to {self.exceptions.database_table} delta table {CONTEXT_ID}={str(self.context_id)}"
+                    )
+                    exceptions.write.format(FormatOptions.DELTA.value).options(**options).mode(
+                        APPEND
+                    ).save(self.exceptions.path)
+            return exceptions_count
+
+        return handle_exceptions
+
     def validate(self):
-        pass
+
+        validation_handler = self._get_validation_exceptions_handler()
+        validator = None
+
+        if self.read.mode == ReadModeOptions.BADRECORDSPATH:
+            # TODO check the config how to set up
+            bad_records_path = self.options[BAD_RECORDS_PATH]
+            self.context.log.info(
+                f"Validating dataframe read using badRecordsPath at {bad_records_path} {CONTEXT_ID}={str(self.context_id)}"
+            )
+            validator = BadRecordsPathSchemaOnRead(
+                self.context,
+                self.dataframe,
+                validation_handler,
+                self.database,
+                self.table,
+                bad_records_path,
+                self.context.spark,
+                self.thresholds.warning,
+                self.thresholds.error,
+            )
+
+        if self.read.mode==ReadModeOptions.PERMISSIVE and self.has_corrupt_column():
+            self.context.log.info(
+                f"Validating dataframe read using PERMISSIVE corrupt column at {CORRUPT_RECORD} {CONTEXT_ID}={str(self.context_id)}"
+            )
+            validator = PermissiveSchemaOnRead(
+                self.context,
+                self.dataframe,
+                validation_handler,
+                self.database,
+                self.table,
+                self.thresholds.warning,
+                self.thresholds.error,
+            )
+
+        if validator:
+            start_datetime = datetime.now()
+            level_validation, validation = validator.validate()
+            self.auditor.dataset_task(
+                self.id, AuditTask.SCHEMA_ON_READ_VALIDATION, validation, start_datetime
+            )
+            self.dataframe = validator.dataframe
+
 
     def _execute_add_source_metadata(self, df: DataFrame):
 
@@ -259,13 +309,13 @@ class Reader(Source, SQLTable):
             )
 
         if self.yetl_properties.metadata_context_id:
-            df: DataFrame = df.withColumn(CONTEXT_ID, fn.lit(self.context_id))
+            df: DataFrame = df.withColumn(CONTEXT_ID, fn.lit(str(self.context_id)))
 
         if self.yetl_properties.metadata_dataflow_id:
-            df: DataFrame = df.withColumn(DATAFLOW_ID, fn.lit(self.dataflow_id))
+            df: DataFrame = df.withColumn(DATAFLOW_ID, fn.lit(str(self.dataflow_id)))
 
         if self.yetl_properties.metadata_dataset_id:
-            df: DataFrame = df.withColumn(DATASET_ID, fn.lit(self.dataset_id))
+            df: DataFrame = df.withColumn(DATASET_ID, fn.lit(str(self.dataset_id)))
 
         return df
 
@@ -337,7 +387,7 @@ class Reader(Source, SQLTable):
         df = df.options(**self.read.options).load(self.path)
 
         # if there isn't a schema and it's configured to create one the save it to repo.
-        self._execute_create_spark_schema
+        self._execute_create_spark_schema(df=df)
         # add metadata after schema is created since we don't want these
         # derived columns in the read metadata, only the _corrupt_column if present
         df = self._execute_add_timeslice(df)
@@ -347,11 +397,12 @@ class Reader(Source, SQLTable):
             f"Reordering sys_columns to end for {self.database_table} from {self.path}. {CONTEXT_ID}={str(self.context_id)}"
         )
         self.dataframe = df
-        detail = {"path": self.path, "options": self.options}
+        detail = {"path": self.path, "options": self.read.options}
         self.auditor.dataset_task(
             self.dataset_id, AuditTask.LAZY_READ, detail, start_datetime
         )
 
+        # TODO
         # only run the validator if exception handling has ben configured.
         if self.has_exceptions:
             self.validation_result = self.validate()

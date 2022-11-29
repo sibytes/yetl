@@ -41,7 +41,7 @@ class Dataflow(IDataflow):
         except KeyError as e:
             raise SourceNotFound(str(e), self.sources)
 
-        if source.auto_io:
+        if source.auto_read:
             source.execute()
         return source.dataframe
 
@@ -58,5 +58,5 @@ class Dataflow(IDataflow):
         if save:
             dst.save = save(dst)
 
-        if dst.auto_io:
+        if dst.auto_write:
             dst.execute()

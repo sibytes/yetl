@@ -51,6 +51,11 @@ class Destination(Dataset, ABC):
         return True
 
     @property
+    def auto_write(self):
+
+        return self.write.auto
+
+    @property
     def initial_load(self):
 
         return self._initial_load
@@ -68,6 +73,11 @@ class Source(Dataset):
     @property
     def is_destination(self):
         return False
+
+    @property
+    def auto_read(self):
+
+        return self.read.auto
 
     @property
     def initial_load(self):
