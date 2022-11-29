@@ -28,6 +28,18 @@ class Dataset(BaseModel, ABC):
     def initial_load(self) -> bool:
         pass
 
+    def get_metadata(self):
+        metadata = {
+            str(self.dataset_id): {
+                "type": self.__class__.__name__,
+                "dataflow_id": str(self.dataflow_id),
+                "database": self.database,
+                "table": self.table,
+                "path": self.path,
+            }
+        }
+
+        return metadata
 
 class Destination(Dataset, ABC):
     @property

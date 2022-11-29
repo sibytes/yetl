@@ -58,13 +58,13 @@ def _build_dataflow(context: IContext):
     for database, table in dataflow_config.items():
         for table, table_config in table.items():
             md = dataset_factory.get_dataset_type(
-                context, database, table, table_config
+                context, database, table, dataflow.dataflow_id, table_config
             )
             context.log.debug(
                 f"Deserialized {database}.{table} configuration into {type(md)}"
             )
             dataflow.append(md)
 
-    dataflow.audit_lineage()
+            dataflow.audit_lineage()
 
     return dataflow

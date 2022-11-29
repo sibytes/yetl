@@ -4,6 +4,7 @@ from ._reader import Reader
 from ._deltalake_writer import DeltaWriter
 from ..context import IContext
 from ..dataflow import IDataflow
+import uuid
 
 # from ._stream_reader import StreamReader
 # from ._stream_writer import StreamWriter
@@ -30,7 +31,7 @@ class _DatasetFactory:
         self._dataset[io_type] = dataset_type
 
     def get_dataset_type(
-        self, context: IContext, database: str, table: str, dataset_config: dict
+        self, context: IContext, database: str, table: str, dataflow_id:uuid.UUID, dataset_config: dict
     ) -> Dataset:
 
         dataset_type: str = dataset_config["type"]
@@ -46,7 +47,7 @@ class _DatasetFactory:
             raise ValueError(type)
 
         return dataset_class(
-            context=context, table=table, database=database, **dataset_config
+            context=context, table=table, database=database, dataflow_id=dataflow_id, **dataset_config
         )
 
 

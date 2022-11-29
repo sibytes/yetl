@@ -116,12 +116,14 @@ class Reader(Source, SQLTable):
         self.initialise()
 
     def initialise(self):
+        self.auditor = self.context.auditor
         self.timeslice = self.context.timeslice
         self.datalake_protocol = self.context.datalake_protocol
         self.datalake = self.context.datalake
         self.auditor = self.context.auditor
-        self._render()
         self.context_id = self.context.context_id
+        self._render()
+        self.auditor.dataset(self.get_metadata())
         self._init_task_read_schema()
         if self.read.auto:
             self._init_task_create_exception_table()
@@ -134,6 +136,7 @@ class Reader(Source, SQLTable):
     context: SparkContext = Field(...)
     timeslice: Timeslice = Field(default=TimesliceUtcNow())
     context_id: uuid.UUID = Field(default=None)
+    dataflow_id: uuid.UUID = Field(default=None)
     datalake_protocol: FileSystemType = Field(default=None)
     datalake: str = Field(default=None)
     auditor: Audit = Field(default=None)
@@ -214,10 +217,10 @@ class Reader(Source, SQLTable):
                 ReadModeOptions.BADRECORDSPATH,
                 ReadModeOptions.PERMISSIVE,
             ]:
-                if self.has_exception_configured:
+                if self.has_exceptions:
                     msg = f"{MODE}={self.read.mode}, exceptions can only be handled on a mode={ReadModeOptions.PERMISSIVE.value} or {ReadModeOptions.BADRECORDSPATH.value}, {EXCEPTIONS} configuration will be disabled."
                     self.context.log.warning(msg)
-                    self.has_exception_configured = False
+                    self.has_exceptions = False
                 else:
                     msg = f"{MODE}={self.read.mode} requires Exceptions details configured."
                     self.context.log.error(msg)
@@ -225,7 +228,7 @@ class Reader(Source, SQLTable):
 
             if (
                 self.read.mode == ReadModeOptions.PERMISSIVE
-                and self.has_exception_configured
+                and self.has_exceptions
                 and not self.has_corrupt_column
             ):
                 msg = f"""{MODE}={ReadModeOptions.PERMISSIVE} exceptions requires _corrupt_record column in the schema, 
@@ -350,7 +353,7 @@ class Reader(Source, SQLTable):
         )
 
         # only run the validator if exception handling has ben configured.
-        if self.has_exception_configured:
+        if self.has_exceptions:
             self.validation_result = self.validate()
 
         return self.dataframe

@@ -53,6 +53,7 @@ class DeltaWriter(Destination, SQLTable):
         self.initialise()
 
     def initialise(self):
+        self.auditor = self.context.auditor
         self.timeslice = self.context.timeslice
         self._replacements = {
             JinjaVariables.DATABASE_NAME: self.database,
@@ -60,15 +61,16 @@ class DeltaWriter(Destination, SQLTable):
         }
         self.datalake_protocol = self.context.datalake_protocol
         self.datalake = self.context.datalake
-        self.auditor = self.context.auditor
         path = f"{self.datalake_protocol.value}{self.datalake}/{self.path}"
         self.path = render_jinja(path, self._replacements)
         self.context_id = self.context.context_id
+        self.auditor.dataset(self.get_metadata())
         self._init_task_read_schema()
 
     context: SparkContext = Field(...)
     timeslice: Timeslice = Field(default=TimesliceUtcNow())
     context_id: uuid.UUID = Field(default=None)
+    dataflow_id: uuid.UUID = Field(default=None)
     datalake_protocol: FileSystemType = Field(default=None)
     datalake: str = Field(default=None)
     auditor: Audit = Field(default=None)
