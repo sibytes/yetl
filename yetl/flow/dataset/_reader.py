@@ -61,7 +61,9 @@ class Read(BaseModel):
 
     @property
     def mode(self):
-        return self.options.get("mode", False)
+        mode = self.options.get("mode", ReadModeOptions.PERMISSIVE.value)
+        mode = ReadModeOptions(mode)
+        return mode
 
     @mode.setter
     def mode(self, value: ReadModeOptions):
@@ -266,7 +268,7 @@ class Reader(Source, SQLTable):
                 self.thresholds.error,
             )
 
-        if self.read.mode == ReadModeOptions.PERMISSIVE and self.has_corrupt_column():
+        if self.read.mode == ReadModeOptions.PERMISSIVE and self.has_corrupt_column:
             self.context.log.info(
                 f"Validating dataframe read using PERMISSIVE corrupt column at {CORRUPT_RECORD} {CONTEXT_ID}={str(self.context_id)}"
             )
@@ -403,7 +405,8 @@ class Reader(Source, SQLTable):
         # TODO
         # only run the validator if exception handling has ben configured.
         if self.has_exceptions:
-            self.validation_result = self.validate()
+            # self.validation_result = self.validate()
+            self.validate()
 
         return self.dataframe
 

@@ -30,15 +30,21 @@ class ThresholdLevels(Enum):
 
 
 class IValidator(BaseModel, ABC):
-    # def __init__(
-    #     self,
-    #     dataframe: DataFrame,
-    #     exceptions_handler: Callable[[DataFrame], int],
-    #     database: str,
-    #     table: str,
-    #     warning_thresholds: dict = None,
-    #     error_thresholds: dict = None,
-    # ) -> None:
+    def __init__(
+        self,
+        dataframe: DataFrame,
+        exceptions_handler: Callable[[DataFrame], int],
+        database: str,
+        table: str,
+        warning_thresholds: dict = None,
+        error_thresholds: dict = None,
+    ) -> None:
+        self.dataframe = dataframe
+        self.exceptions_handler = exceptions_handler
+        self.database = database
+        self.table = table
+        self.warning_thresholds = warning_thresholds
+        self.error_thresholds = error_thresholds
 
     dataframe: DataFrame = None
     exceptions_handler: Callable[[DataFrame], int] = Field(default=None)
@@ -165,11 +171,9 @@ class PermissiveSchemaOnRead(IValidator):
             warning_thresholds,
             error_thresholds,
         )
-        self.database = database
-        self.table = table
+    context: IContext = Field(...)
 
     def validate(self):
-
         self.total_count = self.dataframe.count()
         self.dataframe.cache()
 
@@ -217,6 +221,7 @@ class BadRecordsPathSchemaOnRead(IValidator):
             error_thresholds=error_thresholds,
         )
 
+    context: IContext = Field(...)
     path: str = Field(...)
     spark: SparkSession = None
 
