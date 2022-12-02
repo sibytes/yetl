@@ -18,9 +18,10 @@ dataflow:
       read:
         auto: true
         options:
-          mode: badRecordsPath
+          mode: PERMISSIVE
           inferSchema: false
           header: true
+          # badRecordsPath: "badrecords/{{ database_name }}/{{ table_name }}_exceptions"
 
       exceptions:
           path: "delta_lake/{{ database_name }}/{{ table_name }}_exceptions"

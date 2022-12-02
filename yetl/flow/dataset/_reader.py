@@ -51,23 +51,49 @@ class Read(BaseModel):
     auto: bool = Field(default=True)
     options: Dict[str, Any] = Field(default=_DEFAULT_OPTIONS)
 
+    def _render(self, replacements: Dict[JinjaVariables, str]):
+
+        if self.get_mode() == ReadModeOptions.BADRECORDSPATH:
+            path = self.options.get(ReadModeOptions.BADRECORDSPATH.value, "")
+            path = "{{root}}/" + path
+            self.options[ReadModeOptions.BADRECORDSPATH.value] = render_jinja(path, replacements)
+            if "mode" in self.options:
+                del self.options["mode"]
+
+
     @property
     def infer_schema(self):
         return self.options.get("inferSchema", False)
 
+    @property
+    def bad_records_path(self):
+        return self.options.get(ReadModeOptions.BADRECORDSPATH.value, None)
+
+
     @infer_schema.setter
     def infer_schema(self, value: bool):
-        self.read.options["inferSchema"] = value
+        self.options["inferSchema"] = value
 
-    @property
-    def mode(self):
-        mode = self.options.get("mode", ReadModeOptions.PERMISSIVE.value)
-        mode = ReadModeOptions(mode)
+    def get_mode(self):
+        mode = None
+        if isinstance(self.options.get(ReadModeOptions.BADRECORDSPATH.value, None), str):
+            mode =  ReadModeOptions.BADRECORDSPATH
+        if not mode:
+            mode = self.options.get("mode", ReadModeOptions.PERMISSIVE.value)
+            mode = ReadModeOptions(mode)
         return mode
 
-    @mode.setter
-    def mode(self, value: ReadModeOptions):
-        self.read.options["mode"] = value.value
+    def set_mode(self, mode: ReadModeOptions, bad_records_path:str=None):
+        if mode == ReadModeOptions.BADRECORDSPATH and not bad_records_path:
+            raise Exception(f"Setting mode to BADRECORDSPATH must have a bad_records_path string argument")
+
+        if mode != ReadModeOptions.BADRECORDSPATH:
+            self.options["mode"] = mode.value
+        else:
+            self.options[ReadModeOptions.BADRECORDSPATH.value] = bad_records_path
+            if "mode" in self.options:
+                del self.options["mode"]
+
 
 
 class Exceptions(SQLTable):
@@ -166,6 +192,7 @@ class Reader(Source, SQLTable):
 
         if self.has_exceptions:
             self.exceptions._render(self._replacements)
+        self.read._render(self._replacements)
 
     def _init_task_read_schema(self):
         try:
@@ -179,7 +206,7 @@ class Reader(Source, SQLTable):
                 # to create the schema automatically.
                 self._create_spark_schema = True
                 self.read.infer_schema = True
-                self.read.mode = ReadModeOptions.PERMISSIVE
+                self.read.set_mode(ReadModeOptions.PERMISSIVE)
                 self.initial_load = True
                 self.exceptions = None
             elif not self._infer_schema:
@@ -204,21 +231,21 @@ class Reader(Source, SQLTable):
     def _init_validate(self):
 
         if self._create_spark_schema:
-            if self.read.mode not in [
+            if self.read.get_mode() not in [
                 ReadModeOptions.BADRECORDSPATH,
                 ReadModeOptions.PERMISSIVE,
             ]:
                 if self.has_exceptions:
-                    msg = f"{MODE}={self.read.mode}, exceptions can only be handled on a mode={ReadModeOptions.PERMISSIVE.value} or {ReadModeOptions.BADRECORDSPATH.value}, {EXCEPTIONS} configuration will be disabled."
+                    msg = f"{MODE}={self.read.get_mode()}, exceptions can only be handled on a mode={ReadModeOptions.PERMISSIVE.value} or {ReadModeOptions.BADRECORDSPATH.value}, {EXCEPTIONS} configuration will be disabled."
                     self.context.log.warning(msg)
                     self.exceptions = None
                 else:
-                    msg = f"{MODE}={self.read.mode} requires Exceptions details configured."
+                    msg = f"{MODE}={self.read.get_mode()} requires Exceptions details configured."
                     self.context.log.error(msg)
                     raise Exception(msg)
 
             if (
-                self.read.mode == ReadModeOptions.PERMISSIVE
+                self.read.get_mode() == ReadModeOptions.PERMISSIVE
                 and self.has_exceptions
                 and not self.has_corrupt_column
             ):
@@ -250,10 +277,10 @@ class Reader(Source, SQLTable):
         validation_handler = self._get_validation_exceptions_handler()
         validator = None
 
-        if self.read.mode == ReadModeOptions.BADRECORDSPATH:
+        if self.read.get_mode() == ReadModeOptions.BADRECORDSPATH:
             # TODO check the config how to set up
             self.context.log.info(
-                f"Validating dataframe read using badRecordsPath at {self.exceptions.path} {CONTEXT_ID}={str(self.context_id)}"
+                f"Validating dataframe read using badRecordsPath at {self.read.bad_records_path} {CONTEXT_ID}={str(self.context_id)}"
             )
             validator = BadRecordsPathSchemaOnRead(
                 context=self.context,
@@ -263,11 +290,11 @@ class Reader(Source, SQLTable):
                 table=self.table,
                 warning_thresholds=self.thresholds.warning,
                 error_thresholds=self.thresholds.error,
-                path=self.exceptions.path,
+                path=self.read.bad_records_path,
                 spark=self.context.spark,
             )
 
-        if self.read.mode == ReadModeOptions.PERMISSIVE and self.has_corrupt_column:
+        if self.read.get_mode() == ReadModeOptions.PERMISSIVE and self.has_corrupt_column:
             self.context.log.info(
                 f"Validating dataframe read using PERMISSIVE corrupt column at {CORRUPT_RECORD} {CONTEXT_ID}={str(self.context_id)}"
             )
