@@ -273,20 +273,20 @@ class Reader(Source, SQLTable):
                 f"Validating dataframe read using PERMISSIVE corrupt column at {CORRUPT_RECORD} {CONTEXT_ID}={str(self.context_id)}"
             )
             validator = PermissiveSchemaOnRead(
-                self.context,
-                self.dataframe,
-                validation_handler,
-                self.database,
-                self.table,
-                self.thresholds.warning,
-                self.thresholds.error,
+                context=self.context,
+                dataframe=self.dataframe,
+                validation_handler=validation_handler,
+                database=self.database,
+                table=self.table,
+                warning_thresholds=self.thresholds.warning,
+                error_thresholds=self.thresholds.error,
             )
 
         if validator:
             start_datetime = datetime.now()
             level_validation, validation = validator.validate()
             self.auditor.dataset_task(
-                self.id, AuditTask.SCHEMA_ON_READ_VALIDATION, validation, start_datetime
+                self.dataset_id, AuditTask.SCHEMA_ON_READ_VALIDATION, validation, start_datetime
             )
             self.dataframe = validator.dataframe
 

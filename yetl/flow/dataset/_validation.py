@@ -3,7 +3,7 @@ from pyspark.sql.dataframe import DataFrame
 from pyspark.sql import functions as fn
 from pyspark.sql import SparkSession
 from pyspark.sql.utils import AnalysisException
-from typing import Callable
+from typing import Callable, Any
 from ..parser._constants import *
 import json
 from pydantic import BaseModel, Field
@@ -30,28 +30,29 @@ class ThresholdLevels(Enum):
 
 
 class IValidator(BaseModel, ABC):
-    def __init__(
-        self,
-        dataframe: DataFrame,
-        exceptions_handler: Callable[[DataFrame], int],
-        database: str,
-        table: str,
-        warning_thresholds: dict = None,
-        error_thresholds: dict = None,
-    ) -> None:
-        self.dataframe = dataframe
-        self.exceptions_handler = exceptions_handler
-        self.database = database
-        self.table = table
-        self.warning_thresholds = warning_thresholds
-        self.error_thresholds = error_thresholds
+    # def __init__(
+    #     self,
+    #     dataframe: DataFrame,
+    #     exceptions_handler: Callable[[DataFrame], int],
+    #     database: str,
+    #     table: str,
+    #     warning_thresholds: dict = None,
+    #     error_thresholds: dict = None,
+    # ) -> None:
+    #     self.dataframe = dataframe
+    #     self.exceptions_handler = exceptions_handler
+    #     self.database = database
+    #     self.table = table
+    #     self.warning_thresholds = warning_thresholds
+    #     self.error_thresholds = error_thresholds
 
     dataframe: DataFrame = None
-    exceptions_handler: Callable[[DataFrame], int] = Field(default=None)
+    validation_handler: Callable[[DataFrame], int] = Field(default=None)
     # exceptions = None
     exceptions_count: int = Field(default=0)
     valid_count: int = Field(default=0)
     total_count: int = Field(default=0)
+    exception_percent: int = Field(default=0)
     database: str = Field(default=None)
     table: str = Field(default=None)
     warning_thresholds: ThresholdLimit = Field(default=None)
@@ -64,62 +65,57 @@ class IValidator(BaseModel, ABC):
 
     def raise_thresholds(self, thresholds: ThresholdLimit, level: ThresholdLevels):
 
-        if isinstance(thresholds, dict):
-            min_rows = thresholds.min_rows
-            max_rows = thresholds.max_rows
-            exception_count = thresholds.exception_count
-            exception_percent = thresholds.exception_percent
+        min_rows = thresholds.min_rows
+        max_rows = thresholds.max_rows
+        exception_count = thresholds.exception_count
+        exception_percent = thresholds.exception_percent
 
-            exception_count = self.total_count - self.valid_count
-            self.exception_percent = (exception_count / self.total_count) * 100
+        exception_count = self.total_count - self.valid_count
+        self.exception_percent = (exception_count / self.total_count) * 100
 
-            raise_thresholds = False
-            messages = []
-            if isinstance(min_rows, int):
-                if self.total_count <= min_rows:
-                    raise_thresholds = True
-                    messages.append(
-                        f"min_rows threshold exceeded: {self.total_count} < {min_rows}"
-                    )
+        raise_thresholds = False
+        messages = []
 
-            if isinstance(max_rows, int):
-                if self.total_count > max_rows:
-                    raise_thresholds = True
-                    messages.append(
-                        f"max_rows threshold exceeded: {self.total_count} > {max_rows}"
-                    )
+        if self.total_count <= min_rows:
+            raise_thresholds = True
+            messages.append(
+                f"min_rows threshold exceeded: {self.total_count} < {min_rows}"
+            )
 
-            if isinstance(exception_count, int):
-                if self.exceptions_count > exception_count:
-                    raise_thresholds = True
-                    messages.append(
-                        f"exception_count threshold exceeded: {self.exceptions_count} >= {exception_count}"
-                    )
+        if self.total_count > max_rows:
+            raise_thresholds = True
+            messages.append(
+                f"max_rows threshold exceeded: {self.total_count} > {max_rows}"
+            )
 
-            if isinstance(exception_percent, numbers.Number):
+        if self.exceptions_count > exception_count:
+            raise_thresholds = True
+            messages.append(
+                f"exception_count threshold exceeded: {self.exceptions_count} >= {exception_count}"
+            )
 
-                if self.exception_percent > exception_percent:
-                    raise_thresholds = True
-                    messages.append(
-                        f"exception_percent threshold exceeded: {self.exception_percent} > {exception_percent}"
-                    )
+        if self.exception_percent > exception_percent:
+            raise_thresholds = True
+            messages.append(
+                f"exception_percent threshold exceeded: {self.exception_percent} > {exception_percent}"
+            )
 
-            if raise_thresholds:
-                msg = f"{level.value} Thresholds:\n\t"
-                messages = "\n\t".join(messages)
-                msg = f"{msg}{messages}"
+        if raise_thresholds:
+            msg = f"{level.value} Thresholds:\n\t"
+            messages = "\n\t".join(messages)
+            msg = f"{msg}{messages}"
 
-                if level == ThresholdLevels.ERROR:
-                    # self.context.log.error(msg)
-                    self.level = ThresholdLevels.ERROR
+            if level == ThresholdLevels.ERROR:
+                # self.context.log.error(msg)
+                self.level = ThresholdLevels.ERROR
 
-                if level == ThresholdLevels.WARNING:
-                    # self.context.log.warning(msg)
-                    self.level = ThresholdLevels.WARNING
+            if level == ThresholdLevels.WARNING:
+                # self.context.log.warning(msg)
+                self.level = ThresholdLevels.WARNING
 
-                if level == ThresholdLevels.INFO:
-                    # self.context.log.info(msg)
-                    self.level = ThresholdLevels.INFO
+            if level == ThresholdLevels.INFO:
+                # self.context.log.info(msg)
+                self.level = ThresholdLevels.INFO
 
     def get_result(self):
         validation = {
@@ -153,44 +149,50 @@ class IValidator(BaseModel, ABC):
 
 
 class PermissiveSchemaOnRead(IValidator):
-    def __init__(
-        self,
-        context: IContext,
-        dataframe: DataFrame,
-        exceptions_handler: Callable[[DataFrame], int],
-        database: str,
-        table: str,
-        warning_thresholds: ThresholdLimit = None,
-        error_thresholds: ThresholdLimit = None,
-    ) -> None:
-        super().__init__(
-            dataframe,
-            exceptions_handler,
-            database,
-            table,
-            warning_thresholds,
-            error_thresholds,
-        )
+    # def __init__(
+    #     self,
+    #     context: IContext,
+    #     dataframe: DataFrame,
+    #     exceptions_handler: Callable[[DataFrame], int],
+    #     database: str,
+    #     table: str,
+    #     warning_thresholds: ThresholdLimit = None,
+    #     error_thresholds: ThresholdLimit = None,
+    # ) -> None:
+    #     super().__init__(
+    #         dataframe,
+    #         exceptions_handler,
+    #         database,
+    #         table,
+    #         warning_thresholds,
+    #         error_thresholds,
+    #     )
+    
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+
     context: IContext = Field(...)
+    corrupt_record:str = Field(default=CORRUPT_RECORD)
 
     def validate(self):
         self.total_count = self.dataframe.count()
         self.dataframe.cache()
 
-        self.exceptions = (
-            self.dataframe.where(f"{CORRUPT_RECORD} IS NOT NULL")
+        exceptions = (
+            self.dataframe.where(f"{self.corrupt_record} IS NOT NULL")
             .withColumn(TIMESTAMP, fn.current_timestamp())
             .withColumn(DATABASE, fn.lit(self.database))
             .withColumn(TABLE, fn.lit(self.table))
         )
 
-        self.exceptions_count = self.exceptions.count()
-        self.dataframe = self.dataframe.where(f"{CORRUPT_RECORD} IS NULL").drop(
-            CORRUPT_RECORD
+        self.exceptions_count = exceptions.count()
+    
+        self.dataframe = self.dataframe.where(f"{self.corrupt_record} IS NULL").drop(
+            self.corrupt_record
         )
 
         self.valid_count = self.dataframe.count()
-        self.exceptions_count = self.exceptions_handler(self.exceptions)
+        self.exceptions_count = self.validation_handler(exceptions)
         if self.warning_thresholds:
             super().raise_thresholds(self.warning_thresholds, ThresholdLevels.WARNING)
         if self.error_thresholds:
@@ -207,10 +209,11 @@ class BadRecordsPathSchemaOnRead(IValidator):
         exceptions_handler: Callable[[DataFrame], int],
         database: str,
         table: str,
+        warning_thresholds: ThresholdLimit,
+        error_thresholds: ThresholdLimit,
         path: str,
         spark: SparkSession,
-        warning_thresholds: ThresholdLimit = None,
-        error_thresholds: ThresholdLimit = None,
+
     ) -> None:
         super().__init__(
             dataframe=dataframe,
@@ -240,7 +243,7 @@ class BadRecordsPathSchemaOnRead(IValidator):
                 # self.context.log.info(
                 #     f"Try loading {self.exceptions_count} exceptions for dataset {self.table} from {self.path}"
                 # )
-                exceptions = (
+                exceptions:DataFrame = (
                     self.spark.read.format("json")
                     .options(**options)
                     .load(self.path)
@@ -248,7 +251,7 @@ class BadRecordsPathSchemaOnRead(IValidator):
                     .withColumn(DATABASE, fn.lit(self.database))
                     .withColumn(TABLE, fn.lit(self.table))
                 )
-                self.exceptions_count = self.exceptions_handler(exceptions)
+                self.exceptions_count = self.validation_handler(exceptions)
                 # self.context.log.info(
                 #     f"Deleting exceptions for dataset {self.table} from {self.path}"
                 # )
