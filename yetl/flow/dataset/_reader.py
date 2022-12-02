@@ -72,8 +72,6 @@ class Read(BaseModel):
 
 class Exceptions(SQLTable):
     path: str = Field(...)
-    # database: str = Field(...)
-    # table: str = Field(...)
     context: SparkContext = Field(...)
 
     def __init__(self, **data: Any) -> None:
@@ -83,7 +81,8 @@ class Exceptions(SQLTable):
 
         self.table = render_jinja(self.table, replacements)
         self.database = render_jinja(self.database, replacements)
-        self.path = render_jinja(self.path, replacements)
+        path = "{{root}}/" + self.path
+        self.path = render_jinja(path, replacements)
 
     def table_exists(self):
         dl.create_database(self.context, self.database)
@@ -160,8 +159,9 @@ class Reader(Source, SQLTable):
             JinjaVariables.TIMESLICE_PATH_DATE_FORMAT: self.timeslice.strftime(
                 self.path_date_format
             ),
+            JinjaVariables.ROOT: f"{self.datalake_protocol.value}{self.datalake}",
         }
-        path = f"{self.datalake_protocol.value}{self.datalake}/{self.path}"
+        path = "{{root}}/" + self.path
         self.path = render_jinja(path, self._replacements)
 
         if self.has_exceptions:
