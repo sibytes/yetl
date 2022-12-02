@@ -18,7 +18,7 @@ dataflow:
       read:
         auto: true
         options:
-          mode: PERMISSIVE
+          mode: badRecordsPath
           inferSchema: false
           header: true
 

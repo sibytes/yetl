@@ -252,20 +252,19 @@ class Reader(Source, SQLTable):
 
         if self.read.mode == ReadModeOptions.BADRECORDSPATH:
             # TODO check the config how to set up
-            bad_records_path = self.options[BAD_RECORDS_PATH]
             self.context.log.info(
-                f"Validating dataframe read using badRecordsPath at {bad_records_path} {CONTEXT_ID}={str(self.context_id)}"
+                f"Validating dataframe read using badRecordsPath at {self.exceptions.path} {CONTEXT_ID}={str(self.context_id)}"
             )
             validator = BadRecordsPathSchemaOnRead(
-                self.context,
-                self.dataframe,
-                validation_handler,
-                self.database,
-                self.table,
-                bad_records_path,
-                self.context.spark,
-                self.thresholds.warning,
-                self.thresholds.error,
+                context=self.context,
+                dataframe=self.dataframe,
+                validation_handler=validation_handler,
+                database=self.database,
+                table=self.table,
+                warning_thresholds=self.thresholds.warning,
+                error_thresholds=self.thresholds.error,
+                path=self.exceptions.path,
+                spark=self.context.spark,
             )
 
         if self.read.mode == ReadModeOptions.PERMISSIVE and self.has_corrupt_column:

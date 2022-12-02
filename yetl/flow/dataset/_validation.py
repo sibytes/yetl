@@ -30,25 +30,9 @@ class ThresholdLevels(Enum):
 
 
 class IValidator(BaseModel, ABC):
-    # def __init__(
-    #     self,
-    #     dataframe: DataFrame,
-    #     exceptions_handler: Callable[[DataFrame], int],
-    #     database: str,
-    #     table: str,
-    #     warning_thresholds: dict = None,
-    #     error_thresholds: dict = None,
-    # ) -> None:
-    #     self.dataframe = dataframe
-    #     self.exceptions_handler = exceptions_handler
-    #     self.database = database
-    #     self.table = table
-    #     self.warning_thresholds = warning_thresholds
-    #     self.error_thresholds = error_thresholds
 
     dataframe: DataFrame = None
     validation_handler: Callable[[DataFrame], int] = Field(default=None)
-    # exceptions = None
     exceptions_count: int = Field(default=0)
     valid_count: int = Field(default=0)
     total_count: int = Field(default=0)
@@ -149,25 +133,7 @@ class IValidator(BaseModel, ABC):
 
 
 class PermissiveSchemaOnRead(IValidator):
-    # def __init__(
-    #     self,
-    #     context: IContext,
-    #     dataframe: DataFrame,
-    #     exceptions_handler: Callable[[DataFrame], int],
-    #     database: str,
-    #     table: str,
-    #     warning_thresholds: ThresholdLimit = None,
-    #     error_thresholds: ThresholdLimit = None,
-    # ) -> None:
-    #     super().__init__(
-    #         dataframe,
-    #         exceptions_handler,
-    #         database,
-    #         table,
-    #         warning_thresholds,
-    #         error_thresholds,
-    #     )
-    
+
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
 
@@ -202,27 +168,8 @@ class PermissiveSchemaOnRead(IValidator):
 
 
 class BadRecordsPathSchemaOnRead(IValidator):
-    def __init__(
-        self,
-        context: IContext,
-        dataframe: DataFrame,
-        exceptions_handler: Callable[[DataFrame], int],
-        database: str,
-        table: str,
-        warning_thresholds: ThresholdLimit,
-        error_thresholds: ThresholdLimit,
-        path: str,
-        spark: SparkSession,
-
-    ) -> None:
-        super().__init__(
-            dataframe=dataframe,
-            exceptions_handler=exceptions_handler,
-            database=database,
-            table=table,
-            warning_thresholds=warning_thresholds,
-            error_thresholds=error_thresholds,
-        )
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
 
     context: IContext = Field(...)
     path: str = Field(...)
