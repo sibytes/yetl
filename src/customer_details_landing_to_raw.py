@@ -24,12 +24,12 @@ def customer_details_landing_to_raw(
     df = dataflow.source_df(f"{context.project}_landing.customer_details")
 
     context.log.info("Loading customer details.")
-    df.show()
     df = df.withColumn(
         "_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer")
     )
+    df.show()
 
-    dataflow.destination_df(f"{context.project}_raw.customer_details", df, save=save)
+    # dataflow.destination_df(f"{context.project}_raw.customer_details", df, save=save)
 
 
 # incremental load

@@ -1,7 +1,7 @@
 from pydantic import Field, PrivateAttr
 from ._properties import ReaderProperties
 from ._decoder import parse_properties_key, parse_properties_values
-from typing import Any, Dict
+from typing import Any, Dict, Union
 import json
 from ..parser.parser import (
     JinjaVariables,
@@ -27,6 +27,10 @@ from datetime import datetime
 from ..parser._constants import *
 from ._validation import PermissiveSchemaOnRead, BadRecordsPathSchemaOnRead, Thresholds
 
+class ReaderConfigurationException(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+        self.message = message
 
 def _yetl_properties_dumps(obj: dict, *, default):
     """Decodes the data back into a dictionary with yetl configuration properties names"""
@@ -51,7 +55,7 @@ class Read(BaseModel):
     auto: bool = Field(default=True)
     options: Dict[str, Any] = Field(default=_DEFAULT_OPTIONS)
 
-    def _render(self, replacements: Dict[JinjaVariables, str]):
+    def render(self, replacements: Dict[JinjaVariables, str]):
 
         if self.get_mode() == ReadModeOptions.BADRECORDSPATH:
             path = self.options.get(ReadModeOptions.BADRECORDSPATH.value, "")
@@ -98,12 +102,12 @@ class Read(BaseModel):
 
 class Exceptions(SQLTable):
     path: str = Field(...)
-    context: SparkContext = Field(...)
+    context: Union[SparkContext, DatabricksContext] = Field(...)
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
 
-    def _render(self, replacements: Dict[JinjaVariables, str]):
+    def render(self, replacements: Dict[JinjaVariables, str]):
 
         self.table = render_jinja(self.table, replacements)
         self.database = render_jinja(self.database, replacements)
@@ -138,7 +142,7 @@ class Reader(Source, SQLTable):
         self.datalake = self.context.datalake
         self.auditor = self.context.auditor
         self.context_id = self.context.context_id
-        self._render()
+        self.render()
         self.auditor.dataset(self.get_metadata())
         self._init_task_read_schema()
         if self.read.auto:
@@ -149,7 +153,7 @@ class Reader(Source, SQLTable):
         if data.get("exceptions") and data.get("context"):
             data["exceptions"]["context"] = data.get("context")
 
-    context: SparkContext = Field(...)
+    context: Union[SparkContext, DatabricksContext] = Field(...)
     timeslice: Timeslice = Field(default=TimesliceUtcNow())
     context_id: uuid.UUID = Field(default=None)
     dataflow_id: uuid.UUID = Field(default=None)
@@ -175,7 +179,7 @@ class Reader(Source, SQLTable):
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
     _create_spark_schema: bool = PrivateAttr(default=False)
 
-    def _render(self):
+    def render(self):
         self._replacements = {
             JinjaVariables.DATABASE_NAME: self.database,
             JinjaVariables.TABLE_NAME: self.table,
@@ -191,8 +195,8 @@ class Reader(Source, SQLTable):
         self.path = render_jinja(path, self._replacements)
 
         if self.has_exceptions:
-            self.exceptions._render(self._replacements)
-        self.read._render(self._replacements)
+            self.exceptions.render(self._replacements)
+        self.read.render(self._replacements)
 
     def _init_task_read_schema(self):
         try:
@@ -230,6 +234,9 @@ class Reader(Source, SQLTable):
 
     def _init_validate(self):
 
+        if self.read.get_mode() == ReadModeOptions.BADRECORDSPATH and not isinstance(self.context, DatabricksContext):
+            raise ReaderConfigurationException(f"{ReadModeOptions.BADRECORDSPATH.value} is only supported on databricks runtime.")
+
         if self._create_spark_schema:
             if self.read.get_mode() not in [
                 ReadModeOptions.BADRECORDSPATH,
@@ -242,7 +249,7 @@ class Reader(Source, SQLTable):
                 else:
                     msg = f"{MODE}={self.read.get_mode()} requires Exceptions details configured."
                     self.context.log.error(msg)
-                    raise Exception(msg)
+                    raise ReaderConfigurationException(msg)
 
             if (
                 self.read.get_mode() == ReadModeOptions.PERMISSIVE
@@ -253,7 +260,7 @@ class Reader(Source, SQLTable):
                 if not schema exists yet use the properties to add one {YetlTableProperties.SCHEMA_CORRUPT_RECORD.name},
                 {YetlTableProperties.SCHEMA_CORRUPT_RECORD_NAME.name}."""
                 self.context.log.error(msg)
-                raise Exception(msg)
+                raise ReaderConfigurationException(msg)
 
     def _get_validation_exceptions_handler(self):
         def handle_exceptions(exceptions: DataFrame):
