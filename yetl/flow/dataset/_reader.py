@@ -8,6 +8,7 @@ from ..parser.parser import (
     render_jinja,
     to_regex_search_pattern,
     to_spark_format_code,
+    prefix_root_var
 )
 from ..parser._constants import FormatOptions
 from ..file_system import FileSystemType
@@ -26,6 +27,7 @@ from .. import _delta_lake as dl
 from datetime import datetime
 from ..parser._constants import *
 from ._validation import PermissiveSchemaOnRead, BadRecordsPathSchemaOnRead, Thresholds
+from string import Template as StrTemplate
 
 class ReaderConfigurationException(Exception):
     def __init__(self, message):
@@ -59,7 +61,8 @@ class Read(BaseModel):
 
         if self.get_mode() == ReadModeOptions.BADRECORDSPATH:
             path = self.options.get(ReadModeOptions.BADRECORDSPATH.value, "")
-            path = "{{root}}/" + path
+            # if the path has no root {{root}} prefixed then add one
+            path = prefix_root_var(self.path)
             self.options[ReadModeOptions.BADRECORDSPATH.value] = render_jinja(path, replacements)
             if "mode" in self.options:
                 del self.options["mode"]
@@ -111,7 +114,8 @@ class Exceptions(SQLTable):
 
         self.table = render_jinja(self.table, replacements)
         self.database = render_jinja(self.database, replacements)
-        path = "{{root}}/" + self.path
+        # if the path has no root {{root}} prefixed then add one
+        path = prefix_root_var(self.path)
         self.path = render_jinja(path, replacements)
 
     def table_exists(self):
@@ -191,7 +195,8 @@ class Reader(Source, SQLTable):
             ),
             JinjaVariables.ROOT: f"{self.datalake_protocol.value}{self.datalake}",
         }
-        path = "{{root}}/" + self.path
+        # if the path has no root {{root}} prefixed then add one
+        path = prefix_root_var(self.path)
         self.path = render_jinja(path, self._replacements)
 
         if self.has_exceptions:

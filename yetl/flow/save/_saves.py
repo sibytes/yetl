@@ -1,13 +1,13 @@
 from pyspark.sql import DataFrame
 from delta import DeltaTable
-from ..dataset import Dataset
+from ..dataset import Destination
 from ._save import Save
 from typing import Union
 from ._save_mode_type import SaveModeType
 
 
 class ErrorIfExistsSave(Save):
-    def __init__(self, dataset: Dataset) -> None:
+    def __init__(self, dataset: Destination) -> None:
         super().__init__(dataset)
 
     def write(self):
@@ -22,7 +22,7 @@ class ErrorIfExistsSave(Save):
 
 
 class AppendSave(Save):
-    def __init__(self, dataset: Dataset) -> None:
+    def __init__(self, dataset: Destination) -> None:
         super().__init__(dataset)
 
     def write(self):
@@ -37,7 +37,7 @@ class AppendSave(Save):
 
 
 class OverwriteSchemaSave(Save):
-    def __init__(self, dataset: Dataset) -> None:
+    def __init__(self, dataset: Destination) -> None:
         super().__init__(dataset)
 
     def write(self):
@@ -54,7 +54,7 @@ class OverwriteSchemaSave(Save):
 
 
 class OverwriteSave(Save):
-    def __init__(self, dataset: Dataset) -> None:
+    def __init__(self, dataset: Destination) -> None:
         super().__init__(dataset)
 
     def write(self):
@@ -69,7 +69,7 @@ class OverwriteSave(Save):
 
 
 class IgnoreSave(Save):
-    def __init__(self, dataset: Dataset) -> None:
+    def __init__(self, dataset: Destination) -> None:
         super().__init__(dataset)
 
     def write(self):
@@ -84,7 +84,7 @@ class IgnoreSave(Save):
 
 
 class MergeSave(Save):
-    def __init__(self, dataset: Dataset) -> None:
+    def __init__(self, dataset: Destination) -> None:
         super().__init__(dataset)
 
     def write(self):
@@ -136,8 +136,18 @@ class MergeSave(Save):
 
 
 class DefaultSave(AppendSave):
-    def __init__(self, dataset: Dataset) -> None:
+    def __init__(self, dataset: Destination) -> None:
         super().__init__(dataset)
 
     def write(self):
         super().write()
+        df = (
+            self.dataset.dataframe.write.format(self.dataset.format)
+            .options(**self.dataset.options)
+            .mode(self.get_mode())
+        )
+
+        if self.dataset.partitions:
+            df = df.partitionBy(*self.dataset.partitions)
+
+        df.save(self.dataset.path)

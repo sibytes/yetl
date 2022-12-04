@@ -6,12 +6,11 @@ from ..schema_repo import SchemaNotFound
 from .. import _delta_lake as dl
 from pyspark.sql import DataFrame
 import uuid
-
+from ..save import Save, DefaultSave
 # from typing import ChainMap
 # from ..parser import parser
 # from ..save import save_factory, Save
 from ..audit import Audit, AuditTask
-
 # from datetime import datetime
 from .._timeslice import Timeslice, TimesliceUtcNow
 from pyspark.sql import functions as fn
@@ -19,7 +18,7 @@ import json
 from ._base import Destination, SQLTable
 from pydantic import Field, PrivateAttr, BaseModel
 from typing import Any, Dict, List
-from ..parser.parser import JinjaVariables, render_jinja
+from ..parser.parser import JinjaVariables, render_jinja, sql_partitioned_by, prefix_root_var
 from ._properties import DeltaWriterProperties
 from ..save._save_mode_type import SaveModeType
 from ..file_system import FileSystemType
@@ -55,17 +54,16 @@ class DeltaWriter(Destination, SQLTable):
     def initialise(self):
         self.auditor = self.context.auditor
         self.timeslice = self.context.timeslice
-        self._replacements = {
-            JinjaVariables.DATABASE_NAME: self.database,
-            JinjaVariables.TABLE_NAME: self.table,
-        }
         self.datalake_protocol = self.context.datalake_protocol
+        self.render()
         self.datalake = self.context.datalake
-        path = f"{self.datalake_protocol.value}{self.datalake}/{self.path}"
-        self.path = render_jinja(path, self._replacements)
         self.context_id = self.context.context_id
         self.auditor.dataset(self.get_metadata())
         self._init_task_read_schema()
+        self._init_partitions()
+        # TODO: get_mode()
+        self.save = DefaultSave(dataset=self)
+
 
     context: SparkContext = Field(...)
     timeslice: Timeslice = Field(default=TimesliceUtcNow())
@@ -89,9 +87,22 @@ class DeltaWriter(Destination, SQLTable):
     partitioned_by: List[str] = Field(default=None)
     zorder_by: List[str] = Field(default=None)
     write: Write = Field(default=Write())
+    save: Save = Field(default=None)
     _initial_load: bool = PrivateAttr(default=False)
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
     _create_spark_schema = PrivateAttr(default=False)
+
+
+    def render(self):
+        self._replacements = {
+            JinjaVariables.DATABASE_NAME: self.database,
+            JinjaVariables.TABLE_NAME: self.table,
+            JinjaVariables.ROOT: f"{self.datalake_protocol.value}{self.datalake}",
+        }
+        # if the path has no root {{root}} prefixed then add one
+        path = prefix_root_var(self.path)
+        self.path = render_jinja(path, self._replacements)
+
 
     def _init_task_read_schema(self):
         # if table ddl not defined in the config
@@ -115,6 +126,29 @@ class DeltaWriter(Destination, SQLTable):
 
                 elif not self._infer_schema:
                     raise e
+
+    def _init_partitions(self):
+        """Parse the partitioned columns from the SQL schema ddl
+        if they are defined in the SQL it will overide what is in the yaml configuration.
+        Otherwise they are taken from the configuration. If they are not defined at all
+        the field is already defaulted to None"""
+
+        partitions = None
+        if self.ddl:
+            try:
+                partitions:List[str] = sql_partitioned_by(self.ddl)
+                msg = f"Parsed partitioning columns from sql ddl for {self.database_table} as {partitions}"
+                self.context.log.info(msg)
+            except Exception as e:
+                msg = f"An error has occured parsing sql ddl partitioned clause for {self.database_table} for the ddl: {self.ddl}"
+                self.context.log.error(msg)
+                raise Exception(msg) from e
+
+        if partitions:
+            self.partitioned_by = partitions
+            msg = f"Parsed partitioning columns from dataflow yaml config for {self.database}.{self.table} as {partitions}"
+            self.context.log.info(msg)
+
 
     def validate(self):
         pass
