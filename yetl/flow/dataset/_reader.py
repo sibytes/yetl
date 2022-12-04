@@ -1,4 +1,4 @@
-from pydantic import Field, PrivateAttr
+from pydantic import Field, PrivateAttr, root_validator
 from ._properties import ReaderProperties
 from ._decoder import parse_properties_key, parse_properties_values
 from typing import Any, Dict, Union
@@ -232,8 +232,13 @@ class Reader(Source, SQLTable):
             )
             self._initial_load = True
 
-    def _init_validate(self):
 
+    def _init_validate(self):
+        """Validate the conguration ensuring that compatible options are configured.
+        Because we're validating across class composition and there is complexity encapsulated in those classes
+        bydantic validation isn't appropriate since it will duplicate the logic required to shred the dictionaries
+        that we have already used in pydantic to create the objects.
+        """
         if self.read.get_mode() == ReadModeOptions.BADRECORDSPATH and not isinstance(self.context, DatabricksContext):
             raise ReaderConfigurationException(f"{ReadModeOptions.BADRECORDSPATH.value} is only supported on databricks runtime.")
 
