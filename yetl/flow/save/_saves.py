@@ -14,7 +14,7 @@ class ErrorIfExistsSave(Save):
         super().write()
         (
             self.dataset.dataframe.write.format(self.dataset.format)
-            .options(**self.dataset.options)
+            .options(**self.dataset.write.options)
             .mode(SaveModeType.ERROR_IF_EXISTS.value)
             .partitionBy(*self.dataset.partitions)
             .save(self.dataset.path)
@@ -29,7 +29,7 @@ class AppendSave(Save):
         super().write()
         (
             self.dataset.dataframe.write.format(self.dataset.format)
-            .options(**self.dataset.options)
+            .options(**self.dataset.write.options)
             .mode(SaveModeType.APPEND.value)
             .partitionBy(*self.dataset.partitions)
             .save(self.dataset.path)
@@ -42,7 +42,7 @@ class OverwriteSchemaSave(Save):
 
     def write(self):
         super().write()
-        options = self.dataset.options
+        options = self.dataset.write.options
         options[SaveModeType.OVERWRITE_SCHEMA.value] = True
         (
             self.dataset.dataframe.write.format(self.dataset.format)
@@ -61,7 +61,7 @@ class OverwriteSave(Save):
         super().write()
         (
             self.dataset.dataframe.write.format(self.dataset.format)
-            .options(**self.dataset.options)
+            .options(**self.dataset.write.options)
             .mode(SaveModeType.OVERWRITE.value)
             .partitionBy(*self.dataset.partitions)
             .save(self.dataset.path)
@@ -76,7 +76,7 @@ class IgnoreSave(Save):
         super().write()
         (
             self.dataset.dataframe.write.format(self.dataset.format)
-            .options(**self.dataset.options)
+            .options(**self.dataset.write.options)
             .mode(SaveModeType.IGNORE.value)
             .partitionBy(*self.dataset.partitions)
             .save(self.dataset.path)
@@ -135,7 +135,7 @@ class MergeSave(Save):
             return merge_match
 
 
-class DefaultSave(AppendSave):
+class DefaultSave(Save):
     def __init__(self, dataset: Destination) -> None:
         super().__init__(dataset)
 
@@ -143,8 +143,8 @@ class DefaultSave(AppendSave):
         super().write()
         df = (
             self.dataset.dataframe.write.format(self.dataset.format)
-            .options(**self.dataset.options)
-            .mode(self.get_mode())
+            .options(**self.dataset.write.options)
+            .mode(self.dataset.get_mode())
         )
 
         if self.dataset.partitions:

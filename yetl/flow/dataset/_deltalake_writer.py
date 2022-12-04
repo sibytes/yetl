@@ -45,6 +45,11 @@ class Write(BaseModel):
         self.options[MERGE_SCHEMA] = value
         self._merge_schema = value
 
+    def get_mode(self):
+        return self.mode
+
+    def set_mode(self, mode: SaveModeType):
+        self.mode = mode
 
 class DeltaWriter(Destination, SQLTable):
     def __init__(self, **data: Any) -> None:
@@ -61,7 +66,6 @@ class DeltaWriter(Destination, SQLTable):
         self.auditor.dataset(self.get_metadata())
         self._init_task_read_schema()
         self._init_partitions()
-        # TODO: get_mode()
         self.save = DefaultSave(dataset=self)
 
 
