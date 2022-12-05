@@ -25,6 +25,47 @@ from ..file_system import FileSystemType
 from ..context import SparkContext
 
 
+
+
+class Merge(BaseModel):
+
+    join:str = Field(...)
+    update:str = Field(...)
+
+
+
+        # mode:
+        #   # the alias for source and destination is src and dst
+        #   merge:
+        #     join: |
+        #       src.id = dst.id
+
+        #     # you can provide the clause explicitly
+        #     update: |
+        #         src.change_hash != dst.change_hash
+        #     # or use a simple abstract construct for simple use cases
+        #     # update:
+        #     #   operator: any_not_equal_except
+        #     #   columns:
+        #     #     - id
+
+            
+        #     # insert: true
+            
+        #     # you can provide the clause explicitly
+        #     # insert: |
+        #     #   src.change_hash != dst.change_hash
+
+        #     # or use a simple abstract construct for simple use cases
+        #     # insert:
+        #     #   operator: any_not_equal_except
+        #     #   columns:
+        #     #     - id
+
+        #     # delete: false
+        #     delete: |
+        #       src.change_hash IS NULL
+
 class Write(BaseModel):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
