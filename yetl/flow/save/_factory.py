@@ -22,7 +22,7 @@ class _SaveFactory:
         self._logger.debug(f"Register dataset type {save_type} as {type}")
         self._save[save_mode_type] = save_type
 
-    def get_save_type(self, dataset: Destination) -> Save:
+    def get_save_type(self, dataset: Destination, options:dict={}) -> Save:
 
         type: SaveModeType = dataset.write.get_mode()
 
@@ -36,7 +36,8 @@ class _SaveFactory:
             raise ValueError(type)
 
         # TODO: any constructor args that needed
-        return save_class(dataset=dataset)
+        options["dataset"] = dataset
+        return save_class(**options)
 
 
 factory = _SaveFactory()

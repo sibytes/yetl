@@ -1,8 +1,7 @@
 from pyspark.sql import DataFrame
 from delta import DeltaTable
-from ..dataset import Destination
 from ._save import Save
-from typing import Union, List
+from typing import Union, List, Any
 from ._save_mode_type import SaveModeType
 from pydantic import BaseModel, Field
 from enum import Enum
@@ -92,6 +91,15 @@ class IgnoreSave(Save):
 
 
 class MergeSave(Save):
+
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+
+    join: str = Field(...)
+    update: Union[str, bool, Match] = Field(default=False)
+    insert: Union[str, bool, Match] = Field(default=False)
+    delete: Union[str, bool, Match] = Field(default=False)
+
     def write(self):
         super().write()
 
