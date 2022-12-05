@@ -65,7 +65,7 @@ class SQLReader(Source, SQLTable):
     _initial_load: bool = PrivateAttr(default=False)
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
 
-    def validate(self):
+    def verify(self):
         pass
 
     def execute(self):

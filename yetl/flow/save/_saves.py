@@ -7,8 +7,6 @@ from ._save_mode_type import SaveModeType
 
 
 class ErrorIfExistsSave(Save):
-    def __init__(self, dataset: Destination) -> None:
-        super().__init__(dataset)
 
     def write(self):
         super().write()
@@ -22,8 +20,6 @@ class ErrorIfExistsSave(Save):
 
 
 class AppendSave(Save):
-    def __init__(self, dataset: Destination) -> None:
-        super().__init__(dataset)
 
     def write(self):
         super().write()
@@ -37,8 +33,6 @@ class AppendSave(Save):
 
 
 class OverwriteSchemaSave(Save):
-    def __init__(self, dataset: Destination) -> None:
-        super().__init__(dataset)
 
     def write(self):
         super().write()
@@ -54,8 +48,6 @@ class OverwriteSchemaSave(Save):
 
 
 class OverwriteSave(Save):
-    def __init__(self, dataset: Destination) -> None:
-        super().__init__(dataset)
 
     def write(self):
         super().write()
@@ -69,8 +61,6 @@ class OverwriteSave(Save):
 
 
 class IgnoreSave(Save):
-    def __init__(self, dataset: Destination) -> None:
-        super().__init__(dataset)
 
     def write(self):
         super().write()
@@ -84,8 +74,6 @@ class IgnoreSave(Save):
 
 
 class MergeSave(Save):
-    def __init__(self, dataset: Destination) -> None:
-        super().__init__(dataset)
 
     def write(self):
         super().write()
@@ -135,19 +123,19 @@ class MergeSave(Save):
             return merge_match
 
 
-class DefaultSave(Save):
-    def __init__(self, dataset: Destination) -> None:
-        super().__init__(dataset)
+# class DefaultSave(Save):
+#     def __init__(self, dataset: Destination) -> None:
+#         super().__init__(dataset)
 
-    def write(self):
-        super().write()
-        df = (
-            self.dataset.dataframe.write.format(self.dataset.format)
-            .options(**self.dataset.write.options)
-            .mode(self.dataset.get_mode())
-        )
+#     def write(self):
+#         super().write()
+#         df = (
+#             self.dataset.dataframe.write.format(self.dataset.format)
+#             .options(**self.dataset.write.options)
+#             .mode(self.dataset.write.get_mode())
+#         )
 
-        if self.dataset.partitions:
-            df = df.partitionBy(*self.dataset.partitions)
+#         if self.dataset.partitions:
+#             df = df.partitionBy(*self.dataset.partitions)
 
-        df.save(self.dataset.path)
+#         df.save(self.dataset.path)

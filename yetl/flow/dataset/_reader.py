@@ -1,4 +1,4 @@
-from pydantic import Field, PrivateAttr, root_validator
+from pydantic import Field, PrivateAttr
 from ._properties import ReaderProperties
 from ._decoder import parse_properties_key, parse_properties_values
 from typing import Any, Dict, Union
@@ -289,7 +289,7 @@ class Reader(Source, SQLTable):
 
         return handle_exceptions
 
-    def validate(self):
+    def verify(self):
 
         validation_handler = self._get_validation_exceptions_handler()
         validator = None
@@ -449,7 +449,7 @@ class Reader(Source, SQLTable):
         # only run the validator if exception handling has ben configured.
         if self.has_exceptions:
             # self.validation_result = self.validate()
-            self.validate()
+            self.verify()
 
         return self.dataframe
 

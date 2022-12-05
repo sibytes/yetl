@@ -6,7 +6,7 @@ from ..schema_repo import SchemaNotFound
 from .. import _delta_lake as dl
 from pyspark.sql import DataFrame
 import uuid
-from ..save import Save, DefaultSave
+from ..save import Save, save_factory
 # from typing import ChainMap
 # from ..parser import parser
 # from ..save import save_factory, Save
@@ -66,7 +66,7 @@ class DeltaWriter(Destination, SQLTable):
         self.auditor.dataset(self.get_metadata())
         self._init_task_read_schema()
         self._init_partitions()
-        self.save = DefaultSave(dataset=self)
+        self.save = save_factory.get_save_type(self)
 
 
     context: SparkContext = Field(...)
@@ -154,7 +154,7 @@ class DeltaWriter(Destination, SQLTable):
             self.context.log.info(msg)
 
 
-    def validate(self):
+    def verify(self):
         pass
 
     def execute(self):

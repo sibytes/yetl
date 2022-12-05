@@ -6,10 +6,10 @@ from ._saves import (
     OverwriteSchemaSave,
     ErrorIfExistsSave,
     MergeSave,
-    DefaultSave,
+    # DefaultSave,
 )
 import logging
-from ..dataset import Dataset
+from ..dataset import Destination
 from ._save_mode_type import SaveModeType
 
 
@@ -22,16 +22,9 @@ class _SaveFactory:
         self._logger.debug(f"Register dataset type {save_type} as {type}")
         self._save[save_mode_type] = save_type
 
-    def _get_save_mode_type(self, name: str):
-        try:
-            if SaveModeType[name.upper()] in SaveModeType:
-                return SaveModeType[name.upper()]
-        except:
-            return None
+    def get_save_type(self, dataset: Destination) -> Save:
 
-    def get_save_type(self, dataset: Dataset) -> Save:
-
-        type: SaveModeType = self._get_save_mode_type(dataset.mode)
+        type: SaveModeType = dataset.write.get_mode()
 
         self._logger.info(f"Get {type.name} from factory save")
         save_class = self._save.get(type)
@@ -43,11 +36,11 @@ class _SaveFactory:
             raise ValueError(type)
 
         # TODO: any constructor args that needed
-        return save_class(dataset)
+        return save_class(dataset=dataset)
 
 
 factory = _SaveFactory()
-factory.register_save_type(SaveModeType.DEFAULT, DefaultSave)
+# factory.register_save_type(SaveModeType.DEFAULT, DefaultSave)
 factory.register_save_type(SaveModeType.APPEND, AppendSave)
 factory.register_save_type(SaveModeType.IGNORE, IgnoreSave)
 factory.register_save_type(SaveModeType.OVERWRITE, OverwriteSave)

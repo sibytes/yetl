@@ -13,7 +13,8 @@ class Dataset(BaseModel, ABC):
         pass
 
     @abstractmethod
-    def validate(self):
+    def verify(self):
+        """Validates the dataset, Note: cannot use the verb validate since it clashes with pydantic"""
         pass
 
     @abstractproperty

@@ -4,10 +4,9 @@ from ..dataset import Destination
 
 
 class Save(BaseModel, ABC):
-    def __init__(self, dataset:Destination) -> None:
-        self.dataset = dataset
-    dataset:Destination = Field(...)
 
+    dataset:Destination = Field(default=None)
+        
     @abstractmethod
     def write(self):
         self.dataset.context.log.info(
