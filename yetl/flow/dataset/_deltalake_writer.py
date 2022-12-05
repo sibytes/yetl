@@ -10,7 +10,7 @@ from ..save import Save, save_factory
 
 # from typing import ChainMap
 # from ..parser import parser
-# from ..save import save_factory, Save
+
 from ..audit import Audit, AuditTask
 
 # from datetime import datetime
@@ -37,15 +37,16 @@ class Write(BaseModel):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
         self._merge_schema = self.options.get("merge_schema", False)
-        self.set_mode(self.mode)
+        self._init_mode(self.mode)
 
 
     _DEFAULT_OPTIONS = {"mergeSchema": False}
     auto: bool = Field(default=True)
     options: Dict[str, Any] = Field(default=_DEFAULT_OPTIONS)
     mode: Union[SaveModeType, dict] = Field(default=None)
+    dataset:Destination = Field(default=None)
+
     _save: Save = PrivateAttr(default=None)
-    _dataset:Destination = PrivateAttr(default=None)
     _merge_schema: bool = PrivateAttr(default=False)
     _mode_options: dict = PrivateAttr(default=None)
 
@@ -58,17 +59,7 @@ class Write(BaseModel):
         self.options[MERGE_SCHEMA] = value
         self._merge_schema = value
 
-    def get_mode(self):
-
-        if isinstance(self.mode, dict):
-            mode = next(iter(self.mode))
-            mode = SaveModeType(mode)
-            return mode
-        else:
-            return self.mode 
-
-
-    def set_mode(self, mode:Union[SaveModeType, dict]):
+    def _init_mode(self, mode:Union[SaveModeType, dict]):
 
         if isinstance(mode, dict):
             mode_value = next(iter(mode))
@@ -79,25 +70,13 @@ class Write(BaseModel):
             self.mode = mode
             self._mode_options = None
 
-    def get_dataset(self) -> Destination:
-        return self._dataset
+    def set_dataset_save(self, destination:Destination, mode_options:dict=None):
 
-    def set_dataset(self, value:Destination):
-        self._dataset = value
-
-    def set_dataset_save(self, value:Destination):
-        self._dataset = value
-        self._save = save_factory.get_save_type(dataset=self._dataset, options=self._mode_options)
-        pass
-
-    # @property
-    # def dataset(self) -> Destination:
-    #     return self._dataset
-
-    # @dataset.setter
-    # def dataset(self, value:Destination):
-    #     self._dataset = value
-    #     self._init_save()
+        if mode_options:
+            self._mode_options = mode_options
+            
+        self.dataset = destination
+        self._save = save_factory.get_save_type(dataset=self.dataset, options=self._mode_options)
 
     @property
     def save(self) -> Save:
@@ -149,7 +128,6 @@ class DeltaWriter(Destination, SQLTable):
     check_constraints: Dict[str, str] = Field(default=None)
     partitioned_by: List[str] = Field(default=None)
     zorder_by: List[str] = Field(default=None)
-    # write: Write = Field(default=Write())
     write: Write = Field(...)
 
     _initial_load: bool = PrivateAttr(default=False)
