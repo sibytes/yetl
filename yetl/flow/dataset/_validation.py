@@ -133,12 +133,11 @@ class IValidator(BaseModel, ABC):
 
 
 class PermissiveSchemaOnRead(IValidator):
-
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
 
     context: IContext = Field(...)
-    corrupt_record:str = Field(default=CORRUPT_RECORD)
+    corrupt_record: str = Field(default=CORRUPT_RECORD)
 
     def validate(self):
         self.total_count = self.dataframe.count()
@@ -152,7 +151,7 @@ class PermissiveSchemaOnRead(IValidator):
         )
 
         self.exceptions_count = exceptions.count()
-    
+
         self.dataframe = self.dataframe.where(f"{self.corrupt_record} IS NULL").drop(
             self.corrupt_record
         )
@@ -190,7 +189,7 @@ class BadRecordsPathSchemaOnRead(IValidator):
                 # self.context.log.info(
                 #     f"Try loading {self.exceptions_count} exceptions for dataset {self.table} from {self.path}"
                 # )
-                exceptions:DataFrame = (
+                exceptions: DataFrame = (
                     self.spark.read.format("json")
                     .options(**options)
                     .load(self.path)

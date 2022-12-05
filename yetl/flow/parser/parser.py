@@ -221,10 +221,12 @@ def render_jinja(data: str, replacements: dict[JinjaVariables, str]):
 
     return data
 
-def prefix_root_var(path:str):
-    var =  StrTemplate("{{$var}}").substitute(var=JinjaVariables.ROOT.value)
+
+def prefix_root_var(path: str):
+    var = StrTemplate("{{$var}}").substitute(var=JinjaVariables.ROOT.value)
     rooted_path = path if var in reduce_whitespace(path) else f"{var}/" + path
     return rooted_path
+
 
 def reduce_whitespace(sentence: str):
 

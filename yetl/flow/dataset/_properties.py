@@ -52,7 +52,8 @@ class SchemaProperties(BaseModel):
 
     # the name of the dataframe column that holds the currupt record details
     schema_corrupt_record_name: str = Field(
-        default=CORRUPT_RECORD, alias=YetlTableProperties.SCHEMA_CORRUPT_RECORD_NAME.value
+        default=CORRUPT_RECORD,
+        alias=YetlTableProperties.SCHEMA_CORRUPT_RECORD_NAME.value,
     )
 
     # whether or not to add the corrupt record field into the dataframe

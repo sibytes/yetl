@@ -7,64 +7,30 @@ from .. import _delta_lake as dl
 from pyspark.sql import DataFrame
 import uuid
 from ..save import Save, save_factory
+
 # from typing import ChainMap
 # from ..parser import parser
 # from ..save import save_factory, Save
 from ..audit import Audit, AuditTask
+
 # from datetime import datetime
 from .._timeslice import Timeslice, TimesliceUtcNow
 from pyspark.sql import functions as fn
 import json
 from ._base import Destination, SQLTable
 from pydantic import Field, PrivateAttr, BaseModel
-from typing import Any, Dict, List
-from ..parser.parser import JinjaVariables, render_jinja, sql_partitioned_by, prefix_root_var
+from typing import Any, Dict, List, Union
+from ..parser.parser import (
+    JinjaVariables,
+    render_jinja,
+    sql_partitioned_by,
+    prefix_root_var,
+)
 from ._properties import DeltaWriterProperties
 from ..save._save_mode_type import SaveModeType
 from ..file_system import FileSystemType
 from ..context import SparkContext
 
-
-
-
-class Merge(BaseModel):
-
-    join:str = Field(...)
-    update:str = Field(...)
-
-
-
-        # mode:
-        #   # the alias for source and destination is src and dst
-        #   merge:
-        #     join: |
-        #       src.id = dst.id
-
-        #     # you can provide the clause explicitly
-        #     update: |
-        #         src.change_hash != dst.change_hash
-        #     # or use a simple abstract construct for simple use cases
-        #     # update:
-        #     #   operator: any_not_equal_except
-        #     #   columns:
-        #     #     - id
-
-            
-        #     # insert: true
-            
-        #     # you can provide the clause explicitly
-        #     # insert: |
-        #     #   src.change_hash != dst.change_hash
-
-        #     # or use a simple abstract construct for simple use cases
-        #     # insert:
-        #     #   operator: any_not_equal_except
-        #     #   columns:
-        #     #     - id
-
-        #     # delete: false
-        #     delete: |
-        #       src.change_hash IS NULL
 
 class Write(BaseModel):
     def __init__(self, **data: Any) -> None:
@@ -74,7 +40,8 @@ class Write(BaseModel):
     _DEFAULT_OPTIONS = {"mergeSchema": False}
     auto: bool = Field(default=True)
     options: Dict[str, Any] = Field(default=_DEFAULT_OPTIONS)
-    mode: SaveModeType = Field(default=SaveModeType.APPEND)
+    mode: Union[SaveModeType, dict] = Field(default=SaveModeType.APPEND)
+    save: Save = Field(default=None)
     _merge_schema: bool = PrivateAttr(default=False)
 
     @property
@@ -92,6 +59,7 @@ class Write(BaseModel):
     def set_mode(self, mode: SaveModeType):
         self.mode = mode
 
+
 class DeltaWriter(Destination, SQLTable):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
@@ -108,7 +76,6 @@ class DeltaWriter(Destination, SQLTable):
         self._init_task_read_schema()
         self._init_partitions()
         self.save = save_factory.get_save_type(self)
-
 
     context: SparkContext = Field(...)
     timeslice: Timeslice = Field(default=TimesliceUtcNow())
@@ -132,11 +99,10 @@ class DeltaWriter(Destination, SQLTable):
     partitioned_by: List[str] = Field(default=None)
     zorder_by: List[str] = Field(default=None)
     write: Write = Field(default=Write())
-    save: Save = Field(default=None)
+
     _initial_load: bool = PrivateAttr(default=False)
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
     _create_spark_schema = PrivateAttr(default=False)
-
 
     def render(self):
         self._replacements = {
@@ -147,7 +113,6 @@ class DeltaWriter(Destination, SQLTable):
         # if the path has no root {{root}} prefixed then add one
         path = prefix_root_var(self.path)
         self.path = render_jinja(path, self._replacements)
-
 
     def _init_task_read_schema(self):
         # if table ddl not defined in the config
@@ -181,7 +146,7 @@ class DeltaWriter(Destination, SQLTable):
         partitions = None
         if self.ddl:
             try:
-                partitions:List[str] = sql_partitioned_by(self.ddl)
+                partitions: List[str] = sql_partitioned_by(self.ddl)
                 msg = f"Parsed partitioning columns from sql ddl for {self.database_table} as {partitions}"
                 self.context.log.info(msg)
             except Exception as e:
@@ -193,7 +158,6 @@ class DeltaWriter(Destination, SQLTable):
             self.partitioned_by = partitions
             msg = f"Parsed partitioning columns from dataflow yaml config for {self.database}.{self.table} as {partitions}"
             self.context.log.info(msg)
-
 
     def verify(self):
         pass

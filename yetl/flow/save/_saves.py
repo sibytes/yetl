@@ -2,12 +2,34 @@ from pyspark.sql import DataFrame
 from delta import DeltaTable
 from ..dataset import Destination
 from ._save import Save
-from typing import Union
+from typing import Union, List
 from ._save_mode_type import SaveModeType
+from pydantic import BaseModel, Field
+from enum import Enum
+
+
+class MatchOperator(Enum):
+    ANY_NOT_EQUAL_EXCEPT = "any_not_equal_except"
+    ALL_NOT_EQUAL_EXCEPT = "all_not_equal_except"
+    ANY_EQUAL_EXCEPT = "any_equal_except"
+    ALL_EQUAL_EXCEPT = "all_equal_except"
+
+
+class Match(BaseModel):
+
+    operator: MatchOperator = Field(...)
+    columns: List[str] = Field(...)
+
+
+class Merge(BaseModel):
+
+    join: str = Field(...)
+    update: Union[str, bool, Match] = Field(...)
+    insert: Union[str, bool, Match] = Field(...)
+    delete: Union[str, bool, Match] = Field(...)
 
 
 class ErrorIfExistsSave(Save):
-
     def write(self):
         super().write()
         (
@@ -20,7 +42,6 @@ class ErrorIfExistsSave(Save):
 
 
 class AppendSave(Save):
-
     def write(self):
         super().write()
         (
@@ -33,7 +54,6 @@ class AppendSave(Save):
 
 
 class OverwriteSchemaSave(Save):
-
     def write(self):
         super().write()
         options = self.dataset.write.options
@@ -48,7 +68,6 @@ class OverwriteSchemaSave(Save):
 
 
 class OverwriteSave(Save):
-
     def write(self):
         super().write()
         (
@@ -61,7 +80,6 @@ class OverwriteSave(Save):
 
 
 class IgnoreSave(Save):
-
     def write(self):
         super().write()
         (
@@ -74,7 +92,6 @@ class IgnoreSave(Save):
 
 
 class MergeSave(Save):
-
     def write(self):
         super().write()
 

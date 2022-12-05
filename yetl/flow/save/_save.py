@@ -5,8 +5,8 @@ from ..dataset import Destination
 
 class Save(BaseModel, ABC):
 
-    dataset:Destination = Field(default=None)
-        
+    dataset: Destination = Field(default=None)
+
     @abstractmethod
     def write(self):
         self.dataset.context.log.info(

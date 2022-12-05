@@ -8,7 +8,7 @@ from ..parser.parser import (
     render_jinja,
     to_regex_search_pattern,
     to_spark_format_code,
-    prefix_root_var
+    prefix_root_var,
 )
 from ..parser._constants import FormatOptions
 from ..file_system import FileSystemType
@@ -29,10 +29,12 @@ from ..parser._constants import *
 from ._validation import PermissiveSchemaOnRead, BadRecordsPathSchemaOnRead, Thresholds
 from string import Template as StrTemplate
 
+
 class ReaderConfigurationException(Exception):
     def __init__(self, message):
         super().__init__(message)
         self.message = message
+
 
 def _yetl_properties_dumps(obj: dict, *, default):
     """Decodes the data back into a dictionary with yetl configuration properties names"""
@@ -63,10 +65,11 @@ class Read(BaseModel):
             path = self.options.get(ReadModeOptions.BADRECORDSPATH.value, "")
             # if the path has no root {{root}} prefixed then add one
             path = prefix_root_var(self.path)
-            self.options[ReadModeOptions.BADRECORDSPATH.value] = render_jinja(path, replacements)
+            self.options[ReadModeOptions.BADRECORDSPATH.value] = render_jinja(
+                path, replacements
+            )
             if "mode" in self.options:
                 del self.options["mode"]
-
 
     @property
     def infer_schema(self):
@@ -76,23 +79,26 @@ class Read(BaseModel):
     def bad_records_path(self):
         return self.options.get(ReadModeOptions.BADRECORDSPATH.value, None)
 
-
     @infer_schema.setter
     def infer_schema(self, value: bool):
         self.options["inferSchema"] = value
 
     def get_mode(self):
         mode = None
-        if isinstance(self.options.get(ReadModeOptions.BADRECORDSPATH.value, None), str):
-            mode =  ReadModeOptions.BADRECORDSPATH
+        if isinstance(
+            self.options.get(ReadModeOptions.BADRECORDSPATH.value, None), str
+        ):
+            mode = ReadModeOptions.BADRECORDSPATH
         if not mode:
             mode = self.options.get("mode", ReadModeOptions.PERMISSIVE.value)
             mode = ReadModeOptions(mode)
         return mode
 
-    def set_mode(self, mode: ReadModeOptions, bad_records_path:str=None):
+    def set_mode(self, mode: ReadModeOptions, bad_records_path: str = None):
         if mode == ReadModeOptions.BADRECORDSPATH and not bad_records_path:
-            raise Exception(f"Setting mode to BADRECORDSPATH must have a bad_records_path string argument")
+            raise Exception(
+                f"Setting mode to BADRECORDSPATH must have a bad_records_path string argument"
+            )
 
         if mode != ReadModeOptions.BADRECORDSPATH:
             self.options["mode"] = mode.value
@@ -100,7 +106,6 @@ class Read(BaseModel):
             self.options[ReadModeOptions.BADRECORDSPATH.value] = bad_records_path
             if "mode" in self.options:
                 del self.options["mode"]
-
 
 
 class Exceptions(SQLTable):
@@ -237,15 +242,18 @@ class Reader(Source, SQLTable):
             )
             self._initial_load = True
 
-
     def _init_validate(self):
         """Validate the conguration ensuring that compatible options are configured.
         Because we're validating across class composition and there is complexity encapsulated in those classes
         bydantic validation isn't appropriate since it will duplicate the logic required to shred the dictionaries
         that we have already used in pydantic to create the objects.
         """
-        if self.read.get_mode() == ReadModeOptions.BADRECORDSPATH and not isinstance(self.context, DatabricksContext):
-            raise ReaderConfigurationException(f"{ReadModeOptions.BADRECORDSPATH.value} is only supported on databricks runtime.")
+        if self.read.get_mode() == ReadModeOptions.BADRECORDSPATH and not isinstance(
+            self.context, DatabricksContext
+        ):
+            raise ReaderConfigurationException(
+                f"{ReadModeOptions.BADRECORDSPATH.value} is only supported on databricks runtime."
+            )
 
         if self._create_spark_schema:
             if self.read.get_mode() not in [
@@ -311,7 +319,10 @@ class Reader(Source, SQLTable):
                 spark=self.context.spark,
             )
 
-        if self.read.get_mode() == ReadModeOptions.PERMISSIVE and self.has_corrupt_column:
+        if (
+            self.read.get_mode() == ReadModeOptions.PERMISSIVE
+            and self.has_corrupt_column
+        ):
             self.context.log.info(
                 f"Validating dataframe read using PERMISSIVE corrupt column at {CORRUPT_RECORD} {CONTEXT_ID}={str(self.context_id)}"
             )
@@ -329,7 +340,10 @@ class Reader(Source, SQLTable):
             start_datetime = datetime.now()
             level_validation, validation = validator.validate()
             self.auditor.dataset_task(
-                self.dataset_id, AuditTask.SCHEMA_ON_READ_VALIDATION, validation, start_datetime
+                self.dataset_id,
+                AuditTask.SCHEMA_ON_READ_VALIDATION,
+                validation,
+                start_datetime,
             )
             self.dataframe = validator.dataframe
 
