@@ -1,19 +1,13 @@
 # from multiprocessing import context
 from ..parser._constants import *
-
 from ..schema_repo import SchemaNotFound
-
 from .. import _delta_lake as dl
 from pyspark.sql import DataFrame
 import uuid
 from ..save import Save, save_factory
-
-# from typing import ChainMap
-# from ..parser import parser
-
+from typing import ChainMap
 from ..audit import Audit, AuditTask
-
-# from datetime import datetime
+from datetime import datetime
 from .._timeslice import Timeslice, TimesliceUtcNow
 from pyspark.sql import functions as fn
 import json
@@ -106,6 +100,8 @@ class DeltaWriter(Destination, SQLTable):
         self.auditor.dataset(self.get_metadata())
         self._init_task_read_schema()
         self._init_partitions()
+        if self.auto_write and self.ddl:
+            self.create_or_alter_table()
 
     context: SparkContext = Field(...)
     timeslice: Timeslice = Field(default=TimesliceUtcNow())
@@ -188,6 +184,92 @@ class DeltaWriter(Destination, SQLTable):
             self.partitioned_by = partitions
             msg = f"Parsed partitioning columns from dataflow yaml config for {self.database}.{self.table} as {partitions}"
             self.context.log.info(msg)
+
+    def _get_table_properties_sql(self, existing_properties: dict = None):
+
+        tbl_properties = self.deltalake_properties
+        if tbl_properties:
+            if existing_properties:
+                tbl_properties = dict(ChainMap(tbl_properties, existing_properties))
+            tbl_properties = [f"'{k}' = '{v}'" for k, v in tbl_properties.items()]
+            tbl_properties = ", ".join(tbl_properties)
+            tbl_properties = dl.alter_table_set_tblproperties(
+                self.database, self.table, tbl_properties
+            )
+            return tbl_properties
+        else:
+            return None
+
+    def _set_delta_table_properties(self, existing_properties: dict):
+        _existing_properties = {}
+        if existing_properties:
+            _existing_properties = existing_properties.get(self.database_table)
+            _existing_properties = _existing_properties.get(PROPERTIES)
+        self.tbl_properties_ddl = self._get_table_properties_sql(
+            _existing_properties
+        )
+        self.context.log.debug(
+            f"DeltaWriter table properties ddl = {self.tbl_properties_ddl}"
+        )
+        if self.tbl_properties_ddl:
+            start_datetime = datetime.now()
+            self.context.spark.sql(self.tbl_properties_ddl)
+            self.auditor.dataset_task(
+                self.id,
+                AuditTask.SET_TABLE_PROPERTIES,
+                self.tbl_properties_ddl,
+                start_datetime,
+            )
+
+    def create_or_alter_table(self):
+
+        current_properties = None
+        start_datetime = datetime.now()
+        detail = dl.create_database(self.context, self.database)
+        self.auditor.dataset_task(self.dataset_id, AuditTask.SQL, detail, start_datetime)
+
+        table_exists = dl.table_exists(self.context, self.database, self.table)
+        if table_exists:
+            self.context.log.info(
+                f"Table already exists {self.database_table} at {self.path}"
+            )
+            self.initial_load = False
+
+            start_datetime = datetime.now()
+            # on non initial loads get the constraints and properties
+            # to them to and sync with the declared constraints and properties.
+            # TODO: consolidate details and properties fetch since the properties are in the details. The delta lake api may have some improvements.
+            current_properties = dl.get_table_properties(
+                self.context, self.database, self.table
+            )
+            details = dl.get_table_details(self.context, self.database, self.table)
+            # get the partitions from the table details and add them to the properties.
+            current_properties[self.database_table][PARTITIONS] = details[self.database_table][PARTITIONS]
+            self.auditor.dataset_task(
+                self.id,
+                AuditTask.GET_TABLE_PROPERTIES,
+                current_properties,
+                start_datetime,
+            )
+
+        else:
+            start_datetime = datetime.now()
+            rendered_table_ddl = self.ddl
+            if self.ddl:
+                rendered_table_ddl = render_jinja(
+                    self.ddl, self._replacements
+                )
+            detail = dl.create_table(
+                self.context, self.database, self.table, self.path, rendered_table_ddl
+            )
+            self.auditor.dataset_task(self.id, AuditTask.SQL, detail, start_datetime)
+            self.initial_load = True
+
+        # alter, drop or create any constraints defined that are not on the table
+        self._set_table_constraints(current_properties, self._config)
+        # alter, drop or create any properties that are not on the table
+        self._set_delta_table_properties(current_properties)
+
 
     def verify(self):
         pass
