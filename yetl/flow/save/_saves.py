@@ -2,7 +2,7 @@ from pyspark.sql import DataFrame
 from delta import DeltaTable
 from ._save import Save
 from typing import Union, List, Any
-from ._save_mode_type import SaveModeType
+from ._save_mode_type import SaveModeOptions
 from pydantic import BaseModel, Field
 from enum import Enum
 
@@ -34,7 +34,7 @@ class ErrorIfExistsSave(Save):
         (
             self.dataset.dataframe.write.format(self.dataset.format)
             .options(**self.dataset.write.options)
-            .mode(SaveModeType.ERROR_IF_EXISTS.value)
+            .mode(SaveModeOptions.ERROR_IF_EXISTS.value)
             .partitionBy(*self.dataset.partitions)
             .save(self.dataset.path)
         )
@@ -46,7 +46,7 @@ class AppendSave(Save):
         (
             self.dataset.dataframe.write.format(self.dataset.format)
             .options(**self.dataset.write.options)
-            .mode(SaveModeType.APPEND.value)
+            .mode(SaveModeOptions.APPEND.value)
             .partitionBy(*self.dataset.partitions)
             .save(self.dataset.path)
         )
@@ -56,11 +56,11 @@ class OverwriteSchemaSave(Save):
     def write(self):
         super().write()
         options = self.dataset.write.options
-        options[SaveModeType.OVERWRITE_SCHEMA.value] = True
+        options[SaveModeOptions.OVERWRITE_SCHEMA.value] = True
         (
             self.dataset.dataframe.write.format(self.dataset.format)
             .options(**options)
-            .mode(SaveModeType.OVERWRITE.value)
+            .mode(SaveModeOptions.OVERWRITE.value)
             .partitionBy(*self.dataset.partitions)
             .save(self.dataset.path)
         )
@@ -72,7 +72,7 @@ class OverwriteSave(Save):
         (
             self.dataset.dataframe.write.format(self.dataset.format)
             .options(**self.dataset.write.options)
-            .mode(SaveModeType.OVERWRITE.value)
+            .mode(SaveModeOptions.OVERWRITE.value)
             .partitionBy(*self.dataset.partitions)
             .save(self.dataset.path)
         )
@@ -84,7 +84,7 @@ class IgnoreSave(Save):
         (
             self.dataset.dataframe.write.format(self.dataset.format)
             .options(**self.dataset.write.options)
-            .mode(SaveModeType.IGNORE.value)
+            .mode(SaveModeOptions.IGNORE.value)
             .partitionBy(*self.dataset.partitions)
             .save(self.dataset.path)
         )
@@ -147,20 +147,3 @@ class MergeSave(Save):
         else:
             return merge_match
 
-
-# class DefaultSave(Save):
-#     def __init__(self, dataset: Destination) -> None:
-#         super().__init__(dataset)
-
-#     def write(self):
-#         super().write()
-#         df = (
-#             self.dataset.dataframe.write.format(self.dataset.format)
-#             .options(**self.dataset.write.options)
-#             .mode(self.dataset.write.get_mode())
-#         )
-
-#         if self.dataset.partitions:
-#             df = df.partitionBy(*self.dataset.partitions)
-
-#         df.save(self.dataset.path)

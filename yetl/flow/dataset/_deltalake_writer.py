@@ -27,7 +27,7 @@ from ..parser.parser import (
     prefix_root_var,
 )
 from ._properties import DeltaWriterProperties
-from ..save._save_mode_type import SaveModeType
+from ..save._save_mode_type import SaveModeOptions
 from ..file_system import FileSystemType
 from ..context import SparkContext
 
@@ -43,7 +43,7 @@ class Write(BaseModel):
     _DEFAULT_OPTIONS = {"mergeSchema": False}
     auto: bool = Field(default=True)
     options: Dict[str, Any] = Field(default=_DEFAULT_OPTIONS)
-    mode: Union[SaveModeType, dict] = Field(default=None)
+    mode: Union[SaveModeOptions, dict] = Field(default=None)
     dataset:Destination = Field(default=None)
 
     _save: Save = PrivateAttr(default=None)
@@ -59,11 +59,11 @@ class Write(BaseModel):
         self.options[MERGE_SCHEMA] = value
         self._merge_schema = value
 
-    def _init_mode(self, mode:Union[SaveModeType, dict]):
+    def _init_mode(self, mode:Union[SaveModeOptions, dict]):
 
         if isinstance(mode, dict):
             mode_value = next(iter(mode))
-            self.mode = SaveModeType(mode_value)
+            self.mode = SaveModeOptions(mode_value)
             self._mode_options = mode.get(mode_value)
 
         else:
