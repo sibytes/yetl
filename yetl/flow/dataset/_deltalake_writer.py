@@ -24,6 +24,7 @@ from ._properties import DeltaWriterProperties
 from ..save._save_mode_type import SaveModeOptions
 from ..file_system import FileSystemType
 from ..context import SparkContext
+from ..schema_repo import SchemaNotFound
 
 
 class Write(BaseModel):
@@ -46,7 +47,7 @@ class Write(BaseModel):
 
     @property
     def merge_schema(self) -> bool:
-        return self.merge_schema
+        return self._merge_schema
 
     @merge_schema.setter
     def merge_schema(self, value: bool):
@@ -93,6 +94,7 @@ class DeltaWriter(Destination, SQLTable):
         self.write.set_dataset_save(self)
         self.auditor = self.context.auditor
         self.timeslice = self.context.timeslice
+        self.datalake = self.context.datalake
         self.datalake_protocol = self.context.datalake_protocol
         self.render()
         self.datalake = self.context.datalake
@@ -131,6 +133,12 @@ class DeltaWriter(Destination, SQLTable):
     _create_spark_schema = PrivateAttr(default=False)
 
     def render(self):
+        if self.datalake is None:
+            raise Exception("datalake root path cannot be None")
+
+        if self.datalake_protocol is None:
+            raise Exception("datalake protocol cannot be None")
+
         self._replacements = {
             JinjaVariables.DATABASE_NAME: self.database,
             JinjaVariables.TABLE_NAME: self.table,
@@ -139,6 +147,7 @@ class DeltaWriter(Destination, SQLTable):
         # if the path has no root {{root}} prefixed then add one
         path = prefix_root_var(self.path)
         self.path = render_jinja(path, self._replacements)
+        self._replacements[JinjaVariables.PATH] = self.path
 
     def _init_task_read_schema(self):
         # if table ddl not defined in the config
@@ -233,7 +242,7 @@ class DeltaWriter(Destination, SQLTable):
             self.context.log.info(
                 f"Table already exists {self.database_table} at {self.path}"
             )
-            self.initial_load = False
+            self._set_initial_load(False)
 
             start_datetime = datetime.now()
             # on non initial loads get the constraints and properties
@@ -246,7 +255,7 @@ class DeltaWriter(Destination, SQLTable):
             # get the partitions from the table details and add them to the properties.
             current_properties[self.database_table][PARTITIONS] = details[self.database_table][PARTITIONS]
             self.auditor.dataset_task(
-                self.id,
+                self.dataset_id,
                 AuditTask.GET_TABLE_PROPERTIES,
                 current_properties,
                 start_datetime,
@@ -262,11 +271,11 @@ class DeltaWriter(Destination, SQLTable):
             detail = dl.create_table(
                 self.context, self.database, self.table, self.path, rendered_table_ddl
             )
-            self.auditor.dataset_task(self.id, AuditTask.SQL, detail, start_datetime)
-            self.initial_load = True
+            self.auditor.dataset_task(self.dataset_id, AuditTask.SQL, detail, start_datetime)
+            self._set_initial_load(True)
 
         # alter, drop or create any constraints defined that are not on the table
-        self._set_table_constraints(current_properties, self._config)
+        # self._set_table_constraints(current_properties, self._config)
         # alter, drop or create any properties that are not on the table
         self._set_delta_table_properties(current_properties)
 
@@ -305,6 +314,9 @@ class DeltaWriter(Destination, SQLTable):
 
     @initial_load.setter
     def initial_load(self, value: bool):
+        self._set_initial_load(value)
+
+    def _set_initial_load(self, value: bool):
         # when it's the initial load and schema's aren't declared
         # the delta table is created 1st with no schema and the
         # data schema loads into it. To do this we override the

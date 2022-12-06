@@ -27,7 +27,6 @@ from .. import _delta_lake as dl
 from datetime import datetime
 from ..parser._constants import *
 from ._validation import PermissiveSchemaOnRead, BadRecordsPathSchemaOnRead, Thresholds
-from string import Template as StrTemplate
 
 
 class ReaderConfigurationException(Exception):
