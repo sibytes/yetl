@@ -214,17 +214,17 @@ class DeltaWriter(Destination, SQLTable):
         if existing_properties:
             _existing_properties = existing_properties.get(self.database_table)
             _existing_properties = _existing_properties.get(PROPERTIES)
-        self.tbl_properties_ddl = self._get_table_properties_sql(_existing_properties)
+        tbl_properties_ddl = self._get_table_properties_sql(_existing_properties)
         self.context.log.debug(
-            f"DeltaWriter table properties ddl = {self.tbl_properties_ddl}"
+            f"DeltaWriter table properties ddl = {tbl_properties_ddl}"
         )
-        if self.tbl_properties_ddl:
+        if tbl_properties_ddl:
             start_datetime = datetime.now()
-            self.context.spark.sql(self.tbl_properties_ddl)
+            self.context.spark.sql(tbl_properties_ddl)
             self.auditor.dataset_task(
-                self.id,
+                self.dataset_id,
                 AuditTask.SET_TABLE_PROPERTIES,
-                self.tbl_properties_ddl,
+                tbl_properties_ddl,
                 start_datetime,
             )
 
@@ -278,24 +278,24 @@ class DeltaWriter(Destination, SQLTable):
             existing_constraints = table_properties.get(self.database_table)
             existing_constraints = existing_constraints.get("constraints")
 
-        self.column_constraints_ddl = self._get_check_constraints_sql(
+        column_constraints_ddl = self._get_check_constraints_sql(
             existing_constraints
         )
         self.context.log.debug(
-            f"Writer table check constraints ddl = {self.column_constraints_ddl}"
+            f"Writer table check constraints ddl = {column_constraints_ddl}"
         )
-        if self.table_ddl or not self.initial_load:
+        if self.ddl or not self.initial_load:
             # can only add constraints to columns if there are any
             # if there is no table_ddl an empty table is created and the data schema defines the table
             # on the initial load so this is skipped on the 1st load.
-            if self.column_constraints_ddl:
+            if column_constraints_ddl:
                 start_datetime = datetime.now()
-                for cc in self.column_constraints_ddl:
+                for cc in column_constraints_ddl:
                     self.context.spark.sql(cc)
                 self.auditor.dataset_task(
-                    self.id,
+                    self.dataset_id,
                     AuditTask.SET_TABLE_PROPERTIES,
-                    self.column_constraints_ddl,
+                    column_constraints_ddl,
                     start_datetime,
                 )
 
