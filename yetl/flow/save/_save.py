@@ -5,7 +5,6 @@ from typing import Any
 
 
 class Save(BaseModel, ABC):
-
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
 

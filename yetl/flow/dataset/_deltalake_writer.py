@@ -28,18 +28,16 @@ from ..schema_repo import SchemaNotFound
 
 
 class Write(BaseModel):
-
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
         self._merge_schema = self.options.get("merge_schema", False)
         self._init_mode(self.mode)
 
-
     _DEFAULT_OPTIONS = {"mergeSchema": False}
     auto: bool = Field(default=True)
     options: Dict[str, Any] = Field(default=_DEFAULT_OPTIONS)
     mode: Union[SaveModeOptions, dict] = Field(default=None)
-    dataset:Destination = Field(default=None)
+    dataset: Destination = Field(default=None)
 
     _save: Save = PrivateAttr(default=None)
     _merge_schema: bool = PrivateAttr(default=False)
@@ -54,7 +52,7 @@ class Write(BaseModel):
         self.options[MERGE_SCHEMA] = value
         self._merge_schema = value
 
-    def _init_mode(self, mode:Union[SaveModeOptions, dict]):
+    def _init_mode(self, mode: Union[SaveModeOptions, dict]):
 
         if isinstance(mode, dict):
             mode_value = next(iter(mode))
@@ -65,20 +63,22 @@ class Write(BaseModel):
             self.mode = mode
             self._mode_options = None
 
-    def set_dataset_save(self, destination:Destination, mode_options:dict=None):
+    def set_dataset_save(self, destination: Destination, mode_options: dict = None):
 
         if mode_options:
             self._mode_options = mode_options
-            
+
         self.dataset = destination
-        self._save = save_factory.get_save_type(dataset=self.dataset, options=self._mode_options)
+        self._save = save_factory.get_save_type(
+            dataset=self.dataset, options=self._mode_options
+        )
 
     @property
     def save(self) -> Save:
         return self._save
 
     @save.setter
-    def save(self, value:Save):
+    def save(self, value: Save):
         self.save = value
 
     class Config:
@@ -214,9 +214,7 @@ class DeltaWriter(Destination, SQLTable):
         if existing_properties:
             _existing_properties = existing_properties.get(self.database_table)
             _existing_properties = _existing_properties.get(PROPERTIES)
-        self.tbl_properties_ddl = self._get_table_properties_sql(
-            _existing_properties
-        )
+        self.tbl_properties_ddl = self._get_table_properties_sql(_existing_properties)
         self.context.log.debug(
             f"DeltaWriter table properties ddl = {self.tbl_properties_ddl}"
         )
@@ -230,12 +228,85 @@ class DeltaWriter(Destination, SQLTable):
                 start_datetime,
             )
 
+    def _get_check_constraints_sql(self, existing_constraints: dict = None):
+
+        sql_constraints = []
+
+        # if the existing constraint is not defined in the config constraints
+        # and it is different then drop it and recreate
+        if existing_constraints:
+            for name, existing_constraint in existing_constraints.items():
+                defined_constraint = self.check_constraints.get(name)
+
+                # if the existing constraint is not defined in the config constraints then drop it
+                if not defined_constraint:
+                    sql_constraints.append(
+                        dl.alter_table_drop_constraint(self.database, self.table, name)
+                    )
+                # if the existing constraint is defined and it is different then drop and add it
+                elif (
+                    defined_constraint.replace(" ", "").lower()
+                    != existing_constraint.replace(" ", "").lower()
+                ):
+                    sql_constraints.append(
+                        dl.alter_table_drop_constraint(self.database, self.table, name)
+                    )
+                    sql_constraints.append(
+                        dl.alter_table_add_constraint(
+                            self.database, self.table, name, defined_constraint
+                        )
+                    )
+
+        # the constraint is defined but doesn't exist on the table yet so
+        # add the constraint
+        if self.check_constraints:
+            for name, defined_constraint in self.check_constraints.items():
+                existing_constraint = existing_constraints.get(name)
+                if not existing_constraint:
+                    sql_constraints.append(
+                        dl.alter_table_add_constraint(
+                            self.database, self.table, name, defined_constraint
+                        )
+                    )
+
+        return sql_constraints
+
+    def _set_table_constraints(self, table_properties: dict):
+
+        existing_constraints = {}
+        if table_properties:
+            existing_constraints = table_properties.get(self.database_table)
+            existing_constraints = existing_constraints.get("constraints")
+
+        self.column_constraints_ddl = self._get_check_constraints_sql(
+            existing_constraints
+        )
+        self.context.log.debug(
+            f"Writer table check constraints ddl = {self.column_constraints_ddl}"
+        )
+        if self.table_ddl or not self.initial_load:
+            # can only add constraints to columns if there are any
+            # if there is no table_ddl an empty table is created and the data schema defines the table
+            # on the initial load so this is skipped on the 1st load.
+            if self.column_constraints_ddl:
+                start_datetime = datetime.now()
+                for cc in self.column_constraints_ddl:
+                    self.context.spark.sql(cc)
+                self.auditor.dataset_task(
+                    self.id,
+                    AuditTask.SET_TABLE_PROPERTIES,
+                    self.column_constraints_ddl,
+                    start_datetime,
+                )
+
     def create_or_alter_table(self):
 
         current_properties = None
         start_datetime = datetime.now()
         detail = dl.create_database(self.context, self.database)
-        self.auditor.dataset_task(self.dataset_id, AuditTask.SQL, detail, start_datetime)
+        self.auditor.dataset_task(
+            self.dataset_id, AuditTask.SQL, detail, start_datetime
+        )
 
         table_exists = dl.table_exists(self.context, self.database, self.table)
         if table_exists:
@@ -253,7 +324,9 @@ class DeltaWriter(Destination, SQLTable):
             )
             details = dl.get_table_details(self.context, self.database, self.table)
             # get the partitions from the table details and add them to the properties.
-            current_properties[self.database_table][PARTITIONS] = details[self.database_table][PARTITIONS]
+            current_properties[self.database_table][PARTITIONS] = details[
+                self.database_table
+            ][PARTITIONS]
             self.auditor.dataset_task(
                 self.dataset_id,
                 AuditTask.GET_TABLE_PROPERTIES,
@@ -265,20 +338,19 @@ class DeltaWriter(Destination, SQLTable):
             start_datetime = datetime.now()
             rendered_table_ddl = self.ddl
             if self.ddl:
-                rendered_table_ddl = render_jinja(
-                    self.ddl, self._replacements
-                )
+                rendered_table_ddl = render_jinja(self.ddl, self._replacements)
             detail = dl.create_table(
                 self.context, self.database, self.table, self.path, rendered_table_ddl
             )
-            self.auditor.dataset_task(self.dataset_id, AuditTask.SQL, detail, start_datetime)
+            self.auditor.dataset_task(
+                self.dataset_id, AuditTask.SQL, detail, start_datetime
+            )
             self._set_initial_load(True)
 
         # alter, drop or create any constraints defined that are not on the table
-        # self._set_table_constraints(current_properties, self._config)
+        self._set_table_constraints(current_properties)
         # alter, drop or create any properties that are not on the table
         self._set_delta_table_properties(current_properties)
-
 
     def verify(self):
         pass

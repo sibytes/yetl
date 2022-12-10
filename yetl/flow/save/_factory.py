@@ -21,7 +21,7 @@ class _SaveFactory:
         self._logger.debug(f"Register dataset type {save_type} as {type}")
         self._save[save_mode_type] = save_type
 
-    def get_save_type(self, dataset: Destination, options:dict=None) -> Save:
+    def get_save_type(self, dataset: Destination, options: dict = None) -> Save:
 
         type: SaveModeOptions = dataset.write.mode
 

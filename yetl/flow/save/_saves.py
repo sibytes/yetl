@@ -91,7 +91,6 @@ class IgnoreSave(Save):
 
 
 class MergeSave(Save):
-
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
 
@@ -146,4 +145,3 @@ class MergeSave(Save):
             return derived_merge_match
         else:
             return merge_match
-

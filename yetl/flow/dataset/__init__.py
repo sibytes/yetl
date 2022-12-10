@@ -22,5 +22,5 @@ __all__ = [
     "Reader",
     "DeltaWriter",
     "dataset_factory",
-    "Write"
+    "Write",
 ]
