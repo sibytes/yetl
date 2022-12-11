@@ -43,12 +43,10 @@ class Write(BaseModel):
     _merge_schema: bool = PrivateAttr(default=False)
     _mode_options: dict = PrivateAttr(default=None)
 
-    @property
-    def merge_schema(self) -> bool:
+    def get_merge_schema(self) -> bool:
         return self._merge_schema
 
-    @merge_schema.setter
-    def merge_schema(self, value: bool):
+    def set_merge_schema(self, value: bool):
         self.options[MERGE_SCHEMA] = value
         self._merge_schema = value
 
@@ -73,13 +71,11 @@ class Write(BaseModel):
             dataset=self.dataset, options=self._mode_options
         )
 
-    @property
-    def save(self) -> Save:
+    def get_save(self) -> Save:
         return self._save
 
-    @save.setter
-    def save(self, value: Save):
-        self.save = value
+    def set_save(self, value: Save):
+        self._save = value
 
     class Config:
         arbitrary_types_allowed = True
@@ -394,8 +390,8 @@ class DeltaWriter(Destination, SQLTable):
         # data schema loads into it. To do this we override the
         # merge schema options so the data schema is merged in
         # on the 1st load without requiring changes to pipeline.
-        if not self.write.merge_schema and value:
-            self.write.merge_schema = value
+        if not self.write.get_merge_schema() and value:
+            self.write.set_merge_schema(value)
         self._initial_load = value
 
     class Config:
