@@ -19,7 +19,7 @@ from ..parser.parser import (
     render_jinja,
     sql_partitioned_by,
     prefix_root_var,
-    create_table_dll
+    create_table_dll,
 )
 from ._properties import DeltaWriterProperties
 from ..save._save_mode_type import SaveModeOptions
@@ -276,9 +276,7 @@ class DeltaWriter(Destination, SQLTable):
             existing_constraints = table_properties.get(self.database_table)
             existing_constraints = existing_constraints.get("constraints")
 
-        column_constraints_ddl = self._get_check_constraints_sql(
-            existing_constraints
-        )
+        column_constraints_ddl = self._get_check_constraints_sql(existing_constraints)
         self.context.log.debug(
             f"Writer table check constraints ddl = {column_constraints_ddl}"
         )
@@ -367,7 +365,7 @@ class DeltaWriter(Destination, SQLTable):
                 self.create_schema()
 
             self.context.log.debug("Save options:")
-            self.context.log.debug(json.dumps(self.options, indent=4, default=str))
+            self.context.log.debug(json.dumps(self.write.options, indent=4, default=str))
 
             # write the dataframe to the lake path
             self.write.get_save().write()
@@ -375,7 +373,7 @@ class DeltaWriter(Destination, SQLTable):
             # if there is no schema configured or to create one automatically then handle table creation
             # and changes before the data is written as above
             # or we create the table after the data is written based on the data written
-            if not self.dll and not self._create_spark_schema:
+            if not self.ddl and not self._create_spark_schema:
                 self.context.log.info(
                     f"auto_io = automatically creating or altering delta table {self.database_table}"
                 )
@@ -383,7 +381,7 @@ class DeltaWriter(Destination, SQLTable):
 
             write_audit = dl.get_audit(self.context, f"{self.database_table}")
             self.auditor.dataset_task(
-                self.id, AuditTask.DELTA_TABLE_WRITE, write_audit, start_datetime
+                self.dataset_id, AuditTask.DELTA_TABLE_WRITE, write_audit, start_datetime
             )
 
             if self.yetl_properties.delta_optimize_z_order_by:
@@ -402,7 +400,7 @@ class DeltaWriter(Destination, SQLTable):
                     self.context, f"{self.database}.{self.table}"
                 )
                 self.auditor.dataset_task(
-                    self.id, AuditTask.DELTA_TABLE_OPTIMIZE, write_audit, start_datetime
+                    self.dataset_id, AuditTask.DELTA_TABLE_OPTIMIZE, write_audit, start_datetime
                 )
 
         else:
@@ -413,9 +411,7 @@ class DeltaWriter(Destination, SQLTable):
     def create_schema(self):
         self.ddl = create_table_dll(self.dataframe.schema, self.partitioned_by)
         self.create_or_alter_table()
-        self.schema_repo.save_schema(
-            self.ddl, self.database, self.table, self.ddl
-        )
+        self.schema_repo.save_schema(self.ddl, self.database, self.table, self.ddl)
 
     def _add_df_metadata(self, column: str, value: str):
 
@@ -433,7 +429,7 @@ class DeltaWriter(Destination, SQLTable):
 
             for p in self.partitioned_by:
                 group_by: list = list(self.partitioned_by)
-                #doesn't make sense!
+                # doesn't make sense!
                 group_by.remove(p)
                 if group_by:
                     partition_values_df = partition_values_df.groupBy(*group_by).agg(
@@ -455,21 +451,22 @@ class DeltaWriter(Destination, SQLTable):
         )
 
         # remove a re-add the _context_id since there will be dupplicate columns
-        # when dataframe is built from multiple sources and they are specific 
+        # when dataframe is built from multiple sources and they are specific
         # to the source not this dataset.
-        if self._metadata_context_id_enabled:
+        if self.yetl_properties.metadata_context_id:
             self._add_df_metadata(CONTEXT_ID, str(self.context_id))
 
-        if self._metadata_dataflow_id_enabled:
+        if self.yetl_properties.metadata_dataflow_id:
             self._add_df_metadata(DATAFLOW_ID, str(self.dataflow_id))
 
-        if self._metadata_dataset_id_enabled:
-            self._add_df_metadata(DATASET_ID, str(self.dataset_id))        
-
+        if self.yetl_properties.metadata_dataset_id:
+            self._add_df_metadata(DATASET_ID, str(self.dataset_id))
 
         sys_columns = [c for c in self.dataframe.columns if c.startswith("_")]
         data_columns = [c for c in self.dataframe.columns if not c.startswith("_")]
-        data_columns = self.dataframe.select(*data_columns)
+        data_columns = data_columns + sys_columns
+        self.dataframe = self.dataframe.select(*data_columns)
+
 
         # get the partitions values for efficient IO patterns
         self._partition_values = self._get_partitions_values()

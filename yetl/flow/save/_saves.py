@@ -32,10 +32,10 @@ class ErrorIfExistsSave(Save):
     def write(self):
         super().write()
         (
-            self.dataset.dataframe.write.format(self.dataset.format)
+            self.dataset.dataframe.write.format(self.dataset.format.value)
             .options(**self.dataset.write.options)
             .mode(SaveModeOptions.ERROR_IF_EXISTS.value)
-            .partitionBy(*self.dataset.partitions)
+            .partitionBy(*self.dataset.partitioned_by)
             .save(self.dataset.path)
         )
 
@@ -44,10 +44,10 @@ class AppendSave(Save):
     def write(self):
         super().write()
         (
-            self.dataset.dataframe.write.format(self.dataset.format)
+            self.dataset.dataframe.write.format(self.dataset.format.value)
             .options(**self.dataset.write.options)
             .mode(SaveModeOptions.APPEND.value)
-            .partitionBy(*self.dataset.partitions)
+            .partitionBy(*self.dataset.partitioned_by)
             .save(self.dataset.path)
         )
 
@@ -58,10 +58,10 @@ class OverwriteSchemaSave(Save):
         options = self.dataset.write.options
         options[SaveModeOptions.OVERWRITE_SCHEMA.value] = True
         (
-            self.dataset.dataframe.write.format(self.dataset.format)
+            self.dataset.dataframe.write.format(self.dataset.format.value)
             .options(**options)
             .mode(SaveModeOptions.OVERWRITE.value)
-            .partitionBy(*self.dataset.partitions)
+            .partitionBy(*self.dataset.partitioned_by)
             .save(self.dataset.path)
         )
 
@@ -70,10 +70,10 @@ class OverwriteSave(Save):
     def write(self):
         super().write()
         (
-            self.dataset.dataframe.write.format(self.dataset.format)
+            self.dataset.dataframe.write.format(self.dataset.format.value)
             .options(**self.dataset.write.options)
             .mode(SaveModeOptions.OVERWRITE.value)
-            .partitionBy(*self.dataset.partitions)
+            .partitionBy(*self.dataset.partitioned_by)
             .save(self.dataset.path)
         )
 
@@ -82,10 +82,10 @@ class IgnoreSave(Save):
     def write(self):
         super().write()
         (
-            self.dataset.dataframe.write.format(self.dataset.format)
+            self.dataset.dataframe.write.format(self.dataset.format.value)
             .options(**self.dataset.write.options)
             .mode(SaveModeOptions.IGNORE.value)
-            .partitionBy(*self.dataset.partitions)
+            .partitionBy(*self.dataset.partitioned_by)
             .save(self.dataset.path)
         )
 

@@ -56,7 +56,7 @@ class Dataflow(IDataflow):
 
         dst.dataframe = dataframe
         if save:
-            dst.save = save(dst)
+            dst.write.set_save(save(dataset=dst))
 
         if dst.auto_write:
             dst.execute()
