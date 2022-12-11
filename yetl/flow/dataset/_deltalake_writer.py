@@ -19,6 +19,7 @@ from ..parser.parser import (
     render_jinja,
     sql_partitioned_by,
     prefix_root_var,
+    create_table_dll
 )
 from ._properties import DeltaWriterProperties
 from ..save._save_mode_type import SaveModeOptions
@@ -127,6 +128,7 @@ class DeltaWriter(Destination, SQLTable):
     _initial_load: bool = PrivateAttr(default=False)
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
     _create_spark_schema = PrivateAttr(default=False)
+    _partition_values = PrivateAttr(default=dict)
 
     def render(self):
         if self.datalake is None:
@@ -352,7 +354,131 @@ class DeltaWriter(Destination, SQLTable):
         pass
 
     def execute(self):
-        pass
+        self.context.log.info(f"Writing data to {self.database_table} at {self.path}")
+
+        if self.dataframe:
+
+            start_datetime = datetime.now()
+            self._execute_prepare_write()
+
+            # create the sql table ddl in the schema repo and create the table in th metastore
+            # do this after prepare_write since that will add lineage columns
+            if self._create_spark_schema:
+                self.create_schema()
+
+            self.context.log.debug("Save options:")
+            self.context.log.debug(json.dumps(self.options, indent=4, default=str))
+
+            # write the dataframe to the lake path
+            self.write.get_save().write()
+
+            # if there is no schema configured or to create one automatically then handle table creation
+            # and changes before the data is written as above
+            # or we create the table after the data is written based on the data written
+            if not self.dll and not self._create_spark_schema:
+                self.context.log.info(
+                    f"auto_io = automatically creating or altering delta table {self.database_table}"
+                )
+                self.create_or_alter_table()
+
+            write_audit = dl.get_audit(self.context, f"{self.database_table}")
+            self.auditor.dataset_task(
+                self.id, AuditTask.DELTA_TABLE_WRITE, write_audit, start_datetime
+            )
+
+            if self.yetl_properties.delta_optimize_z_order_by:
+                self.context.log.info(
+                    f"Auto optimizing {self.database_table} where {self._partition_values} zorder by {self.zorder_by}"
+                )
+                start_datetime = datetime.now()
+                dl.optimize(
+                    self.context,
+                    self.database,
+                    self.table,
+                    self.partition_values,
+                    self.zorder_by,
+                )
+                write_audit = dl.get_audit(
+                    self.context, f"{self.database}.{self.table}"
+                )
+                self.auditor.dataset_task(
+                    self.id, AuditTask.DELTA_TABLE_OPTIMIZE, write_audit, start_datetime
+                )
+
+        else:
+            msg = f"DeltaWriter dataframe isn't set and cannot be written for {self.database_table} at {self.path}"
+            self.context.log.error(msg)
+            raise Exception(msg)
+
+    def create_schema(self):
+        self.ddl = create_table_dll(self.dataframe.schema, self.partitioned_by)
+        self.create_or_alter_table()
+        self.schema_repo.save_schema(
+            self.ddl, self.database, self.table, self.ddl
+        )
+
+    def _add_df_metadata(self, column: str, value: str):
+
+        if column in self.dataframe.columns:
+            # We have to drop the column first if it exists since it may have been added
+            # to incoming dataframe specific to source dataset
+            self.dataframe = self.dataframe.drop(column)
+        self.dataframe = self.dataframe.withColumn(column, fn.lit(value))
+
+    def _get_partitions_values(self):
+
+        partition_values = {}
+        if self.partitioned_by and not self.initial_load:
+            partition_values_df = self.dataframe.select(*self.partitioned_by).distinct()
+
+            for p in self.partitioned_by:
+                group_by: list = list(self.partitioned_by)
+                #doesn't make sense!
+                group_by.remove(p)
+                if group_by:
+                    partition_values_df = partition_values_df.groupBy(*group_by).agg(
+                        fn.collect_set(p).alias(p)
+                    )
+                else:
+                    partition_values_df = partition_values_df.withColumn(
+                        p, fn.collect_set(p)
+                    )
+
+            partition_values_df = partition_values_df.collect()
+            partition_values = partition_values_df[0].asDict()
+
+        return partition_values
+
+    def _execute_prepare_write(self):
+        self.context.log.debug(
+            f"Reordering sys_columns to end for {self.database_table} from {self.path} {CONTEXT_ID}={str(self.context_id)}"
+        )
+
+        # remove a re-add the _context_id since there will be dupplicate columns
+        # when dataframe is built from multiple sources and they are specific 
+        # to the source not this dataset.
+        if self._metadata_context_id_enabled:
+            self._add_df_metadata(CONTEXT_ID, str(self.context_id))
+
+        if self._metadata_dataflow_id_enabled:
+            self._add_df_metadata(DATAFLOW_ID, str(self.dataflow_id))
+
+        if self._metadata_dataset_id_enabled:
+            self._add_df_metadata(DATASET_ID, str(self.dataset_id))        
+
+
+        sys_columns = [c for c in self.dataframe.columns if c.startswith("_")]
+        data_columns = [c for c in self.dataframe.columns if not c.startswith("_")]
+        data_columns = self.dataframe.select(*data_columns)
+
+        # get the partitions values for efficient IO patterns
+        self._partition_values = self._get_partitions_values()
+        # if there are any then log them out
+        if self._partition_values:
+            msg_partition_values = json.dumps(self._partition_values, indent=4)
+            self.context.log.info(
+                f"""IO operations for {self._partition_values} will be paritioned by: \n{msg_partition_values}"""
+            )
 
     @property
     def has_partitions(self) -> bool:
