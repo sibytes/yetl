@@ -2,6 +2,7 @@ datalake: "/mnt/datalake/yetl_data"
 
 engine:
   databricks:
+    default_catalog: main
     logging_level: ERROR
     config:
       spark.master: local
