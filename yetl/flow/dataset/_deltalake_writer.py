@@ -418,10 +418,12 @@ class DeltaWriter(Destination, SQLTable):
             raise Exception(msg)
 
     def create_schema(self):
+        # auto creating schema's expects the ddl attribute to be a schema uri
+        path = self.ddl
         self.ddl = create_table_dll(self.dataframe.schema, self.partitioned_by)
         self.create_or_alter_table()
         self.context.deltalake_schema_repository.save_schema(
-            self.ddl, self.database, self.table, self.ddl
+            self.ddl, self.database, self.table, path
         )
 
     def _add_df_metadata(self, column: str, value: str):
