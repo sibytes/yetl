@@ -114,6 +114,7 @@ class DeltaWriter(Destination, SQLTable):
     dataframe: DataFrame = Field(default=None)
     dataset_id: uuid.UUID = Field(default=uuid.uuid4())
     ddl: str = Field(default=None)
+    schema_uri: str = Field(default=None)
     yetl_properties: DeltaWriterProperties = Field(
         default=DeltaWriterProperties(), alias="properties"
     )
@@ -148,14 +149,17 @@ class DeltaWriter(Destination, SQLTable):
         self._replacements[JinjaVariables.PATH] = self.path
 
     def _init_task_read_schema(self):
-        # if table ddl not defined in the config
-        # or it is but it's not a SQL statement it self.
+        # If the schema_uri has been provided in the config then that will
+        # override the ddl setting. The ddl setting can also hold the uri path or the SQL ddl directly
         # We just look to see if it's multi-line at the moment
         # and let spark handle the parsing of whether it's SQL or
         # not. The assumption is that the paths will be single line
         # and SQL will be multiline.
-        if (not self.ddl) or (not "\n" in self.ddl):
+        if (not self.ddl) or (not "\n" in self.ddl) or (self.schema_uri):
             try:
+                # if not provided in the config explicitly then all it from the schema_uri
+                if not self.schema_uri:
+                    self.schema_uri = self.ddl
                 self.ddl = self.context.deltalake_schema_repository.load_schema(
                     database=self.database, table=self.table, sub_location=self.ddl
                 )
@@ -419,11 +423,10 @@ class DeltaWriter(Destination, SQLTable):
 
     def create_schema(self):
         # auto creating schema's expects the ddl attribute to be a schema uri
-        path = self.ddl
         self.ddl = create_table_dll(self.dataframe.schema, self.partitioned_by)
         self.create_or_alter_table()
         self.context.deltalake_schema_repository.save_schema(
-            self.ddl, self.database, self.table, path
+            self.ddl, self.database, self.table, self.schema_uri
         )
 
     def _add_df_metadata(self, column: str, value: str):
