@@ -166,6 +166,7 @@ class DeltaWriter(Destination, SQLTable):
                 # in the spirit of best practice.
                 if self.yetl_properties.schema_create_if_not_exists:
                     self._create_spark_schema = True
+                    self.ddl = None
 
                 elif not self._infer_schema:
                     raise e
@@ -365,7 +366,9 @@ class DeltaWriter(Destination, SQLTable):
                 self.create_schema()
 
             self.context.log.debug("Save options:")
-            self.context.log.debug(json.dumps(self.write.options, indent=4, default=str))
+            self.context.log.debug(
+                json.dumps(self.write.options, indent=4, default=str)
+            )
 
             # write the dataframe to the lake path
             self.write.get_save().write()
@@ -381,7 +384,10 @@ class DeltaWriter(Destination, SQLTable):
 
             write_audit = dl.get_audit(self.context, f"{self.database_table}")
             self.auditor.dataset_task(
-                self.dataset_id, AuditTask.DELTA_TABLE_WRITE, write_audit, start_datetime
+                self.dataset_id,
+                AuditTask.DELTA_TABLE_WRITE,
+                write_audit,
+                start_datetime,
             )
 
             if self.yetl_properties.delta_optimize_z_order_by:
@@ -400,7 +406,10 @@ class DeltaWriter(Destination, SQLTable):
                     self.context, f"{self.database}.{self.table}"
                 )
                 self.auditor.dataset_task(
-                    self.dataset_id, AuditTask.DELTA_TABLE_OPTIMIZE, write_audit, start_datetime
+                    self.dataset_id,
+                    AuditTask.DELTA_TABLE_OPTIMIZE,
+                    write_audit,
+                    start_datetime,
                 )
 
         else:
@@ -411,7 +420,9 @@ class DeltaWriter(Destination, SQLTable):
     def create_schema(self):
         self.ddl = create_table_dll(self.dataframe.schema, self.partitioned_by)
         self.create_or_alter_table()
-        self.schema_repo.save_schema(self.ddl, self.database, self.table, self.ddl)
+        self.context.deltalake_schema_repository.save_schema(
+            self.ddl, self.database, self.table, self.ddl
+        )
 
     def _add_df_metadata(self, column: str, value: str):
 
@@ -466,7 +477,6 @@ class DeltaWriter(Destination, SQLTable):
         data_columns = [c for c in self.dataframe.columns if not c.startswith("_")]
         data_columns = data_columns + sys_columns
         self.dataframe = self.dataframe.select(*data_columns)
-
 
         # get the partitions values for efficient IO patterns
         self._partition_values = self._get_partitions_values()

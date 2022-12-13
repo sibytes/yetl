@@ -25,7 +25,7 @@ class DatabricksContext(SparkContext):
         )
 
     databricks_version: dict = Field(default=None)
-    default_catalog:str = Field(default=None)
+    default_catalog: str = Field(default=None)
 
     def _get_databricks_version(self, spark: SparkSession):
 
