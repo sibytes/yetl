@@ -33,15 +33,37 @@ class SQLReader(Source, SQLTable):
         self.initialise()
 
     def initialise(self):
+        self.auditor = self.context.auditor
         self.timeslice = self.context.timeslice
+        self.datalake_protocol = self.context.datalake_protocol
+        self.datalake = self.context.datalake
+        self.render()
+        self.context_id = self.context.context_id
+        self._init_task_read_schema()
+
+    def render(self):
+        if self.datalake is None:
+            raise Exception("datalake root path cannot be None")
+
+        if self.datalake_protocol is None:
+            raise Exception("datalake protocol cannot be None")
+
         self._replacements = {
             JinjaVariables.DATABASE_NAME: self.database,
             JinjaVariables.TABLE_NAME: self.table,
+            JinjaVariables.ROOT: f"{self.datalake_protocol.value}{self.datalake}",
         }
-        self.datalake_protocol = self.context.datalake_protocol
-        self.datalake = self.context.datalake
-        self.auditor = self.context.auditor
-        self.context_id = self.context.context_id
+
+    def _init_task_read_schema(self):
+
+
+        if (not self.sql) or (not "\n" in self.sql) or (self.sql_uri):
+            if not self.sql_uri:
+                    self.sql_uri = self.sql
+            self.sql = self.context.pipeline_repository.load_pipeline_sql(self.database, self.table, self.sql_uri)
+
+
+   
 
     context: SparkContext = Field(...)
     timeslice: Timeslice = Field(default=TimesliceUtcNow())
@@ -49,7 +71,7 @@ class SQLReader(Source, SQLTable):
     datalake_protocol: FileSystemType = Field(default=None)
     datalake: str = Field(default=None)
     auditor: Audit = Field(default=None)
-
+    sql_uri: str = Field(default=None)
     catalog: str = Field(None)
     dataframe: DataFrame = Field(default=None)
     dataset_id: uuid.UUID = Field(default=uuid.uuid4())
@@ -58,8 +80,6 @@ class SQLReader(Source, SQLTable):
         default=LineageProperties(), alias="properties"
     )
     timeslice_format: str = Field(default="%Y%m%d")
-    sql_schema_database: str = Field(default=None)
-    sql_schema_name: str = Field(default=None)
     format: FormatOptions = Field(default=FormatOptions.DELTA)
     read: Read = Field(default=Read())
     _initial_load: bool = PrivateAttr(default=False)

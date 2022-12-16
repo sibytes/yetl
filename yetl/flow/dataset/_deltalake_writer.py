@@ -94,7 +94,6 @@ class DeltaWriter(Destination, SQLTable):
         self.datalake = self.context.datalake
         self.datalake_protocol = self.context.datalake_protocol
         self.render()
-        self.datalake = self.context.datalake
         self.context_id = self.context.context_id
         self.auditor.dataset(self.get_metadata())
         self._init_task_read_schema()

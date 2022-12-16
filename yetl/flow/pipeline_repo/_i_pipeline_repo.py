@@ -9,6 +9,6 @@ class IPipelineRepo(BaseModel, ABC):
         pass
 
     @abstractmethod
-    def load_pipeline_sql(self, name: str):
+    def load_pipeline_sql(self, database:str, table: str, path:str):
         """Loads a pipeline sql component"""
         pass

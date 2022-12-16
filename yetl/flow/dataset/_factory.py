@@ -1,6 +1,7 @@
 from enum import Enum
 from ._base import Dataset
 from ._reader import Reader
+from ._sql_reader import SQLReader
 from ._deltalake_writer import DeltaWriter
 from ..context import IContext
 from ..dataflow import IDataflow
@@ -63,6 +64,6 @@ class _DatasetFactory:
 factory = _DatasetFactory()
 factory.register_dataset_type(IOType.READER, Reader)
 factory.register_dataset_type(IOType.DELTAWRITER, DeltaWriter)
-# factory.register_dataset_type(IOType.SQLREADER, SQLReader)
+factory.register_dataset_type(IOType.SQLREADER, SQLReader)
 # factory.register_dataset_type(IOType.STREAMREADER, StreamReader)
 # factory.register_dataset_type(IOType.STREAMWRITER, StreamWriter)

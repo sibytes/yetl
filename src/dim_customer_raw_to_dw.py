@@ -12,12 +12,13 @@ from typing import Type
 import json
 
 @yetl_flow(project="demo")
-def customer_preferences_landing_to_raw(
+def dim_customer_raw_to_dw(
     context: IContext,
     dataflow: IDataflow,
     timeslice: Timeslice = TimesliceUtcNow(),
     save: Type[Save] = None,
 ) -> dict:
+
     """Load the demo customer data as is into a raw delta hive registered table."""
 
     df = dataflow.source_df(f"{context.project}_landing.customer_preferences")
@@ -28,7 +29,7 @@ def customer_preferences_landing_to_raw(
     )
     df.show()
 
-    dataflow.destination_df(f"{context.project}_raw.customer_preferences", df, save=save)
+    # dataflow.destination_df(f"{context.project}_raw.customer_preferences", df, save=save)
 
 # incremental load
 # timeslice = Timeslice(year=2021, month=1, day=1)
@@ -46,7 +47,7 @@ def customer_preferences_landing_to_raw(
 
 # reload all
 timeslice = Timeslice(year="*", month="*", day="*")
-results = customer_preferences_landing_to_raw(timeslice=timeslice, save=OverwriteSave)
+results = dim_customer_raw_to_dw(timeslice=timeslice, save=OverwriteSave)
 results = json.dumps(results, indent=4, default=str)
 print(results)
 
