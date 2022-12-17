@@ -67,6 +67,20 @@ class SchemaProperties(BaseModel):
         json_dumps = _yetl_properties_dumps
 
 
+class SqlReaderProperties(LineageProperties):
+    """Yetl table properies that drives SqlReader features of a data flow"""
+
+    # whether or not to add the context_id
+    create_as_view: bool = Field(
+        default=False, alias=YetlTableProperties.CREATE_AS_VIEW.value
+    )
+
+    class Config:
+        # use a custom decoder to convert the field names
+        # back into yetl configuration names
+        json_dumps = _yetl_properties_dumps
+
+
 class ReaderProperties(SchemaProperties, LineageProperties):
     """Yetl table properies that drives various features of a data flow for Reader source"""
 

@@ -1,7 +1,7 @@
 from ._base import Source, SQLTable
 from ._decoder import parse_properties_key, parse_properties_values
 from pyspark.sql import DataFrame
-from ._properties import LineageProperties
+from ._properties import SqlReaderProperties
 from pydantic import Field, PrivateAttr, BaseModel
 from pyspark.sql import DataFrame
 import uuid
@@ -67,6 +67,15 @@ class SQLReader(Source, SQLTable):
                 self.database, self.table, self.sql_uri
             )
 
+        if self.yetl_properties.create_as_view:
+            name = (
+                f"{self.catalog}.{self.sql_database_table}"
+                if self.catalog
+                else self.sql_database_table
+            )
+            ddl = f"create or replace view {name}\n"
+            sql = f"{sql}{ddl}"
+
     context: SparkContext = Field(...)
     timeslice: Timeslice = Field(default=TimesliceUtcNow())
     context_id: uuid.UUID = Field(default=None)
@@ -78,8 +87,8 @@ class SQLReader(Source, SQLTable):
     dataframe: DataFrame = Field(default=None)
     dataset_id: uuid.UUID = Field(default=uuid.uuid4())
     sql: str = Field(...)
-    yetl_properties: LineageProperties = Field(
-        default=LineageProperties(), alias="properties"
+    yetl_properties: SqlReaderProperties = Field(
+        default=SqlReaderProperties(), alias="properties"
     )
     timeslice_format: str = Field(default="%Y%m%d")
     format: FormatOptions = Field(default=FormatOptions.DELTA)

@@ -55,6 +55,10 @@ class YetlTableProperties(Enum):
     METADATA_CONTEXT_ID = "yetl.metadata.contextId"
     METADATA_DATAFLOW_ID = "yetl.metadata.dataflowId"
     METADATA_DATASET_ID = "yetl.metadata.datasetId"
+    # whether or not to use the SQL in SqlReader to
+    # create a view and select from that rather then
+    # just the SQL
+    CREATE_AS_VIEW = "yetl.sql.createAsView"
 
 
 class TimesliceOptions(Enum):
