@@ -3,7 +3,7 @@ from ._i_file_system import IFileSystem
 from typing import Union, Callable, Any
 import yaml
 import json
-from pydantic import PrivateAttr, Field
+from pydantic import PrivateAttr
 from ._file_system_options import FileFormat
 
 

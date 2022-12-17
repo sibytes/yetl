@@ -1,6 +1,6 @@
 import yaml
 import os
-import logging
+# import logging
 import json
 import jinja2
 from pydantic import BaseSettings, Field, BaseModel, PrivateAttr
@@ -32,9 +32,9 @@ class Environment(BaseModel):
         return path
 
     def load(self, project: str):
-        _logger = logging.getLogger(project)
+        # _logger = logging.getLogger(project)
         path = self.environment_filepath()
-        _logger.info(f"Loading Dataflow configuration from file {path}")
+        # _logger.info(f"Loading Dataflow configuration from file {path}")
         with open(path, "r", encoding="utf-8") as f:
             config = f.read()
 
@@ -42,6 +42,6 @@ class Environment(BaseModel):
 
         config = template_partition.render(cwd=os.getcwd(), project=project)
         config = yaml.safe_load(config)
-        _logger.debug(json.dumps(config, indent=4, sort_keys=True, default=str))
+        # _logger.debug(json.dumps(config, indent=4, sort_keys=True, default=str))
 
         return config

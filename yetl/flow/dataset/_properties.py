@@ -5,8 +5,6 @@
 
 from pydantic import BaseModel, Field
 from ..parser._constants import YetlTableProperties, CORRUPT_RECORD
-
-# from ..flow.parser.parser import JinjaVariables
 from ..parser._constants import TimesliceOptions
 from ._decoder import parse_properties
 import json

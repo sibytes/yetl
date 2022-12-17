@@ -24,7 +24,7 @@ def dim_customer_raw_to_dw(
 
     df = dataflow.source_df(f"{context.project}_dw.src_dim_customer")
 
-    context.log.info("Loading customer preferences")
+    # context.log.info("Loading customer preferences")
     df = df.withColumn(
         "_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer")
     )

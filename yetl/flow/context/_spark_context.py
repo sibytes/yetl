@@ -3,10 +3,12 @@ import json
 from delta import configure_spark_with_delta_pip
 from ._i_context import IContext
 from typing import Any
-from pydantic import Field, PrivateAttr
+from pydantic import Field
 from ..schema_repo import schema_repo_factory, ISchemaRepo
 from ..file_system import file_system_factory, IFileSystem, FileSystemType
+import logging
 
+_logger = logging.getLogger(__name__)
 
 class SparkContext(IContext):
 
@@ -45,7 +47,7 @@ class SparkContext(IContext):
         )
 
         self.spark_version = self._get_spark_version(self.spark)
-        self.log.info(f"Spark version detected as : {self.spark_version}")
+        # self.log.info(f"Spark version detected as : {self.spark_version}")
 
         # abstraction of the spark schema repo
         self.spark_schema_repository: ISchemaRepo = (
@@ -63,11 +65,11 @@ class SparkContext(IContext):
         return version
 
     def _get_spark_context(self, project: str, config: dict):
-        self.log.info("Setting spark context")
+        _logger.debug("Setting spark context")
         spark_config = config.get("config", {})
 
         msg = json.dumps(spark_config, indent=4, default=str)
-        self.log.debug(msg)
+        _logger.debug(msg)
 
         builder = SparkSession.builder
 
@@ -82,7 +84,7 @@ class SparkContext(IContext):
     def _get_spark_logger(self, spark: SparkSession, project: str, config: dict):
 
         log_level = config.get("logging_level", "ERROR")
-        self.log.info(f"Setting application context spark logger at level {log_level}")
+        _logger.debug(f"Setting application context spark logger at level {log_level}")
         sc = spark.sparkContext
         sc.setLogLevel(log_level)
         log4j_logger = sc._jvm.org.apache.log4j

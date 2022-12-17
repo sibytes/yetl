@@ -9,6 +9,7 @@ import json
 
 def _build_context(pipeline_name: str, project: str, function_name: str, kwargs: dict):
 
+
     # load the environment settings and configuration provider
     environment = Environment()
 
@@ -43,7 +44,7 @@ def _build_context(pipeline_name: str, project: str, function_name: str, kwargs:
     )
 
     # run the pipeline
-    context.log.info(f"Executing Dataflow {context.project} with timeslice={timeslice}")
+    # context.log.info(f"Executing Dataflow {context.project} with timeslice={timeslice}")
 
     return context
 
@@ -60,9 +61,9 @@ def _build_dataflow(context: IContext):
             md = dataset_factory.get_dataset_type(
                 context, database, table, dataflow.dataflow_id, table_config
             )
-            context.log.debug(
-                f"Deserialized {database}.{table} configuration into {type(md)}"
-            )
+            # context.log.debug(
+            #     f"Deserialized {database}.{table} configuration into {type(md)}"
+            # )
             dataflow.append(md)
 
             dataflow.audit_lineage()

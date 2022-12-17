@@ -2,7 +2,7 @@ from enum import Enum
 
 from ._pipeline_file_repo import PipelineFileRepo
 from ._i_pipeline_repo import IPipelineRepo
-import logging
+# import logging
 
 
 class PipelineRepoType(Enum):
@@ -11,13 +11,13 @@ class PipelineRepoType(Enum):
 
 class _PipelineRepoFactory:
     def __init__(self) -> None:
-        self._logger = logging.getLogger(__name__)
+        # self._logger = logging.getLogger(__name__)
         self._pipeline_repo = {}
 
     def register_pipeline_repo_type(
         self, pr_type: PipelineRepoType, pipeline_repo_type: type
     ):
-        self._logger.debug(f"Register pipeline type {pipeline_repo_type} as {type}")
+        # self._logger.debug(f"Register pipeline type {pipeline_repo_type} as {type}")
         self._pipeline_repo[pr_type] = pipeline_repo_type
 
     def get_pipeline_repo_type(self, config: dict) -> IPipelineRepo:

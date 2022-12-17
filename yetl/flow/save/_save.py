@@ -12,6 +12,7 @@ class Save(BaseModel, ABC):
 
     @abstractmethod
     def write(self):
-        self.dataset.context.log.info(
-            f"Writer saving using the {self.__class__.__name__} "
-        )
+        pass
+        # self.dataset.context.log.info(
+        #     f"Writer saving using the {self.__class__.__name__} "
+        # )

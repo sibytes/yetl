@@ -71,11 +71,11 @@ class MetadataFile(IMetadataRepo):
         metadata_dataset = self._merge_existing(
             metadata_dataset, dataset.context_id, dir_path, dataset_file_path
         )
-        self.context.log.debug(json.dumps(metadata_dataset, indent=4, default=str))
+        # self.context.log.debug(json.dumps(metadata_dataset, indent=4, default=str))
         self.context.fs.write_file(dataset_file_path, metadata_dataset, FileFormat.JSON)
 
         metadata_index = self._merge_existing(
             metadata_index, dataset.context_id, dir_path, index_file_path
         )
-        self.context.log.debug(json.dumps(metadata_index, indent=4, default=str))
+        # self.context.log.debug(json.dumps(metadata_index, indent=4, default=str))
         self.context.fs.write_file(index_file_path, metadata_index, FileFormat.JSON)

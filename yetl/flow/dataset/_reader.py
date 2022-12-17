@@ -27,7 +27,9 @@ from .. import _delta_lake as dl
 from datetime import datetime
 from ..parser._constants import *
 from ._validation import PermissiveSchemaOnRead, BadRecordsPathSchemaOnRead, Thresholds
+import logging
 
+_logger = logging.getLogger(__name__)
 
 class ReaderConfigurationException(Exception):
     def __init__(self, message):
@@ -229,9 +231,9 @@ class Reader(Source, SQLTable):
 
         table_exists = self.exceptions.table_exists()
         if table_exists:
-            # self.context.log.info(
-            #     f"Exception table already exists {self.database}.{self.table} at {self.exceptions_path} {CONTEXT_ID}={str(self.context_id)}"
-            # )
+            _logger.debug(
+                f"Exception table already exists {self.database}.{self.table} at {self.exceptions_path} {CONTEXT_ID}={str(self.context_id)}"
+            )
             self._initial_load = False
         else:
             start_datetime = datetime.now()
@@ -261,11 +263,11 @@ class Reader(Source, SQLTable):
             ]:
                 if self.has_exceptions:
                     msg = f"{MODE}={self.read.get_mode()}, exceptions can only be handled on a mode={ReadModeOptions.PERMISSIVE.value} or {ReadModeOptions.BADRECORDSPATH.value}, {EXCEPTIONS} configuration will be disabled."
-                    self.context.log.warning(msg)
+                    _logger.warning(msg)
                     self.exceptions = None
                 else:
                     msg = f"{MODE}={self.read.get_mode()} requires Exceptions details configured."
-                    self.context.log.error(msg)
+                    _logger.error(msg)
                     raise ReaderConfigurationException(msg)
 
             if (
@@ -276,7 +278,7 @@ class Reader(Source, SQLTable):
                 msg = f"""{MODE}={ReadModeOptions.PERMISSIVE} exceptions requires _corrupt_record column in the schema, 
                 if not schema exists yet use the properties to add one {YetlTableProperties.SCHEMA_CORRUPT_RECORD.name},
                 {YetlTableProperties.SCHEMA_CORRUPT_RECORD_NAME.name}."""
-                self.context.log.error(msg)
+                _logger.error(msg)
                 raise ReaderConfigurationException(msg)
 
     def _get_validation_exceptions_handler(self):
@@ -286,7 +288,7 @@ class Reader(Source, SQLTable):
                 exceptions_count = exceptions.count()
                 if exceptions and exceptions_count > 0:
                     options = {MERGE_SCHEMA: True}
-                    self.context.log.warning(
+                    _logger.warning(
                         f"Writing {exceptions_count} exception(s) from {self.database_table} to {self.exceptions.database_table} delta table {CONTEXT_ID}={str(self.context_id)}"
                     )
                     exceptions.write.format(FormatOptions.DELTA.value).options(
@@ -302,8 +304,7 @@ class Reader(Source, SQLTable):
         validator = None
 
         if self.read.get_mode() == ReadModeOptions.BADRECORDSPATH:
-            # TODO check the config how to set up
-            self.context.log.info(
+            _logger.debug(
                 f"Validating dataframe read using badRecordsPath at {self.read.bad_records_path} {CONTEXT_ID}={str(self.context_id)}"
             )
             validator = BadRecordsPathSchemaOnRead(
@@ -322,7 +323,7 @@ class Reader(Source, SQLTable):
             self.read.get_mode() == ReadModeOptions.PERMISSIVE
             and self.has_corrupt_column
         ):
-            self.context.log.info(
+            _logger.debug(
                 f"Validating dataframe read using PERMISSIVE corrupt column at {CORRUPT_RECORD} {CONTEXT_ID}={str(self.context_id)}"
             )
             validator = PermissiveSchemaOnRead(
@@ -416,7 +417,7 @@ class Reader(Source, SQLTable):
 
     def _execute_create_spark_schema(self, df: DataFrame):
         if self._create_spark_schema:
-            self.context.log.info(
+            _logger.debug(
                 f"Saving inferred schema for {self.database}.{self.table} into schema repository. {CONTEXT_ID}={str(self.context_id)}"
             )
             self.spark_schema = df.schema
@@ -429,7 +430,7 @@ class Reader(Source, SQLTable):
             self.schema_repo.save_schema(self.spark_schema, self.database, self.table)
 
     def execute(self):
-        self.context.log.info(
+        _logger.debug(
             f"Reading data for {self.database_table} from {self.path} with options {self.read.options} {CONTEXT_ID}={str(self.context_id)}"
         )
 
@@ -449,7 +450,7 @@ class Reader(Source, SQLTable):
         df = self._execute_add_timeslice(df)
         df = self._execute_add_source_metadata(df)
 
-        self.context.log.debug(
+        _logger.debug(
             f"Reordering sys_columns to end for {self.database_table} from {self.path}. {CONTEXT_ID}={str(self.context_id)}"
         )
         self.dataframe = df
@@ -458,10 +459,8 @@ class Reader(Source, SQLTable):
             self.dataset_id, AuditTask.LAZY_READ, detail, start_datetime
         )
 
-        # TODO
         # only run the validator if exception handling has ben configured.
         if self.has_exceptions:
-            # self.validation_result = self.validate()
             self.verify()
 
         return self.dataframe

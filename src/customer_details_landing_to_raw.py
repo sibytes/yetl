@@ -23,7 +23,7 @@ def customer_details_landing_to_raw(
 
     df = dataflow.source_df(f"{context.project}_landing.customer_details")
 
-    context.log.info("Loading customer details.")
+    # context.log.info("Loading customer details.")
     df = df.withColumn(
         "_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer")
     )

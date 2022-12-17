@@ -23,7 +23,7 @@ def customer_preferences_landing_to_raw(
 
     df = dataflow.source_df(f"{context.project}_landing.customer_preferences")
 
-    context.log.info("Loading customer preferences")
+    # context.log.info("Loading customer preferences")
     df = df.withColumn(
         "_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer")
     )

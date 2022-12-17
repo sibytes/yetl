@@ -4,7 +4,10 @@ from ._spark_context import SparkContext
 from typing import Any
 from pydantic import Field
 from ..file_system import file_system_factory, IFileSystem, FileSystemType
+import logging
 
+
+_logger = logging.getLogger(__name__)
 
 class DatabricksContext(SparkContext):
     def __init__(self, **data: Any) -> None:
@@ -20,7 +23,7 @@ class DatabricksContext(SparkContext):
 
         self.databricks_version = self._get_databricks_version(self.spark)
 
-        self.log.info(
+        _logger.debug(
             f"Databricks Runtime version detected as : {self.databricks_version}"
         )
 

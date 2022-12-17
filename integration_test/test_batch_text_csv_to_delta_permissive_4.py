@@ -32,7 +32,7 @@ def batch_text_csv_to_delta_permissive_1(
     df_cust = dataflow.source_df("landing.customer")
     df_prefs = dataflow.source_df("landing.customer_preferences")
 
-    context.log.info("Joining customers with customer_preferences")
+    # context.log.info("Joining customers with customer_preferences")
     df = df_cust.join(df_prefs, "id", "inner")
     df = df.withColumn(
         "_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer")

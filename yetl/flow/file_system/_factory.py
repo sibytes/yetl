@@ -4,16 +4,16 @@ from ._i_file_system import IFileSystem
 from ._file_system_options import FileSystemType
 import logging
 
+_logger = logging.getLogger()
 
 class _FileSystemFactory:
     def __init__(self) -> None:
-        self._logger = logging.getLogger(__name__)
         self._file_system = {}
 
     def register_file_system_type(
         self, fs_type: FileSystemType, file_system_type: type
     ):
-        self._logger.debug(f"Register file system type {file_system_type} as {type}")
+        _logger.debug(f"Register file system type {file_system_type} as {type}")
         self._file_system[fs_type] = file_system_type
 
     def _get_fs_type(self, name: str):
@@ -28,7 +28,7 @@ class _FileSystemFactory:
 
         if isinstance(fileSystemType, FileSystemType):
             # return based on the type asked for.
-            # TODO: log.debug(f"Setting FileSystemType using type {fileSystemType}")
+            _logger.debug(f"Setting FileSystemType using type {fileSystemType}")
             file_system: IFileSystem = self._file_system.get(fileSystemType)
             # different file systems have different arguments
             return file_system(protocol=fileSystemType)
