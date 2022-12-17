@@ -11,6 +11,7 @@ from pyspark.sql.functions import *
 from typing import Type
 import json
 
+
 @yetl_flow(project="demo")
 def dim_customer_raw_to_dw(
     context: IContext,
@@ -31,6 +32,7 @@ def dim_customer_raw_to_dw(
 
     # dataflow.destination_df(f"{context.project}_raw.customer_preferences", df, save=save)
 
+
 # incremental load
 # timeslice = Timeslice(year=2021, month=1, day=1)
 # timeslice = Timeslice(year=2021, month=1, day=2)
@@ -50,4 +52,3 @@ timeslice = Timeslice(year="*", month="*", day="*")
 results = dim_customer_raw_to_dw(timeslice=timeslice, save=OverwriteSave)
 results = json.dumps(results, indent=4, default=str)
 print(results)
-

@@ -4,7 +4,7 @@
 dataflow:
 
   demo_dw:
-    dim_customer_sql:
+    src_dim_customer:
       type: SqlReader
       sql: "{{root}}"
     timeslice_format: "%Y%m%d"

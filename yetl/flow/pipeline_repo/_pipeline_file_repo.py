@@ -27,7 +27,7 @@ class PipelineFileRepo(IPipelineRepo):
 
         return pipeline
 
-    def load_pipeline_sql(self, database: str, table:str, path:str):
+    def load_pipeline_sql(self, database: str, table: str, path: str):
         """Loads a pipeline SQL file."""
         path = render_jinja(path, {JinjaVariables.ROOT: self.sql_root})
         path = os.path.join(self.sql_root, database, f"{table}.{FileFormat.SQL.value}")
