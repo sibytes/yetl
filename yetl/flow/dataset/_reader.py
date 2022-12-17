@@ -493,6 +493,12 @@ class Reader(Source, SQLTable):
                 in self.spark_schema.fieldNames()
             )
 
+    def get_metadata(self):
+        metadata = super().get_metadata()
+        metadata[self.dataset_id]["path"] = self.path
+
+        return metadata
+        
     class Config:
         # use a custom decoder to convert the field names
         # back into yetl configuration names

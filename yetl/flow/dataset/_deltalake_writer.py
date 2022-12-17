@@ -531,6 +531,12 @@ class DeltaWriter(Destination, SQLTable):
             self.write.set_merge_schema(value)
         self._initial_load = value
 
+    def get_metadata(self):
+        metadata = super().get_metadata()
+        metadata[str(self.dataset_id)]["path"] = self.path
+
+        return metadata
+
     class Config:
         # use a custom decoder to convert the field names
         # back into yetl configuration names

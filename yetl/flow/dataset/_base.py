@@ -35,8 +35,7 @@ class Dataset(BaseModel, ABC):
                 "type": self.__class__.__name__,
                 "dataflow_id": str(self.dataflow_id),
                 "database": self.database,
-                "table": self.table,
-                "path": self.path,
+                "table": self.table
             }
         }
 

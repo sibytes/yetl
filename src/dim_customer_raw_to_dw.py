@@ -22,7 +22,7 @@ def dim_customer_raw_to_dw(
 
     """Load the demo customer data as is into a raw delta hive registered table."""
 
-    df = dataflow.source_df(f"{context.project}_landing.customer_preferences")
+    df = dataflow.source_df(f"{context.project}_dw.src_dim_customer")
 
     context.log.info("Loading customer preferences")
     df = df.withColumn(
@@ -30,7 +30,7 @@ def dim_customer_raw_to_dw(
     )
     df.show()
 
-    # dataflow.destination_df(f"{context.project}_raw.customer_preferences", df, save=save)
+    dataflow.destination_df(f"{context.project}_dw.dim_customer", df, save=save)
 
 
 # incremental load

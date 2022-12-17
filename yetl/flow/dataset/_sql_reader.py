@@ -43,6 +43,7 @@ class SQLReader(Source, SQLTable):
         self.datalake = self.context.datalake
         self.render()
         self.context_id = self.context.context_id
+        self.auditor.dataset(self.get_metadata())
         self._init_task_read_schema()
 
     def render(self):
@@ -86,6 +87,7 @@ class SQLReader(Source, SQLTable):
     catalog: str = Field(None)
     dataframe: DataFrame = Field(default=None)
     dataset_id: uuid.UUID = Field(default=uuid.uuid4())
+    dataflow_id: uuid.UUID = Field(default=None)
     sql: str = Field(...)
     yetl_properties: SqlReaderProperties = Field(
         default=SqlReaderProperties(), alias="properties"
@@ -106,29 +108,36 @@ class SQLReader(Source, SQLTable):
 
         start_datetime = datetime.now()
 
-        df: DataFrame = self.context.spark.sql(self.sql)
-        df = self._add_source_metadata(df)
-
-        self.dataframe = df
+        self.dataframe = self.context.spark.sql(self.sql)
+        self.dataframe = self._add_source_metadata(self.dataframe)
 
         detail = {"table": self.database_table, "sql": self.sql}
-        self.auditor.dataset_task(self.id, AuditTask.LAZY_READ, detail, start_datetime)
+        self.auditor.dataset_task(self.dataset_id, AuditTask.LAZY_READ, detail, start_datetime)
 
-        self.validation_result = self.validate()
         return self.dataframe
 
-    def _add_source_metadata(self, df: DataFrame):
+    def _add_df_metadata(self, column: str, value: str, df:DataFrame):
 
+        if column in df.columns:
+            # We have to drop the column first if it exists since it may have been added
+            # to incoming dataframe specific to source dataset
+            df = df.drop(column)
+        df = df.withColumn(column, fn.lit(value))
+        return df
+
+    def _add_source_metadata(self, df:DataFrame):
+        
         if self.yetl_properties.metadata_context_id:
-            df: DataFrame = df.withColumn(CONTEXT_ID, fn.lit(self.context_id))
+            df = self._add_df_metadata(CONTEXT_ID, str(self.context_id), df)
 
         if self.yetl_properties.metadata_dataflow_id:
-            df: DataFrame = df.withColumn(DATAFLOW_ID, fn.lit(self.dataflow_id))
+            df = self._add_df_metadata(DATAFLOW_ID, str(self.dataflow_id), df)
 
         if self.yetl_properties.metadata_dataset_id:
-            df: DataFrame = df.withColumn(DATASET_ID, fn.lit(self.dataset_id))
+            df = self._add_df_metadata(DATASET_ID, str(self.dataset_id), df)
 
         return df
+
 
     class Config:
         # use a custom decoder to convert the field names
