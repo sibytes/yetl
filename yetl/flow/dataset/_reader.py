@@ -436,7 +436,7 @@ class Reader(Source, SQLTable):
                     StringType(),
                     nullable=True,
                 )
-            self.schema_repo.save_schema(self.spark_schema, self.database, self.table)
+            self.context.spark_schema_repository.save_schema(self.spark_schema, self.database, self.table)
 
     def execute(self):
         self._logger.debug(
