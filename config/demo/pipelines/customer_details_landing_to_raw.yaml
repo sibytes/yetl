@@ -3,14 +3,11 @@ dataflow:
   demo_landing:
     customer_details:
       type: Reader     
-
       properties:
         yetl.schema.createIfNotExists: true
         yetl.schema.corruptRecord: false
         yetl.metadata.timeslice: timeslice_file_date_format
         yetl.metadata.filepathFilename: true
-
-
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: csv
@@ -23,22 +20,22 @@ dataflow:
           header: true
           # badRecordsPath: "badrecords/{{ database_name }}/{{ table_name }}_exceptions"
 
-      exceptions:
-          path: "delta_lake/{{ database_name }}/{{ table_name }}_exceptions"
-          database: "{{ database_name }}"
-          table: "{{ table_name }}_exceptions"
+      # exceptions:
+      #     path: "delta_lake/{{ database_name }}/{{ table_name }}_exceptions"
+      #     database: "{{ database_name }}"
+      #     table: "{{ table_name }}_exceptions"
 
-      thresholds:
-        warning:
-          min_rows: 1
-          max_rows: 1000
-          exception_count: 0
-          exception_percent: 0
-        error:
-          min_rows: 0
-          max_rows: 100000000
-          exception_count: 50
-          exception_percent: 80
+      # thresholds:
+      #   warning:
+      #     min_rows: 1
+      #     max_rows: 1000
+      #     exception_count: 0
+      #     exception_percent: 0
+      #   error:
+      #     min_rows: 0
+      #     max_rows: 100000000
+      #     exception_count: 50
+      #     exception_percent: 80
 
   demo_raw:
 
@@ -67,9 +64,9 @@ dataflow:
         delta.randomPrefixLength: 2
 
       # table constraints can be declared inline or via a SQL include file on the ddl
-      check_constraints:
-        amount_lower_bound: "amount > -1000"
-        amount_upper_bound: "amount < 10000"
+      # check_constraints:
+      #   amount_lower_bound: "amount > -1000"
+      #   amount_upper_bound: "amount < 10000"
 
       format: delta
       path: delta_lake/{{ database_name }}/{{ table_name }}

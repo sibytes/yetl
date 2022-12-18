@@ -86,6 +86,9 @@ class Read(BaseModel):
     def infer_schema(self, value: bool):
         self.options["inferSchema"] = value
 
+    def set_infer_schema(self, infer_schema:bool):
+        self.options["inferSchema"] = infer_schema
+
     def get_mode(self):
         mode = None
         if isinstance(
@@ -225,28 +228,29 @@ class Reader(Source, SQLTable):
                 # we're effectively the user is forcing this to they've configured it
                 # to create the schema automatically.
                 self._create_spark_schema = True
-                self.read.infer_schema = True
+                self.read.set_infer_schema(True)
                 self.read.set_mode(ReadModeOptions.PERMISSIVE)
-                self.initial_load = True
+                self._initial_load = True
                 self.exceptions = None
             elif not self._infer_schema:
                 raise e
 
     def _init_task_create_exception_table(self):
 
-        table_exists = self.exceptions.table_exists()
-        if table_exists:
-            self._logger.debug(
-                f"Exception table already exists {self.exceptions.database_table} at {self.exceptions.path} {CONTEXT_ID}={str(self.context_id)}"
-            )
-            self._initial_load = False
-        else:
-            start_datetime = datetime.now()
-            sql = self.exceptions.create_table()
-            self.auditor.dataset_task(
-                self.dataset_id, AuditTask.SQL, sql, start_datetime
-            )
-            self._initial_load = True
+        if self.has_exceptions:
+            table_exists = self.exceptions.table_exists()
+            if table_exists:
+                self._logger.debug(
+                    f"Exception table already exists {self.exceptions.database_table} at {self.exceptions.path} {CONTEXT_ID}={str(self.context_id)}"
+                )
+                self._initial_load = False
+            else:
+                start_datetime = datetime.now()
+                sql = self.exceptions.create_table()
+                self.auditor.dataset_task(
+                    self.dataset_id, AuditTask.SQL, sql, start_datetime
+                )
+                self._initial_load = True
 
     def _init_validate(self):
         """Validate the conguration ensuring that compatible options are configured.
