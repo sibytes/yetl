@@ -86,7 +86,7 @@ cp $SPARK_HOME/conf/spark-defaults.conf.template  $SPARK_HOME/conf/spark-default
 ```
 Add the following to `spark-defaults.conf`:
 ```
-spark.jars.packages               io.delta:delta-core_2.12:2.0.0
+spark.jars.packages               io.delta:delta-core_2.12:2.1.1
 spark.sql.extensions              io.delta.sql.DeltaSparkSessionExtension
 spark.sql.catalog.spark_catalog   org.apache.spark.sql.delta.catalog.DeltaCatalog
 spark.sql.catalogImplementation   hive
