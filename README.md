@@ -26,7 +26,7 @@ from pyspark.sql.functions import *
 from typing import Type
 
 @yetl_flow(project="demo")
-def batch_text_csv_to_delta_permissive_1(
+def landing_to_raw(
     context: IContext,
     dataflow: IDataflow,
     timeslice: Timeslice = TimesliceUtcNow(),
@@ -43,7 +43,6 @@ def batch_text_csv_to_delta_permissive_1(
     df_cust = dataflow.source_df(f"{context.project}_landing.customer")
     df_prefs = dataflow.source_df(f"{context.project}_landing.customer_preferences")
 
-    # context.log.info("Joining customers with customer_preferences")
     df = df_cust.join(df_prefs, "id", "inner")
     df = df.withColumn(
         "_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer")
@@ -55,17 +54,17 @@ def batch_text_csv_to_delta_permissive_1(
 ## Run an incremental load:
 
 ```python
-timeslice = Timeslice(2022, 7, 12)
-results = batch_text_csv_to_delta_permissive_1(
-    timeslice = Timeslice(2022, 7, 12)
+timeslice = Timeslice(year=2022, month=7, day=12)
+results = landing_to_raw(
+    timeslice = Timeslice(year=2022, month=7, day=12)
 )
 ```
 
 ## Run a full load for Year 2022:
 
 ```python
-results = batch_text_csv_to_delta_permissive_1(
-    timeslice = Timeslice(2022, '*', '*'),
+results = landing_to_raw(
+    timeslice = Timeslice(year=2022, month='*', day='*'),
     save = OverwriteSave
 )
 ```
