@@ -6,12 +6,11 @@ from typing import Any
 from ._i_dataflow import IDataflow
 import logging
 
-_logger = logging.getLogger(__name__)
-
 
 class Dataflow(IDataflow):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
+        self._logger = logging.getLogger(self.__class__.__name__)
 
     def audit_lineage(self):
         lineage = {"lineage": {str(self.dataflow_id): {}}}
@@ -26,13 +25,13 @@ class Dataflow(IDataflow):
     def append(self, dataset: Dataset):
 
         if dataset.is_source:
-            _logger.debug(
+            self._logger.debug(
                 f"Appending source {dataset.database_table} as {type(dataset)} to dataflow"
             )
             self.sources[dataset.database_table] = dataset
 
         elif dataset.is_destination:
-            _logger.debug(
+            self._logger.debug(
                 f"Appending destination {dataset.database_table} as {type(dataset)} to dataflow"
             )
             self.destinations[dataset.database_table] = dataset

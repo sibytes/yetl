@@ -2,7 +2,7 @@ from ..dataset import Dataset
 from abc import ABC, abstractmethod
 from pyspark.sql import DataFrame
 import uuid
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PrivateAttr
 from typing import Any
 from ..audit import Audit
 from ..context import IContext
@@ -19,6 +19,8 @@ class IDataflow(BaseModel, ABC):
     dataflow_id: uuid.UUID = Field(default=uuid.uuid4())
     sources: dict = Field(default={})
     destinations: dict = Field(default={})
+    _logger:Any = PrivateAttr(default=None)
+
 
     @abstractmethod
     def append(self, dataset: Dataset) -> None:

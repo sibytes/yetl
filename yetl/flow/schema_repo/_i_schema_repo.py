@@ -1,12 +1,14 @@
 from pyspark.sql.types import StructType
 from typing import Union, Any
 from abc import ABC, abstractmethod
-from pydantic import BaseModel
+from pydantic import BaseModel, PrivateAttr
 
 
 class ISchemaRepo(BaseModel, ABC):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
+
+    _logger:Any = PrivateAttr(default=None)
 
     @abstractmethod
     def save_schema(

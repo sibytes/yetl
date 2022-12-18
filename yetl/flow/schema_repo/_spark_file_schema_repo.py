@@ -6,22 +6,21 @@ from ..file_system import FileFormat, IFileSystem, file_system_factory, FileSyst
 import os
 from ._exceptions import SchemaNotFound
 from pydantic import Field
-# import logging
+import logging
 from typing import Any
 
 _SCHEMA_ROOT = "./config/schema/spark"
 _EXT = "yaml"
 
-
 class SparkFileSchemaRepo(ISchemaRepo):
 
     root: str = Field(default=_SCHEMA_ROOT, alias="spark_schema_root")
-    # TODO:log: logging.Logger = None
     # TODO: mkae private after FS is pydantic
     fs: IFileSystem = None
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
+        self._logger = logging.getLogger(self.__class__.__name__)
         # abstraction of the filesystem for driver file commands e.g. rm, ls, mv, cp
         self.fs: IFileSystem = file_system_factory.get_file_system_type(
             FileSystemType.FILE
@@ -58,16 +57,16 @@ class SparkFileSchemaRepo(ISchemaRepo):
         path = self._mkpath(database, table, sub_location)
         path = os.path.abspath(path)
 
-        # self.log.info(
-        #     f"Loading schema for dataset {database_name}.{table_name} from {path} using {type(self.fs)}"
-        # )
+        self._logger.debug(
+            f"Loading schema for dataset {database}.{table} from {path} using {type(self.fs)}"
+        )
         try:
             schema = self.fs.read_file(path, FileFormat.YAML)
         except Exception as e:
             raise SchemaNotFound(path) from e
 
-        # msg = json.dumps(schema, indent=4, default=str)
-        # self.context.log.debug(msg)
+        msg = json.dumps(schema, indent=4, default=str)
+        self._logger.debug(msg)
 
         try:
             spark_schema = StructType.fromJson(schema)

@@ -19,8 +19,6 @@ from datetime import datetime
 from pyspark.sql import functions as fn
 import logging
 
-_logger = logging.getLogger(__name__)
-
 def _yetl_properties_dumps(obj: dict, *, default):
     """Decodes the data back into a dictionary with yetl configuration properties names"""
     obj = {
@@ -36,6 +34,7 @@ class Read(BaseModel):
 class SQLReader(Source, SQLTable):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
+        self._logger = logging.getLogger(self.__class__.__name__)
         self.initialise()
 
     def initialise(self):
@@ -104,7 +103,7 @@ class SQLReader(Source, SQLTable):
         pass
 
     def execute(self):
-        _logger.debug(
+        self._logger.debug(
             f"Reading data for {self.database_table} with query {self.sql} {CONTEXT_ID}={str(self.context_id)}"
         )
 

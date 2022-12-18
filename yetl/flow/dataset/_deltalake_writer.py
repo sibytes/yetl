@@ -29,12 +29,10 @@ from ..schema_repo import SchemaNotFound
 import logging
 
 
-_logger = logging.getLogger(__name__)
-
-
 class Write(BaseModel):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
+        self._logger = logging.getLogger(self.__class__.__name__)
         self._merge_schema = self.options.get("merge_schema", False)
         self._init_mode(self.mode)
 
@@ -47,6 +45,7 @@ class Write(BaseModel):
     _save: Save = PrivateAttr(default=None)
     _merge_schema: bool = PrivateAttr(default=False)
     _mode_options: dict = PrivateAttr(default=None)
+    _logger:Any = PrivateAttr(default=None)
 
     def get_merge_schema(self) -> bool:
         return self._merge_schema
@@ -89,6 +88,7 @@ class Write(BaseModel):
 class DeltaWriter(Destination, SQLTable):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
+        self._logger = logging.getLogger(self.__class__.__name__)
         self.initialise()
 
     def initialise(self):
@@ -189,16 +189,16 @@ class DeltaWriter(Destination, SQLTable):
             try:
                 partitions: List[str] = sql_partitioned_by(self.ddl)
                 msg = f"Parsed partitioning columns from sql ddl for {self.database_table} as {partitions}"
-                _logger.debug(msg)
+                self._logger.debug(msg)
             except Exception as e:
                 msg = f"An error has occured parsing sql ddl partitioned clause for {self.database_table} for the ddl: {self.ddl}"
-                _logger.exception(msg)
+                self._logger.exception(msg)
                 raise Exception(msg) from e
 
         if partitions:
             self.partitioned_by = partitions
             msg = f"Parsed partitioning columns from dataflow yaml config for {self.database}.{self.table} as {partitions}"
-            _logger.debug(msg)
+            self._logger.debug(msg)
 
     def _get_table_properties_sql(self, existing_properties: dict = None):
 
@@ -221,7 +221,7 @@ class DeltaWriter(Destination, SQLTable):
             _existing_properties = existing_properties.get(self.database_table)
             _existing_properties = _existing_properties.get(PROPERTIES)
         tbl_properties_ddl = self._get_table_properties_sql(_existing_properties)
-        _logger.debug(
+        self._logger.debug(
             f"DeltaWriter table properties ddl = {tbl_properties_ddl}"
         )
         if tbl_properties_ddl:
@@ -285,7 +285,7 @@ class DeltaWriter(Destination, SQLTable):
             existing_constraints = existing_constraints.get("constraints")
 
         column_constraints_ddl = self._get_check_constraints_sql(existing_constraints)
-        _logger.debug(
+        self._logger.debug(
             f"Writer table check constraints ddl = {column_constraints_ddl}"
         )
         if self.ddl or not self.initial_load:
@@ -314,7 +314,7 @@ class DeltaWriter(Destination, SQLTable):
 
         table_exists = dl.table_exists(self.context, self.database, self.table)
         if table_exists:
-            _logger.debug(
+            self._logger.debug(
                 f"Table already exists {self.database_table} at {self.path}"
             )
             self._set_initial_load(False)
@@ -360,7 +360,7 @@ class DeltaWriter(Destination, SQLTable):
         pass
 
     def execute(self):
-        # self.context.log.info(f"Writing data to {self.database_table} at {self.path}")
+        self._logger.debug(f"Writing data to {self.database_table} at {self.path}")
 
         if self.dataframe:
 
@@ -372,8 +372,8 @@ class DeltaWriter(Destination, SQLTable):
             if self._create_spark_schema:
                 self.create_schema()
 
-            _logger.debug("Save options:")
-            _logger.debug(
+            self._logger.debug("Save options:")
+            self._logger.debug(
                 json.dumps(self.write.options, indent=4, default=str)
             )
 
@@ -384,7 +384,7 @@ class DeltaWriter(Destination, SQLTable):
             # and changes before the data is written as above
             # or we create the table after the data is written based on the data written
             if not self.ddl and not self._create_spark_schema:
-                _logger.debug(
+                self._logger.debug(
                     f"auto_io = automatically creating or altering delta table {self.database_table}"
                 )
                 self.create_or_alter_table()
@@ -398,7 +398,7 @@ class DeltaWriter(Destination, SQLTable):
             )
 
             if self.yetl_properties.delta_optimize_z_order_by:
-                _logger.debug(
+                self._logger.debug(
                     f"Auto optimizing {self.database_table} where {self._partition_values} zorder by {self.zorder_by}"
                 )
                 start_datetime = datetime.now()
@@ -421,7 +421,7 @@ class DeltaWriter(Destination, SQLTable):
 
         else:
             msg = f"DeltaWriter dataframe isn't set and cannot be written for {self.database_table} at {self.path}"
-            _logger.exception(msg)
+            self._logger.exception(msg)
             raise Exception(msg)
 
     def create_schema(self):
@@ -465,7 +465,7 @@ class DeltaWriter(Destination, SQLTable):
         return partition_values
 
     def _execute_prepare_write(self):
-        _logger.debug(
+        self._logger.debug(
             f"Reordering sys_columns to end for {self.database_table} from {self.path} {CONTEXT_ID}={str(self.context_id)}"
         )
 
@@ -491,7 +491,7 @@ class DeltaWriter(Destination, SQLTable):
         # if there are any then log them out
         if self._partition_values:
             msg_partition_values = json.dumps(self._partition_values, indent=4)
-            _logger.debug(
+            self._logger.debug(
                 f"IO operations for {self._partition_values} will be paritioned by: \n{msg_partition_values}"
             )
 

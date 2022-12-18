@@ -29,7 +29,7 @@ from ..parser._constants import *
 from ._validation import PermissiveSchemaOnRead, BadRecordsPathSchemaOnRead, Thresholds
 import logging
 
-_logger = logging.getLogger(__name__)
+
 
 class ReaderConfigurationException(Exception):
     def __init__(self, message):
@@ -55,10 +55,12 @@ class ReadModeOptions(Enum):
 class Read(BaseModel):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
+        self._logger = logging.getLogger(self.__class__.__name__)
 
     _DEFAULT_OPTIONS = {"mode": ReadModeOptions.PERMISSIVE.value, "inferSchema": False}
     auto: bool = Field(default=True)
     options: Dict[str, Any] = Field(default=_DEFAULT_OPTIONS)
+    _logger:Any = PrivateAttr(default=None)
 
     def render(self, replacements: Dict[JinjaVariables, str]):
 
@@ -112,9 +114,11 @@ class Read(BaseModel):
 class Exceptions(SQLTable):
     path: str = Field(...)
     context: Union[SparkContext, DatabricksContext] = Field(...)
+    _logger:Any = PrivateAttr(default=None)
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
+        self._logger = logging.getLogger(self.__class__.__name__)
 
     def render(self, replacements: Dict[JinjaVariables, str]):
 
@@ -143,6 +147,7 @@ class Reader(Source, SQLTable):
     def __init__(self, **data: Any) -> None:
         self._cascade_context(data)
         super().__init__(**data)
+        self._logger = logging.getLogger(self.__class__.__name__)
         self.initialise()
 
     def initialise(self):
@@ -231,8 +236,8 @@ class Reader(Source, SQLTable):
 
         table_exists = self.exceptions.table_exists()
         if table_exists:
-            _logger.debug(
-                f"Exception table already exists {self.database}.{self.table} at {self.exceptions_path} {CONTEXT_ID}={str(self.context_id)}"
+            self._logger.debug(
+                f"Exception table already exists {self.exceptions.database_table} at {self.exceptions.path} {CONTEXT_ID}={str(self.context_id)}"
             )
             self._initial_load = False
         else:
@@ -263,11 +268,11 @@ class Reader(Source, SQLTable):
             ]:
                 if self.has_exceptions:
                     msg = f"{MODE}={self.read.get_mode()}, exceptions can only be handled on a mode={ReadModeOptions.PERMISSIVE.value} or {ReadModeOptions.BADRECORDSPATH.value}, {EXCEPTIONS} configuration will be disabled."
-                    _logger.warning(msg)
+                    self._logger.warning(msg)
                     self.exceptions = None
                 else:
                     msg = f"{MODE}={self.read.get_mode()} requires Exceptions details configured."
-                    _logger.error(msg)
+                    self._logger.error(msg)
                     raise ReaderConfigurationException(msg)
 
             if (
@@ -278,7 +283,7 @@ class Reader(Source, SQLTable):
                 msg = f"""{MODE}={ReadModeOptions.PERMISSIVE} exceptions requires _corrupt_record column in the schema, 
                 if not schema exists yet use the properties to add one {YetlTableProperties.SCHEMA_CORRUPT_RECORD.name},
                 {YetlTableProperties.SCHEMA_CORRUPT_RECORD_NAME.name}."""
-                _logger.error(msg)
+                self._logger.error(msg)
                 raise ReaderConfigurationException(msg)
 
     def _get_validation_exceptions_handler(self):
@@ -288,7 +293,7 @@ class Reader(Source, SQLTable):
                 exceptions_count = exceptions.count()
                 if exceptions and exceptions_count > 0:
                     options = {MERGE_SCHEMA: True}
-                    _logger.warning(
+                    self._logger.warning(
                         f"Writing {exceptions_count} exception(s) from {self.database_table} to {self.exceptions.database_table} delta table {CONTEXT_ID}={str(self.context_id)}"
                     )
                     exceptions.write.format(FormatOptions.DELTA.value).options(
@@ -304,7 +309,7 @@ class Reader(Source, SQLTable):
         validator = None
 
         if self.read.get_mode() == ReadModeOptions.BADRECORDSPATH:
-            _logger.debug(
+            self._logger.debug(
                 f"Validating dataframe read using badRecordsPath at {self.read.bad_records_path} {CONTEXT_ID}={str(self.context_id)}"
             )
             validator = BadRecordsPathSchemaOnRead(
@@ -323,7 +328,7 @@ class Reader(Source, SQLTable):
             self.read.get_mode() == ReadModeOptions.PERMISSIVE
             and self.has_corrupt_column
         ):
-            _logger.debug(
+            self._logger.debug(
                 f"Validating dataframe read using PERMISSIVE corrupt column at {CORRUPT_RECORD} {CONTEXT_ID}={str(self.context_id)}"
             )
             validator = PermissiveSchemaOnRead(
@@ -417,7 +422,7 @@ class Reader(Source, SQLTable):
 
     def _execute_create_spark_schema(self, df: DataFrame):
         if self._create_spark_schema:
-            _logger.debug(
+            self._logger.debug(
                 f"Saving inferred schema for {self.database}.{self.table} into schema repository. {CONTEXT_ID}={str(self.context_id)}"
             )
             self.spark_schema = df.schema
@@ -430,7 +435,7 @@ class Reader(Source, SQLTable):
             self.schema_repo.save_schema(self.spark_schema, self.database, self.table)
 
     def execute(self):
-        _logger.debug(
+        self._logger.debug(
             f"Reading data for {self.database_table} from {self.path} with options {self.read.options} {CONTEXT_ID}={str(self.context_id)}"
         )
 
@@ -450,7 +455,7 @@ class Reader(Source, SQLTable):
         df = self._execute_add_timeslice(df)
         df = self._execute_add_source_metadata(df)
 
-        _logger.debug(
+        self._logger.debug(
             f"Reordering sys_columns to end for {self.database_table} from {self.path}. {CONTEXT_ID}={str(self.context_id)}"
         )
         self.dataframe = df
@@ -494,7 +499,7 @@ class Reader(Source, SQLTable):
 
     def get_metadata(self):
         metadata = super().get_metadata()
-        metadata[self.dataset_id]["path"] = self.path
+        metadata[str(self.dataset_id)]["path"] = self.path
 
         return metadata
         

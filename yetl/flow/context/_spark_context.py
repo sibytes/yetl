@@ -8,8 +8,6 @@ from ..schema_repo import schema_repo_factory, ISchemaRepo
 from ..file_system import file_system_factory, IFileSystem, FileSystemType
 import logging
 
-_logger = logging.getLogger(__name__)
-
 class SparkContext(IContext):
 
     spark_version: str = Field(default=None)
@@ -26,7 +24,7 @@ class SparkContext(IContext):
     def __init__(self, **data: Any) -> None:
 
         super().__init__(**data)
-
+        self._logger = logging.getLogger(self.__class__.__name__)
         # abstraction of the filesystem for driver file commands e.g. rm, ls, mv, cp
         # this is the datalake file system which is where the data is held
         # this is so we can perform commands directly on the datalake store.
@@ -47,7 +45,7 @@ class SparkContext(IContext):
         )
 
         self.spark_version = self._get_spark_version(self.spark)
-        # self.log.info(f"Spark version detected as : {self.spark_version}")
+        self._logger.debug(f"Spark version detected as : {self.spark_version}")
 
         # abstraction of the spark schema repo
         self.spark_schema_repository: ISchemaRepo = (
@@ -65,11 +63,11 @@ class SparkContext(IContext):
         return version
 
     def _get_spark_context(self, project: str, config: dict):
-        _logger.debug("Setting spark context")
+        self._logger.debug("Setting spark context")
         spark_config = config.get("config", {})
 
         msg = json.dumps(spark_config, indent=4, default=str)
-        _logger.debug(msg)
+        self._logger.debug(msg)
 
         builder = SparkSession.builder
 
@@ -84,7 +82,7 @@ class SparkContext(IContext):
     def _get_spark_logger(self, spark: SparkSession, project: str, config: dict):
 
         log_level = config.get("logging_level", "ERROR")
-        _logger.debug(f"Setting application context spark logger at level {log_level}")
+        self._logger.debug(f"Setting application context spark logger at level {log_level}")
         sc = spark.sparkContext
         sc.setLogLevel(log_level)
         log4j_logger = sc._jvm.org.apache.log4j

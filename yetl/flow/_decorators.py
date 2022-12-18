@@ -44,7 +44,7 @@ def yetl_flow(project: str, pipeline_name: str = None):
                 )
             except Exception as e:
                 msg = f"Dataflow application {context.project} failed due to {e}."
-                context.log.error(msg)
+                _logger.error(msg)
                 auditor.error(e)
 
             # get the delta lake audit information and add it to the return

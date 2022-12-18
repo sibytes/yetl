@@ -8,7 +8,7 @@ from ..parser.parser import reduce_whitespace
 from ..warnings import Warning
 from pydantic import BaseModel, Field, PrivateAttr
 from typing import Union, Any, Dict
-
+import logging
 
 class AuditLevel(Enum):
     DATAFLOW = "dataflow"
@@ -37,6 +37,7 @@ class Audit(BaseModel):
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
+        self._logger = logging.getLogger(self.__class__.__name__)
 
         self.audit_log = {
             AuditLevel.DATAFLOW.value: {AuditLevel.DATASETS.value: {}},
@@ -46,12 +47,15 @@ class Audit(BaseModel):
 
     audit_log: Dict[str, dict] = Field(default=None)
     _task_counter: dict = PrivateAttr(default={})
+    _logger:Any = PrivateAttr(default=None)
 
     def error(self, exception: Exception):
+        self._logger.exception(exception)
         data = {"exception": exception.__class__.__name__, "message": str(exception)}
         self._append(data, AuditLevel.ERROR)
 
     def warning(self, warning: Warning):
+        self._logger.warning(str(warning))
         data = {"warning": warning.__class__.__name__, "message": str(warning)}
         self._append(data, AuditLevel.WARNING)
 
@@ -76,6 +80,7 @@ class Audit(BaseModel):
             "end_datetime": end_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             "seconds_duration": duration,
         }
+        self._logger.info(detail)
 
         data = {self._next_task_id(dataset_id): audit_step}
         if self.audit_log[AuditLevel.DATAFLOW.value][AuditLevel.DATASETS.value][
@@ -90,9 +95,11 @@ class Audit(BaseModel):
             ] |= {"tasks": data}
 
     def dataset(self, data: dict):
+        self._logger.info(yaml.safe_dump(data))
         self.audit_log[AuditLevel.DATAFLOW.value][AuditLevel.DATASETS.value] |= data
 
     def dataflow(self, data: dict):
+        self._logger.info(yaml.safe_dump(data))
         self._append(data, AuditLevel.DATAFLOW)
 
     def save(self, data: dict):

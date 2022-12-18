@@ -2,17 +2,15 @@
 from pyspark.sql import SparkSession
 from ._spark_context import SparkContext
 from typing import Any
-from pydantic import Field
+from pydantic import Field, PrivateAttr
 from ..file_system import file_system_factory, IFileSystem, FileSystemType
 import logging
 
 
-_logger = logging.getLogger(__name__)
-
 class DatabricksContext(SparkContext):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
-
+        self._logger = logging.getLogger(self.__class__.__name__)
         # abstraction of the filesystem for driver file commands e.g. rm, ls, mv, cp
         # this is the datalake file system which is where the data is held
         # this is so we can perform commands directly on the datalake store.
@@ -23,7 +21,7 @@ class DatabricksContext(SparkContext):
 
         self.databricks_version = self._get_databricks_version(self.spark)
 
-        _logger.debug(
+        self._logger.debug(
             f"Databricks Runtime version detected as : {self.databricks_version}"
         )
 

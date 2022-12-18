@@ -1,9 +1,13 @@
 from pydantic import BaseModel
 from abc import ABC, abstractmethod, abstractproperty
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PrivateAttr
+from typing import Any
 
 
 class Dataset(BaseModel, ABC):
+
+    _logger:Any = PrivateAttr(default=None)
+
     @abstractmethod
     def initialise(self):
         pass

@@ -4,13 +4,11 @@ from pyspark.sql import SparkSession
 from pyspark.sql.utils import AnalysisException
 from typing import Callable, Any
 from ..parser._constants import *
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PrivateAttr
 from ..context import IContext
 from abc import ABC, abstractmethod
 import logging
 import json
-
-_logger = logging.getLogger(__name__)
 
 class ThresholdLimit(BaseModel):
     min_rows: int = Field(default=0)
@@ -43,6 +41,7 @@ class IValidator(BaseModel, ABC):
     warning_thresholds: ThresholdLimit = Field(default=None)
     error_thresholds: ThresholdLimit = Field(default=None)
     level: ThresholdLevels = Field(default=ThresholdLevels.INFO)
+    _logger:Any = PrivateAttr(default=None)
 
     @abstractmethod
     def validate(self) -> dict:
@@ -91,15 +90,15 @@ class IValidator(BaseModel, ABC):
             msg = f"{msg}{messages}"
 
             if level == ThresholdLevels.ERROR:
-                _logger.error(msg)
+                self._logger.error(msg)
                 self.level = ThresholdLevels.ERROR
 
             if level == ThresholdLevels.WARNING:
-                _logger.warning(msg)
+                self._logger.warning(msg)
                 self.level = ThresholdLevels.WARNING
 
             if level == ThresholdLevels.INFO:
-                _logger.debug(msg)
+                self._logger.debug(msg)
                 self.level = ThresholdLevels.INFO
 
     def get_result(self):
@@ -121,11 +120,11 @@ class IValidator(BaseModel, ABC):
         }
         validation_json = json.dumps(validation, indent=4, default=str)
         if self.level == ThresholdLevels.INFO:
-            _logger.info(validation_json)
+            self._logger.info(validation_json)
         elif ThresholdLevels.WARNING:
-            _logger.warning(validation_json)
+            self._logger.warning(validation_json)
         elif ThresholdLevels.ERROR:
-            _logger.error(validation_json)
+            self._logger.error(validation_json)
 
         return self.level, validation
 
@@ -136,6 +135,7 @@ class IValidator(BaseModel, ABC):
 class PermissiveSchemaOnRead(IValidator):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
+        self._logger = logging.getLogger(self.__class__.__name__)
 
     context: IContext = Field(...)
     corrupt_record: str = Field(default=CORRUPT_RECORD)
@@ -183,11 +183,11 @@ class BadRecordsPathSchemaOnRead(IValidator):
         self.exceptions_count = self.total_count - self.valid_count
         options = {INFER_SCHEMA: True, RECURSIVE_FILE_LOOKUP: True}
         try:
-            _logger.debug(
+            self._logger.debug(
                 f"{self.exceptions_count} schema on read exceptions found for dataset {self.table}"
             )
             if self.exceptions_count > 0:
-                _logger.debug(
+                self._logger.debug(
                     f"Try loading {self.exceptions_count} exceptions for dataset {self.table} from {self.path}"
                 )
                 exceptions: DataFrame = (
@@ -199,7 +199,7 @@ class BadRecordsPathSchemaOnRead(IValidator):
                     .withColumn(TABLE, fn.lit(self.table))
                 )
                 self.exceptions_count = self.validation_handler(exceptions)
-                _logger.debug(
+                self._logger.debug(
                     f"Deleting exceptions for dataset {self.table} from {self.path}"
                 )
                 self.context.fs.rm(self.path, True)
@@ -207,7 +207,7 @@ class BadRecordsPathSchemaOnRead(IValidator):
         except AnalysisException as e:
             if self.exceptions_count > 0:
                 msg = f"There are {self.exceptions_count} exceptions but dataset for table {self.table} failed to load from path {self.table}"
-                _logger.error(msg)
+                self._logger.error(msg)
                 raise Exception(msg) from e
             exceptions = None
             self.exceptions_count = 0

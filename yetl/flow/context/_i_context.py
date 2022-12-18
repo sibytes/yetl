@@ -3,7 +3,7 @@ import uuid
 from ..pipeline_repo import pipeline_repo_factory, IPipelineRepo
 from .._timeslice import Timeslice, TimesliceUtcNow
 from ..audit import Audit
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PrivateAttr
 from typing import Any
 from .._environment import Environment
 from ._context_options import ContextType
@@ -24,6 +24,7 @@ class IContext(BaseModel):
     datalake_fs: IFileSystem = None
     environment: Environment = Field(...)
     context_type: ContextType = Field(...)
+    _logger:Any = PrivateAttr(default=None)
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)

@@ -10,28 +10,28 @@ from ._saves import (
 # import logging
 from ..dataset import Destination
 from ._save_mode_type import SaveModeOptions
-
+import logging
 
 class _SaveFactory:
     def __init__(self) -> None:
-        # self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger(self.__class__.__name__)
         self._save = {}
 
     def register_save_type(self, save_mode_type: SaveModeOptions, save_type: type):
-        # self._logger.debug(f"Register dataset type {save_type} as {type}")
+        self._logger.debug(f"Register dataset type {save_type} as {type}")
         self._save[save_mode_type] = save_type
 
     def get_save_type(self, dataset: Destination, options: dict = None) -> Save:
 
         type: SaveModeOptions = dataset.write.mode
 
-        # self._logger.info(f"Get {type.name} from factory save")
+        self._logger.debug(f"Get {type.name} from factory save")
         save_class = self._save.get(type)
 
         if not save_class:
-            # self._logger.error(
-            #     f"SaveModeOptions {type.name} not registered in the save factory"
-            # )
+            self._logger.error(
+                f"SaveModeOptions {type.name} not registered in the save factory"
+            )
             raise ValueError(type)
 
         # TODO: any constructor args that needed

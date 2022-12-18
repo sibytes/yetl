@@ -14,8 +14,6 @@ import logging
 from ..audit import Audit
 
 
-_logger = logging.getLogger(__name__)
-
 class IOType(Enum):
     READER = "Reader"
     DELTAWRITER = "DeltaWriter"
@@ -26,10 +24,11 @@ class IOType(Enum):
 
 class _DatasetFactory:
     def __init__(self) -> None:
+        self._logger = logging.getLogger(self.__class__.__name__)
         self._dataset = {}
 
     def register_dataset_type(self, io_type: IOType, dataset_type: type):
-        _logger.debug(f"Register dataset type {dataset_type} as {type}")
+        self._logger.debug(f"Register dataset type {dataset_type} as {type}")
         self._dataset[io_type] = dataset_type
 
     def get_dataset_type(
@@ -44,11 +43,11 @@ class _DatasetFactory:
         dataset_type: str = dataset_config["type"]
         type: IOType = IOType(dataset_type)
 
-        _logger.debug(f"Get {type.name} from factory dataset")
+        self._logger.debug(f"Get {type.name} from factory dataset")
         dataset_class = self._dataset.get(type)
 
         if not dataset_class:
-            _logger.debug(
+            self._logger.debug(
                 f"IOType {type.name} not registered in the dataset factory dataset"
             )
             raise ValueError(type)

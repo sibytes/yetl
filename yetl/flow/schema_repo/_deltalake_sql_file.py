@@ -5,7 +5,7 @@ import os
 from ..parser.parser import render_jinja, JinjaVariables
 from ._exceptions import SchemaNotFound
 from typing import Any
-# import logging
+import logging
 from pydantic import Field
 
 _SCHEMA_ROOT = "./config/schema"
@@ -21,6 +21,7 @@ class DeltalakeSchemaFile(ISchemaRepo):
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
+        self._logger = logging.getLogger(self.__class__.__name__)
         # abstraction of the filesystem for driver file commands e.g. rm, ls, mv, cp
         self.fs: IFileSystem = file_system_factory.get_file_system_type(
             FileSystemType.FILE
@@ -55,9 +56,9 @@ class DeltalakeSchemaFile(ISchemaRepo):
 
         path = self._mkpath(database, table, sub_location)
 
-        # self.log.info(
-        #     f"Loading schema for dataset {database_name}.{table_name} from {path} using {type(self.fs)}"
-        # )
+        self._logger.debug(
+            f"Loading schema for dataset {database}.{table} from {path} using {type(self.fs)}"
+        )
 
         try:
             schema = self.fs.read_file(path, FileFormat.TEXT)
@@ -65,7 +66,7 @@ class DeltalakeSchemaFile(ISchemaRepo):
             raise SchemaNotFound(path) from e
 
         msg = json.dumps(schema)
-        # self.log.debug(msg)
+        self._logger.debug(msg)
 
         return schema
 
