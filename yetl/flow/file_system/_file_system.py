@@ -1,14 +1,16 @@
 import os
 import shutil
-from ._ifile_system import IFileSystem, FileFormat
-from typing import Type, Union
+from ._i_file_system import IFileSystem
+from ._file_system_options import FileFormat
+from typing import Union
 import yaml
 import json
+from typing import Any
 
 
 class FileSystem(IFileSystem):
-    def __init__(self, context: str, datalake_protocol: str = "file:") -> None:
-        super().__init__(context, datalake_protocol)
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
 
     def rm(self, path: str, recurse=False) -> bool:
         """Removes a file or directory."""
@@ -99,7 +101,7 @@ class FileSystem(IFileSystem):
             elif file_format == FileFormat.YAML:
                 data = f.read()
                 data = yaml.safe_load(data)
-            elif file_format == FileFormat.TEXT:
+            elif file_format in (FileFormat.TEXT, FileFormat.SQL):
                 data = f.read()
             else:
                 raise Exception(

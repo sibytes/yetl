@@ -1,0 +1,6 @@
+datalake: "./test/config/demo/data"
+context_type: spark
+pipeline_repo:
+  pipeline_file:
+    pipeline_root: "./test/config/demo/pipelines"
+    sql_root: "./test/config/demo/sql"

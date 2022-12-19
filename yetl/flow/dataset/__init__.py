@@ -1,18 +1,26 @@
-from ._dataset import Dataset
-from ._base import Destination, Source
+from ._properties import (
+    SchemaProperties,
+    LineageProperties,
+    ReaderProperties,
+    DeltaWriterProperties,
+)
+from ._base import Source, Destination, Dataset
+from ._deltalake_writer import DeltaWriter, Write
+from ._sql_reader import SQLReader
 from ._reader import Reader
-from ._deltalake_writer import DeltaWriter
-from ._stream_reader import StreamReader
-from ._stream_writer import StreamWriter
 from ._factory import factory as dataset_factory
 
 __all__ = [
     "Source",
     "Destination",
     "Dataset",
+    "SchemaProperties",
+    "LineageProperties",
+    "ReaderProperties",
+    "DeltaWriterProperties",
+    "SQLReader",
     "Reader",
     "DeltaWriter",
-    "StreamReader",
-    "StreamWriter",
     "dataset_factory",
+    "Write",
 ]

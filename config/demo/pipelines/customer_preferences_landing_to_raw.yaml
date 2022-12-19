@@ -21,7 +21,24 @@ dataflow:
           mode: PERMISSIVE
           inferSchema: false
           header: true
-  
+          # badRecordsPath: "badrecords/{{ database_name }}/{{ table_name }}_exceptions"
+
+      exceptions:
+          path: "delta_lake/{{ database_name }}/{{ table_name }}_exceptions"
+          database: "{{ database_name }}"
+          table: "{{ table_name }}_exceptions"
+
+      thresholds:
+        warning:
+          min_rows: 1
+          max_rows: 1000
+          exception_count: 0
+          exception_percent: 0
+        error:
+          min_rows: 0
+          max_rows: 100000000
+          exception_count: 50
+          exception_percent: 80
 
   demo_raw:
 
@@ -49,7 +66,7 @@ dataflow:
         delta.randomPrefixLength: 2
       
       format: delta
-      path: delta_lake/demo_raw/customer_preferences
+      path: delta_lake/{{ database_name }}/{{ table_name }}
       write:
         mode: append
         options:

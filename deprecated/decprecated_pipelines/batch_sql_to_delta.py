@@ -22,7 +22,7 @@ def batch_sql_to_delta(
     """Load the demo customer data from Raw delta table using SQL to a DW dimension delta table"""
 
     df_dim_cust = dataflow.source_df(f"{context.project}_raw.customer")
-    context.log.info(f"Loading {context.project}_dw.dim_customer type 2 dimension")
+    # context.log.info(f"Loading {context.project}_dw.dim_customer type 2 dimension")
     dataflow.destination_df(
         f"{context.project}_dw.dim_customer", df_dim_cust, save=save
     )

@@ -3,14 +3,11 @@ dataflow:
   demo_landing:
     customer_details:
       type: Reader     
-
       properties:
         yetl.schema.createIfNotExists: true
         yetl.schema.corruptRecord: false
         yetl.metadata.timeslice: timeslice_file_date_format
         yetl.metadata.filepathFilename: true
-
-
       path_date_format: "%Y%m%d"
       file_date_format: "%Y%m%d"
       format: csv
@@ -21,7 +18,24 @@ dataflow:
           mode: PERMISSIVE
           inferSchema: false
           header: true
-  
+          # badRecordsPath: "badrecords/{{ database_name }}/{{ table_name }}_exceptions"
+
+      # exceptions:
+      #     path: "delta_lake/{{ database_name }}/{{ table_name }}_exceptions"
+      #     database: "{{ database_name }}"
+      #     table: "{{ table_name }}_exceptions"
+
+      # thresholds:
+      #   warning:
+      #     min_rows: 1
+      #     max_rows: 1000
+      #     exception_count: 0
+      #     exception_percent: 0
+      #   error:
+      #     min_rows: 0
+      #     max_rows: 100000000
+      #     exception_count: 50
+      #     exception_percent: 80
 
   demo_raw:
 
@@ -34,6 +48,7 @@ dataflow:
       properties:
         yetl.metadata.datasetId: true
         yetl.schema.createIfNotExists: true
+      deltalake_properties:
         delta.appendOnly: false
         delta.checkpoint.writeStatsAsJson: true
         delta.autoOptimize.autoCompact: true       
@@ -47,10 +62,47 @@ dataflow:
         delta.minWriterVersion: 2
         delta.randomizeFilePrefixes: false
         delta.randomPrefixLength: 2
-      
+
+      # table constraints can be declared inline or via a SQL include file on the ddl
+      # check_constraints:
+      #   amount_lower_bound: "amount > -1000"
+      #   amount_upper_bound: "amount < 10000"
+
       format: delta
-      path: delta_lake/demo_raw/customer_details
+      path: delta_lake/{{ database_name }}/{{ table_name }}
       write:
+        # mode:
+          # merge:
+          #   join: |
+          #     src.id = dst.id
+
+          #   ## you can provide the clause explicitly
+          #   update: |
+          #       src.change_hash != dst.change_hash
+          #   ## or use a simple abstract construct for simple use cases
+          #   # update:
+          #   #   operator: any_not_equal_except
+          #   #   columns:
+          #   #     - id
+
+            
+          #   insert: true
+            
+          #   ## you can provide the clause explicitly
+          #   # insert: |
+          #   #   src.change_hash != dst.change_hash
+
+          #   ## or use a simple abstract construct for simple use cases
+          #   # insert:
+          #   #   operator: any_not_equal_except
+          #   #   columns:
+          #   #     - id
+
+          #   # delete: false
+          #   delete: |
+          #     src.change_hash IS NULL
+
+
         mode: append
         options:
           mergeSchema: true

@@ -6,7 +6,7 @@ from ._saves import (
     OverwriteSchemaSave,
     ErrorIfExistsSave,
     MergeSave,
-    DefaultSave,
+    # DefaultSave,
 )
 from ._save import Save
 
@@ -18,6 +18,6 @@ __all__ = [
     "OverwriteSchemaSave",
     "ErrorIfExistsSave",
     "MergeSave",
-    "DefaultSave",
+    # "DefaultSave",
     "Save",
 ]
