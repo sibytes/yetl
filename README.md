@@ -1,4 +1,4 @@
-<img src="https://img.shields.io/badge/Python-v3.8-blue">
+<img src="https://img.shields.io/badge/Python-v3.9-blue">
 
 # YETL
 
