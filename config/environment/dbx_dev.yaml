@@ -21,10 +21,3 @@ deltalake_schema_repo:
   deltalake_sql_file:
     deltalake_schema_root: ./config/schema
 
-# used to write data lineage to
-metadata_repo:
-  metadata_file:
-    metadata_root: ./config/runs
-    metadata_dataset: dataset.json
-    metadata_index: index.json
-    

@@ -42,13 +42,14 @@ def get_log_configuration():
 
 def get_dbx_environment_config(config_dir: str = _CONFIG_DIR):
     env_config = _strip_margin(
-        """datalake: "/mnt/datalake/yetl_data"
-      |datalake_protocol: "dbfs:"
-      |spark:
-      |  logging_level: ERROR
-      |  config:
-      |    spark.master: local
-      |    spark.databricks.delta.allowArbitraryProperties.enabled: true
+    """datalake: "/mnt/datalake/yetl_data"
+      |engine:
+      |  databricks:
+      |    default_catalog: main
+      |    logging_level: ERROR
+      |    config:
+      |      spark.master: local
+      |      spark.databricks.delta.allowArbitraryProperties.enabled: true
       |
       |pipeline_repo:
       |  pipeline_file:
@@ -62,13 +63,6 @@ def get_dbx_environment_config(config_dir: str = _CONFIG_DIR):
       |deltalake_schema_repo:
       |  deltalake_sql_file:
       |    deltalake_schema_root: ./{config}/schema
-      |
-      |# used to write data lineage to
-      |metadata_repo:
-      |  metadata_file:
-      |    metadata_root: ./config/runs
-      |    metadata_dataset: dataset.json
-      |    metadata_index: index.json
     """.format(
             config=config_dir
         )
@@ -79,19 +73,20 @@ def get_dbx_environment_config(config_dir: str = _CONFIG_DIR):
 
 def get_local_environment_config(config_dir: str = _CONFIG_DIR):
     env_config = _strip_margin(
-        """datalake: "{{{{cwd}}}}/data"
-      |datalake_protocol: "file:"
-      |spark:
-      |  logging_level: ERROR
-      |  config:
-      |    spark.master: local
-      |    # yetl uses table properties so this must be set as a table
-      |    # property or globally like here in the spark context
-      |    spark.databricks.delta.allowArbitraryProperties.enabled: true
-      |    spark.jars.packages: io.delta:delta-core_2.12:2.1.1
-      |    park.sql.extensions: io.delta.sql.DeltaSparkSessionExtension
-      |    spark.sql.catalog.spark_catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
-      |    spark.databricks.delta.merge.repartitionBeforeWrite.enabled: true
+    """datalake: "{{{{cwd}}}}/data"
+      |
+      |engine:
+      |  spark:
+      |    logging_level: ERROR
+      |    config:
+      |      spark.master: local
+      |      # yetl uses table properties so this must be set as a table
+      |      # property or globally like here in the spark context
+      |      spark.databricks.delta.allowArbitraryProperties.enabled: true
+      |      spark.jars.packages: io.delta:delta-core_2.12:2.1.1
+      |      park.sql.extensions: io.delta.sql.DeltaSparkSessionExtension
+      |      spark.sql.catalog.spark_catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
+      |      spark.databricks.delta.merge.repartitionBeforeWrite.enabled: true
       |
       |pipeline_repo:
       |  pipeline_file:
@@ -105,13 +100,6 @@ def get_local_environment_config(config_dir: str = _CONFIG_DIR):
       |deltalake_schema_repo:
       |  deltalake_sql_file:
       |    deltalake_schema_root: ./{config}/schema/deltalake
-      |
-      |# used to write data lineage to
-      |metadata_repo:
-      |  metadata_file:
-      |    metadata_root: ./config/runs
-      |    metadata_dataset: dataset.json
-      |    metadata_index: index.json
     """.format(
             config=config_dir
         )
