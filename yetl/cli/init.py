@@ -43,6 +43,7 @@ def get_log_configuration():
 def get_dbx_environment_config(config_dir: str = _CONFIG_DIR):
     env_config = _strip_margin(
     """datalake: "/mnt/datalake/yetl_data"
+      |
       |engine:
       |  databricks:
       |    default_catalog: main
