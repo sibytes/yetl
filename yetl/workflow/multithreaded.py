@@ -4,7 +4,15 @@ from typing import Callable
 from ..flow import Timeslice, Save
 from typing import Type
 
-def load(database: str, tables: list, function: Callable, timeslice: Timeslice, save: Type[Save] = None, maxparallel:int = 4):
+
+def load(
+    database: str,
+    tables: list,
+    function: Callable,
+    timeslice: Timeslice,
+    save: Type[Save] = None,
+    maxparallel: int = 4,
+):
     """Prototype multi-threaded loader"""
 
     def _load(q):

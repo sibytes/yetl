@@ -26,7 +26,7 @@ from pyspark.sql.functions import *
 from typing import Type
 
 @yetl_flow(project="demo")
-def batch_text_csv_to_delta_permissive_1(
+def landing_to_raw(
     context: IContext,
     dataflow: IDataflow,
     timeslice: Timeslice = TimesliceUtcNow(),
@@ -43,7 +43,6 @@ def batch_text_csv_to_delta_permissive_1(
     df_cust = dataflow.source_df(f"{context.project}_landing.customer")
     df_prefs = dataflow.source_df(f"{context.project}_landing.customer_preferences")
 
-    context.log.info("Joining customers with customer_preferences")
     df = df_cust.join(df_prefs, "id", "inner")
     df = df.withColumn(
         "_partition_key", date_format("_timeslice", "yyyyMMdd").cast("integer")
@@ -55,17 +54,17 @@ def batch_text_csv_to_delta_permissive_1(
 ## Run an incremental load:
 
 ```python
-timeslice = Timeslice(2022, 7, 12)
-results = batch_text_csv_to_delta_permissive_1(
-    timeslice = Timeslice(2022, 7, 12)
+timeslice = Timeslice(year=2022, month=7, day=12)
+results = landing_to_raw(
+    timeslice = Timeslice(year=2022, month=7, day=12)
 )
 ```
 
 ## Run a full load for Year 2022:
 
 ```python
-results = batch_text_csv_to_delta_permissive_1(
-    timeslice = Timeslice(2022, '*', '*'),
+results = landing_to_raw(
+    timeslice = Timeslice(year=2022, month='*', day='*'),
     save = OverwriteSave
 )
 ```
@@ -87,7 +86,7 @@ cp $SPARK_HOME/conf/spark-defaults.conf.template  $SPARK_HOME/conf/spark-default
 ```
 Add the following to `spark-defaults.conf`:
 ```
-spark.jars.packages               io.delta:delta-core_2.12:2.0.0
+spark.jars.packages               io.delta:delta-core_2.12:2.1.1
 spark.sql.extensions              io.delta.sql.DeltaSparkSessionExtension
 spark.sql.catalog.spark_catalog   org.apache.spark.sql.delta.catalog.DeltaCatalog
 spark.sql.catalogImplementation   hive
@@ -118,6 +117,11 @@ There is a CI build configured for this repo that builds on main origin and publ
 
 
 # Releases
+
+Version: 0.0.28
+- Heavily refactored the internal design into a simpler code base
+- Much less reliance on dictionaries
+- Built Pyandantic into almost all the classes
 
 Version: 0.0.27
 - bumping spark version 3.3.2

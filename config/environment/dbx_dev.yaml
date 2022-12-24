@@ -1,10 +1,12 @@
 datalake: "/mnt/datalake/yetl_data"
-datalake_protocol: "dbfs:"
-spark:
-  logging_level: ERROR
-  config:
-    spark.master: local
-    spark.databricks.delta.allowArbitraryProperties.enabled: true
+
+engine:
+  databricks:
+    default_catalog: main
+    logging_level: ERROR
+    config:
+      spark.master: local
+      spark.databricks.delta.allowArbitraryProperties.enabled: true
 
 pipeline_repo:
   pipeline_file:
@@ -19,10 +21,3 @@ deltalake_schema_repo:
   deltalake_sql_file:
     deltalake_schema_root: ./config/schema
 
-# used to write data lineage to
-metadata_repo:
-  metadata_file:
-    metadata_root: ./config/runs
-    metadata_dataset: dataset.json
-    metadata_index: index.json
-    

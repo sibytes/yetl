@@ -1,385 +1,395 @@
+from pydantic import Field, PrivateAttr
+from ._properties import ReaderProperties
+from ._decoder import parse_properties_key, parse_properties_values
+from typing import Any, Dict, Union
+import json
 from ..parser.parser import (
     JinjaVariables,
     render_jinja,
     to_regex_search_pattern,
     to_spark_format_code,
+    prefix_root_var,
 )
-from ._dataset import Dataset
-from pyspark.sql import functions as fn
-from pyspark.sql.types import StructType, StringType
-from ..parser._constants import *
-
-from ..schema_repo import ISchemaRepo, SchemaNotFound
-from ._validation import (
-    PermissiveSchemaOnRead,
-    BadRecordsPathSchemaOnRead,
-    ThresholdLevels,
-)
+from ..parser._constants import FormatOptions
+from ..file_system import FileSystemType
+import uuid
+from ._base import Source, SQLTable
 from pyspark.sql import DataFrame
-import json
-from .. import _delta_lake as dl
+from .._timeslice import Timeslice, TimesliceUtcNow
+from pydantic import BaseModel, Field
+from enum import Enum
+from ..context import SparkContext, DatabricksContext
 from ..audit import Audit, AuditTask
+from pyspark.sql.types import StructType, StringType
+from pyspark.sql import functions as fn
+from ..schema_repo import SchemaNotFound
+from .. import _delta_lake as dl
 from datetime import datetime
-from ._base import Source
-from ..parser.parser import JinjaVariables
+from ..parser._constants import *
+from ._validation import PermissiveSchemaOnRead, BadRecordsPathSchemaOnRead, Thresholds
+import logging
 
 
-class Reader(Dataset, Source):
-    def __init__(
-        self,
-        context,
-        database: str,
-        table: str,
-        config: dict,
-        io_type: str,
-        auditor: Audit,
-    ) -> None:
-        super().__init__(context, database, table, config, io_type, auditor)
 
+class ReaderConfigurationException(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+        self.message = message
+
+
+def _yetl_properties_dumps(obj: dict, *, default):
+    """Decodes the data back into a dictionary with yetl configuration properties names"""
+    obj = {
+        parse_properties_key(k): parse_properties_values(k, v) for k, v in obj.items()
+    }
+    return json.dumps(obj, default=default)
+
+
+class ReadModeOptions(Enum):
+    PERMISSIVE = "PERMISSIVE"
+    FAILFAST = "FAILFAST"
+    DROPMALFORMED = "DROPMALFORMED"
+    BADRECORDSPATH = "badRecordsPath"
+
+
+class Read(BaseModel):
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+        self._logger = logging.getLogger(self.__class__.__name__)
+
+    _DEFAULT_OPTIONS = {"mode": ReadModeOptions.PERMISSIVE.value, "inferSchema": False}
+    auto: bool = Field(default=True)
+    options: Dict[str, Any] = Field(default=_DEFAULT_OPTIONS)
+    _logger:Any = PrivateAttr(default=None)
+
+    def render(self, replacements: Dict[JinjaVariables, str]):
+
+        if self.get_mode() == ReadModeOptions.BADRECORDSPATH:
+            path = self.options.get(ReadModeOptions.BADRECORDSPATH.value, "")
+            # if the path has no root {{root}} prefixed then add one
+            path = prefix_root_var(self.path)
+            self.options[ReadModeOptions.BADRECORDSPATH.value] = render_jinja(
+                path, replacements
+            )
+            if "mode" in self.options:
+                del self.options["mode"]
+
+    @property
+    def infer_schema(self):
+        return self.options.get("inferSchema", False)
+
+    @property
+    def bad_records_path(self):
+        return self.options.get(ReadModeOptions.BADRECORDSPATH.value, None)
+
+    @infer_schema.setter
+    def infer_schema(self, value: bool):
+        self.options["inferSchema"] = value
+
+    def set_infer_schema(self, infer_schema:bool):
+        self.options["inferSchema"] = infer_schema
+
+    def get_mode(self):
+        mode = None
+        if isinstance(
+            self.options.get(ReadModeOptions.BADRECORDSPATH.value, None), str
+        ):
+            mode = ReadModeOptions.BADRECORDSPATH
+        if not mode:
+            mode = self.options.get("mode", ReadModeOptions.PERMISSIVE.value)
+            mode = ReadModeOptions(mode)
+        return mode
+
+    def set_mode(self, mode: ReadModeOptions, bad_records_path: str = None):
+        if mode == ReadModeOptions.BADRECORDSPATH and not bad_records_path:
+            raise Exception(
+                f"Setting mode to BADRECORDSPATH must have a bad_records_path string argument"
+            )
+
+        if mode != ReadModeOptions.BADRECORDSPATH:
+            self.options["mode"] = mode.value
+        else:
+            self.options[ReadModeOptions.BADRECORDSPATH.value] = bad_records_path
+            if "mode" in self.options:
+                del self.options["mode"]
+
+
+class Exceptions(SQLTable):
+    path: str = Field(...)
+    context: Union[SparkContext, DatabricksContext] = Field(...)
+    _logger:Any = PrivateAttr(default=None)
+
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+        self._logger = logging.getLogger(self.__class__.__name__)
+
+    def render(self, replacements: Dict[JinjaVariables, str]):
+
+        self.table = render_jinja(self.table, replacements)
+        self.database = render_jinja(self.database, replacements)
+        # if the path has no root {{root}} prefixed then add one
+        path = prefix_root_var(self.path)
+        self.path = render_jinja(path, replacements)
+
+    def table_exists(self):
+        dl.create_database(self.context, self.database)
+        exists = dl.table_exists(self.context, self.database, self.table)
+        return exists
+
+    def create_table(self):
+        sql = dl.create_table(
+            self.context,
+            self.database,
+            self.table,
+            self.path,
+        )
+        return sql
+
+
+class Reader(Source, SQLTable):
+    def __init__(self, **data: Any) -> None:
+        self._cascade_context(data)
+        super().__init__(**data)
+        self._logger = logging.getLogger(self.__class__.__name__)
+        self.initialise()
+
+    def initialise(self):
+        self.auditor = self.context.auditor
+        self.timeslice = self.context.timeslice
+        self.datalake_protocol = self.context.datalake_protocol
+        self.datalake = self.context.datalake
+        self.auditor = self.context.auditor
+        self.context_id = self.context.context_id
+        self.render()
+        self.auditor.dataset(self.get_metadata())
+        self._init_task_read_schema()
+        if self.read.auto:
+            self._init_task_create_exception_table()
+        self._init_validate()
+
+    def _cascade_context(self, data: dict):
+        if data.get("exceptions") and data.get("context"):
+            data["exceptions"]["context"] = data.get("context")
+
+    context: Union[SparkContext, DatabricksContext] = Field(...)
+    timeslice: Timeslice = Field(default=TimesliceUtcNow())
+    context_id: uuid.UUID = Field(default=None)
+    dataflow_id: uuid.UUID = Field(default=None)
+    datalake_protocol: FileSystemType = Field(default=None)
+    datalake: str = Field(default=None)
+    auditor: Audit = Field(default=None)
+
+    catalog: str = Field(None)
+    dataframe: DataFrame = Field(default=None)
+    dataset_id: uuid.UUID = Field(default=uuid.uuid4())
+    yetl_properties: ReaderProperties = Field(
+        default=ReaderProperties(), alias="properties"
+    )
+    path_date_format: str = Field(default="%Y%m%d")
+    file_date_format: str = Field(default="%Y%m%d")
+    format: FormatOptions = Field(default=FormatOptions.JSON)
+    path: str = Field(...)
+    read: Read = Field(default=Read())
+    exceptions: Exceptions = Field(default=None)
+    thresholds: Thresholds = Field(default=None)
+    spark_schema: StructType = None
+    _initial_load: bool = PrivateAttr(default=False)
+    _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
+    _create_spark_schema: bool = PrivateAttr(default=False)
+
+    def render(self):
         self._replacements = {
             JinjaVariables.DATABASE_NAME: self.database,
             JinjaVariables.TABLE_NAME: self.table,
-            **self._replacements,
+            JinjaVariables.TIMESLICE_FILE_DATE_FORMAT: self.timeslice.strftime(
+                self.file_date_format
+            ),
+            JinjaVariables.TIMESLICE_PATH_DATE_FORMAT: self.timeslice.strftime(
+                self.path_date_format
+            ),
+            JinjaVariables.ROOT: f"{self.datalake_protocol.value}{self.datalake}",
         }
+        # if the path has no root {{root}} prefixed then add one
+        path = prefix_root_var(self.path)
+        self.path = render_jinja(path, self._replacements)
 
-        # gets the read, write, etc options based on the type
-        self.config = config
-        io_properties = config.get("read")
+        if self.has_exceptions:
+            self.exceptions.render(self._replacements)
+        self.read.render(self._replacements)
 
-        # get the table properties
-        properties: dict = self._get_table_properties(config)
-        self._set_table_properties(properties)
-
-        self.thresholds_warnings = self._get_thresholds(config, ThresholdLevels.WARNING)
-        self.thresholds_error = self._get_thresholds(config, ThresholdLevels.ERROR)
-
-        self.has_exception_configured = EXCEPTIONS in config.keys()
-        self.auto_io = io_properties.get(AUTO_IO, True)
-        self.options: dict = io_properties.get(OPTIONS)
-        self.infer_schema = self.options.get(INFER_SCHEMA, False)
-        self.has_badrecordspath_configured = BAD_RECORDS_PATH in self.options.keys()
-        self.mode = self.options.get(MODE, None)
-
-        # try and load a schema if schema on read
+    def _init_task_read_schema(self):
         try:
-            self.schema = self._get_schema(config["spark_schema_repo"])
-            self.has_schema = True
-
+            self.spark_schema = self.context.spark_schema_repository.load_schema(
+                database=self.database, table=self.table
+            )
         except SchemaNotFound as e:
-            self.schema = None
-            self.has_schema = False
-            if not self.infer_schema and not self._create_schema_if_not_exists:
-                self._creating_inferred_schema = False
-                msg = f"schema not found for {self.database}.{self.table} as path {e}"
-                raise SchemaNotFound
+            if self.yetl_properties.schema_create_if_not_exists:
+                # default all settings to allow a inferred schema load
+                # we're effectively the user is forcing this to they've configured it
+                # to create the schema automatically.
+                self._create_spark_schema = True
+                self.read.set_infer_schema(True)
+                self.read.set_mode(ReadModeOptions.PERMISSIVE)
+                self._initial_load = True
+                self.exceptions = None
+            elif not self._infer_schema:
+                raise e
+
+    def _init_task_create_exception_table(self):
+
+        if self.has_exceptions:
+            table_exists = self.exceptions.table_exists()
+            if table_exists:
+                self._logger.debug(
+                    f"Exception table already exists {self.exceptions.database_table} at {self.exceptions.path} {CONTEXT_ID}={str(self.context_id)}"
+                )
+                self._initial_load = False
             else:
-                msg = f"schema not found for {self.database}.{self.table} as path {e}"
-                self.context.log.warning(msg)
+                start_datetime = datetime.now()
+                sql = self.exceptions.create_table()
+                self.auditor.dataset_task(
+                    self.dataset_id, AuditTask.SQL, sql, start_datetime
+                )
+                self._initial_load = True
 
-        self._creating_inferred_schema = (
-            self._create_schema_if_not_exists and not self.has_schema
-        )
-
-        if self.auto_io and self._creating_inferred_schema:
-            self._on_schema_creation()
-
-        if self.has_exception_configured:
-            self._set_exceptions_attributes(config)
-
-        if not self._creating_inferred_schema:
-            self._validate_configuration()
-
-        if self.has_badrecordspath_configured:
-            self.options = self.configure_badrecords_path(
-                self.options, self.datalake_protocol, self.datalake
-            )
-
-        # set the exceptions table settings if configured.
-
-        self.database_table = f"{self.database}.{self.table}"
-        # self._initial_load = super().initial_load
-
-        if self.auto_io and self.has_exception_configured:
-            self.context.log.info(
-                f"auto_io = {self.auto_io} automatically creating or altering exception delta table {self.database}.{self.table} {CONTEXT_ID}={str(self.context_id)}"
-            )
-            self.create_or_alter_table()
-
-    def _set_table_properties(self, properties: dict):
-
-        self._metadata_timeslice_enabled = properties.get(
-            YETL_TBLP_METADATA_TIMESLICE, None
-        )
-        if isinstance(self._metadata_timeslice_enabled, str):
-            self._metadata_timeslice_enabled = JinjaVariables[
-                self._metadata_timeslice_enabled.upper()
-            ]
-
-        self._create_schema_if_not_exists = properties.get(
-            YETL_TBLP_SCHEMA_CREATE_IF_NOT_EXISTS, False
-        )
-        self._add_corrupt_record = properties.get(YETL_TBLP_SCHEMA_CORRUPT_RECORD, True)
-
-        self.metadata_filepath_filename = properties.get(
-            YETL_TBLP_METADATA_FILEPATH_FILENAME, False
-        )
-        self.metadata_filepath = properties.get(YETL_TBLP_METADATA_FILEPATH, False)
-        self.metadata_filename = properties.get(YETL_TBLP_METADATA_FILENAME, False)
-
-        self._metadata_context_id_enabled = properties.get(
-            YETL_TBLP_METADATA_CONTEXT_ID, False
-        )
-        self._metadata_dataflow_id_enabled = properties.get(
-            YETL_TBLP_METADATA_DATAFLOW_ID, False
-        )
-        self._metadata_dataset_id_enabled = properties.get(
-            YETL_TBLP_METADATA_DATASET_ID, False
-        )
-
-    def _get_thresholds(self, config: dict, level: ThresholdLevels):
-        thresholds: dict = config.get("thresholds")
-        if thresholds:
-            return thresholds.get(level.value)
-
-    def _validate_configuration(self):
-
-        if not self.has_badrecordspath_configured and not self.mode:
-            self.context.log.warning(
-                f"{BAD_RECORDS_PATH} and {MODE} option are not set, defaulting to {MODE}={FAIL_FAST} {CONTEXT_ID}={str(self.context_id)}"
-            )
-            self.options[MODE] = FAIL_FAST
-
-        self.has_corrupt_column = self._is_corrupt_column_set(self.options, self.schema)
-
-        if self.has_badrecordspath_configured and self.mode:
-            msg = f"{BAD_RECORDS_PATH} and {MODE} option are both set, this is not supported. Configure either {BAD_RECORDS_PATH} or {MODE} {CONTEXT_ID}={str(self.context_id)}"
-            self.context.log.error(msg)
-            raise Exception(msg)
-
-        if self.has_badrecordspath_configured and not self.has_schema:
-            msg = f"No schema has been defined. {BAD_RECORDS_PATH} requires that a schema is defined. {CONTEXT_ID}={str(self.context_id)}"
-            self.context.log.error(msg)
-            raise Exception(msg)
-
-        if self.has_badrecordspath_configured and not self.has_exception_configured:
-            msg = f"{BAD_RECORDS_PATH} requires that {EXCEPTIONS} configuration is defined. {CONTEXT_ID}={str(self.context_id)}"
-            self.context.log.error(msg)
-            raise Exception(msg)
-
-        if self.has_badrecordspath_configured and not self.has_corrupt_column:
-            msg = f"{BAD_RECORDS_PATH} doesn't support the use of the _corrupt_record columnd. {CONTEXT_ID}={str(self.context_id)}"
-            self.context.log.error(msg)
-            raise Exception(msg)
-
-        if self.mode and not self.has_schema:
-            msg = f"No schema has been defined. {MODE}={self.mode} configuration requires that a schema is defined. {CONTEXT_ID}={str(self.context_id)}"
-            self.context.log.error(msg)
-            raise Exception(msg)
-
-        if self.mode.lower() != PERMISSIVE and self.has_exception_configured:
-            msg = f"{MODE}={self.mode}, exceptions can only be handled on a mode={PERMISSIVE}, {EXCEPTIONS} configuration will be disabled. {CONTEXT_ID}={str(self.context_id)}"
-            self.context.log.warning(msg)
-            self.has_exception_configured = False
-
-        if (
-            self.mode.lower() == PERMISSIVE
-            and self.has_exception_configured
-            and not self.has_corrupt_column
-        ):
-            msg = f"If expceptions are configured for {MODE}={self.mode} then _corrupt_record columns must be supplied in the schema. {CONTEXT_ID}={str(self.context_id)}"
-            self.context.log.error(msg)
-            raise Exception(msg)
-
-    def _on_schema_creation(self):
-
-        self.initial_load = True
-        self.has_corrupt_column = False
-
-        if self.has_exception_configured:
-            msg = f"Creating inferred schema for {self.database}.{self.table} {EXCEPTIONS} configuration will be ignored"
-            self.context.log.warning(msg)
-            self.has_exception_configured = False
-
-        if self.has_badrecordspath_configured:
-            msg = f"Creating inferred schema for {self.database}.{self.table} {BAD_RECORDS_PATH} configuration will be ingnored"
-            self.context.log.warning(msg)
-            self.has_badrecordspath_configured = False
-
-        if self.mode:
-            msg = f"Creating inferred schema for {self.database}.{self.table} {self.mode} configuration will be ignored"
-            self.context.log.warning(msg)
-            del self.options[MODE]
-
-        if not self.infer_schema:
-            msg = f"Creating inferred schema for {self.database}.{self.table} defaulting {INFER_SCHEMA} to True"
-            self.context.log.warning(msg)
-            self.options[INFER_SCHEMA] = True
-
-    def _get_table_properties(self, config: dict):
-        properties = config.get(PROPERTIES, {})
-        if properties == None:
-            properties = {}
-
-        return properties
-
-    def create_or_alter_table(self):
-
-        dl.create_database(self.context, self.exceptions_database)
-        table_exists = dl.table_exists(
-            self.context, self.exceptions_database, self.exceptions_table
-        )
-        if table_exists:
-            self.context.log.info(
-                f"Exception table already exists {self.exceptions_database}.{self.exceptions_table} at {self.exceptions_path} {CONTEXT_ID}={str(self.context_id)}"
-            )
-            self.initial_load = False
-        else:
-            start_datetime = datetime.now()
-            sql = dl.create_table(
-                self.context,
-                self.exceptions_database,
-                self.exceptions_table,
-                self.exceptions_path,
-            )
-            self.initial_load = True
-            self.auditor.dataset_task(self.id, AuditTask.SQL, sql, start_datetime)
-
-    @property
-    def initial_load(self):
-
-        return self._initial_load
-
-    @initial_load.setter
-    def initial_load(self, value: bool):
-
-        self._initial_load = value
-
-    def _get_schema(self, config: dict):
-
-        self.schema_repo: ISchemaRepo = (
-            self.context.schema_repo_factory.get_schema_repo_type(self.context, config)
-        )
-        schema = self.schema_repo.load_schema(self.database, self.table)
-        return schema
-
-    def configure_badrecords_path(
-        self, options: dict, datalake_protocol: str, datalake: str
-    ):
-
-        bad_records_path = options[BAD_RECORDS_PATH]
-        bad_records_path = render_jinja(bad_records_path, self._replacements)
-        options[BAD_RECORDS_PATH] = f"{datalake_protocol}{datalake}/{bad_records_path}"
-
-        return options
-
-    def _set_exceptions_attributes(self, dataset: dict):
-
-        exceptions = dataset[EXCEPTIONS]
-        self.exceptions_table = render_jinja(exceptions.get(TABLE), self._replacements)
-        self.exceptions_database = render_jinja(
-            exceptions.get(DATABASE), self._replacements
-        )
-        exceptions_path = render_jinja(exceptions.get(PATH), self._replacements)
-
-        self.exceptions_database_table = (
-            f"{self.exceptions_database}.{self.exceptions_table}"
-        )
-        self.exceptions_path = f"{self.datalake_protocol}{self.datalake}/{exceptions_path}/{self.exceptions_database}/{self.exceptions_table}"
-        self.context.log.debug(
-            f"""Jinja rendered exception table configuration:
-            database_name: {self.exceptions_database}
-            table_name: {self.exceptions_table}
-            exception_path: {self.exceptions_path}
+    def _init_validate(self):
+        """Validate the conguration ensuring that compatible options are configured.
+        Because we're validating across class composition and there is complexity encapsulated in those classes
+        bydantic validation isn't appropriate since it will duplicate the logic required to shred the dictionaries
+        that we have already used in pydantic to create the objects.
         """
-        )
-
-    def _is_corrupt_column_set(self, options: dict, schema: StructType):
-
-        if schema:
-            has_corrupt_column = (
-                options.get(MODE, "").lower() == PERMISSIVE
-                and CORRUPT_RECORD in schema.fieldNames()
+        if self.read.get_mode() == ReadModeOptions.BADRECORDSPATH and not isinstance(
+            self.context, DatabricksContext
+        ):
+            raise ReaderConfigurationException(
+                f"{ReadModeOptions.BADRECORDSPATH.value} is only supported on databricks runtime."
             )
+
+        if self._create_spark_schema:
+            if self.read.get_mode() not in [
+                ReadModeOptions.BADRECORDSPATH,
+                ReadModeOptions.PERMISSIVE,
+            ]:
+                if self.has_exceptions:
+                    msg = f"{MODE}={self.read.get_mode()}, exceptions can only be handled on a mode={ReadModeOptions.PERMISSIVE.value} or {ReadModeOptions.BADRECORDSPATH.value}, {EXCEPTIONS} configuration will be disabled."
+                    self._logger.warning(msg)
+                    self.exceptions = None
+                else:
+                    msg = f"{MODE}={self.read.get_mode()} requires Exceptions details configured."
+                    self._logger.error(msg)
+                    raise ReaderConfigurationException(msg)
 
             if (
-                options.get(MODE, "").lower() == PERMISSIVE
-                and not CORRUPT_RECORD in schema.fieldNames()
+                self.read.get_mode() == ReadModeOptions.PERMISSIVE
+                and self.has_exceptions
+                and not self.has_corrupt_column
             ):
-                self.context.log.warning(
-                    f"mode={PERMISSIVE} and corrupt record is not set in the schema, schema on read corrupt records will be silently dropped."
-                )
-        else:
-            has_corrupt_column = False
-
-        return has_corrupt_column
+                msg = f"""{MODE}={ReadModeOptions.PERMISSIVE} exceptions requires _corrupt_record column in the schema, 
+                if not schema exists yet use the properties to add one {YetlTableProperties.SCHEMA_CORRUPT_RECORD.name},
+                {YetlTableProperties.SCHEMA_CORRUPT_RECORD_NAME.name}."""
+                self._logger.error(msg)
+                raise ReaderConfigurationException(msg)
 
     def _get_validation_exceptions_handler(self):
         def handle_exceptions(exceptions: DataFrame):
             exceptions_count = 0
-            if self.has_exception_configured:
+            if self.has_exceptions:
                 exceptions_count = exceptions.count()
                 if exceptions and exceptions_count > 0:
                     options = {MERGE_SCHEMA: True}
-                    self.context.log.warning(
-                        f"Writing {exceptions_count} exception(s) from {self.database_table} to {self.exceptions_database_table} delta table {CONTEXT_ID}={str(self.context_id)}"
+                    self._logger.warning(
+                        f"Writing {exceptions_count} exception(s) from {self.database_table} to {self.exceptions.database_table} delta table {CONTEXT_ID}={str(self.context_id)}"
                     )
-                    exceptions.write.format(Format.DELTA.value).options(**options).mode(
-                        APPEND
-                    ).save(self.exceptions_path)
+                    exceptions.write.format(FormatOptions.DELTA.value).options(
+                        **options
+                    ).mode(APPEND).save(self.exceptions.path)
             return exceptions_count
 
         return handle_exceptions
 
-    def validate(self):
+    def verify(self):
 
         validation_handler = self._get_validation_exceptions_handler()
         validator = None
 
-        if self.has_badrecordspath_configured:
-
-            bad_records_path = self.options[BAD_RECORDS_PATH]
-            self.context.log.info(
-                f"Validating dataframe read using badRecordsPath at {bad_records_path} {CONTEXT_ID}={str(self.context_id)}"
+        if self.read.get_mode() == ReadModeOptions.BADRECORDSPATH:
+            self._logger.debug(
+                f"Validating dataframe read using badRecordsPath at {self.read.bad_records_path} {CONTEXT_ID}={str(self.context_id)}"
             )
             validator = BadRecordsPathSchemaOnRead(
-                self.context,
-                self.dataframe,
-                validation_handler,
-                self.database,
-                self.table,
-                bad_records_path,
-                self.context.spark,
-                self.thresholds_warnings,
-                self.thresholds_error,
+                context=self.context,
+                dataframe=self.dataframe,
+                validation_handler=validation_handler,
+                database=self.database,
+                table=self.table,
+                warning_thresholds=self.thresholds.warning,
+                error_thresholds=self.thresholds.error,
+                path=self.read.bad_records_path,
+                spark=self.context.spark,
             )
 
-        if self.has_corrupt_column:
-            self.context.log.info(
+        if (
+            self.read.get_mode() == ReadModeOptions.PERMISSIVE
+            and self.has_corrupt_column
+        ):
+            self._logger.debug(
                 f"Validating dataframe read using PERMISSIVE corrupt column at {CORRUPT_RECORD} {CONTEXT_ID}={str(self.context_id)}"
             )
             validator = PermissiveSchemaOnRead(
-                self.context,
-                self.dataframe,
-                validation_handler,
-                self.database,
-                self.table,
-                self.thresholds_warnings,
-                self.thresholds_error,
+                context=self.context,
+                dataframe=self.dataframe,
+                validation_handler=validation_handler,
+                database=self.database,
+                table=self.table,
+                warning_thresholds=self.thresholds.warning,
+                error_thresholds=self.thresholds.error,
             )
 
         if validator:
             start_datetime = datetime.now()
             level_validation, validation = validator.validate()
             self.auditor.dataset_task(
-                self.id, AuditTask.SCHEMA_ON_READ_VALIDATION, validation, start_datetime
+                self.dataset_id,
+                AuditTask.SCHEMA_ON_READ_VALIDATION,
+                validation,
+                start_datetime,
             )
             self.dataframe = validator.dataframe
 
-    def _add_timeslice(self, df: DataFrame):
+    def _execute_add_source_metadata(self, df: DataFrame):
+
+        if self.yetl_properties.metadata_filepath_filename:
+            df: DataFrame = df.withColumn(FILEPATH_FILENAME, fn.input_file_name())
+
+        if self.yetl_properties.metadata_filepath:
+            df: DataFrame = df.withColumn(FILEPATH, fn.input_file_name()).withColumn(
+                FILEPATH,
+                fn.expr(
+                    f"replace({FILEPATH}, concat('/', substring_index({FILEPATH}, '/', -1)))"
+                ),
+            )
+
+        if self.yetl_properties.metadata_filename:
+            df: DataFrame = df.withColumn(FILENAME, fn.input_file_name()).withColumn(
+                FILENAME, fn.substring_index(fn.col(FILENAME), "/", -1)
+            )
+
+        if self.yetl_properties.metadata_context_id:
+            df: DataFrame = df.withColumn(CONTEXT_ID, fn.lit(str(self.context_id)))
+
+        if self.yetl_properties.metadata_dataflow_id:
+            df: DataFrame = df.withColumn(DATAFLOW_ID, fn.lit(str(self.dataflow_id)))
+
+        if self.yetl_properties.metadata_dataset_id:
+            df: DataFrame = df.withColumn(DATASET_ID, fn.lit(str(self.dataset_id)))
+
+        return df
+
+    def _execute_add_timeslice(self, df: DataFrame):
 
         if (
-            self._metadata_timeslice_enabled
-            == JinjaVariables.TIMESLICE_PATH_DATE_FORMAT
+            self.yetl_properties.metadata_timeslice.name
+            == JinjaVariables.TIMESLICE_PATH_DATE_FORMAT.name
         ):
 
             pattern = to_regex_search_pattern(self.path_date_format)
@@ -395,8 +405,8 @@ class Reader(Dataset, Source):
             )
 
         elif (
-            self._metadata_timeslice_enabled
-            == JinjaVariables.TIMESLICE_FILE_DATE_FORMAT
+            self.yetl_properties.metadata_timeslice.name
+            == JinjaVariables.TIMESLICE_FILE_DATE_FORMAT.name
         ):
 
             pattern = to_regex_search_pattern(self.file_date_format)
@@ -414,78 +424,91 @@ class Reader(Dataset, Source):
 
         return df
 
-    def _add_source_metadata(self, df: DataFrame):
-
-        if self.metadata_filepath_filename:
-            df: DataFrame = df.withColumn(FILEPATH_FILENAME, fn.input_file_name())
-
-        if self.metadata_filepath:
-            df: DataFrame = df.withColumn(FILEPATH, fn.input_file_name()).withColumn(
-                FILEPATH,
-                fn.expr(
-                    f"replace({FILEPATH}, concat('/', substring_index({FILEPATH}, '/', -1)))"
-                ),
+    def _execute_create_spark_schema(self, df: DataFrame):
+        if self._create_spark_schema:
+            self._logger.debug(
+                f"Saving inferred schema for {self.database}.{self.table} into schema repository. {CONTEXT_ID}={str(self.context_id)}"
             )
+            self.spark_schema = df.schema
+            if self.yetl_properties.schema_corrupt_record:
+                self.spark_schema.add(
+                    self.yetl_properties.schema_corrupt_record_name,
+                    StringType(),
+                    nullable=True,
+                )
+            self.context.spark_schema_repository.save_schema(self.spark_schema, self.database, self.table)
 
-        if self.metadata_filename:
-            df: DataFrame = df.withColumn(FILENAME, fn.input_file_name()).withColumn(
-                FILENAME, fn.substring_index(fn.col(FILENAME), "/", -1)
-            )
-
-        if self._metadata_context_id_enabled:
-            df: DataFrame = df.withColumn(CONTEXT_ID, fn.lit(self.context_id))
-
-        if self._metadata_dataflow_id_enabled:
-            df: DataFrame = df.withColumn(DATAFLOW_ID, fn.lit(self.dataflow_id))
-
-        if self._metadata_dataset_id_enabled:
-            df: DataFrame = df.withColumn(DATASET_ID, fn.lit(self.id))
-
-        return df
-
-    def read(self):
-        self.context.log.info(
-            f"Reading data for {self.database_table} from {self.path} with options {self.options} {CONTEXT_ID}={str(self.context_id)}"
+    def execute(self):
+        self._logger.debug(
+            f"Reading data for {self.database_table} from {self.path} with options {self.read.options} {CONTEXT_ID}={str(self.context_id)}"
         )
-
-        self.context.log.debug(json.dumps(self.options, indent=4, default=str))
 
         start_datetime = datetime.now()
 
-        df: DataFrame = self.context.spark.read.format(self.format)
+        df: DataFrame = self.context.spark.read.format(self.format.value)
 
-        if self.has_schema:
-            df = df.schema(self.schema)
+        if self.spark_schema:
+            df = df.schema(self.spark_schema)
 
-        df = (
-            df.options(**self.options)
-            .load(self.path)
-        )
+        df = df.options(**self.read.options).load(self.path)
 
         # if there isn't a schema and it's configured to create one the save it to repo.
-        if self._creating_inferred_schema:
-            self.context.log.info(
-                f"Saving inferred schema for {self.database}.{self.table} into schema repository. {CONTEXT_ID}={str(self.context_id)}"
-            )
-            self.schema = df.schema
-            if self._add_corrupt_record:
-                self.schema.add(CORRUPT_RECORD, StringType(), nullable=True)
-            self.schema_repo.save_schema(self.schema, self.database, self.table)
-
-        # add metadata after schema is created since we don't want these 
+        self._execute_create_spark_schema(df=df)
+        # add metadata after schema is created since we don't want these
         # derived columns in the read metadata, only the _corrupt_column if present
-        df = self._add_timeslice(df)
-        df = self._add_source_metadata(df)
+        df = self._execute_add_timeslice(df)
+        df = self._execute_add_source_metadata(df)
 
-        self.context.log.debug(
+        self._logger.debug(
             f"Reordering sys_columns to end for {self.database_table} from {self.path}. {CONTEXT_ID}={str(self.context_id)}"
         )
         self.dataframe = df
-        detail = {"path": self.path, "options": self.options}
-        self.auditor.dataset_task(self.id, AuditTask.LAZY_READ, detail, start_datetime)
+        detail = {"path": self.path, "options": self.read.options}
+        self.auditor.dataset_task(
+            self.dataset_id, AuditTask.LAZY_READ, detail, start_datetime
+        )
 
         # only run the validator if exception handling has ben configured.
-        if self.has_exception_configured:
-            self.validation_result = self.validate()
+        if self.has_exceptions:
+            self.verify()
 
         return self.dataframe
+
+    @property
+    def has_exceptions(self) -> bool:
+        "Readable property to determine if schema exception handling has been configured"
+        if self.exceptions:
+            return True
+        else:
+            False
+
+    @property
+    def has_thresholds(self) -> bool:
+        "Readable property to determine if schema thresholds have been configured"
+        if self.thresholds:
+            return True
+        else:
+            False
+
+    @property
+    def has_corrupt_column(self) -> bool:
+        "Readable property to determine if schema has a corrupt column"
+        if not self.spark_schema and self.yetl_properties.schema_create_if_not_exists:
+            return self.yetl_properties.schema_corrupt_record
+        if self.spark_schema:
+            return (
+                self.yetl_properties.schema_corrupt_record_name
+                in self.spark_schema.fieldNames()
+            )
+
+    def get_metadata(self):
+        metadata = super().get_metadata()
+        metadata[str(self.dataset_id)]["path"] = self.path
+
+        return metadata
+        
+    class Config:
+        # use a custom decoder to convert the field names
+        # back into yetl configuration names
+        json_dumps = _yetl_properties_dumps
+        arbitrary_types_allowed = True

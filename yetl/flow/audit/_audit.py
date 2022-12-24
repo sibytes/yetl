@@ -1,4 +1,3 @@
-from curses import meta
 from enum import Enum
 from datetime import datetime
 import json
@@ -7,9 +6,9 @@ import yaml
 import time
 from ..parser.parser import reduce_whitespace
 from ..warnings import Warning
-
-from typing import Union
-
+from pydantic import BaseModel, Field, PrivateAttr
+from typing import Union, Any, Dict
+import logging
 
 class AuditLevel(Enum):
     DATAFLOW = "dataflow"
@@ -33,22 +32,30 @@ class AuditTask(Enum):
     LAZY_READ = "lazy_read"
 
 
-class Audit:
+class Audit(BaseModel):
     _COUNT = "count"
 
-    def __init__(self) -> None:
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+        self._logger = logging.getLogger(self.__class__.__name__)
+
         self.audit_log = {
             AuditLevel.DATAFLOW.value: {AuditLevel.DATASETS.value: {}},
             AuditLevel.WARNING.value: {self._COUNT: 0},
             AuditLevel.ERROR.value: {self._COUNT: 0},
         }
-        self._task_counter = {}
+
+    audit_log: Dict[str, dict] = Field(default=None)
+    _task_counter: dict = PrivateAttr(default={})
+    _logger:Any = PrivateAttr(default=None)
 
     def error(self, exception: Exception):
+        self._logger.exception(exception)
         data = {"exception": exception.__class__.__name__, "message": str(exception)}
         self._append(data, AuditLevel.ERROR)
 
     def warning(self, warning: Warning):
+        self._logger.warning(str(warning))
         data = {"warning": warning.__class__.__name__, "message": str(warning)}
         self._append(data, AuditLevel.WARNING)
 
@@ -73,6 +80,7 @@ class Audit:
             "end_datetime": end_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             "seconds_duration": duration,
         }
+        self._logger.info(detail)
 
         data = {self._next_task_id(dataset_id): audit_step}
         if self.audit_log[AuditLevel.DATAFLOW.value][AuditLevel.DATASETS.value][
@@ -87,9 +95,11 @@ class Audit:
             ] |= {"tasks": data}
 
     def dataset(self, data: dict):
+        self._logger.info(yaml.safe_dump(data))
         self.audit_log[AuditLevel.DATAFLOW.value][AuditLevel.DATASETS.value] |= data
 
     def dataflow(self, data: dict):
+        self._logger.info(yaml.safe_dump(data))
         self._append(data, AuditLevel.DATAFLOW)
 
     def save(self, data: dict):
@@ -104,15 +114,6 @@ class Audit:
             self.audit_log[level.value][self._COUNT] += 1
 
     def get(self, format: AuditFormat = AuditFormat.JSON):
-
-        # For python 10
-        # match format:
-        #     case AuditFormat.JSON:
-        #         metadata = json.dumps(self.audit_log, indent=4, default=str)
-        #     case AuditFormat.YAML:
-        #         metadata = yaml.safe_dump(self.audit_log, indent=4)
-        #     case _:
-        #         metadata = json.dumps(self.audit_log, indent=4, default=str)
 
         if format == AuditFormat.JSON:
             metadata = json.dumps(self.audit_log, indent=4, default=str)

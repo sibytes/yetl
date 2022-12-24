@@ -8,6 +8,6 @@ handlers:
     formatter: default
     stream: ext://sys.stdout
 root:
-  level: ERROR
+  level: INFO
   handlers: [console]
     

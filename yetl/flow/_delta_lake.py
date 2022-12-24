@@ -2,7 +2,9 @@ import json
 from pyspark.sql import DataFrame
 from enum import Enum
 from pyspark.sql.types import StructType
+import logging
 
+_logger = logging.getLogger(__name__)
 
 class DeltaLakeProperties(Enum):
     OPTIMIZE_WRITE = "delta.autoOptimize.optimizeWrite"
@@ -33,7 +35,7 @@ def table_exists(context, database: str, table: str):
 
 
 def create_table(context, database: str, table: str, path: str, sql: str = None):
-    context.log.info(f"Creating table if not exists {database}.{table} at {path}")
+    _logger.debug(f"Creating table if not exists {database}.{table} at {path}")
 
     if not sql:
         sql = f"""
@@ -46,17 +48,17 @@ def create_table(context, database: str, table: str, path: str, sql: str = None)
 
 
 def create_database(context, database: str):
-    context.log.info(f"Creating database if not exists `{database}`")
+    _logger.debug(f"Creating database if not exists `{database}`")
     sql = f"CREATE DATABASE IF NOT EXISTS {database}"
-    context.log.debug(sql)
+    _logger.debug(sql)
     context.spark.sql(sql)
     return sql
 
 
 def get_audit(context, database_table: str) -> dict:
-    context.log.info(f"Auditing database table {database_table}")
+    _logger.debug(f"Auditing database table {database_table}")
     sql = f"DESCRIBE HISTORY {database_table}"
-    context.log.debug(sql)
+    _logger.debug(sql)
     audit: dict = context.spark.sql(sql).first().asDict()
     return audit
 
@@ -68,7 +70,7 @@ def get_audits(context):
 
     results = json.dumps(audit, indent=4, sort_keys=True, default=str)
 
-    context.log.info(results)
+    _logger.debug(results)
     return audit
 
 
@@ -89,7 +91,7 @@ def alter_table_set_tblproperties(database: str, table: str, properties: str):
 
 def get_table_properties(context, database: str, table: str):
 
-    context.log.info(f"getting existing table properties for table {database}.{table}")
+    _logger.debug(f"getting existing table properties for table {database}.{table}")
     df: DataFrame = context.spark.sql(
         f"SHOW TBLPROPERTIES `{database}`.`{table}`"
     ).collect()
@@ -111,7 +113,7 @@ def get_table_properties(context, database: str, table: str):
         }
     }
     msg = json.dumps(properties, indent=4, default=str)
-    context.log.info(msg)
+    _logger.debug(msg)
     return properties
 
 
@@ -129,13 +131,13 @@ def optimize(
         sql_zorderby = ",".join([f"`{z}`" for z in zorder_by])
         sql = f"{sql} ZORDER BY ({sql_zorderby})"
 
-    context.log.info(f"optimizing table {database}.{table}\n{sql}")
+    _logger.debug(f"optimizing table {database}.{table}\n{sql}")
     context.spark.sql(sql)
 
 
 def get_table_details(context, database: str, table: str):
 
-    context.log.info(
+    _logger.debug(
         f"getting existing table details and partitions for table {database}.{table}"
     )
 
@@ -173,5 +175,5 @@ def get_table_details(context, database: str, table: str):
     }
 
     msg = json.dumps(details, indent=4, default=str)
-    context.log.info(msg)
+    _logger.debug(msg)
     return details

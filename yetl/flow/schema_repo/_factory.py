@@ -3,22 +3,20 @@ from enum import Enum
 
 from ._spark_file_schema_repo import SparkFileSchemaRepo
 from ._deltalake_sql_file import DeltalakeSchemaFile
-from ._sql_reader_file import SqlReaderFile
-from ._ischema_repo import ISchemaRepo
+# from ._sql_reader_file import SqlReaderFile
+from ._i_schema_repo import ISchemaRepo
 import logging
 
-
 class SchemaRepoType(Enum):
-    SPARK_SCHEMA_FILE = 1
-    DELTALAKE_SQL_FILE = 2
-    PIPELINE_FILE = 3
-
+    SPARK_SCHEMA_FILE = "spark_schema_file"
+    DELTALAKE_SQL_FILE = "deltalake_sql_file"
+    PIPELINE_FILE = "sql_root"
 
 
 class _SchemaRepoFactory:
     def __init__(self) -> None:
-        self._logger = logging.getLogger(__name__)
         self._schema_repo = {}
+        self._logger = logging.getLogger(self.__class__.__name__)
 
     def register_schema_repo_type(
         self, sr_type: SchemaRepoType, schema_repo_type: type
@@ -26,22 +24,14 @@ class _SchemaRepoFactory:
         self._logger.debug(f"Register file system type {schema_repo_type} as {type}")
         self._schema_repo[sr_type] = schema_repo_type
 
-    def _get_sr_type(self, name: str):
-        name = name.strip().upper()
-        try:
-            if SchemaRepoType[name] in SchemaRepoType:
-                return SchemaRepoType[name]
-        except:
-            return None
-
-    def get_schema_repo_type(self, context, config: dict) -> ISchemaRepo:
+    def get_schema_repo_type(self, config: dict) -> ISchemaRepo:
 
         schema_repo_store: str = next(iter(config))
-        sr_type: SchemaRepoType = self._get_sr_type(schema_repo_store)
+        sr_type: SchemaRepoType = SchemaRepoType(schema_repo_store)
 
-        context.log.info(f"Setting up schema repo on {schema_repo_store} ")
+        self._logger.debug(f"Setting up schema repo on {schema_repo_store} ")
 
-        context.log.debug(f"Setting SchemaRepoType using type {sr_type}")
+        self._logger.debug(f"Setting SchemaRepoType using type {sr_type}")
         schema_repo: ISchemaRepo = self._schema_repo.get(sr_type)
 
         if not schema_repo:
@@ -50,7 +40,8 @@ class _SchemaRepoFactory:
             )
             raise ValueError(sr_type)
 
-        return schema_repo(context, config)
+        config = config[schema_repo_store]
+        return schema_repo(**config)
 
 
 factory = _SchemaRepoFactory()
@@ -58,6 +49,4 @@ factory.register_schema_repo_type(SchemaRepoType.SPARK_SCHEMA_FILE, SparkFileSch
 factory.register_schema_repo_type(
     SchemaRepoType.DELTALAKE_SQL_FILE, DeltalakeSchemaFile
 )
-factory.register_schema_repo_type(
-    SchemaRepoType.PIPELINE_FILE, SqlReaderFile
-)
+# factory.register_schema_repo_type(SchemaRepoType.PIPELINE_FILE, SqlReaderFile)

@@ -1,20 +1,12 @@
-from enum import Enum
-
 from ._dbfs_file_system import DbfsFileSystem
 from ._file_system import FileSystem
-from ._ifile_system import IFileSystem
-from typing import Union
+from ._i_file_system import IFileSystem
+from ._file_system_options import FileSystemType
 import logging
-
-
-class FileSystemType(Enum):
-    FILE = 1
-    DBFS = 2
-
 
 class _FileSystemFactory:
     def __init__(self) -> None:
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger(self.__class__.__name__)
         self._file_system = {}
 
     def register_file_system_type(
@@ -31,38 +23,21 @@ class _FileSystemFactory:
         except:
             return None
 
-    def get_file_system_type(
-        self, context, config: Union[dict, FileSystemType]
-    ) -> IFileSystem:
+    def get_file_system_type(self, fileSystemType: FileSystemType) -> IFileSystem:
 
-        if isinstance(config, dict):
-
-            # determine type from configuration
-
-            datalake_protocol: str = config["datalake_protocol"]
-            fs_type: FileSystemType = self._get_fs_type(datalake_protocol)
-            if not fs_type:
-                context.log.error(
-                    f"FileSystemType {fs_type.name} not registered in the file_system factory"
-                )
-                raise ValueError(fs_type)
-
-            context.log.info(f"Setting filestystem using protocol {datalake_protocol}")
-            context.log.debug(f"Setting FileSystemType using type {fs_type}")
-            file_system: IFileSystem = self._file_system.get(fs_type)
-            return file_system(context, datalake_protocol)
-
-        elif isinstance(config, FileSystemType):
+        if isinstance(fileSystemType, FileSystemType):
             # return based on the type asked for.
-            context.log.debug(f"Setting FileSystemType using type {config}")
-            file_system: IFileSystem = self._file_system.get(config)
-            return file_system(context)
+            self._logger.debug(f"Setting FileSystemType using type {fileSystemType}")
+            file_system: IFileSystem = self._file_system.get(fileSystemType)
+            # different file systems have different arguments
+            return file_system(protocol=fileSystemType)
 
         else:
-            raise Exception(f"FileSystemType cannot be produced using {type(config)}")
+            raise Exception(
+                f"FileSystemType cannot be produced using {type(fileSystemType)}"
+            )
 
 
 factory = _FileSystemFactory()
 factory.register_file_system_type(FileSystemType.FILE, FileSystem)
-# factory.register_file_system_type(FileSystemType.DBFS, DbfsFileSystem)
-factory.register_file_system_type(FileSystemType.DBFS, FileSystem)
+factory.register_file_system_type(FileSystemType.DBFS, DbfsFileSystem)

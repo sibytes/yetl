@@ -7,6 +7,7 @@ import regex
 from ._constants import NAME, REPLACE, ARGS
 import jinja2
 from pyspark.sql.types import StructType, StructField
+from string import Template as StrTemplate
 
 
 class JinjaVariables(Enum):
@@ -219,6 +220,12 @@ def render_jinja(data: str, replacements: dict[JinjaVariables, str]):
         data = template.render(replace)
 
     return data
+
+
+def prefix_root_var(path: str):
+    var = StrTemplate("{{$var}}").substitute(var=JinjaVariables.ROOT.value)
+    rooted_path = path if var in reduce_whitespace(path) else f"{var}/" + path
+    return rooted_path
 
 
 def reduce_whitespace(sentence: str):

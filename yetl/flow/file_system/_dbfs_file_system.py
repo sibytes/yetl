@@ -1,15 +1,25 @@
 from pyspark.sql import SparkSession
-from ._ifile_system import IFileSystem, FileFormat
-from ._ifile_system import IFileSystem, FileFormat
-from typing import Union
+from ._i_file_system import IFileSystem
+from typing import Union, Callable, Any
 import yaml
 import json
+from pydantic import PrivateAttr
+from ._file_system_options import FileFormat
 
 
 class DbfsFileSystem(IFileSystem):
-    def __init__(self, context: str, datalake_protocol: str = "dbfs:") -> None:
-        super().__init__(context, datalake_protocol)
-        self._fs = self._get_dbutils(context.spark).fs
+
+    _fs: Callable = PrivateAttr(...)
+
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+        spark = SparkSession.builder.getOrCreate()
+        try:
+            self._fs = self._get_dbutils(spark).fs
+        except ModuleNotFoundError as e:
+            raise Exception(
+                "Cannot import DBUtils, most likely cause is having DBFS configured for environment that isn't databricks and doesn't support."
+            ) from e
 
     def _get_dbutils(self, spark: SparkSession):
         from pyspark.dbutils import DBUtils
@@ -54,7 +64,7 @@ class DbfsFileSystem(IFileSystem):
             elif file_format == FileFormat.YAML:
                 data = f.read()
                 data = yaml.safe_load(data)
-            elif file_format == FileFormat.TEXT:
+            elif file_format in (FileFormat.TEXT, FileFormat.SQL):
                 data = f.read()
             else:
                 raise Exception(
@@ -120,3 +130,9 @@ class DbfsFileSystem(IFileSystem):
                 raise Exception(
                     f"File format not supported {file_format} when writing file {path}"
                 )
+
+    def exists(self, path: str) -> bool:
+        raise NotImplementedError()
+
+    class Config:
+        arbitrary_types_allowed = True
