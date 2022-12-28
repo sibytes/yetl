@@ -32,7 +32,7 @@ def build(
     template_file: str,
     build_dir: str,
 ):
-    """Use manifest config file and the pipeline jinja template to build a pipeline configuration for each table"""
+    """Use table manifest file and the pipeline jinja template to build a pipeline configuration for each table"""
     build_config(project, metadata_file, template_file, build_dir)
 
 

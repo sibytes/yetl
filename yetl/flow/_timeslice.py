@@ -69,11 +69,8 @@ class Timeslice(BaseModel):
         NOT SUPPORTED - %A - Weekday as locale’s full name.
         NOT SUPPORTED - %w - Weekday as a decimal number, where 0 is Sunday and 6 is Saturday.
         """
-        # format = "%Y%m%d"
-        unsupported_codes = []
-        for c in _UNSUPPORTED_FORMAT_CODES:
-            if c in format:
-                unsupported_codes.append(c)
+
+        unsupported_codes = [c for c in _UNSUPPORTED_FORMAT_CODES if c in format]
 
         if unsupported_codes:
             unsupported_codes = ",".join(unsupported_codes)

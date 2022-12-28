@@ -44,10 +44,10 @@ dataflow:
       partitioned_by:
         - _partition_key
 
-      ddl: "{{ root }}"
+      # ddl: "{{ root }}"
       properties:
         yetl.metadata.datasetId: true
-        yetl.schema.createIfNotExists: true
+        yetl.schema.createIfNotExists: false
       deltalake_properties:
         delta.appendOnly: false
         delta.checkpoint.writeStatsAsJson: true

@@ -158,7 +158,7 @@ class DeltaWriter(Destination, SQLTable):
         # and let spark handle the parsing of whether it's SQL or
         # not. The assumption is that the paths will be single line
         # and SQL will be multiline.
-        if (not self.ddl) or (not "\n" in self.ddl) or (self.schema_uri):
+        if (self.ddl and not "\n" in self.ddl) or (self.schema_uri):
             try:
                 # if not provided in the config explicitly then all it from the schema_uri
                 if not self.schema_uri:
@@ -174,8 +174,9 @@ class DeltaWriter(Destination, SQLTable):
                 if self.yetl_properties.schema_create_if_not_exists:
                     self._create_spark_schema = True
                     self.ddl = None
-
-                elif not self._infer_schema:
+                # if the schema URI is defined, it's not there 
+                # and is not create if not exist then raise an error
+                else:
                     raise e
 
     def _init_partitions(self):
@@ -223,7 +224,7 @@ class DeltaWriter(Destination, SQLTable):
         tbl_properties_ddl = self._get_table_properties_sql(_existing_properties)
         self._logger.debug(
             f"DeltaWriter table properties ddl = {tbl_properties_ddl}"
-        )
+        ) # TODO: only alter properties if they have changed.
         if tbl_properties_ddl:
             start_datetime = datetime.now()
             self.context.spark.sql(tbl_properties_ddl)
