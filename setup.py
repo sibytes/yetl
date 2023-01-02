@@ -29,6 +29,7 @@ setup(
     packages=[
         "yetl",
         "yetl.cli",
+        "yetl.cli.project",
         "yetl.flow",
         "yetl.flow.audit",
         "yetl.flow.context",

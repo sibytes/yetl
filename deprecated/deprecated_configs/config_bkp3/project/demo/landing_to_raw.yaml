@@ -1,7 +1,7 @@
 dataflow:
 
   demo_landing:
-    {{demo_tables.table}}:
+    {{demo_tables_table_name}}:
       type: Reader     
 
       properties:
@@ -24,7 +24,7 @@ dataflow:
 
   demo_raw:
 
-    {{demo_tables.table}}:
+    {{demo_tables_table_name}}:
       type: DeltaWriter
       partitioned_by:
         - _partition_key
@@ -48,7 +48,7 @@ dataflow:
         delta.randomPrefixLength: 2
       
       format: delta
-      path: delta_lake/demo_raw/{{demo_tables.table}}
+      path: delta_lake/demo_raw/{{demo_tables_table_name}}
       write:
         mode: append
         options:

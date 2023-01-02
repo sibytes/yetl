@@ -3,6 +3,9 @@ import typer
 from .cli.metadata import MetadataFileStore
 from .cli.build import build_config
 from .cli.init import init as _init
+from .cli.project import Project
+import os
+import yaml
 
 app = typer.Typer()
 
@@ -33,8 +36,16 @@ def build(
     build_dir: str,
 ):
     """Use table manifest file and the pipeline jinja template to build a pipeline configuration for each table"""
-    build_config(project, metadata_file, template_file, build_dir)
+    # build_config(project, metadata_file, template_file, build_dir)
 
+    project_dir = os.path.abspath(os.path.join(build_dir, "project", project))
+
+    metadata_path = os.path.join(project_dir, metadata_file)
+    with open(metadata_path, "r", encoding="utf-8") as f:
+        metadata: dict = yaml.safe_load(f)
+
+    project = Project(**metadata)
+    print(project)
 
 @app.command()
 def create_table_manifest(

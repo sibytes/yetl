@@ -14,7 +14,13 @@
             "envFile": "${workspaceFolder}/.env",
             "args": [
                 
-                "init", "demo", "--overwrite"
+                // "init", "demo", "--overwrite"
+
+                "build",
+                "demo",
+                "demo_tables.yml", 
+                "landing_to_raw.yaml",
+                "./config"
                 
                 // "build",
                 // "adworks",
