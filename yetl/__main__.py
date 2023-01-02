@@ -6,6 +6,7 @@ from .cli.init import init as _init
 from .cli.project import Project
 import os
 import yaml
+import json
 
 app = typer.Typer()
 
@@ -45,7 +46,7 @@ def build(
         metadata: dict = yaml.safe_load(f)
 
     project = Project(**metadata)
-    print(project)
+    print(json.dumps(json.loads(project.json()), indent=4))
 
 @app.command()
 def create_table_manifest(
