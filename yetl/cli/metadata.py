@@ -20,10 +20,13 @@ class MetadataFileStore(MetadataStore):
         os.makedirs(self.directory_path, exist_ok=True)
 
     def _format_table(
-        self, name: str, enable_exceptions: bool = False, enable_thresholds: bool = True
+        self,
+        name: str,
+        enable_exceptions: bool = False,
+        disable_thresholds: bool = True,
     ):
         table = {"name": name, "keys": [], "enable_exceptions": enable_exceptions}
-        if enable_exceptions and enable_thresholds:
+        if enable_exceptions and not disable_thresholds:
             table["thresholds"] = {
                 "thresholds": {
                     "warning": {
@@ -40,18 +43,18 @@ class MetadataFileStore(MetadataStore):
                     },
                 }
             }
-        return table
+        return dict(table)
 
     def save_tables(
         self,
         tables: List[str],
         enable_exceptions: bool = False,
-        enable_thresholds: bool = True,
+        disable_thresholds: bool = True,
     ):
 
         path = os.path.join(self.directory_path, f"{self.project}_tables.yml")
         tables = [
-            self._format_table(t, enable_exceptions, enable_thresholds) for t in tables
+            self._format_table(t, enable_exceptions, disable_thresholds) for t in tables
         ]
         data = {"database": self.project, "tables": tables}
         data_yml = yaml.safe_dump(data)

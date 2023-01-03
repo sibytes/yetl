@@ -48,17 +48,23 @@ def create_table_manifest(
     source_dir: str,
     filename: str = "*",
     extract_regex: str = None,
+    enable_exceptions: bool = False,
+    disable_thresholds: bool = False,
 ):
     """Create manifest configuration file containing the names of tables we want create yetl data pipelines on
 
     --filename:str - A wildcard name to filter the files you want to include to derive table names
 
     --extract_regex:str - A regex expression used to extract the table name from the file to get the table names you want e.g. remove timestamps ect
+
+    --enable_exceptions:bool - Whether or not to include a exceptions for piping schema exceptions into a delta table
+
+    --disable_thresholds:bool - Whether or not to include a default thresholds definition that can be modified afterwards, note --enabled_expcetions must be true
     """
     source = FileSource(source_dir, filename, extract_regex)
     files = source.tables()
     metadata = MetadataFileStore(project, build_dir)
-    metadata.save_tables(files)
+    metadata.save_tables(files, enable_exceptions, disable_thresholds)
 
 
 if __name__ in ["yetl.__main__", "__main__"]:
