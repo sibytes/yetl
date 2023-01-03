@@ -8,6 +8,7 @@ from typing import Any
 
 _EXT = "yaml"
 
+
 class EnvironmentSettings(BaseSettings):
 
     root: str = Field(default="./config", env="YETL_ROOT")
@@ -20,7 +21,7 @@ class EnvironmentSettings(BaseSettings):
 class Environment(BaseModel):
     environment_settings: EnvironmentSettings = Field(default=EnvironmentSettings())
     _path: str = PrivateAttr(default=None)
-    _logger:Any = PrivateAttr(default=None)
+    _logger: Any = PrivateAttr(default=None)
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)

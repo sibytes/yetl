@@ -30,7 +30,6 @@ from ._validation import PermissiveSchemaOnRead, BadRecordsPathSchemaOnRead, Thr
 import logging
 
 
-
 class ReaderConfigurationException(Exception):
     def __init__(self, message):
         super().__init__(message)
@@ -60,7 +59,7 @@ class Read(BaseModel):
     _DEFAULT_OPTIONS = {"mode": ReadModeOptions.PERMISSIVE.value, "inferSchema": False}
     auto: bool = Field(default=True)
     options: Dict[str, Any] = Field(default=_DEFAULT_OPTIONS)
-    _logger:Any = PrivateAttr(default=None)
+    _logger: Any = PrivateAttr(default=None)
 
     def render(self, replacements: Dict[JinjaVariables, str]):
 
@@ -86,7 +85,7 @@ class Read(BaseModel):
     def infer_schema(self, value: bool):
         self.options["inferSchema"] = value
 
-    def set_infer_schema(self, infer_schema:bool):
+    def set_infer_schema(self, infer_schema: bool):
         self.options["inferSchema"] = infer_schema
 
     def get_mode(self):
@@ -117,7 +116,7 @@ class Read(BaseModel):
 class Exceptions(SQLTable):
     path: str = Field(...)
     context: Union[SparkContext, DatabricksContext] = Field(...)
-    _logger:Any = PrivateAttr(default=None)
+    _logger: Any = PrivateAttr(default=None)
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
@@ -436,7 +435,9 @@ class Reader(Source, SQLTable):
                     StringType(),
                     nullable=True,
                 )
-            self.context.spark_schema_repository.save_schema(self.spark_schema, self.database, self.table)
+            self.context.spark_schema_repository.save_schema(
+                self.spark_schema, self.database, self.table
+            )
 
     def execute(self):
         self._logger.debug(
@@ -506,7 +507,7 @@ class Reader(Source, SQLTable):
         metadata[str(self.dataset_id)]["path"] = self.path
 
         return metadata
-        
+
     class Config:
         # use a custom decoder to convert the field names
         # back into yetl configuration names

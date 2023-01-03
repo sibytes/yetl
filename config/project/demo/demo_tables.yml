@@ -1,9 +1,9 @@
 database: demo
 tables:
-- table: customer_preferences
+- name: customer_preferences
   keys:
     - ID
-- table: customer_details
+- name: customer_details
   keys:
     - ID
   enable_exceptions: true

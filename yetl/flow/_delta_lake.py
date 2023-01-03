@@ -6,6 +6,7 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+
 class DeltaLakeProperties(Enum):
     OPTIMIZE_WRITE = "delta.autoOptimize.optimizeWrite"
     AUTO_COMPACT = "delta.autoOptimize.autoCompact"

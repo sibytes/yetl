@@ -42,7 +42,7 @@ def get_log_configuration():
 
 def get_dbx_environment_config(config_dir: str = _CONFIG_DIR):
     env_config = _strip_margin(
-    """datalake: "/mnt/datalake/yetl_data"
+        """datalake: "/mnt/datalake/yetl_data"
       |
       |engine:
       |  databricks:
@@ -74,7 +74,7 @@ def get_dbx_environment_config(config_dir: str = _CONFIG_DIR):
 
 def get_local_environment_config(config_dir: str = _CONFIG_DIR):
     env_config = _strip_margin(
-    """datalake: "{{{{cwd}}}}/data"
+        """datalake: "{{{{cwd}}}}/data"
       |
       |engine:
       |  spark:

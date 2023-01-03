@@ -23,5 +23,5 @@ __all__ = [
     "DeltaWriter",
     "dataset_factory",
     "Write",
-    "Thresholds"
+    "Thresholds",
 ]

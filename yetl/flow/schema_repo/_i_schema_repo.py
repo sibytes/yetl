@@ -8,7 +8,7 @@ class ISchemaRepo(BaseModel, ABC):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
 
-    _logger:Any = PrivateAttr(default=None)
+    _logger: Any = PrivateAttr(default=None)
 
     @abstractmethod
     def save_schema(

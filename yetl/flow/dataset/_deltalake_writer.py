@@ -45,7 +45,7 @@ class Write(BaseModel):
     _save: Save = PrivateAttr(default=None)
     _merge_schema: bool = PrivateAttr(default=False)
     _mode_options: dict = PrivateAttr(default=None)
-    _logger:Any = PrivateAttr(default=None)
+    _logger: Any = PrivateAttr(default=None)
 
     def get_merge_schema(self) -> bool:
         return self._merge_schema
@@ -174,7 +174,7 @@ class DeltaWriter(Destination, SQLTable):
                 if self.yetl_properties.schema_create_if_not_exists:
                     self._create_spark_schema = True
                     self.ddl = None
-                # if the schema URI is defined, it's not there 
+                # if the schema URI is defined, it's not there
                 # and is not create if not exist then raise an error
                 else:
                     raise e
@@ -224,7 +224,7 @@ class DeltaWriter(Destination, SQLTable):
         tbl_properties_ddl = self._get_table_properties_sql(_existing_properties)
         self._logger.debug(
             f"DeltaWriter table properties ddl = {tbl_properties_ddl}"
-        ) # TODO: only alter properties if they have changed.
+        )  # TODO: only alter properties if they have changed.
         if tbl_properties_ddl:
             start_datetime = datetime.now()
             self.context.spark.sql(tbl_properties_ddl)
@@ -374,9 +374,7 @@ class DeltaWriter(Destination, SQLTable):
                 self.create_schema()
 
             self._logger.debug("Save options:")
-            self._logger.debug(
-                json.dumps(self.write.options, indent=4, default=str)
-            )
+            self._logger.debug(json.dumps(self.write.options, indent=4, default=str))
 
             # write the dataframe to the lake path
             self.write.get_save().write()

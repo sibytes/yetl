@@ -37,16 +37,8 @@ def build(
     build_dir: str,
 ):
     """Use table manifest file and the pipeline jinja template to build a pipeline configuration for each table"""
-    # build_config(project, metadata_file, template_file, build_dir)
+    build_config(project, metadata_file, template_file, build_dir)
 
-    project_dir = os.path.abspath(os.path.join(build_dir, "project", project))
-
-    metadata_path = os.path.join(project_dir, metadata_file)
-    with open(metadata_path, "r", encoding="utf-8") as f:
-        metadata: dict = yaml.safe_load(f)
-
-    project = Project(**metadata)
-    print(json.dumps(json.loads(project.json()), indent=4))
 
 @app.command()
 def create_table_manifest(
@@ -66,7 +58,7 @@ def create_table_manifest(
     source = FileSource(source_dir, filename, extract_regex)
     files = source.tables()
     metadata = MetadataFileStore(project, build_dir)
-    metadata.save_table_manifest(files)
+    metadata.save_tables(files)
 
 
 if __name__ in ["yetl.__main__", "__main__"]:

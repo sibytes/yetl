@@ -9,7 +9,6 @@ from .._environment import Environment
 from ._context_options import ContextType
 
 
-
 class IContext(BaseModel):
 
     auditor: Audit = Field(...)
@@ -24,7 +23,7 @@ class IContext(BaseModel):
     datalake_fs: IFileSystem = None
     environment: Environment = Field(...)
     context_type: ContextType = Field(...)
-    _logger:Any = PrivateAttr(default=None)
+    _logger: Any = PrivateAttr(default=None)
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)

@@ -19,7 +19,7 @@
                 "build",
                 "demo",
                 "demo_tables.yml", 
-                "landing_to_raw.yaml",
+                "landing_to_raw.yaml.j2",
                 "./config"
                 
                 // "build",

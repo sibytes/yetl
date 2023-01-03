@@ -7,6 +7,7 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+
 class YetlFlowException(Exception):
     def __init__(self, message):
         super().__init__(message)
@@ -16,7 +17,7 @@ class YetlFlowException(Exception):
 def yetl_flow(project: str, pipeline_name: str = None):
     def decorate(function):
         def wrap_function(*args, **kwargs):
-            
+
             function_name = function.__name__
             _logger.debug(f"Initiaiting pipeline {function_name} pre execute")
 

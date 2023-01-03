@@ -6,7 +6,7 @@ from typing import Any
 
 class Dataset(BaseModel, ABC):
 
-    _logger:Any = PrivateAttr(default=None)
+    _logger: Any = PrivateAttr(default=None)
 
     @abstractmethod
     def initialise(self):
@@ -39,7 +39,7 @@ class Dataset(BaseModel, ABC):
                 "type": self.__class__.__name__,
                 "dataflow_id": str(self.dataflow_id),
                 "database": self.database,
-                "table": self.table
+                "table": self.table,
             }
         }
 

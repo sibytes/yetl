@@ -1,7 +1,3 @@
-from ._project import (
-    Project
-)
+from ._project import Project
 
-__all__ = [
-    "Project"
-]
+__all__ = ["Project"]
