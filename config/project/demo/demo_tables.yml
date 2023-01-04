@@ -1,11 +1,11 @@
 database: demo
 tables:
 - keys:
-    - ID
+    - id
   name: customer_preferences
 - enable_exceptions: true
   keys:
-    - ID
+    - id
   name: customer_details
   thresholds:
     error:
