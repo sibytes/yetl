@@ -37,7 +37,7 @@ def build(
 
 
 @app.command()
-def create_table_manifest(
+def register_tables(
     project: str,
     build_dir: str,
     source_type: str,

@@ -22,7 +22,7 @@
                 // "landing_to_raw.yaml.j2",
                 // "./config"
 
-                "create-table-manifest" ,
+                "register_tables" ,
                 "demo" ,
                 "./config/project"  ,
                 "File" ,
@@ -42,7 +42,7 @@
                 // "landing_to_raw.yaml",
                 // "./config"
 
-                // "create-table-manifest", 
+                // "register_tables", 
                 // "File", 
                 // "/Users/shaunryan/AzureDevOps/yetl-patterns/data/landing/adventureworks", 
                 // "--filename", 
