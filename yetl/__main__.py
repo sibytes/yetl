@@ -3,10 +3,6 @@ import typer
 from .cli.metadata import MetadataFileStore
 from .cli.build import build_config
 from .cli.init import init as _init
-from .cli.project import Project
-import os
-import yaml
-import json
 
 app = typer.Typer()
 
