@@ -4,7 +4,6 @@ from datetime import datetime
 from ._environment import Environment
 from .dataflow import IDataflow, Dataflow
 from .dataset import dataset_factory
-import json
 import logging
 
 _logger = logging.getLogger(__name__)
