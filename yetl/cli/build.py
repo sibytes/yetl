@@ -74,7 +74,21 @@ def build_config(
     for table in project.tables:
         filename = f"{table.name}_{template_file}"
         filename = os.path.join(pipeline_build_path, filename)
+        filename = _file_extension_handling(filename)
+
         data = table.dict()
         content = template.render(table=data)
         with open(filename, mode="w", encoding="utf-8") as pipeline:
             pipeline.write(content)
+
+
+def _file_extension_handling(filename:str):
+
+        filename, ext = os.path.splitext(filename)
+        if ext in [".jinja2", ".j2"]:
+            filename, ext = os.path.splitext(filename)
+        if ext not in [".yaml",".yml"]:
+            ext = "yaml"
+        filename = f"{filename}{ext}"
+
+        return filename
