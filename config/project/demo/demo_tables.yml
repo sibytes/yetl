@@ -1,4 +1,20 @@
 database: demo
 tables:
-- table: customer_preferences
-- table: customer_details
+- keys:
+    - id
+  name: customer_preferences
+- enable_exceptions: true
+  keys:
+    - id
+  name: customer_details
+  thresholds:
+    error:
+      exception_count: 0
+      exception_percent: 80
+      max_rows: 100000000
+      min_rows: 0
+    warning:
+      exception_count: 0
+      exception_percent: 0
+      max_rows: 100000000
+      min_rows: 1

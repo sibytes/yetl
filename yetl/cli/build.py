@@ -3,6 +3,7 @@ from jinja2 import Template, Undefined
 import shutil
 import yaml
 from jinja2.utils import missing, object_type_repr
+from .project import Project
 
 
 class YetlDebugUndefined(Undefined):
@@ -26,6 +27,14 @@ class YetlDebugUndefined(Undefined):
 
     def _fail_with_undefined_error(self, *args, **kwargs):
         return ""
+
+
+def _to_yaml(data: dict):
+    if isinstance(data, dict):
+        yaml_string = yaml.dump(data, default_flow_style=False)
+    else:
+        raise Exception("to_yaml function expects a dictionary type.")
+    return yaml_string
 
 
 def build_config(
@@ -52,14 +61,20 @@ def build_config(
     with open(os.path.join(template_dir, template_file), "r", encoding="utf-8") as f:
         template_data = f.read()
 
-    template: Template = Template(template_data, undefined=YetlDebugUndefined)
+    project: Project = Project(**metadata)
+    template: Template = Template(
+        template_data,
+        undefined=YetlDebugUndefined,
+        trim_blocks=True,
+        lstrip_blocks=True,
+    )
+    env = template.environment
+    env.globals.update(to_yaml=_to_yaml)
 
-    tables = metadata.get("tables", [])
-    for table in tables:
-        table_name = table["table"]
-        filename = f"{table_name}_{template_file}"
+    for table in project.tables:
+        filename = f"{table.name}_{template_file}"
         filename = os.path.join(pipeline_build_path, filename)
-        data = {f"{project}_tables_table_name": table_name}
-        content = template.render(data)
+        data = table.dict()
+        content = template.render(table=data)
         with open(filename, mode="w", encoding="utf-8") as pipeline:
             pipeline.write(content)

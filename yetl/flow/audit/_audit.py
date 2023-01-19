@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field, PrivateAttr
 from typing import Union, Any, Dict
 import logging
 
+
 class AuditLevel(Enum):
     DATAFLOW = "dataflow"
     DATASETS = "datasets"
@@ -47,7 +48,7 @@ class Audit(BaseModel):
 
     audit_log: Dict[str, dict] = Field(default=None)
     _task_counter: dict = PrivateAttr(default={})
-    _logger:Any = PrivateAttr(default=None)
+    _logger: Any = PrivateAttr(default=None)
 
     def error(self, exception: Exception):
         self._logger.exception(exception)

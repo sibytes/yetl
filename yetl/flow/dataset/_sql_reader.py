@@ -19,6 +19,7 @@ from datetime import datetime
 from pyspark.sql import functions as fn
 import logging
 
+
 def _yetl_properties_dumps(obj: dict, *, default):
     """Decodes the data back into a dictionary with yetl configuration properties names"""
     obj = {
@@ -113,11 +114,13 @@ class SQLReader(Source, SQLTable):
         self.dataframe = self._add_source_metadata(self.dataframe)
 
         detail = {"table": self.database_table, "sql": self.sql}
-        self.auditor.dataset_task(self.dataset_id, AuditTask.LAZY_READ, detail, start_datetime)
+        self.auditor.dataset_task(
+            self.dataset_id, AuditTask.LAZY_READ, detail, start_datetime
+        )
 
         return self.dataframe
 
-    def _add_df_metadata(self, column: str, value: str, df:DataFrame):
+    def _add_df_metadata(self, column: str, value: str, df: DataFrame):
 
         if column in df.columns:
             # We have to drop the column first if it exists since it may have been added
@@ -126,8 +129,8 @@ class SQLReader(Source, SQLTable):
         df = df.withColumn(column, fn.lit(value))
         return df
 
-    def _add_source_metadata(self, df:DataFrame):
-        
+    def _add_source_metadata(self, df: DataFrame):
+
         if self.yetl_properties.metadata_context_id:
             df = self._add_df_metadata(CONTEXT_ID, str(self.context_id), df)
 
@@ -138,7 +141,6 @@ class SQLReader(Source, SQLTable):
             df = self._add_df_metadata(DATASET_ID, str(self.dataset_id), df)
 
         return df
-
 
     class Config:
         # use a custom decoder to convert the field names

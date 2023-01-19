@@ -8,6 +8,7 @@ from ..schema_repo import schema_repo_factory, ISchemaRepo
 from ..file_system import file_system_factory, IFileSystem, FileSystemType
 import logging
 
+
 class SparkContext(IContext):
 
     spark_version: str = Field(default=None)
@@ -82,7 +83,9 @@ class SparkContext(IContext):
     def _get_spark_logger(self, spark: SparkSession, project: str, config: dict):
 
         log_level = config.get("logging_level", "ERROR")
-        self._logger.debug(f"Setting application context spark logger at level {log_level}")
+        self._logger.debug(
+            f"Setting application context spark logger at level {log_level}"
+        )
         sc = spark.sparkContext
         sc.setLogLevel(log_level)
         log4j_logger = sc._jvm.org.apache.log4j

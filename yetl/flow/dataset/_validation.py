@@ -10,6 +10,7 @@ from abc import ABC, abstractmethod
 import logging
 import json
 
+
 class ThresholdLimit(BaseModel):
     min_rows: int = Field(default=0)
     max_rows: int = Field(default=None)
@@ -41,7 +42,7 @@ class IValidator(BaseModel, ABC):
     warning_thresholds: ThresholdLimit = Field(default=None)
     error_thresholds: ThresholdLimit = Field(default=None)
     level: ThresholdLevels = Field(default=ThresholdLevels.INFO)
-    _logger:Any = PrivateAttr(default=None)
+    _logger: Any = PrivateAttr(default=None)
 
     @abstractmethod
     def validate(self) -> dict:

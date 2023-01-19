@@ -7,7 +7,7 @@ from ._properties import (
 from ._base import Source, Destination, Dataset
 from ._deltalake_writer import DeltaWriter, Write
 from ._sql_reader import SQLReader
-from ._reader import Reader
+from ._reader import Reader, Thresholds
 from ._factory import factory as dataset_factory
 
 __all__ = [
@@ -23,4 +23,5 @@ __all__ = [
     "DeltaWriter",
     "dataset_factory",
     "Write",
+    "Thresholds",
 ]

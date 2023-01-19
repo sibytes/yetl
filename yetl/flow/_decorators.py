@@ -1,11 +1,12 @@
 # implicit, not referenced - must be the 1st import
-from . import _logging_config
+from ._logging_config import configure_logging
 from ._builder import _build_context, _build_dataflow
 from datetime import datetime
 from .dataflow import IDataflow
 import logging
 
 _logger = logging.getLogger(__name__)
+
 
 class YetlFlowException(Exception):
     def __init__(self, message):
@@ -14,9 +15,12 @@ class YetlFlowException(Exception):
 
 
 def yetl_flow(project: str, pipeline_name: str = None):
+    # need to fix this by wrapping it in a function.
+    # having it live this is nasty.
+
     def decorate(function):
         def wrap_function(*args, **kwargs):
-            
+            configure_logging()
             function_name = function.__name__
             _logger.debug(f"Initiaiting pipeline {function_name} pre execute")
 

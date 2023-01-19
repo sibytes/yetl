@@ -19,8 +19,7 @@ class IDataflow(BaseModel, ABC):
     dataflow_id: uuid.UUID = Field(default=uuid.uuid4())
     sources: dict = Field(default={})
     destinations: dict = Field(default={})
-    _logger:Any = PrivateAttr(default=None)
-
+    _logger: Any = PrivateAttr(default=None)
 
     @abstractmethod
     def append(self, dataset: Dataset) -> None:

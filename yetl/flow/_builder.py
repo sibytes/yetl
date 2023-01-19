@@ -4,13 +4,12 @@ from datetime import datetime
 from ._environment import Environment
 from .dataflow import IDataflow, Dataflow
 from .dataset import dataset_factory
-import json
 import logging
 
 _logger = logging.getLogger(__name__)
 
-def _build_context(pipeline_name: str, project: str, function_name: str, kwargs: dict):
 
+def _build_context(pipeline_name: str, project: str, function_name: str, kwargs: dict):
 
     # load the environment settings and configuration provider
     environment = Environment()

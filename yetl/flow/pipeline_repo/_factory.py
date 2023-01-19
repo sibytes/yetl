@@ -4,6 +4,7 @@ from ._pipeline_file_repo import PipelineFileRepo
 from ._i_pipeline_repo import IPipelineRepo
 import logging
 
+
 class PipelineRepoType(Enum):
     PIPELINE_FILE = "pipeline_file"
 

@@ -4,6 +4,7 @@ from ._i_file_system import IFileSystem
 from ._file_system_options import FileSystemType
 import logging
 
+
 class _FileSystemFactory:
     def __init__(self) -> None:
         self._logger = logging.getLogger(self.__class__.__name__)

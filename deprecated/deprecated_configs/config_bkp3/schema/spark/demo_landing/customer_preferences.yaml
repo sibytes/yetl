@@ -1,0 +1,10 @@
+fields:
+- metadata: {}
+  name: id
+  nullable: true
+  type: integer
+- metadata: {}
+  name: allow_contact
+  nullable: true
+  type: boolean
+type: struct

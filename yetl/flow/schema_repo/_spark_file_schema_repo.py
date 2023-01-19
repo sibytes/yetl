@@ -12,6 +12,7 @@ from typing import Any
 _SCHEMA_ROOT = "./config/schema/spark"
 _EXT = "yaml"
 
+
 class SparkFileSchemaRepo(ISchemaRepo):
 
     root: str = Field(default=_SCHEMA_ROOT, alias="spark_schema_root")

@@ -119,6 +119,10 @@ There is a CI build configured for this repo that builds on main origin and publ
 # Releases
 
 Version: 0.0.28
+- Now cli supports full jinja templating of pipelines instead trying to re-invent the jinja wheel
+- Fixed bugs related to pydantic refactor
+
+Version: 0.0.28
 - Heavily refactored the internal design into a simpler code base
 - Much less reliance on dictionaries
 - Built Pyandantic into almost all the classes

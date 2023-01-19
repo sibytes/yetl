@@ -1,0 +1,53 @@
+dataflow:
+
+  demo_landing:
+    customer_preferences:
+      type: Reader     
+
+      properties:
+        yetl.schema.createIfNotExists: true
+        yetl.metadata.timeslice: timeslice_file_date_format
+        yetl.metadata.filepathFilename: true
+
+      path_date_format: "%Y%m%d"
+      file_date_format: "%Y%m%d"
+      format: csv
+      path: "landing/demo/{{ timeslice_path_date_format }}/{{ demo_tables_table_name }}_{{ timeslice_file_date_format }}.csv"
+      read:
+        auto: true
+        options:
+          mode: PERMISSIVE
+          inferSchema: false
+          header: true
+  
+
+  demo_raw:
+    customer_preferences:
+      type: DeltaWriter
+      partitioned_by:
+        - _partition_key
+
+      ddl: "{{ root }}"
+      properties:
+        yetl.metadata.datasetId: true
+        yetl.schema.createIfNotExists: true
+        delta.appendOnly: false
+        delta.checkpoint.writeStatsAsJson: true
+        delta.autoOptimize.autoCompact: true       
+        delta.autoOptimize.optimizeWrite: true     
+        delta.compatibility.symlinkFormatManifest.enabled: false
+        delta.dataSkippingNumIndexedCols: -1
+        delta.logRetentionDuration: interval 30 days
+        delta.deletedFileRetentionDuration: interval 1 week
+        delta.enableChangeDataFeed: true
+        delta.minReaderVersion: 1
+        delta.minWriterVersion: 2
+        delta.randomizeFilePrefixes: false
+        delta.randomPrefixLength: 2
+      
+      format: delta
+      path: delta_lake/demo_raw/customer_preferences
+      write:
+        mode: append
+        options:
+          mergeSchema: true
