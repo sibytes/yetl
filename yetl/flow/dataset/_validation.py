@@ -61,25 +61,25 @@ class IValidator(BaseModel, ABC):
         raise_thresholds = False
         messages = []
 
-        if self.total_count <= min_rows:
+        if min_rows != None and self.total_count <= min_rows:
             raise_thresholds = True
             messages.append(
                 f"min_rows threshold exceeded: {self.total_count} < {min_rows}"
             )
 
-        if self.total_count > max_rows:
+        if max_rows != None and self.total_count > max_rows:
             raise_thresholds = True
             messages.append(
                 f"max_rows threshold exceeded: {self.total_count} > {max_rows}"
             )
 
-        if self.exceptions_count > exception_count:
+        if exception_count != None and self.exceptions_count > exception_count:
             raise_thresholds = True
             messages.append(
                 f"exception_count threshold exceeded: {self.exceptions_count} >= {exception_count}"
             )
 
-        if self.exception_percent > exception_percent:
+        if exception_percent != None and self.exception_percent > exception_percent:
             raise_thresholds = True
             messages.append(
                 f"exception_percent threshold exceeded: {self.exception_percent} > {exception_percent}"
