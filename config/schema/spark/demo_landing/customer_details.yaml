@@ -2,7 +2,7 @@ fields:
 - metadata: {}
   name: id
   nullable: true
-  type: string
+  type: integer
 - metadata: {}
   name: first_name
   nullable: true
@@ -27,4 +27,8 @@ fields:
   name: amount
   nullable: true
   type: double
+- metadata: {}
+  name: _corrupt_record
+  nullable: true
+  type: string
 type: struct
