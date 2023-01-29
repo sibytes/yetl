@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, PrivateAttr
 from ..context import IContext
 from abc import ABC, abstractmethod
 import logging
+from ..warnings import Warning
 import json
 
 
@@ -43,6 +44,7 @@ class IValidator(BaseModel, ABC):
     error_thresholds: ThresholdLimit = Field(default=None)
     level: ThresholdLevels = Field(default=ThresholdLevels.INFO)
     _logger: Any = PrivateAttr(default=None)
+    context: IContext = Field(...)
 
     @abstractmethod
     def validate(self) -> dict:
@@ -51,12 +53,12 @@ class IValidator(BaseModel, ABC):
     def raise_thresholds(self, thresholds: ThresholdLimit, level: ThresholdLevels):
 
         self.exception_count = self.total_count - self.valid_count
-        self.exception_percent = (thresholds.exception_count / self.total_count) * 100
+        self.exception_percent = (self.exception_count / self.total_count) * 100
 
         raise_thresholds = False
         messages = []
 
-        if thresholds.min_rows != None and self.total_count <= thresholds.min_rows:
+        if thresholds.min_rows != None and self.total_count < thresholds.min_rows:
             raise_thresholds = True
             messages.append(
                 f"min_rows threshold exceeded: {self.total_count} < {thresholds.min_rows}"
@@ -71,7 +73,7 @@ class IValidator(BaseModel, ABC):
         if thresholds.exception_count != None and self.exception_count > thresholds.exception_count:
             raise_thresholds = True
             messages.append(
-                f"exception_count threshold exceeded: {self.exception_count} >= {thresholds.exception_count}"
+                f"exception_count threshold exceeded: {self.exception_count} > {thresholds.exception_count}"
             )
 
         if thresholds.exception_percent != None and self.exception_percent > thresholds.exception_percent:
@@ -91,11 +93,17 @@ class IValidator(BaseModel, ABC):
 
             if level == ThresholdLevels.WARNING:
                 self._logger.warning(msg)
-                self.level = ThresholdLevels.WARNING
+                self.context.auditor.warning(Warning(message=msg))
+                if self.level != ThresholdLevels.ERROR:
+                    self.level = ThresholdLevels.WARNING
 
             if level == ThresholdLevels.INFO:
                 self._logger.debug(msg)
-                self.level = ThresholdLevels.INFO
+                if self.level not in [ThresholdLevels.ERROR, ThresholdLevels.WARNING]:
+                    self.level = ThresholdLevels.INFO 
+
+            if self.level == ThresholdLevels.ERROR:
+                raise Exception(msg)
 
     def get_result(self):
         validation = {
@@ -133,7 +141,6 @@ class PermissiveSchemaOnRead(IValidator):
         super().__init__(**data)
         self._logger = logging.getLogger(self.__class__.__name__)
 
-    context: IContext = Field(...)
     corrupt_record: str = Field(default=CORRUPT_RECORD)
 
     def validate(self):
@@ -167,7 +174,6 @@ class BadRecordsPathSchemaOnRead(IValidator):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
 
-    context: IContext = Field(...)
     path: str = Field(...)
     spark: SparkSession = None
 

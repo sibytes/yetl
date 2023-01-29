@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 
-class Warning:
+class Warning(BaseModel):
 
     message: str = Field(...)
 
