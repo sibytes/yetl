@@ -33,7 +33,7 @@ class IValidator(BaseModel, ABC):
 
     dataframe: DataFrame = None
     validation_handler: Callable[[DataFrame], int] = Field(default=None)
-    exceptions_count: int = Field(default=0)
+    exception_count: int = Field(default=0)
     valid_count: int = Field(default=0)
     total_count: int = Field(default=0)
     exception_percent: int = Field(default=0)
@@ -50,39 +50,34 @@ class IValidator(BaseModel, ABC):
 
     def raise_thresholds(self, thresholds: ThresholdLimit, level: ThresholdLevels):
 
-        min_rows = thresholds.min_rows
-        max_rows = thresholds.max_rows
-        exception_count = thresholds.exception_count
-        exception_percent = thresholds.exception_percent
-
-        exception_count = self.total_count - self.valid_count
-        self.exception_percent = (exception_count / self.total_count) * 100
+        self.exception_count = self.total_count - self.valid_count
+        self.exception_percent = (thresholds.exception_count / self.total_count) * 100
 
         raise_thresholds = False
         messages = []
 
-        if min_rows != None and self.total_count <= min_rows:
+        if thresholds.min_rows != None and self.total_count <= thresholds.min_rows:
             raise_thresholds = True
             messages.append(
-                f"min_rows threshold exceeded: {self.total_count} < {min_rows}"
+                f"min_rows threshold exceeded: {self.total_count} < {thresholds.min_rows}"
             )
 
-        if max_rows != None and self.total_count > max_rows:
+        if thresholds.max_rows != None and self.total_count > thresholds.max_rows:
             raise_thresholds = True
             messages.append(
-                f"max_rows threshold exceeded: {self.total_count} > {max_rows}"
+                f"max_rows threshold exceeded: {self.total_count} > {thresholds.max_rows}"
             )
 
-        if exception_count != None and self.exceptions_count > exception_count:
+        if thresholds.exception_count != None and self.exception_count > thresholds.exception_count:
             raise_thresholds = True
             messages.append(
-                f"exception_count threshold exceeded: {self.exceptions_count} >= {exception_count}"
+                f"exception_count threshold exceeded: {self.exception_count} >= {thresholds.exception_count}"
             )
 
-        if exception_percent != None and self.exception_percent > exception_percent:
+        if thresholds.exception_percent != None and self.exception_percent > thresholds.exception_percent:
             raise_thresholds = True
             messages.append(
-                f"exception_percent threshold exceeded: {self.exception_percent} > {exception_percent}"
+                f"exception_percent threshold exceeded: {self.exception_percent} > {thresholds.exception_percent}"
             )
 
         if raise_thresholds:
@@ -113,7 +108,7 @@ class IValidator(BaseModel, ABC):
                     f"{self.database}.{self.table}": {
                         "total_count": self.total_count,
                         "valid_count": self.valid_count,
-                        "exception_count": self.exceptions_count,
+                        "exception_count": self.exception_count,
                         "exception_percent": self.exception_percent,
                     }
                 },
@@ -152,14 +147,14 @@ class PermissiveSchemaOnRead(IValidator):
             .withColumn(TABLE, fn.lit(self.table))
         )
 
-        self.exceptions_count = exceptions.count()
+        self.exception_count = exceptions.count()
 
         self.dataframe = self.dataframe.where(f"{self.corrupt_record} IS NULL").drop(
             self.corrupt_record
         )
 
         self.valid_count = self.dataframe.count()
-        self.exceptions_count = self.validation_handler(exceptions)
+        self.exception_count = self.validation_handler(exceptions)
         if self.warning_thresholds:
             super().raise_thresholds(self.warning_thresholds, ThresholdLevels.WARNING)
         if self.error_thresholds:
@@ -181,15 +176,15 @@ class BadRecordsPathSchemaOnRead(IValidator):
         self.total_count = self.dataframe.count()
         self.dataframe.cache()
         self.valid_count = self.dataframe.distinct().count()
-        self.exceptions_count = self.total_count - self.valid_count
+        self.exception_count = self.total_count - self.valid_count
         options = {INFER_SCHEMA: True, RECURSIVE_FILE_LOOKUP: True}
         try:
             self._logger.debug(
-                f"{self.exceptions_count} schema on read exceptions found for dataset {self.table}"
+                f"{self.exception_count} schema on read exceptions found for dataset {self.table}"
             )
-            if self.exceptions_count > 0:
+            if self.exception_count > 0:
                 self._logger.debug(
-                    f"Try loading {self.exceptions_count} exceptions for dataset {self.table} from {self.path}"
+                    f"Try loading {self.exception_count} exceptions for dataset {self.table} from {self.path}"
                 )
                 exceptions: DataFrame = (
                     self.spark.read.format("json")
@@ -199,19 +194,19 @@ class BadRecordsPathSchemaOnRead(IValidator):
                     .withColumn(DATABASE, fn.lit(self.database))
                     .withColumn(TABLE, fn.lit(self.table))
                 )
-                self.exceptions_count = self.validation_handler(exceptions)
+                self.exception_count = self.validation_handler(exceptions)
                 self._logger.debug(
                     f"Deleting exceptions for dataset {self.table} from {self.path}"
                 )
                 self.context.fs.rm(self.path, True)
 
         except AnalysisException as e:
-            if self.exceptions_count > 0:
-                msg = f"There are {self.exceptions_count} exceptions but dataset for table {self.table} failed to load from path {self.table}"
+            if self.exception_count > 0:
+                msg = f"There are {self.exception_count} exceptions but dataset for table {self.table} failed to load from path {self.table}"
                 self._logger.error(msg)
                 raise Exception(msg) from e
             exceptions = None
-            self.exceptions_count = 0
+            self.exception_count = 0
 
         super().raise_thresholds(self.warning_thresholds, ThresholdLevels.WARNING)
         super().raise_thresholds(self.error_thresholds, ThresholdLevels.ERROR)

@@ -39,12 +39,6 @@ def customer_details_landing_to_raw(
 # results = customer_details_landing_to_raw(timeslice=timeslice)
 # print(results)
 
-# reload 2021
-# timeslice = Timeslice(2021, "*", "*")
-# results = customer_details_landing_to_raw(timeslice=timeslice, save=OverwriteSave)
-# results = json.dumps(results, indent=4, default=str)
-# print(results)
-
 
 # reload all
 # timeslice = Timeslice(year="*", month="*", day="*")

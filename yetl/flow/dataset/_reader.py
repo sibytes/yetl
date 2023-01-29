@@ -291,18 +291,18 @@ class Reader(Source, SQLTable):
 
     def _get_validation_exceptions_handler(self):
         def handle_exceptions(exceptions: DataFrame):
-            exceptions_count = 0
+            exception_count = 0
             if self.has_exceptions:
-                exceptions_count = exceptions.count()
-                if exceptions and exceptions_count > 0:
+                exception_count = exceptions.count()
+                if exceptions and exception_count > 0:
                     options = {MERGE_SCHEMA: True}
                     self._logger.warning(
-                        f"Writing {exceptions_count} exception(s) from {self.database_table} to {self.exceptions.database_table} delta table {CONTEXT_ID}={str(self.context_id)}"
+                        f"Writing {exception_count} exception(s) from {self.database_table} to {self.exceptions.database_table} delta table {CONTEXT_ID}={str(self.context_id)}"
                     )
                     exceptions.write.format(FormatOptions.DELTA.value).options(
                         **options
                     ).mode(APPEND).save(self.exceptions.path)
-            return exceptions_count
+            return exception_count
 
         return handle_exceptions
 
