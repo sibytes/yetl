@@ -42,8 +42,8 @@ class Audit(BaseModel):
 
         self.audit_log = {
             AuditLevel.DATAFLOW.value: {AuditLevel.DATASETS.value: {}},
-            AuditLevel.WARNING.value: {self._COUNT: 0},
-            AuditLevel.ERROR.value: {self._COUNT: 0},
+            AuditLevel.WARNING.value: {self._COUNT: 0, f"{AuditLevel.WARNING.value}s":[]},
+            AuditLevel.ERROR.value: {self._COUNT: 0, f"{AuditLevel.ERROR.value}s":[]},
         }
 
     audit_log: Dict[str, dict] = Field(default=None)
@@ -107,7 +107,13 @@ class Audit(BaseModel):
         pass
 
     def _append(self, data: dict, level: AuditLevel):
-        self.audit_log[level.value] |= data
+
+        if level in [AuditLevel.ERROR, AuditLevel.WARNING]:
+            list_name = f"{level.value}s"
+            self.audit_log[level.value][list_name].append(data)
+        else:
+            self.audit_log[level.value] |= data
+
         self._increment_count(level)
 
     def _increment_count(self, level: AuditLevel):

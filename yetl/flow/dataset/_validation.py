@@ -83,9 +83,9 @@ class IValidator(BaseModel, ABC):
             )
 
         if raise_thresholds:
-            msg = f"{level.value} Thresholds:\n\t"
-            messages = "\n\t".join(messages)
-            msg = f"{msg}{messages}"
+            msg = f"{level.value} Thresholds: "
+            # messages = "\n\t".join(messages)
+            # msg = f"{msg}{messages}"
 
             if level == ThresholdLevels.ERROR:
                 self._logger.error(msg)
@@ -93,7 +93,8 @@ class IValidator(BaseModel, ABC):
 
             if level == ThresholdLevels.WARNING:
                 self._logger.warning(msg)
-                self.context.auditor.warning(Warning(message=msg))
+                for m in messages:
+                    self.context.auditor.warning(Warning(message=f"{msg}{m}"))
                 if self.level != ThresholdLevels.ERROR:
                     self.level = ThresholdLevels.WARNING
 
