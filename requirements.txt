@@ -38,8 +38,8 @@ rich==12.5.1
 six==1.16.0
 tomli==2.0.1
 twine==4.0.1
+typer==0.7.0
 typing_extensions==4.3.0
 urllib3==1.26.12
 webencodings==0.5.1
--e git+ssh://git@github.com/sibytes/yetl.git@aba00badcb77d90cb2e291a10dcdf2e7e1445892#egg=yetl_framework
 zipp==3.8.1
