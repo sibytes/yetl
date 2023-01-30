@@ -1,7 +1,7 @@
 from pyspark.sql import DataFrame
 from ..dataset import Dataset, Source, Destination
 from typing import Callable
-from ._exceptions import SourceNotFound, DestinationNotFound
+from ..exceptions import SourceNotFound, DestinationNotFound
 from typing import Any
 from ._i_dataflow import IDataflow
 import logging

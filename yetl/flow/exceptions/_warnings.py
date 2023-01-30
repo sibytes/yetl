@@ -7,3 +7,7 @@ class Warning(BaseModel):
 
     def __str__(self) -> str:
         return self.message
+
+
+class ThresholdWarning(Warning):
+    pass

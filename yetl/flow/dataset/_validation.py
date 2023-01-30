@@ -8,7 +8,8 @@ from pydantic import BaseModel, Field, PrivateAttr
 from ..context import IContext
 from abc import ABC, abstractmethod
 import logging
-from ..warnings import Warning
+from ..exceptions import ThresholdWarning
+from ..exceptions import ThresholdException
 import json
 
 
@@ -61,50 +62,55 @@ class IValidator(BaseModel, ABC):
         if thresholds.min_rows != None and self.total_count < thresholds.min_rows:
             raise_thresholds = True
             messages.append(
-                f"min_rows threshold exceeded: {self.total_count} < {thresholds.min_rows}"
+                f"min_rows threshold exceeded {self.total_count} < {thresholds.min_rows}"
             )
 
         if thresholds.max_rows != None and self.total_count > thresholds.max_rows:
             raise_thresholds = True
             messages.append(
-                f"max_rows threshold exceeded: {self.total_count} > {thresholds.max_rows}"
+                f"max_rows threshold exceeded {self.total_count} > {thresholds.max_rows}"
             )
 
-        if thresholds.exception_count != None and self.exception_count > thresholds.exception_count:
+        if (
+            thresholds.exception_count != None
+            and self.exception_count > thresholds.exception_count
+        ):
             raise_thresholds = True
             messages.append(
-                f"exception_count threshold exceeded: {self.exception_count} > {thresholds.exception_count}"
+                f"exception_count threshold exceeded {self.exception_count} > {thresholds.exception_count}"
             )
 
-        if thresholds.exception_percent != None and self.exception_percent > thresholds.exception_percent:
+        if (
+            thresholds.exception_percent != None
+            and self.exception_percent > thresholds.exception_percent
+        ):
             raise_thresholds = True
             messages.append(
-                f"exception_percent threshold exceeded: {self.exception_percent} > {thresholds.exception_percent}"
+                f"exception_percent threshold exceeded {self.exception_percent} > {thresholds.exception_percent}"
             )
 
         if raise_thresholds:
-            msg = f"{level.value} Thresholds: "
-            # messages = "\n\t".join(messages)
-            # msg = f"{msg}{messages}"
-
             if level == ThresholdLevels.ERROR:
-                self._logger.error(msg)
+                for m in messages:
+                    self._logger.error(m)
+                    self.context.auditor.error(ThresholdException(message=m))
                 self.level = ThresholdLevels.ERROR
 
             if level == ThresholdLevels.WARNING:
-                self._logger.warning(msg)
                 for m in messages:
-                    self.context.auditor.warning(Warning(message=f"{msg}{m}"))
+                    self._logger.warning(m)
+                    self.context.auditor.warning(ThresholdWarning(message=m))
                 if self.level != ThresholdLevels.ERROR:
                     self.level = ThresholdLevels.WARNING
 
             if level == ThresholdLevels.INFO:
-                self._logger.debug(msg)
+                for m in messages:
+                    self._logger.debug(m)
                 if self.level not in [ThresholdLevels.ERROR, ThresholdLevels.WARNING]:
-                    self.level = ThresholdLevels.INFO 
+                    self.level = ThresholdLevels.INFO
 
             if self.level == ThresholdLevels.ERROR:
-                raise Exception(msg)
+                raise ThresholdException("One or more exception threshold exception has occured.")
 
     def get_result(self):
         validation = {

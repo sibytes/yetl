@@ -5,6 +5,7 @@ import os
 
 from yaml import YAMLError
 
+
 def configure_logging():
     """Returns as of a named logger based on a yaml logging configuration file
 

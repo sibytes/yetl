@@ -41,7 +41,6 @@ setup(
         "yetl.flow.pipeline_repo",
         "yetl.flow.save",
         "yetl.flow.schema_repo",
-        "yetl.flow.warnings",
         "yetl.workflow",
     ],
     install_requires=[

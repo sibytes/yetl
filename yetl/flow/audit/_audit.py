@@ -3,9 +3,8 @@ from datetime import datetime
 import json
 from uuid import UUID
 import yaml
-import time
 from ..parser.parser import reduce_whitespace
-from ..warnings import Warning
+from ..exceptions import Warning
 from pydantic import BaseModel, Field, PrivateAttr
 from typing import Union, Any, Dict
 import logging
@@ -42,8 +41,11 @@ class Audit(BaseModel):
 
         self.audit_log = {
             AuditLevel.DATAFLOW.value: {AuditLevel.DATASETS.value: {}},
-            AuditLevel.WARNING.value: {self._COUNT: 0, f"{AuditLevel.WARNING.value}s":[]},
-            AuditLevel.ERROR.value: {self._COUNT: 0, f"{AuditLevel.ERROR.value}s":[]},
+            AuditLevel.WARNING.value: {
+                self._COUNT: 0,
+                f"{AuditLevel.WARNING.value}s": [],
+            },
+            AuditLevel.ERROR.value: {self._COUNT: 0, f"{AuditLevel.ERROR.value}s": []},
         }
 
     audit_log: Dict[str, dict] = Field(default=None)
@@ -52,12 +54,12 @@ class Audit(BaseModel):
 
     def error(self, exception: Exception):
         self._logger.exception(exception)
-        data = {"exception": exception.__class__.__name__, "message": str(exception)}
+        data = {exception.__class__.__name__: str(exception)}
         self._append(data, AuditLevel.ERROR)
 
     def warning(self, warning: Warning):
         self._logger.warning(str(warning))
-        data = {"warning": warning.__class__.__name__, "message": str(warning)}
+        data = {warning.__class__.__name__: str(warning)}
         self._append(data, AuditLevel.WARNING)
 
     def dataset_task(

@@ -82,13 +82,13 @@ def build_config(
             pipeline.write(content)
 
 
-def _file_extension_handling(filename:str):
+def _file_extension_handling(filename: str):
 
+    filename, ext = os.path.splitext(filename)
+    if ext in [".jinja2", ".j2"]:
         filename, ext = os.path.splitext(filename)
-        if ext in [".jinja2", ".j2"]:
-            filename, ext = os.path.splitext(filename)
-        if ext not in [".yaml",".yml"]:
-            ext = "yaml"
-        filename = f"{filename}{ext}"
+    if ext not in [".yaml", ".yml"]:
+        ext = "yaml"
+    filename = f"{filename}{ext}"
 
-        return filename
+    return filename

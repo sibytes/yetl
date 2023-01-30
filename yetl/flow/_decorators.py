@@ -4,6 +4,7 @@ from ._builder import _build_context, _build_dataflow
 from datetime import datetime
 from .dataflow import IDataflow
 import logging
+from .exceptions import ThresholdException
 
 _logger = logging.getLogger(__name__)
 
@@ -46,6 +47,8 @@ def yetl_flow(project: str, pipeline_name: str = None):
                     *args,
                     **kwargs,
                 )
+            except ThresholdException as te:
+                _logger.error(te)
             except Exception as e:
                 msg = f"Dataflow application {context.project} failed due to {e}."
                 _logger.error(msg)
