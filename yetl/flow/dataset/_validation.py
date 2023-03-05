@@ -16,8 +16,8 @@ import json
 class ThresholdLimit(BaseModel):
     min_rows: int = Field(default=0)
     max_rows: int = Field(default=None)
-    exception_count: int = Field(default=0)
-    exception_percent: int = Field(default=0)
+    exception_count: int = Field(default=None)
+    exception_percent: int = Field(default=None)
 
 
 class Thresholds(BaseModel):

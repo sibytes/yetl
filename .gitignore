@@ -146,3 +146,4 @@ derby.log
 /config/runs/*
 /scratch
 
+.databricks

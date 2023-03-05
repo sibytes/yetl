@@ -1,4 +1,4 @@
-datalake: "/mnt/datalake/yetl_data"
+datalake: "/mnt/datalake/data"
 
 engine:
   databricks:

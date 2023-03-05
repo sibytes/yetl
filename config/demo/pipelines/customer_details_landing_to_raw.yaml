@@ -25,12 +25,12 @@ dataflow:
           table: "{{ table_name }}_exceptions"
       thresholds:
         error:
-          exception_count: 0
-          exception_percent: 5
+          exception_count: 1000
+          # exception_percent: 5
           max_rows: 1000
           min_rows: 1
         warning:
-          exception_count: 0
+          exception_count: 1
           exception_percent: 5
           max_rows: 1000
           min_rows: 1

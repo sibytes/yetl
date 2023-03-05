@@ -13,7 +13,8 @@ from yetl.workflow import multithreaded as yetl_wf
 
 project = "demo"
 pipeline_name = "landing_to_raw"
-timeslice = Timeslice(2022, 7, 11)
+# timeslice = Timeslice(2022, 7, 11)
+timeslice = Timeslice(year=2021, month="*", day="*")
 maxparallel = 2
 
 
@@ -39,6 +40,6 @@ with open(
     f"./config/project/{project}/{project}_tables.yml", "r", encoding="utf-8"
 ) as f:
     metdata = yaml.safe_load(f)
-tables: list = [t["table"] for t in metdata.get("tables")]
+tables: list = [t["name"] for t in metdata.get("tables")]
 
 yetl_wf.load(project, tables, landing_to_raw, timeslice, maxparallel)
