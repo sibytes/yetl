@@ -166,6 +166,15 @@ pip install -e .
 pytest test/unit --junitxml=junit/test-results.xml --cov=yetl --cov-report=xml --cov-report=html
 ```
 
+## Integration Tests
+
+To run the integration tests with a coverage report.
+
+```
+pip install -e .
+pytest test/integration --junitxml=junit/test-results.xml --cov=yetl --cov-report=xml --cov-report=html
+```
+
 ## Build
 
 ```
