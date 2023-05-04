@@ -12,16 +12,16 @@ Define your tables.
 
 ```yaml
 
-landing:
-  read:
+landing: # this is the landing stage in the deltalake house
+  read: # this is the type of spark asset that the pipeline needs to read
     landing_dbx_patterns:
       customer_details_1: null
       customer_details_2: null
 
-raw:
-  delta_lake:
-    raw_dbx_patterns:
-      customers:
+raw: # this is the bronze stage in the deltalake house
+  delta_lake: # this is the type of spark asset that the pipeline needs to read and write to
+    raw_dbx_patterns: # this is the database name
+      customers: # this is a table name and it's subsequent properties
         ids: id
         depends_on:
           - landing.landing_dbx_patterns.customer_details_1
@@ -39,16 +39,16 @@ raw:
         custom_properties:
           process_group: 1
 
-base:
-  delta_lake:
+base: # this is the silver stage in the delta lakehouse
+  delta_lake: # this is the type of spark asset that the pipeline needs to read and write to
     # delta table properties can be set at stage level or table level
     delta_properties:
       delta.appendOnly: true
       delta.autoOptimize.autoCompact: true    
       delta.autoOptimize.optimizeWrite: true  
       delta.enableChangeDataFeed: false
-    base_dbx_patterns:
-      customer_details_1:
+    base_dbx_patterns: # this is a database name
+      customer_details_1: # this is a table name and it's subsequent properties
         ids: id
         depends_on:
           - raw.raw_dbx_patterns.customers
@@ -56,7 +56,7 @@ base:
         # table level properties will overwride stage level properties
         delta_properties:
             delta.enableChangeDataFeed: true
-      customer_details_2:
+      customer_details_2: # this is a table name and it's subsequent properties
         ids: id
         depends_on:
           - raw.raw_dbx_patterns.customers
@@ -68,8 +68,8 @@ Define you load configuration:
 version: 1.0.0
 tables: ./tables.yaml
 
-landing:
-  read:
+landing: # this is the landing stage in the deltalake house
+  read: # this is the type of spark asset that the pipeline needs to read from
     trigger: customerdetailscomplete-{{filename_date_format}}*.flg
     trigger_type: file
     container: datalake
@@ -99,8 +99,8 @@ landing:
       emptyValue: ""
     
 
-raw:
-  delta_lake:
+raw: # this is the bronze stage in the deltalake house
+  delta_lake: # this is the type of spark asset that the pipeline needs to read and write to
     # delta table properties can be set at stage level or table level
     delta_properties:
       delta.appendOnly: true
