@@ -145,6 +145,8 @@ Use even less code and use the decorator pattern:
         config_path="./test/config"
 )
 def auto_load_schema(table_mapping:TableMapping):
+
+    # << ADD YOUR PIPELINE LOGIC HERE - USING TABLE MAPPING CONFIG >>
     return table_mapping
 
 
