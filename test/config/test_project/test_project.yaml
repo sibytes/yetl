@@ -1,0 +1,21 @@
+version: 5.0.0
+
+name: dbxconfig
+sql: ./sql
+spark_schema: ./schema
+pipeline: ./pipelines
+databricks_notebooks: ./databricks/notebooks
+databricks_workflows: ./databricks/workflows
+databricks_queries: ./databricks/queries
+
+
+spark:
+  logging_level: ERROR
+  config:
+    spark.master: local
+    # spark.jars.packages: io.delta:delta-core_2.12:2.1.1
+    # spark.sql.extensions: io.delta.sql.DeltaSparkSessionExtension
+    spark.sql.catalog.spark_catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
+    spark.databricks.delta.merge.repartitionBeforeWrite.enabled: True
+    spark.sql.catalog.spark_catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
+    spark.sql.catalogImplementation: hive

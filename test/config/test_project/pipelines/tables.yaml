@@ -1,0 +1,75 @@
+
+version: 5.0.0
+# deltalake table properties
+# https://docs.databricks.com/delta/table-properties.html
+
+# delta.appendOnly: false
+# delta.autoOptimize.autoCompact: none    
+# delta.autoOptimize.optimizeWrite: none    
+# delta.checkpoint.writeStatsAsJson: true
+# delta.checkpoint.writeStatsAsStruct: none
+# delta.columnMapping.mode: false
+# delta.compatibility.symlinkFormatManifest.enabled: false
+# delta.dataSkippingNumIndexedCols 32
+# delta.deletedFileRetentionDuration: interval 1 week
+# delta.enableChangeDataFeed: false
+# delta.isolationLevel:  WriteSerializable
+# delta.logRetentionDuration: interval 30 days
+# delta.minReaderVersion: 1
+# delta.minWriterVersion: 2
+# delta.randomizeFilePrefixes: false
+# delta.randomPrefixLength: 2
+# delta.setTransactionRetentionDuration: none
+# delta.tuneFileSizesForRewrites: none
+
+
+landing:
+  read:
+    landing_dbx_patterns:
+      customer_details_1: null
+      customer_details_2: null
+
+raw:
+  delta_lake:
+    raw_dbx_patterns:
+      customers:
+        ids: id
+        depends_on:
+          - landing.landing_dbx_patterns.customer_details_1
+          - landing.landing_dbx_patterns.customer_details_2
+        warning_thresholds:
+          invalid_ratio: 0.1
+          invalid_rows: 0
+          max_rows: 100
+          min_rows: 5
+        exception_thresholds:
+          invalid_ratio: 0.2
+          invalid_rows: 2
+          max_rows: 1000
+          min_rows: 0
+        custom_properties:
+          process_group: 1
+
+base:
+  delta_lake:
+    # delta table properties can be set at stage level or table level
+    delta_properties:
+      delta.appendOnly: true
+      delta.autoOptimize.autoCompact: true    
+      delta.autoOptimize.optimizeWrite: true  
+      delta.enableChangeDataFeed: false
+    base_dbx_patterns:
+      customer_details_1:
+        ids: id
+        depends_on:
+          - raw.raw_dbx_patterns.customers
+        # delta table properties can be set at stage level or table level
+        # table level properties will overwride stage level properties
+        delta_properties:
+            delta.enableChangeDataFeed: true
+      customer_details_2:
+        ids: id
+        depends_on:
+          - raw.raw_dbx_patterns.customers
+
+

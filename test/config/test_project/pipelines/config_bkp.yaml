@@ -1,0 +1,49 @@
+version:5.0.0
+tables: ../Config/tables.yaml
+
+landing:
+  trigger: customerdetailscomplete-{{filename_date_format}}*.flg
+  trigger_type: file
+  database: landing_dbx_patterns
+  table: "{{table}}"
+  container: datalake
+  root: "/mnt/{{container}}/data/landing/dbx_patterns/{{table}}/{{path_date_format}}"
+  filename: "{{table}}-{{filename_date_format}}*.csv"
+  filename_date_format: "%Y%m%d"
+  path_date_format: "%Y%m%d"
+  format: cloudFiles
+  options:
+    # autoloader
+    cloudFiles.format: csv
+    cloudFiles.schemaLocation:  /mnt/{{container}}/checkpoint/{{checkpoint}}
+    cloudFiles.inferColumnTypes: false
+    cloudFiles.schemaHints: ../Schema/{{table}}.yaml
+    cloudFiles.schemaEvolutionMode: addNewColumns
+    cloudFiles.useIncrementalListing: auto
+    # csv
+    header: false
+    mode: PERMISSIVE
+    # encoding: windows-1252
+    delimiter: ","
+    escape: \
+    nullValue: ""
+    quote: '"'
+    emptyValue: ""
+
+raw:
+  database: raw_dbx_patterns
+  table: "{{table}}"
+  container: datalake
+  root: /mnt/{{container}}/data/raw
+  path: "{{database}}/{{table}}"
+  options:
+    checkpointLocation: /mnt/{{container}}/checkpoint/{{checkpoint}}
+    mergeSchema: true
+
+base:
+  database: base_dbx_patterns
+  table: "{{table}}"
+  container: datalake
+  root: /mnt/{{container}}/data/base
+  path: "{{database}}/{{table}}"
+  options: null

@@ -1,8 +1,0 @@
-extract_date,load_flag,id,first_name,last_name,email,gender,job_title,amount
-"2008-01-02 00:00:00","I",11,"Davidde","Legier","dlegier0@mail.ru","Agender","Editor",86.5
-"2008-01-02 00:00:00","I",12,"Panchito","Scirman","pscirman1@kickstarter.com","Male","Junior Executive",36.18
-"2008-01-02 00:00:00","I",13,"Chic","Ickowics","cickowics2@booking.com","Male","Research Associate",35.54
-"2008-01-02 00:00:00","I",14,"Pascale","Jedrzaszkiewicz","pjedrzaszkiewicz3@auda.org.au","Male","Safety Technician IV",73.21
-"2008-01-02 00:00:00","U",1,"Davidde","Legier","dlegier0@mail.ru","Agender","Super Hero",86.5
-"2008-01-02 00:00:00","U",2,"Panchito","Scirman","pscirman1@kickstarter.com","Female","Senior Executive",36.18
-"2008-01-02 00:00:00","D",3,"Chic","Ickowics","cickowics2@booking.com","Male","Research Associate",35.54

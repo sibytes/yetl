@@ -1,16 +1,32 @@
-# from pipelines import batch_text_csv_to_delta_permissive_1
-# from pipelines import batch_text_csv_to_delta_permissive_merge
-# from pipelines import batch_sql_to_delta
-# from yetl import __main__
+from dbxconfig import StageType, yetl_flow, TableMapping
+import pytest
+import os
+import shutil
 
-# from pipelines import humanresourcesdepartment_landing_to_raw
-# from pipelines import adworks_landing_to_raw
+def tear_down():
+    shutil.rmtree("./test/config/test_project/data", ignore_errors=True)
+    shutil.rmtree("./metastore_db", ignore_errors=True)
+    shutil.rmtree("./spark-warehouse", ignore_errors=True)
+    try:
+        os.remove("./derby.log")
+    except Exception:
+        pass
 
 
-# from src import customer_details_landing_to_raw
+tear_down()
 
-# from src import customer_preferences_landing_to_raw
-# from src import dim_customer_raw_to_dw
 
-# from src import demo_joined_landing_to_raw
-from src import demo_landing_to_raw
+@yetl_flow(
+        project="test_project", 
+        stage=StageType.raw, 
+        config_path="./test/config"
+)
+def auto_load_schema(table_mapping:TableMapping):
+
+    destination = table_mapping.destination
+    source = table_mapping.source
+    assert source.table == "customer_details_1"
+    assert destination.table == "customers"
+
+
+auto_load_schema(table="customers")

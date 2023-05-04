@@ -1,5 +1,0 @@
-database: demo
-tables:
-- table: cdc_customer
-- table: customer_preferences
-- table: customer

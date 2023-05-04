@@ -1,0 +1,79 @@
+trigger:
+  branches:
+    include:
+    - main
+
+# variables:
+# - group: data-platform-kv
+# - group: databricks
+
+pool:
+  vmImage: 'ubuntu-latest'
+strategy:
+  matrix:
+    Python38:
+      python.version: '3.8'
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '$(python.version)'
+  displayName: 'Use Python $(python.version)'
+
+- script: |
+    python -m pip install --upgrade pip setuptools wheel twine
+    pip install -r requirements.txt
+  displayName: 'Install dependencies'
+
+- script: |
+    python -m flake8 ./dbxconfig
+  displayName: 'Run lint tests'
+
+- script: |
+    python setup.py sdist bdist_wheel
+    ls dist/
+  displayName: 'Artifact creation'
+
+- script: |    
+    pip install .
+    pytest test/ --junitxml=junit/test-results.xml --cov=dbxconfig --cov-report=xml --cov-report=html
+  displayName: 'Unit & Integration Tests'
+
+
+- task: PublishTestResults@2
+  condition: succeededOrFailed()
+  inputs:
+    testResultsFiles: '**/test-*.xml'
+    testRunTitle: 'Publish test results for Python $(python.version)'
+
+- task: PublishCodeCoverageResults@1
+  inputs:
+    codeCoverageTool: Cobertura
+    summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+    reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)'
+    Contents: |
+      dist/**
+      deployment/**
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+  displayName: 'Publish Build Artefacts'
+
+- task: TwineAuthenticate@0
+  inputs:
+    # artifactFeeds: 'sibytes'
+    externalFeeds: 'pypi'
+  displayName: 'Authenticate Twine'
+
+- script: |
+    twine upload -r pypi --config-file $(PYPIRC_PATH) $(Build.SourcesDirectory)/dist/*
+  continueOnError: true
+  displayName: 'Publish to Artefact Store'

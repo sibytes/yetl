@@ -1,0 +1,57 @@
+version: 5.0.0
+tables: ./tables.yaml
+
+landing:
+  read:
+    trigger: customerdetailscomplete-{{filename_date_format}}*.flg
+    trigger_type: file
+    container: datalake
+    root: "/mnt/{{container}}/data/landing/dbx_patterns/{{table}}/{{path_date_format}}"
+    filename: "{{table}}-{{filename_date_format}}*.csv"
+    filename_date_format: "%Y%m%d"
+    path_date_format: "%Y%m%d"
+    format: cloudFiles
+    spark_schema: ../schema/{{table.lower()}}.yaml
+    options:
+      # autoloader
+      cloudFiles.format: csv
+      cloudFiles.schemaLocation:  /mnt/{{container}}/checkpoint/{{checkpoint}}
+      cloudFiles.useIncrementalListing: auto
+      # schema
+      inferSchema: false
+      enforceSchema: true
+      columnNameOfCorruptRecord: _corrupt_record
+      # csv
+      header: false
+      mode: PERMISSIVE
+      encoding: windows-1252
+      delimiter: ","
+      escape: '"'
+      nullValue: ""
+      quote: '"'
+      emptyValue: ""
+    
+
+raw:
+  delta_lake:
+    # delta table properties can be set at stage level or table level
+    delta_properties:
+      delta.appendOnly: true
+      delta.autoOptimize.autoCompact: true    
+      delta.autoOptimize.optimizeWrite: true  
+      delta.enableChangeDataFeed: false
+    managed: false
+    create_table: true
+    container: datalake
+    root: /mnt/{{container}}/data/raw
+    path: "{{database}}/{{table}}"
+    options:
+      checkpointLocation: /mnt/{{container}}/checkpoint/{{database}}_{{table}}
+      mergeSchema: true
+
+base:
+  delta_lake:
+    container: datalake
+    root: /mnt/{{container}}/data/base
+    path: "{{database}}/{{table}}"
+    options: null
