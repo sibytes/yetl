@@ -6,6 +6,7 @@ Define configuration and table dependencies in yaml config then get the table ma
 Define your tables.
 
 ```yaml
+
 landing:
   read:
     landing_dbx_patterns:
@@ -59,21 +60,20 @@ base:
 Define you load configuration:
 
 ```yaml
+version: 1.0.0
 tables: ./tables.yaml
 
 landing:
   read:
     trigger: customerdetailscomplete-{{filename_date_format}}*.flg
     trigger_type: file
-    database: landing_dbx_patterns
-    table: "{{table}}"
     container: datalake
     root: "/mnt/{{container}}/data/landing/dbx_patterns/{{table}}/{{path_date_format}}"
     filename: "{{table}}-{{filename_date_format}}*.csv"
     filename_date_format: "%Y%m%d"
     path_date_format: "%Y%m%d"
     format: cloudFiles
-    spark_schema: ../Schema/{{table.lower()}}.yaml
+    spark_schema: ../schema/{{table.lower()}}.yaml
     options:
       # autoloader
       cloudFiles.format: csv
@@ -102,8 +102,8 @@ raw:
       delta.autoOptimize.autoCompact: true    
       delta.autoOptimize.optimizeWrite: true  
       delta.enableChangeDataFeed: false
-    database: raw_dbx_patterns
-    table: "{{table}}"
+    managed: false
+    create_table: true
     container: datalake
     root: /mnt/{{container}}/data/raw
     path: "{{database}}/{{table}}"
@@ -118,23 +118,32 @@ Import the config objects into you pipeline:
 from yetl import Config, Timeslice, StageType
 
 # build path to configuration file
-pattern = "auto_load_schema"
-config_path = f"../Config"
-
-# create a timeslice object for slice loading. Use * for all time (supports hrs, mins, seconds and sub-second).
+pipeline = "auto_load_schema"
+project = "test_project"
 timeslice = Timeslice(day="*", month="*", year="*")
-
-# parse and create a config objects
-config = Config(config_path=config_path, pattern=pattern)
-
-# get the configuration for a table mapping to load.
+config = Config(
+    project=project, pipeline=pipeline
+)
 table_mapping = config.get_table_mapping(
-    timeslice=timeslice, 
-    stage=StageType.raw, 
-    table="customers"
+    timeslice=timeslice, stage=StageType.raw, table="customers"
 )
 
 print(table_mapping)
+```
+
+Use even less code and use the decorator pattern:
+
+```python
+@yetl_flow(
+        project="test_project", 
+        stage=StageType.raw, 
+        config_path="./test/config"
+)
+def auto_load_schema(table_mapping:TableMapping):
+    return table_mapping
+
+
+result = auto_load_schema(table="customers")
 ```
 
 ## Development Setup
