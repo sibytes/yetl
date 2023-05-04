@@ -122,7 +122,6 @@ Import the config objects into you pipeline:
 ```python
 from yetl import Config, Timeslice, StageType
 
-# build path to configuration file
 pipeline = "auto_load_schema"
 project = "test_project"
 timeslice = Timeslice(day="*", month="*", year="*")
@@ -141,8 +140,7 @@ Use even less code and use the decorator pattern:
 ```python
 @yetl_flow(
         project="test_project", 
-        stage=StageType.raw, 
-        config_path="./test/config"
+        stage=StageType.raw
 )
 def auto_load_schema(table_mapping:TableMapping):
 
