@@ -1,7 +1,8 @@
-from dbxconfig import Config, Timeslice, StageType, Read, DeltaLake, yetl_flow, TableMapping
+from yetl import Config, Timeslice, StageType, Read, DeltaLake, yetl_flow, TableMapping
 import pytest
 import os
 import shutil
+
 
 
 @pytest.fixture()

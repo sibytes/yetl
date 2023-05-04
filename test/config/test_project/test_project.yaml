@@ -1,6 +1,6 @@
-version: 5.0.0
+version: 1.0.0
 
-name: dbxconfig
+name: test_project
 sql: ./sql
 spark_schema: ./schema
 pipeline: ./pipelines

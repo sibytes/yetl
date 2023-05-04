@@ -41,7 +41,7 @@ def check_version(data: dict):
 
     del data["version"]
 
-    pkg_version = pkg_resources.get_distribution("dbxconfig").version
+    pkg_version = pkg_resources.get_distribution("yetl-framework").version
     pkg_version = pkg_version.split(".")
 
     try:

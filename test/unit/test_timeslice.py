@@ -1,5 +1,5 @@
 from pydantic import ValidationError
-from dbxconfig import Timeslice, TimesliceNow, TimesliceUtcNow
+from yetl import Timeslice, TimesliceNow, TimesliceUtcNow
 from datetime import datetime
 
 

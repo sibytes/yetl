@@ -16,5 +16,5 @@ __all__ = [
     "TableMapping",
     "Tables",
     "StageType",
-    "yetl_flow"
+    "yetl_flow",
 ]

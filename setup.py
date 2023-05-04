@@ -28,9 +28,9 @@ setup(
         "Programming Language :: Python :: 3.8",
     ],
     packages=[
-        "dbxconfig",
-        "dbxconfig.dataset",
-        "dbxconfig.workflow"
+        "yetl",
+        "yetl.dataset",
+        "yetl.workflow"
     ],
     install_requires=[
           'PyYAML',

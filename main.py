@@ -1,4 +1,4 @@
-from dbxconfig import StageType, yetl_flow, TableMapping
+from yetl import StageType, yetl_flow, TableMapping
 import pytest
 import os
 import shutil

@@ -1,4 +1,4 @@
-# dbxconfig
+# yetl
 
 Configuration framework for databricks pipelines.
 Define configuration and table dependencies in yaml config then get the table mappings config model:
@@ -115,7 +115,7 @@ raw:
 Import the config objects into you pipeline:
 
 ```python
-from dbxconfig import Config, Timeslice, StageType
+from yetl import Config, Timeslice, StageType
 
 # build path to configuration file
 pattern = "auto_load_schema"
@@ -149,7 +149,7 @@ To run the unit tests with a coverage report.
 
 ```
 pip install -e .
-pytest test/unit --junitxml=junit/test-results.xml --cov=dbxconfig --cov-report=xml --cov-report=html
+pytest test/unit --junitxml=junit/test-results.xml --cov=yetl --cov-report=xml --cov-report=html
 ```
 
 ## Build

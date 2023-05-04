@@ -26,7 +26,7 @@ steps:
   displayName: 'Install dependencies'
 
 - script: |
-    python -m flake8 ./dbxconfig
+    python -m flake8 ./yetl
   displayName: 'Run lint tests'
 
 - script: |
@@ -36,7 +36,7 @@ steps:
 
 - script: |    
     pip install .
-    pytest test/ --junitxml=junit/test-results.xml --cov=dbxconfig --cov-report=xml --cov-report=html
+    pytest test/ --junitxml=junit/test-results.xml --cov=yetl --cov-report=xml --cov-report=html
   displayName: 'Unit & Integration Tests'
 
 
