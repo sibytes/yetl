@@ -1,5 +1,10 @@
 # yetl
 
+Install
+```
+pip install yetl-framework
+```
+
 Configuration framework for databricks pipelines.
 Define configuration and table dependencies in yaml config then get the table mappings config model:
 
