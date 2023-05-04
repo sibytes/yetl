@@ -35,11 +35,17 @@ def landing_to_raw(
     )
     dataflow.destination_df(f"{project}_raw.{table}", df, save=save)
 
-
 with open(
     f"./config/project/{project}/{project}_tables.yml", "r", encoding="utf-8"
 ) as f:
     metdata = yaml.safe_load(f)
 tables: list = [t["name"] for t in metdata.get("tables")]
 
-yetl_wf.load(project, tables, landing_to_raw, timeslice, maxparallel)
+yetl_wf.load(
+    database=project, 
+    tables=tables, 
+    function=landing_to_raw, 
+    timeslice=timeslice, 
+    save=None, 
+    maxparallel=maxparallel
+)
