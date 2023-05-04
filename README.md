@@ -147,7 +147,7 @@ Use even less code and use the decorator pattern:
 def auto_load_schema(table_mapping:TableMapping):
 
     # << ADD YOUR PIPELINE LOGIC HERE - USING TABLE MAPPING CONFIG >>
-    return table_mapping
+    return table_mapping # return whatever you want here.
 
 
 result = auto_load_schema(table="customers")
