@@ -153,10 +153,10 @@ class Tables(BaseModel):
                 ):
                     return True
                 else:
-                    index = Tables.get_index(table.stage, table.database, table.name)
+                    index = Tables.get_index(table.stage, table.database, table.table)
                     if index in matches:
                         matches.remove(
-                            Tables.get_index(table.stage, table.database, table.name)
+                            Tables.get_index(table.stage, table.database, table.table)
                         )
                     return False
 
