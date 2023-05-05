@@ -5,6 +5,7 @@ from typing import Any, Dict, Union, List
 from .._timeslice import Timeslice
 from .._stage_type import StageType
 from .dataset_type import TableType
+from .._project import Project
 
 
 class Table(BaseModel):
@@ -29,6 +30,7 @@ class DataSet(BaseModel):
 
     _logger: Any = PrivateAttr(default=None)
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
+    project: Project = Field(...)
     container: str = Field(...)
     root: str = Field(...)
     path: str = Field(default=None)

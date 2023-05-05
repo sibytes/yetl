@@ -13,6 +13,7 @@ from typing import Union
 class _DatasetFactory:
     _TIMESLICE = "timeslice"
     _CONFIG_PATH = "config_path"
+    _PROJECT = "project"
 
     def __init__(self) -> None:
         self._logger = logging.getLogger(self.__class__.__name__)
@@ -96,6 +97,7 @@ class _DatasetFactory:
             )
         stage_config[self._TIMESLICE] = timeslice
         stage_config[self._CONFIG_PATH] = config[self._CONFIG_PATH]
+        stage_config[self._PROJECT] = config[self._PROJECT]
         table_config = table.dict()
         stage_config = {**stage_config, **table_config}
 

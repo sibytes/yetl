@@ -12,6 +12,7 @@ from ._project import Project
 class Config:
     _TABLES = "tables"
     _CONFIG_PATH = "config_path"
+    _PROJECT = "project"
 
     def __init__(self, project: str, pipeline: str, config_path: str = None):
         self.config_path = get_config_path(project, config_path)
@@ -38,6 +39,7 @@ class Config:
         # add the configuration path into the confif dictionart
         # so that it gets passed to table config when created
         pipeline[self._CONFIG_PATH] = self.project.pipelines
+        pipeline[self._PROJECT] = self.project
         return pipeline
 
     def _load_tables(self):

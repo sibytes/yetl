@@ -6,7 +6,9 @@ from .._timeslice import Timeslice
 import os
 from .._stage_type import StageType
 from ._dataset import DataSet, Table
-from ..datallake import create_database, create_table
+from ..deltalake import DeltaLakeFn
+
+# from ..datallake import create_database, create_table
 
 # try:
 #     from databricks.sdk.runtime import *  # noqa F403
@@ -32,6 +34,7 @@ class DeltaLake(DataSet, DeltaLakeTable):
         super().__init__(**data)
         self._logger = logging.getLogger(self.__class__.__name__)
         self._render()
+        self._spark = DeltaLakeFn(project=self.project)
         self.create_delta_table()
 
     @classmethod
@@ -40,6 +43,7 @@ class DeltaLake(DataSet, DeltaLakeTable):
 
     _logger: Any = PrivateAttr(default=None)
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
+    _spark: DeltaLakeFn = PrivateAttr(default=None)
     options: Union[dict, None] = Field(default=None)
     timeslice: Timeslice = Field(...)
     location: str = Field(default=None)
@@ -72,16 +76,16 @@ class DeltaLake(DataSet, DeltaLakeTable):
     def create_delta_table(self):
         database_table = f"`{self.database}`.`{self.table}`"
         self._logger.info(f"Creating delta lake table {database_table}")
-        create_database(self.database)
+        self._spark.create_database(self.database)
 
         if self.managed:
-            create_table(
+            self._spark.create_table(
                 database=self.database,
                 table=self.table,
                 delta_properties=self.delta_properties,
             )
         else:
-            create_table(
+            self._spark.create_table(
                 database=self.database,
                 table=self.table,
                 delta_properties=self.delta_properties,
