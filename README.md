@@ -69,7 +69,7 @@ base: # this is the silver stage in the delta lakehouse
 Define you load configuration:
 
 ```yaml
-version: 1.0.0
+version: 1.1.0
 tables: ./tables.yaml
 
 landing: # this is the landing stage in the deltalake house
