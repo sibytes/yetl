@@ -10,7 +10,7 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="yetl-framework",
-    version="1.1.1",
+    version="1.1.0",
     description="yet (another spark) etl framework",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -29,8 +29,8 @@ setup(
     ],
     packages=[
         "yetl",
-        "yetl.dataset",
-        "yetl.workflow"
+        "yetl.workflow",
+        "yetl.table"
     ],
     install_requires=[
           'PyYAML',
