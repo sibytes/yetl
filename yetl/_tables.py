@@ -46,8 +46,8 @@ class Tables(BaseModel):
             stage_type = StageType(stage_name)
             for table_type_name, database in table_type.items():
                 table_type = TableType(table_type_name)
+                push_down_properties = {}
                 for database_name, table in database.items():
-                    push_down_properties = {}
                     if PushDownProperties.has_not_value(database_name):
                         for table_name, table_propties in table.items():
                             table_config = {
