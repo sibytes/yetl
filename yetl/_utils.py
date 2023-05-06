@@ -26,6 +26,8 @@ class JinjaVariables(Enum):
     FILENAME_DATE_FORMAT = "filename_date_format"
     PATH_DATE_FORMAT = "path_date_format"
     CONTAINER = "container"
+    DELTA_PROPERTIES = "delta_properties"
+    LOCATION = "location"
 
 
 def is_databricks():
@@ -127,6 +129,15 @@ def load_yaml(path: str):
                 problem = f"{e.problem}."
 
             raise Exception(f"Invalid yaml format in {path}. {problem} {location}")
+    _logger.debug(data)
+    return data
+
+
+def load_text(path: str):
+    _logger = logging.getLogger(__name__)
+    _logger.info(f"Loading text file {path}")
+    with open(path, "r", encoding=_ENCODING) as f:
+        data = f.read()
     _logger.debug(data)
     return data
 

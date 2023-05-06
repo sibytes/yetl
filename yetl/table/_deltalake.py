@@ -1,6 +1,12 @@
 import logging
 from pydantic import Field, PrivateAttr
-from .._utils import JinjaVariables, render_jinja, is_databricks
+from .._utils import (
+    JinjaVariables,
+    render_jinja,
+    is_databricks,
+    abs_config_path,
+    load_text,
+)
 from typing import Any, Dict, Union, List
 from .._timeslice import Timeslice
 import os
@@ -20,9 +26,10 @@ class DeltaLake(Table):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
         self._logger = logging.getLogger(self.__class__.__name__)
-        self._render()
         self._spark = DeltaLakeFn(project=self.project)
-        self.create_delta_table()
+        self._render()
+        if self.create_table:
+            self.create_delta_table()
 
     @classmethod
     def in_allowed_stages(cls, stage: StageType):
@@ -45,6 +52,12 @@ class DeltaLake(Table):
     stage: StageType = Field(...)
     managed: bool = Field(default=False)
     create_table: bool = Field(default=True)
+    sql: str = Field(default=None)
+
+    def _load_sql(self, path: str):
+        path = abs_config_path(self.config_path, path)
+        sql = load_text(path)
+        return sql
 
     def _render(self):
         self._replacements = {
@@ -53,23 +66,35 @@ class DeltaLake(Table):
             JinjaVariables.CONTAINER: self.container,
             JinjaVariables.CHECKPOINT: self.checkpoint,
         }
-
-        self.location = render_jinja(self.location, self._replacements)
-        self.path = render_jinja(self.path, self._replacements)
+        if self.delta_properties:
+            delta_properties_sql = self._spark.get_delta_properties_sql(
+                self.delta_properties
+            )
+            self._replacements[JinjaVariables.DELTA_PROPERTIES] = delta_properties_sql
         self.database = render_jinja(self.database, self._replacements)
         self.table = render_jinja(self.table, self._replacements)
-        if self.options:
-            for option, value in self.options.items():
-                self.options[option] = render_jinja(value, self._replacements)
-
+        self.location = render_jinja(self.location, self._replacements)
+        self.path = render_jinja(self.path, self._replacements)
         self.location = os.path.join(self.location, self.path)
         if not is_databricks():
             self.location = f"{self.config_path}/../data{self.location}"
             self.location = os.path.abspath(self.location)
+        self._replacements[JinjaVariables.LOCATION] = self.location
 
+        if self.options:
+            for option, value in self.options.items():
+                self.options[option] = render_jinja(value, self._replacements)
+
+        if self.sql:
+            # render the path
+            self.sql = render_jinja(self.sql, self._replacements)
+            # load the file
+            self.sql = self._load_sql(self.sql)
+            # render the SQL
+            self.sql = render_jinja(self.sql, self._replacements)
+
+    # TODO: Create or alter table
     def create_delta_table(self):
-        database_table = f"`{self.database}`.`{self.table}`"
-        self._logger.info(f"Creating delta lake table {database_table}")
         self._spark.create_database(self.database)
 
         if self.managed:
@@ -77,6 +102,7 @@ class DeltaLake(Table):
                 database=self.database,
                 table=self.table,
                 delta_properties=self.delta_properties,
+                sql=self.sql,
             )
         else:
             self._spark.create_table(
@@ -84,4 +110,5 @@ class DeltaLake(Table):
                 table=self.table,
                 delta_properties=self.delta_properties,
                 path=self.location,
+                sql=self.sql,
             )

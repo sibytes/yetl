@@ -3,7 +3,7 @@ from pyspark.sql import DataFrame
 import logging
 from pyspark.sql.types import StructType, StructField
 import jinja2
-from typing import List
+from typing import List, Union, Dict
 from ._spark_context import get_spark_context
 from pydantic import BaseModel, Field
 from typing import Any
@@ -42,6 +42,13 @@ class DeltaLakeFn(BaseModel):
         )
         return table_exists
 
+    def get_delta_properties_sql(self, delta_properties: Dict[str, Union[str, bool]]):
+        sql_properties = [
+            f"{k.lower()} = {v.lower()}" for k, v in delta_properties.items()
+        ]
+        sql_properties = ", ".join(sql_properties)
+        return sql_properties
+
     def create_table(
         self,
         database: str,
@@ -55,22 +62,20 @@ class DeltaLakeFn(BaseModel):
         if not sql:
             sql = f"CREATE TABLE IF NOT EXISTS `{database}`.`{table}`"
 
-        # add in the delta properties if there are any
-        sql_properties = ""
-        if delta_properties:
-            sql_properties = [
-                f"{k.lower()} = {v.lower()}" for k, v in delta_properties.items()
-            ]
-            sql_properties = ", ".join(sql_properties)
-            sql_properties = f"TBLPROPERTIES({sql_properties})"
+            # add in the delta properties if there are any
+            sql_properties = ""
+            if delta_properties:
+                sql_properties = self.get_delta_properties_sql(delta_properties)
+                sql_properties = f"TBLPROPERTIES({sql_properties})"
 
-        sql_path = ""
-        if path:
-            sql_path = f"USING DELTA LOCATION '{path}'"
+            sql_path = ""
+            if path:
+                sql_path = f"USING DELTA LOCATION '{path}'"
 
-            sql = f"{sql}\n{sql_path}\n{sql_properties};"
+                sql = f"{sql}\n{sql_path}\n{sql_properties};"
 
         _logger.debug(f"{sql}")
+        print(sql)
         self.spark.sql(sql)
 
         return sql

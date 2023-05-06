@@ -29,9 +29,9 @@ audit_control:
   delta_lake:
     raw_dbx_patterns_control:
       header_footer:
-        sql: ../sql/tables/{{database}}.{{table}}.sql
+        sql: ../sql/{{database}}/{{table}}.sql
       raw_audit:
-        sql: ../sql/tables/{{database}}.{{table}}.sql
+        sql: ../sql/{{database}}/{{table}}.sql
 
 landing:
   read:
