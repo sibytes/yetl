@@ -128,7 +128,6 @@ from yetl import Config, Timeslice, StageType
 
 pipeline = "auto_load_schema"
 project = "test_project"
-timeslice = Timeslice(day="*", month="*", year="*")
 config = Config(
     project=project, pipeline=pipeline
 )
