@@ -10,10 +10,12 @@ from ._project import Project
 
 class Config:
     def __init__(
-        self, project: str, pipeline: str, timeslice: Timeslice, config_path: str = None
+        self, project: str, pipeline: str, timeslice: Timeslice = None, config_path: str = None
     ):
         self.config_path = get_config_path(project, config_path)
         configure_logging(project, self.config_path)
+        if not timeslice:
+            timeslice = Timeslice(year="*", month="*", day="*")
         self.project = self._load_project(project)
         self.pipeline = pipeline
         self.tables = self._load_tables(timeslice)
