@@ -24,6 +24,7 @@ class Table(BaseModel):
         self._logger = logging.getLogger(self.__class__.__name__)
 
     _logger: Any = PrivateAttr(default=None)
+    _rendered: bool = PrivateAttr(default=False)
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
     stage: StageType = Field(...)
     database: str = Field(...)

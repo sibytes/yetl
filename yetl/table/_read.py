@@ -53,28 +53,39 @@ class Read(Table):
             JinjaVariables.CONTAINER: self.container,
             JinjaVariables.CHECKPOINT: self.checkpoint,
         }
+        if not self._rendered:
+            self.location = render_jinja(self.location, self._replacements)
+            self.filename = render_jinja(self.filename, self._replacements)
+            self.database = render_jinja(self.database, self._replacements)
+            self.table = render_jinja(self.table, self._replacements)
+            self.trigger = render_jinja(self.trigger, self._replacements)
 
-        self.location = render_jinja(self.location, self._replacements)
-        self.filename = render_jinja(self.filename, self._replacements)
-        self.database = render_jinja(self.database, self._replacements)
-        self.table = render_jinja(self.table, self._replacements)
-        self.trigger = render_jinja(self.trigger, self._replacements)
+            if self.options:
+                for option, value in self.options.items():
+                    self.options[option] = render_jinja(value, self._replacements)
 
-        if self.options:
-            for option, value in self.options.items():
-                self.options[option] = render_jinja(value, self._replacements)
+            self._config_schema_hints()
 
-        self._config_schema_hints()
+            if isinstance(self.spark_schema, str):
+                path = self.spark_schema
+                path = render_jinja(self.spark_schema, self._replacements)
+                self._load_schema(path)
 
-        if isinstance(self.spark_schema, str):
-            path = self.spark_schema
-            path = render_jinja(self.spark_schema, self._replacements)
-            self._load_schema(path)
+            corrupt_record_name = self.options.get(
+                self._OPTION_CORRUPT_RECORD_NAME, None
+            )
+            if isinstance(self.spark_schema, StructType) and corrupt_record_name:
+                if corrupt_record_name not in self.spark_schema.names:
+                    self.spark_schema.add(field=corrupt_record_name, data_type="string")
 
-        corrupt_record_name = self.options.get(self._OPTION_CORRUPT_RECORD_NAME, None)
-        if isinstance(self.spark_schema, StructType) and corrupt_record_name:
-            if corrupt_record_name not in self.spark_schema.names:
-                self.spark_schema.add(field=corrupt_record_name, data_type="string")
+            self._rendered = True
+
+        if self._rendered and self.options:
+            value = self.options.get("checkpointLocation")
+            if value:
+                self.options["checkpointLocation"] = render_jinja(
+                    value, self._replacements
+                )
 
     def _config_schema_hints(self):
         path = self.options.get(self._OPTION_CF_SCHEMA_HINTS, None)

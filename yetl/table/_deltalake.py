@@ -66,32 +66,44 @@ class DeltaLake(Table):
             JinjaVariables.CONTAINER: self.container,
             JinjaVariables.CHECKPOINT: self.checkpoint,
         }
-        if self.delta_properties:
-            delta_properties_sql = self._spark.get_delta_properties_sql(
-                self.delta_properties
-            )
-            self._replacements[JinjaVariables.DELTA_PROPERTIES] = delta_properties_sql
-        self.database = render_jinja(self.database, self._replacements)
-        self.table = render_jinja(self.table, self._replacements)
-        self.location = render_jinja(self.location, self._replacements)
-        self.path = render_jinja(self.path, self._replacements)
-        self.location = os.path.join(self.location, self.path)
-        if not is_databricks():
-            self.location = f"{self.config_path}/../data{self.location}"
-            self.location = os.path.abspath(self.location)
-        self._replacements[JinjaVariables.LOCATION] = self.location
+        if not self._rendered:
+            if self.delta_properties:
+                delta_properties_sql = self._spark.get_delta_properties_sql(
+                    self.delta_properties
+                )
+                self._replacements[
+                    JinjaVariables.DELTA_PROPERTIES
+                ] = delta_properties_sql
+            self.database = render_jinja(self.database, self._replacements)
+            self.table = render_jinja(self.table, self._replacements)
+            self.location = render_jinja(self.location, self._replacements)
+            self.path = render_jinja(self.path, self._replacements)
+            self.location = os.path.join(self.location, self.path)
+            if not is_databricks():
+                self.location = f"{self.config_path}/../data{self.location}"
+                self.location = os.path.abspath(self.location)
+            self._replacements[JinjaVariables.LOCATION] = self.location
 
-        if self.options:
-            for option, value in self.options.items():
-                self.options[option] = render_jinja(value, self._replacements)
+            if self.options:
+                for option, value in self.options.items():
+                    self.options[option] = render_jinja(value, self._replacements)
 
-        if self.sql:
-            # render the path
-            self.sql = render_jinja(self.sql, self._replacements)
-            # load the file
-            self.sql = self._load_sql(self.sql)
-            # render the SQL
-            self.sql = render_jinja(self.sql, self._replacements)
+            if self.sql:
+                # render the path
+                self.sql = render_jinja(self.sql, self._replacements)
+                # load the file
+                self.sql = self._load_sql(self.sql)
+                # render the SQL
+                self.sql = render_jinja(self.sql, self._replacements)
+
+            self._rendered = True
+
+        if self._rendered and self.options:
+            value = self.options.get("checkpointLocation")
+            if value:
+                self.options["checkpointLocation"] = render_jinja(
+                    value, self._replacements
+                )
 
     # TODO: Create or alter table
     def create_delta_table(self):
