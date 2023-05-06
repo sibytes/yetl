@@ -60,7 +60,7 @@ class DeltaLake(DataSet, DeltaLakeTable):
             JinjaVariables.CHECKPOINT: self.checkpoint,
         }
 
-        self.root = render_jinja(self.root, self._replacements)
+        self.location = render_jinja(self.location, self._replacements)
         self.path = render_jinja(self.path, self._replacements)
         self.database = render_jinja(self.database, self._replacements)
         self.table = render_jinja(self.table, self._replacements)
@@ -68,7 +68,7 @@ class DeltaLake(DataSet, DeltaLakeTable):
             for option, value in self.options.items():
                 self.options[option] = render_jinja(value, self._replacements)
 
-        self.location = os.path.join(self.root, self.path)
+        self.location = os.path.join(self.location, self.path)
         if not is_databricks():
             self.location = f"{self.config_path}/../data{self.location}"
             self.location = os.path.abspath(self.location)

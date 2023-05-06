@@ -35,12 +35,12 @@ audit_control:
       header_footer:
         ids: null
         container: datalake
-        root: /mnt/{{container}}/data/raw
+        location: /mnt/{{container}}/data/raw
         sql: ../sql/tables/{{database}}.{{table}}.sql
       header_footer:
         ids: null
         container: datalake
-        root: /mnt/{{container}}/data/raw
+        location: /mnt/{{container}}/data/raw
         sql: ../sql/tables/{{database}}.{{table}}.sql
 
 landing:

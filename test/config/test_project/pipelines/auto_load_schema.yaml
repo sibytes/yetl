@@ -6,7 +6,7 @@ landing:
     trigger: customerdetailscomplete-{{filename_date_format}}*.flg
     trigger_type: file
     container: datalake
-    root: "/mnt/{{container}}/data/landing/dbx_patterns/{{table}}/{{path_date_format}}"
+    location: "/mnt/{{container}}/data/landing/dbx_patterns/{{table}}/{{path_date_format}}"
     filename: "{{table}}-{{filename_date_format}}*.csv"
     filename_date_format: "%Y%m%d"
     path_date_format: "%Y%m%d"
@@ -43,7 +43,7 @@ raw:
     managed: false
     create_table: true
     container: datalake
-    root: /mnt/{{container}}/data/raw
+    location: /mnt/{{container}}/data/raw
     path: "{{database}}/{{table}}"
     options:
       checkpointLocation: /mnt/{{container}}/checkpoint/{{database}}_{{table}}
@@ -52,6 +52,6 @@ raw:
 base:
   delta_lake:
     container: datalake
-    root: /mnt/{{container}}/data/base
+    location: /mnt/{{container}}/data/base
     path: "{{database}}/{{table}}"
     options: null

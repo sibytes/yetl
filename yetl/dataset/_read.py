@@ -31,7 +31,7 @@ class Read(DataSet, ReadTable):
         super().__init__(**data)
         self._logger = logging.getLogger(self.__class__.__name__)
         self._render()
-        self.path = os.path.join(self.root, self.filename)
+        self.path = os.path.join(self.location, self.filename)
 
     _logger: Any = PrivateAttr(default=None)
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
@@ -60,7 +60,7 @@ class Read(DataSet, ReadTable):
             JinjaVariables.CHECKPOINT: self.checkpoint,
         }
 
-        self.root = render_jinja(self.root, self._replacements)
+        self.location = render_jinja(self.location, self._replacements)
         self.filename = render_jinja(self.filename, self._replacements)
         self.database = render_jinja(self.database, self._replacements)
         self.table = render_jinja(self.table, self._replacements)

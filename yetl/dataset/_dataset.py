@@ -44,7 +44,7 @@ class DataSet(BaseModel):
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
     project: Project = Field(...)
     container: str = Field(...)
-    root: str = Field(...)
+    location: str = Field(...)
     path: str = Field(default=None)
     options: dict = Field(...)
     timeslice: Timeslice = Field(...)

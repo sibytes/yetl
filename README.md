@@ -77,7 +77,7 @@ landing: # this is the landing stage in the deltalake house
     trigger: customerdetailscomplete-{{filename_date_format}}*.flg
     trigger_type: file
     container: datalake
-    root: "/mnt/{{container}}/data/landing/dbx_patterns/{{table}}/{{path_date_format}}"
+    location: "/mnt/{{container}}/data/landing/dbx_patterns/{{table}}/{{path_date_format}}"
     filename: "{{table}}-{{filename_date_format}}*.csv"
     filename_date_format: "%Y%m%d"
     path_date_format: "%Y%m%d"
@@ -114,7 +114,7 @@ raw: # this is the bronze stage in the deltalake house
     managed: false
     create_table: true
     container: datalake
-    root: /mnt/{{container}}/data/raw
+    location: /mnt/{{container}}/data/raw
     path: "{{database}}/{{table}}"
     options:
       checkpointLocation: /mnt/{{container}}/checkpoint/{{database}}_{{table}}
