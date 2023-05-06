@@ -47,6 +47,7 @@ class Tables(BaseModel):
             for table_type_name, database in table_type.items():
                 table_type = TableType(table_type_name)
                 for database_name, table in database.items():
+                    push_down_properties = {}
                     if PushDownProperties.has_not_value(database_name):
                         for table_name, table_propties in table.items():
                             table_config = {
@@ -77,7 +78,6 @@ class Tables(BaseModel):
                             table_config = {**stage_config, **table_config}
                             index = f"{stage_name}.{database_name}.{table_name}"
                             self.tables_index[index] = table_config
-                            push_down_properties = {}
                     else:
                         push_down_properties[database_name] = table
 
