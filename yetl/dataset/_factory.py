@@ -1,9 +1,9 @@
 from ._deltalake import DeltaLake
 from ._read import Read
 from ._write import Write
-from ._dataset import DataSet, Table
-from ._deltalake import DeltaLakeTable
-from ._read import ReadTable
+from ._table import Table
+from ._deltalake import DeltaLake
+from ._read import Read
 import logging
 from .dataset_type import DataSetType, TableType
 from .._timeslice import Timeslice
@@ -32,7 +32,7 @@ class _DatasetFactory:
         self,
         table_type: TableType,
         dataset_config: dict,
-    ) -> DataSet:
+    ) -> Table:
         self._logger.debug(f"Get DataSetType {table_type.value} from dataset factory")
 
         dataset_type: DataSetType = DataSetType(table_type.value)
@@ -48,6 +48,11 @@ class _DatasetFactory:
             **dataset_config,
         )
 
+    def create(
+        self, config: dict, timeslice: Timeslice
+    ):
+        pass
+        
     def get_data_set(
         self, config: dict, dataset: Union[Table, dict], timeslice: Timeslice
     ):
@@ -109,5 +114,3 @@ factory.register_dataset_type(DataSetType.Read, Read)
 factory.register_dataset_type(DataSetType.DeltaLake, DeltaLake)
 factory.register_dataset_type(DataSetType.Write, Write)
 
-factory.register_table_type(TableType.ReadTable, ReadTable)
-factory.register_table_type(TableType.DeltaLakeTable, DeltaLakeTable)

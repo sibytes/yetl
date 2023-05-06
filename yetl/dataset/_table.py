@@ -21,7 +21,10 @@ class ValidationThreshold(BaseModel):
 class Table(BaseModel):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
+        self._logger = logging.getLogger(self.__class__.__name__)
 
+    _logger: Any = PrivateAttr(default=None)
+    _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
     stage: StageType = Field(...)
     database: str = Field(...)
     table: str = Field(...)
@@ -30,18 +33,6 @@ class Table(BaseModel):
     table_type: TableType = Field(...)
     warning_thresholds: ValidationThreshold = Field(default=None)
     exception_thresholds: ValidationThreshold = Field(default=None)
-
-    def _render(self):
-        pass
-
-
-class DataSet(BaseModel):
-    def __init__(self, **data: Any) -> None:
-        super().__init__(**data)
-        self._logger = logging.getLogger(self.__class__.__name__)
-
-    _logger: Any = PrivateAttr(default=None)
-    _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
     project: Project = Field(...)
     container: str = Field(...)
     location: str = Field(...)

@@ -8,22 +8,13 @@ from pyspark.sql.types import StructType
 from pyspark.sql.streaming import StreamingQuery
 from pyspark.sql import DataFrame
 from .._stage_type import StageType
-from ._dataset import DataSet, Table
+from ._table import Table
 
 
 class TriggerType(Enum):
     File = "file"
 
-
-class ReadTable(Table):
-    def __init__(self, **data: Any) -> None:
-        super().__init__(**data)
-
-    create_table: bool = Field(default=True)
-    managed: bool = Field(default=False)
-
-
-class Read(DataSet, ReadTable):
+class Read(Table):
     _OPTION_CF_SCHEMA_HINTS = "cloudFiles.schemaHints"
     _OPTION_CORRUPT_RECORD_NAME = "columnNameOfCorruptRecord"
 
@@ -35,6 +26,8 @@ class Read(DataSet, ReadTable):
 
     _logger: Any = PrivateAttr(default=None)
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
+    create_table: bool = Field(default=True)
+    managed: bool = Field(default=False)
     trigger: str = Field(default=None)
     trigger_type: TriggerType = Field(default=None)
     filename: str = Field(...)

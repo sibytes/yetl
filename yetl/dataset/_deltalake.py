@@ -5,7 +5,7 @@ from typing import Any, Dict, Union, List
 from .._timeslice import Timeslice
 import os
 from .._stage_type import StageType
-from ._dataset import DataSet, Table
+from ._table import Table
 from ..deltalake import DeltaLakeFn
 
 # from ..datallake import create_database, create_table
@@ -16,20 +16,8 @@ from ..deltalake import DeltaLakeFn
 #     pass
 
 
-class DeltaLakeTable(Table):
-    def __init__(self, **data: Any) -> None:
-        super().__init__(**data)
 
-    depends_on: List[str] = Field(default=[])
-    delta_properties: Dict[str, str] = Field(default=None)
-    delta_constraints: Dict[str, str] = Field(default=None)
-    partition_by: List[str] = Field(default=None)
-    z_order_by: List[str] = Field(default=None)
-    create_table: bool = Field(default=True)
-    managed: bool = Field(default=False)
-
-
-class DeltaLake(DataSet, DeltaLakeTable):
+class DeltaLake(Table):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
         self._logger = logging.getLogger(self.__class__.__name__)
@@ -44,6 +32,13 @@ class DeltaLake(DataSet, DeltaLakeTable):
     _logger: Any = PrivateAttr(default=None)
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
     _spark: DeltaLakeFn = PrivateAttr(default=None)
+    depends_on: List[str] = Field(default=[])
+    delta_properties: Dict[str, str] = Field(default=None)
+    delta_constraints: Dict[str, str] = Field(default=None)
+    partition_by: List[str] = Field(default=None)
+    z_order_by: List[str] = Field(default=None)
+    create_table: bool = Field(default=True)
+    managed: bool = Field(default=False)
     options: Union[dict, None] = Field(default=None)
     timeslice: Timeslice = Field(...)
     location: str = Field(default=None)

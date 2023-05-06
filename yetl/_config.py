@@ -1,5 +1,5 @@
 import os
-from .dataset import DataSet
+from .dataset import Table
 from ._timeslice import Timeslice
 from ._tables import Tables, _INDEX_WILDCARD
 from ._stage_type import StageType
@@ -18,7 +18,7 @@ class Config:
         self.config_path = get_config_path(project, config_path)
         configure_logging(project, self.config_path)
         self.project = self._load_project(project)
-        self.pipeline = self._load_pipeline(pipeline)
+        self.pipeline = pipeline
         self.tables = self._load_tables()
 
     def _load_project(self, project: str):
@@ -43,19 +43,17 @@ class Config:
         return pipeline
 
     def _load_tables(self):
-        tables_path = self.pipeline[self._TABLES]
+        tables_config = self._load_pipeline(self.pipeline)
+        tables_path = tables_config[self._TABLES]
         tables_path = abs_config_path(
-            self.project.pipelines, self.pipeline[self._TABLES]
+            self.project.pipelines, tables_path
         )
 
         data = load_yaml(tables_path)
         check_version(data)
-        self.pipeline[self._TABLES] = data
+        tables_config[self._TABLES] = data
 
-        tables = Tables(
-            table_data=self.pipeline[self._TABLES],
-            config_path=self.pipeline[self._CONFIG_PATH],
-        )
+        tables = Tables(table_data=tables_config)
         return tables
 
     def get_table_mapping(
@@ -70,18 +68,18 @@ class Config:
         )
 
         table_mapping.source = dataset_factory.get_data_set(
-            self.pipeline, table_mapping.source, timeslice
+            self._pipeline, table_mapping.source, timeslice
         )
         table_mapping.destination = dataset_factory.get_data_set(
-            self.pipeline, table_mapping.destination, timeslice
+            self._pipeline, table_mapping.destination, timeslice
         )
 
         return table_mapping
 
     def set_checkpoint(
         self,
-        source: DataSet,
-        destination: DataSet,
+        source: Table,
+        destination: Table,
         checkpoint_name: str = None,
     ):
         if not checkpoint_name:

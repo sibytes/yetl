@@ -4,7 +4,7 @@ import logging
 from ._config import Config
 from ._timeslice import Timeslice
 from ._stage_type import StageType
-from .dataset import DataSet
+from .dataset import Table
 
 
 def yetl_flow(

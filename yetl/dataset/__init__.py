@@ -1,13 +1,13 @@
 from ._deltalake import DeltaLake
 from ._read import Read
-from ._dataset import DataSet, Table, ValidationThreshold
-from ._factory import factory as dataset_factory
+from ._table import Table, ValidationThreshold
+from ._factory import factory as table_factory
 
 
 __all__ = [
     "DeltaLake",
     "Read",
-    "dataset_factory",
+    "table_factory",
     "DataSet",
     "Table",
     "ValidationThreshold",

@@ -4,22 +4,64 @@ from ._stage_type import StageType
 import fnmatch
 from ._table_mapping import TableMapping
 from .dataset.dataset_type import TableType
-from .dataset import dataset_factory
-from .dataset._dataset import Table
-
+from .dataset import table_factory
+from .dataset._table import Table
+from enum import Enum
+from pprint import pprint
 
 _INDEX_WILDCARD = "*"
 
 
+class PushDownProperties(Enum):
+    DELTA_PROPETIES = "delta_properties"
+    @classmethod
+    def has_value(cls, value):
+        return value in cls._value2member_map_ 
+    @classmethod
+    def has_not_value(cls, value):
+        return value not in cls._value2member_map_ 
+    
 class Tables(BaseModel):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
-        self._load_index()
+        self._parse_configuration()
+        self._build_tables()
+
+    def _parse_configuration(self):
+        push_down_properties = {}
+        for stage_name, table_type in self.table_data["tables"].items():
+            stage_type = StageType(stage_name)
+            for table_type_name, database in table_type.items():
+                table_type = TableType(table_type_name)
+                for database_name, table in database.items():
+                    if PushDownProperties.has_not_value(database_name):
+                        for table_name, table_propties in table.items():
+                            table_config = {
+                                "database": database_name,
+                                "table": table_name,
+                                "stage": stage_type,
+                                "table_type": table_type
+                            }
+                            if table_propties:
+                                table_config = {**table_config, **table_propties}
+                            table_config = {**push_down_properties, **table_config}
+                            for p, v in push_down_properties.items():
+                                if isinstance(v, dict) and table_config.get(p):
+                                    table_config[p] = {**v, **table_config[p]}
+                                else:
+                                    table_config[p] = v
+                            stage_config = self.table_data.get(stage_type.value, {})
+                            stage_config = stage_config.get(table_type.value, {})
+                            table_config = {**stage_config, **table_config}
+                            index = f"{stage_name}.{database_name}.{table_name}"
+                            self.tables_index[index] = table_config
+                            push_down_properties = {}
+                    else:
+                        push_down_properties[database_name] = table
 
     table_data: dict = Field(...)
     tables_index: Dict[str, Table] = Field(default={})
     delta_properties: Dict[str, str] = Field(default=None)
-    config_path: str = Field(...)
 
     @classmethod
     def get_index(
@@ -50,84 +92,16 @@ class Tables(BaseModel):
 
         return stage, database, table
 
-    def _parse_table_delta_lake_properties(
-        self,
-        table_type: TableType,
-        table_details: dict,
-        merge_properties: dict = {},
-    ):
-        """
-        Parse the delta properties from the tables details if there are any. Merge the into
-        a set of existing properties with the table detail properties taking precedence.
-        """
-        if table_type is TableType.DeltaLakeTable:
-            delta_properties = table_details.get("delta_properties", {})
-            # delta_properties = stage_delta_properties | delta_properties
-            delta_properties = {
-                **merge_properties,
-                **delta_properties,
-            }
-            return delta_properties
-        else:
-            return None
-
-    def _parse_stage_delta_lake_properties(
-        self, table_type: TableType, database_tables: dict
-    ):
-        """Parse delta lake properties from the database table details and remove it"""
-        stage_delta_properties = None
-        if table_type is TableType.DeltaLakeTable:
-            stage_delta_properties = database_tables.get("delta_properties", {})
-            if stage_delta_properties:
-                del database_tables["delta_properties"]
-        return stage_delta_properties
-
-    def _parse_stage_data(self, stage: StageType, stage_data: dict):
-        """
-        loop through the database tables, create the table
-        and add it to the class index.
-        """
-        for table_type, database_tables in stage_data.items():
-            table_type = TableType(table_type)
-            stage_delta_properties = self._parse_stage_delta_lake_properties(
-                table_type, database_tables
-            )
-            for database, tables in database_tables.items():
-                for table, table_details in tables.items():
-                    # flatten the config structure for a table
-                    if not table_details:
-                        table_details = {}
-
-                    delta_properties = self._parse_table_delta_lake_properties(
-                        table_type, table_details, stage_delta_properties
-                    )
-                    if delta_properties:
-                        table_details["delta_properties"] = delta_properties
-                    table_details["table"] = table
-                    table_details["database"] = database
-                    table_details["stage"] = stage
-                    table_details["table_type"] = table_type
-
-                    # create a table object
-
-                    # table = Table(**table_details)
-                    table = dataset_factory.get_table(table_type, table_details)
-
-                    # index the table object
-                    index = f"{stage.name}.{database}.{table.table}"
-                    self.tables_index[index] = table
-
-    def _load_index(self):
+    def _build_tables(self):
         """
         Parse through the table definitions dictionary and deserialize it
         into Table objects. The table object are then place in a dictionary for easy
         lookup with a key = stage.database.table and the value being the table
         object it self. This dictionary index is held on self.tables_index
         """
-        for stage in StageType:
-            stage_data = self.table_data.get(stage)
-            if stage_data:
-                self._parse_stage_data(stage, stage_data)
+        for index, table_config in self.tables_index.items():
+            self.tables_index[index] = table_factory.create(table_config)
+
 
     def lookup_table(
         self,
