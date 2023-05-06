@@ -22,6 +22,26 @@ version: 1.0.0
 # delta.setTransactionRetentionDuration: none
 # delta.tuneFileSizesForRewrites: none
 
+# captures any audit tables you may
+# want to create to capture details of the ETL process
+# such as watermarks, stats etc
+audit_control:
+  delta_lake:
+    delta_properties:
+        delta.appendOnly: true
+        delta.autoOptimize.autoCompact: true
+        delta.autoOptimize.optimizeWrite: true
+    raw_dbx_patterns_control:
+      header_footer:
+        ids: null
+        container: datalake
+        root: /mnt/{{container}}/data/raw
+        sql: ../sql/tables/{{database}}.{{table}}.sql
+      header_footer:
+        ids: null
+        container: datalake
+        root: /mnt/{{container}}/data/raw
+        sql: ../sql/tables/{{database}}.{{table}}.sql
 
 landing:
   read:

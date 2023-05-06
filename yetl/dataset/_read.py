@@ -1,5 +1,5 @@
 import logging
-from pydantic import Field, PrivateAttr, BaseModel
+from pydantic import Field, PrivateAttr
 from .._utils import JinjaVariables, render_jinja, get_ddl, load_schema, abs_config_path
 from typing import Any, Dict, List, Union
 from enum import Enum
@@ -15,22 +15,10 @@ class TriggerType(Enum):
     File = "file"
 
 
-class ValidationThreshold(BaseModel):
-    def __init__(self, **data: Any) -> None:
-        super().__init__(**data)
-
-    invalid_ratio: float = Field(default=None)
-    invalid_rows: int = Field(default=None)
-    max_rows: int = Field(default=None)
-    min_rows: int = Field(default=None)
-
-
 class ReadTable(Table):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
 
-    warning_thresholds: ValidationThreshold = Field(default=None)
-    exception_thresholds: ValidationThreshold = Field(default=None)
     create_table: bool = Field(default=True)
     managed: bool = Field(default=False)
 

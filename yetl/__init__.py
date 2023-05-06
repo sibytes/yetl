@@ -18,5 +18,5 @@ __all__ = [
     "Tables",
     "StageType",
     "yetl_flow",
-    "ValidationThreshold"
+    "ValidationThreshold",
 ]

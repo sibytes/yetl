@@ -8,6 +8,16 @@ from .dataset_type import TableType
 from .._project import Project
 
 
+class ValidationThreshold(BaseModel):
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+
+    invalid_ratio: float = Field(default=None)
+    invalid_rows: int = Field(default=None)
+    max_rows: int = Field(default=None)
+    min_rows: int = Field(default=None)
+
+
 class Table(BaseModel):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
@@ -18,6 +28,8 @@ class Table(BaseModel):
     id: Union[str, List[str]] = Field(default=[])
     custom_properties: Dict[str, Any] = Field(default=None)
     table_type: TableType = Field(...)
+    warning_thresholds: ValidationThreshold = Field(default=None)
+    exception_thresholds: ValidationThreshold = Field(default=None)
 
     def _render(self):
         pass
