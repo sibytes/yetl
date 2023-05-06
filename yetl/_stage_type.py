@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class StageType(str, Enum):
-    audit = "audit_control"
+    audit_control = "audit_control"
     landing = "landing"
     raw = "raw"
     base = "base"
