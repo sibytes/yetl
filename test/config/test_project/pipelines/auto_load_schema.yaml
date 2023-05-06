@@ -1,6 +1,20 @@
 version: 1.0.0
 tables: ./tables.yaml
 
+audit_control:
+  delta_lake:
+    # delta table properties can be set at stage level or table level
+    delta_properties:
+        delta.appendOnly: true
+        delta.autoOptimize.autoCompact: true
+        delta.autoOptimize.optimizeWrite: true
+    managed: false
+    create_table: true
+    container: datalake
+    location: /mnt/{{container}}/data/raw
+    path: "{{database}}/{{table}}"
+    options: null
+
 landing:
   read:
     trigger: customerdetailscomplete-{{filename_date_format}}*.flg
@@ -31,7 +45,6 @@ landing:
       quote: '"'
       emptyValue: ""
     
-
 raw:
   delta_lake:
     # delta table properties can be set at stage level or table level

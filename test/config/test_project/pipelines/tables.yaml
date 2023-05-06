@@ -27,20 +27,10 @@ version: 1.0.0
 # such as watermarks, stats etc
 audit_control:
   delta_lake:
-    delta_properties:
-        delta.appendOnly: true
-        delta.autoOptimize.autoCompact: true
-        delta.autoOptimize.optimizeWrite: true
     raw_dbx_patterns_control:
       header_footer:
-        ids: null
-        container: datalake
-        location: /mnt/{{container}}/data/raw
         sql: ../sql/tables/{{database}}.{{table}}.sql
       header_footer:
-        ids: null
-        container: datalake
-        location: /mnt/{{container}}/data/raw
         sql: ../sql/tables/{{database}}.{{table}}.sql
 
 landing:
