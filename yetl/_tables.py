@@ -3,24 +3,37 @@ from typing import Union, Any, Dict, List
 from ._stage_type import StageType
 import fnmatch
 from ._table_mapping import TableMapping
-from .dataset.dataset_type import TableType
-from .dataset import table_factory
-from .dataset._table import Table
+from .table import TableType
+from .table import table_factory
+from .table import Table
 from enum import Enum
-from pprint import pprint
 
 _INDEX_WILDCARD = "*"
 
 
+class KeyContants(Enum):
+    DATABASE = "database"
+    TABLE = "table"
+    TABLES = "tables"
+    STAGE = "stage"
+    TABLE_TYPE = "table_type"
+    PROJECT = "project"
+    TIMESLICE = "timeslice"
+    CONFIG_PATH = "config_path"
+
+
 class PushDownProperties(Enum):
     DELTA_PROPETIES = "delta_properties"
+
     @classmethod
     def has_value(cls, value):
-        return value in cls._value2member_map_ 
+        return value in cls._value2member_map_
+
     @classmethod
     def has_not_value(cls, value):
-        return value not in cls._value2member_map_ 
-    
+        return value not in cls._value2member_map_
+
+
 class Tables(BaseModel):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
@@ -37,10 +50,19 @@ class Tables(BaseModel):
                     if PushDownProperties.has_not_value(database_name):
                         for table_name, table_propties in table.items():
                             table_config = {
-                                "database": database_name,
-                                "table": table_name,
-                                "stage": stage_type,
-                                "table_type": table_type
+                                KeyContants.DATABASE.value: database_name,
+                                KeyContants.TABLE.value: table_name,
+                                KeyContants.STAGE.value: stage_type,
+                                KeyContants.TABLE_TYPE.value: table_type,
+                                KeyContants.PROJECT.value: self.table_data.get(
+                                    KeyContants.PROJECT.value
+                                ),
+                                KeyContants.TIMESLICE.value: self.table_data.get(
+                                    KeyContants.TIMESLICE.value
+                                ),
+                                KeyContants.CONFIG_PATH.value: self.table_data.get(
+                                    KeyContants.CONFIG_PATH.value
+                                ),
                             }
                             if table_propties:
                                 table_config = {**table_config, **table_propties}
@@ -100,8 +122,9 @@ class Tables(BaseModel):
         object it self. This dictionary index is held on self.tables_index
         """
         for index, table_config in self.tables_index.items():
-            self.tables_index[index] = table_factory.create(table_config)
-
+            self.tables_index[index] = table_factory.make(
+                table_config["table_type"], table_config
+            )
 
     def lookup_table(
         self,

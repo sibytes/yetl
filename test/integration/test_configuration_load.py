@@ -25,10 +25,10 @@ def test_configuration_load(tear_down):
     project = "test_project"
     timeslice = Timeslice(day="*", month="*", year="*")
     config = Config(
-        project=project, pipeline=pipeline, config_path=config_path
+        project=project, pipeline=pipeline, config_path=config_path, timeslice=timeslice
     )
     table_mapping = config.get_table_mapping(
-        timeslice=timeslice, stage=StageType.raw, table="customers"
+        stage=StageType.raw, table="customers"
     )
 
     source: Read = table_mapping.source["customer_details_1"]

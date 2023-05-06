@@ -2,6 +2,7 @@ from ._deltalake import DeltaLake
 from ._read import Read
 from ._table import Table, ValidationThreshold
 from ._factory import factory as table_factory
+from ._table_type import TableType
 
 
 __all__ = [
@@ -11,4 +12,5 @@ __all__ = [
     "DataSet",
     "Table",
     "ValidationThreshold",
+    "TableType",
 ]

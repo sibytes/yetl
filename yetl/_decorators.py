@@ -4,7 +4,7 @@ import logging
 from ._config import Config
 from ._timeslice import Timeslice
 from ._stage_type import StageType
-from .dataset import Table
+from .table import Table
 
 
 def yetl_flow(
@@ -35,13 +35,14 @@ def yetl_flow(
                 raise Exception(f"{e} is a required argument for a yetl flow function")
 
             config = Config(
-                project=project, pipeline=_pipeline, config_path=config_path
+                project=project,
+                pipeline=_pipeline,
+                config_path=config_path,
+                timeslice=timeslice,
             )
-            table_mapping = config.get_table_mapping(
-                timeslice=timeslice, stage=stage, table=table
-            )
+            table_mapping = config.get_table_mapping(stage=stage, table=table)
 
-            destination: DataSet = table_mapping.destination
+            destination: Table = table_mapping.destination
             sources = table_mapping.source
             if isinstance(sources, dict):
                 for _, source in sources.items():

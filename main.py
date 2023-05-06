@@ -24,9 +24,11 @@ tear_down()
 def auto_load_schema(table_mapping:TableMapping):
 
     destination = table_mapping.destination
-    source = table_mapping.source
+    source = table_mapping.source["customer_details_1"]
+
     assert source.table == "customer_details_1"
     assert destination.table == "customers"
 
 
 auto_load_schema(table="customers")
+

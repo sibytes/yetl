@@ -1,25 +1,22 @@
 import os
-from .dataset import Table
+from .table import Table
 from ._timeslice import Timeslice
-from ._tables import Tables, _INDEX_WILDCARD
+from ._tables import Tables, _INDEX_WILDCARD, KeyContants
 from ._stage_type import StageType
-from .dataset import dataset_factory
 from ._utils import abs_config_path, load_yaml, get_config_path, check_version
 from ._logging_config import configure_logging
 from ._project import Project
 
 
 class Config:
-    _TABLES = "tables"
-    _CONFIG_PATH = "config_path"
-    _PROJECT = "project"
-
-    def __init__(self, project: str, pipeline: str, config_path: str = None):
+    def __init__(
+        self, project: str, pipeline: str, timeslice: Timeslice, config_path: str = None
+    ):
         self.config_path = get_config_path(project, config_path)
         configure_logging(project, self.config_path)
         self.project = self._load_project(project)
         self.pipeline = pipeline
-        self.tables = self._load_tables()
+        self.tables = self._load_tables(timeslice)
 
     def _load_project(self, project: str):
         project_file_path = os.path.join(self.config_path, f"{project}.yaml")
@@ -31,47 +28,34 @@ class Config:
 
     def _load_pipeline(self, pipeline: str):
         pipeline_file = f"{pipeline}.yaml"
-
         config_file_path = os.path.join(self.project.pipelines, pipeline_file)
         pipeline = load_yaml(config_file_path)
         check_version(pipeline)
-
-        # add the configuration path into the confif dictionart
-        # so that it gets passed to table config when created
-        pipeline[self._CONFIG_PATH] = self.project.pipelines
-        pipeline[self._PROJECT] = self.project
         return pipeline
 
-    def _load_tables(self):
+    def _load_tables(self, timeslice: Timeslice):
         tables_config = self._load_pipeline(self.pipeline)
-        tables_path = tables_config[self._TABLES]
-        tables_path = abs_config_path(
-            self.project.pipelines, tables_path
-        )
+        tables_path = tables_config[KeyContants.TABLES.value]
+        tables_path = abs_config_path(self.project.pipelines, tables_path)
 
         data = load_yaml(tables_path)
         check_version(data)
-        tables_config[self._TABLES] = data
+        tables_config[KeyContants.TABLES.value] = data
+        tables_config[KeyContants.TIMESLICE.value] = timeslice
+        tables_config[KeyContants.CONFIG_PATH.value] = self.project.pipelines
+        tables_config[KeyContants.PROJECT.value] = self.project
 
         tables = Tables(table_data=tables_config)
         return tables
 
     def get_table_mapping(
         self,
-        timeslice: Timeslice,
         stage: StageType,
         table: str = _INDEX_WILDCARD,
         database: str = _INDEX_WILDCARD,
     ):
         table_mapping = self.tables.get_table_mapping(
             stage=stage, table=table, database=database
-        )
-
-        table_mapping.source = dataset_factory.get_data_set(
-            self._pipeline, table_mapping.source, timeslice
-        )
-        table_mapping.destination = dataset_factory.get_data_set(
-            self._pipeline, table_mapping.destination, timeslice
         )
 
         return table_mapping

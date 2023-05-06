@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Union, Any, Dict
-from .dataset import Table
+from .table import Table
 
 
 class TableMapping(BaseModel):

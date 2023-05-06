@@ -4,7 +4,7 @@ from .._utils import JinjaVariables
 from typing import Any, Dict, Union, List
 from .._timeslice import Timeslice
 from .._stage_type import StageType
-from .dataset_type import TableType
+from ._table_type import TableType
 from .._project import Project
 
 

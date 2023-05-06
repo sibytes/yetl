@@ -14,6 +14,7 @@ from ._table import Table
 class TriggerType(Enum):
     File = "file"
 
+
 class Read(Table):
     _OPTION_CF_SCHEMA_HINTS = "cloudFiles.schemaHints"
     _OPTION_CORRUPT_RECORD_NAME = "columnNameOfCorruptRecord"
