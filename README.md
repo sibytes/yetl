@@ -124,7 +124,7 @@ raw: # this is the bronze stage in the deltalake house
 Import the config objects into you pipeline:
 
 ```python
-from yetl import Config, Timeslice, StageType
+from yetl import Config, StageType
 
 pipeline = "auto_load_schema"
 project = "test_project"
@@ -132,7 +132,7 @@ config = Config(
     project=project, pipeline=pipeline
 )
 table_mapping = config.get_table_mapping(
-    timeslice=timeslice, stage=StageType.raw, table="customers"
+    stage=StageType.raw, table="customers"
 )
 
 print(table_mapping)
