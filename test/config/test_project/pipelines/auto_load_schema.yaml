@@ -12,8 +12,10 @@ audit_control:
     create_table: true
     container: datalake
     location: /mnt/{{container}}/data/raw
+    checkpoint_location: "/mnt/{{container}}/checkpoint/{{checkpoint}}"
     path: "{{database}}/{{table}}"
-    options: null
+    options:
+      checkpointLocation: default
 
 landing:
   read:
