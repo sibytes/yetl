@@ -31,22 +31,22 @@ class ValidationThreshold(BaseModel):
     def select_sql(self):
         thresholds_sql = []
         if self.invalid_ratio is not None:
-            thresholds_sql.append(f"{self.invalid_ratio} as invalid_ratio")
+            thresholds_sql.append(f"cast({self.invalid_ratio} as double) as invalid_ratio")
         else:
             thresholds_sql.append("null as invalid_ratio")
 
         if self.invalid_rows is not None:
-            thresholds_sql.append(f"{self.invalid_rows} as invalid_rows")
+            thresholds_sql.append(f"cast({self.invalid_rows} as long) as invalid_rows")
         else:
             thresholds_sql.append("null as invalid_rows")
 
         if self.max_rows is not None:
-            thresholds_sql.append(f"{self.max_rows} as max_rows")
+            thresholds_sql.append(f"cast({self.max_rows} as long) as max_rows")
         else:
             thresholds_sql.append("null as max_rows")
 
         if self.min_rows is not None:
-            thresholds_sql.append(f"{self.min_rows} as min_rows")
+            thresholds_sql.append(f"cast({self.min_rows} as long) as min_rows")
         else:
             thresholds_sql.append("null as min_rows")
 
