@@ -15,17 +15,29 @@ Define configuration and table dependencies in yaml config then get the table ma
 Define your tables.
 
 ```yaml
+audit_control:
+  delta_lake:
+    raw_dbx_patterns_control:
+      header_footer:
+        sql: ../sql/{{database}}/{{table}}.sql
+        depends_on:
+          - raw.raw_dbx_patterns.*
+      raw_audit:
+        sql: ../sql/{{database}}/{{table}}.sql
+        depends_on:
+          - raw.raw_dbx_patterns.*
+          - audit_control.raw_dbx_patterns_control.header_footer
 
-landing: # this is the landing stage in the deltalake house
-  read: # this is the type of spark asset that the pipeline needs to read
+landing:
+  read:
     landing_dbx_patterns:
       customer_details_1: null
       customer_details_2: null
 
-raw: # this is the bronze stage in the deltalake house
-  delta_lake: # this is the type of spark asset that the pipeline needs to read and write to
-    raw_dbx_patterns: # this is the database name
-      customers: # this is a table name and it's subsequent properties
+raw:
+  delta_lake:
+    raw_dbx_patterns:
+      customers:
         ids: id
         depends_on:
           - landing.landing_dbx_patterns.customer_details_1
@@ -42,38 +54,32 @@ raw: # this is the bronze stage in the deltalake house
           min_rows: 0
         custom_properties:
           process_group: 1
-
-base: # this is the silver stage in the delta lakehouse
-  delta_lake: # this is the type of spark asset that the pipeline needs to read and write to
-    # delta table properties can be set at stage level or table level
-    delta_properties:
-      delta.appendOnly: true
-      delta.autoOptimize.autoCompact: true    
-      delta.autoOptimize.optimizeWrite: true  
-      delta.enableChangeDataFeed: false
-    base_dbx_patterns: # this is a database name
-      customer_details_1: # this is a table name and it's subsequent properties
-        ids: id
-        depends_on:
-          - raw.raw_dbx_patterns.customers
-        # delta table properties can be set at stage level or table level
-        # table level properties will overwride stage level properties
-        delta_properties:
-            delta.enableChangeDataFeed: true
-      customer_details_2: # this is a table name and it's subsequent properties
-        ids: id
-        depends_on:
-          - raw.raw_dbx_patterns.customers
 ```
 
 Define you load configuration:
 
 ```yaml
-version: 1.1.0
+version: 1.0.0
 tables: ./tables.yaml
 
-landing: # this is the landing stage in the deltalake house
-  read: # this is the type of spark asset that the pipeline needs to read from
+audit_control:
+  delta_lake:
+    # delta table properties can be set at stage level or table level
+    delta_properties:
+        delta.appendOnly: true
+        delta.autoOptimize.autoCompact: true
+        delta.autoOptimize.optimizeWrite: true
+    managed: false
+    create_table: true
+    container: datalake
+    location: /mnt/{{container}}/data/raw
+    checkpoint_location: "/mnt/{{container}}/checkpoint/{{checkpoint}}"
+    path: "{{database}}/{{table}}"
+    options:
+      checkpointLocation: default
+
+landing:
+  read:
     trigger: customerdetailscomplete-{{filename_date_format}}*.flg
     trigger_type: file
     container: datalake
@@ -102,9 +108,8 @@ landing: # this is the landing stage in the deltalake house
       quote: '"'
       emptyValue: ""
     
-
-raw: # this is the bronze stage in the deltalake house
-  delta_lake: # this is the type of spark asset that the pipeline needs to read and write to
+raw:
+  delta_lake:
     # delta table properties can be set at stage level or table level
     delta_properties:
       delta.appendOnly: true
@@ -116,9 +121,16 @@ raw: # this is the bronze stage in the deltalake house
     container: datalake
     location: /mnt/{{container}}/data/raw
     path: "{{database}}/{{table}}"
+    checkpoint_location: "/mnt/{{container}}/checkpoint/{{checkpoint}}"
     options:
-      checkpointLocation: /mnt/{{container}}/checkpoint/{{database}}_{{table}}
       mergeSchema: true
+
+base:
+  delta_lake:
+    container: datalake
+    location: /mnt/{{container}}/data/base
+    path: "{{database}}/{{table}}"
+    options: null
 ```
 
 Import the config objects into you pipeline:
