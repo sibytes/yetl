@@ -50,9 +50,9 @@ class ValidationThreshold(BaseModel):
         else:
             thresholds_sql.append("null as min_rows")
 
-        sql = """
+        sql = f"""
             struct(
-                ",".join(warning_thresholds_sql)
+                {",".join(thresholds_sql)}
             )
         """
 
