@@ -25,14 +25,7 @@ class ValidationThreshold(BaseModel):
 
     @classmethod
     def default_select_sql(cls):
-        sql = """
-            struct(
-                null as invalid_ratio,
-                null as invalid_rows,
-                null as max_rows,
-                null as min_rows
-            )
-        """
+        sql = "null"
         return sql
 
     def select_sql(self):
