@@ -1,8 +1,11 @@
   CREATE TABLE IF NOT EXISTS `raw_dbx_patterns_control`.`raw_audit`
   (
+    `file_name` string,
+    source_database string,
+    source_table string,
     `database` string,
     `table` string,
-    `file_name` string,
+
     total_count bigint,
     valid_count bigint,
     invalid_count bigint,

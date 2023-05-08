@@ -29,7 +29,7 @@ class ValidationThreshold(BaseModel):
             struct(
                 null as invalid_ratio,
                 null as invalid_rows,
-                null as as max_rows,
+                null as max_rows,
                 null as min_rows
             )
         """
