@@ -16,19 +16,36 @@ def tear_down():
 tear_down()
 
 
+# @yetl_flow(
+#         project="test_project", 
+#         stage=StageType.raw, 
+#         config_path="./test/config"
+# )
+# def auto_load_schema(table_mapping:TableMapping):
+
+#     destination = table_mapping.destination
+#     source = table_mapping.source["customer_details_1"]
+
+#     assert source.table == "customer_details_1"
+#     assert destination.table == "customers"
+
+
+# auto_load_schema(table="customers")
+
+
 @yetl_flow(
         project="test_project", 
-        stage=StageType.raw, 
+        stage=StageType.audit_control, 
         config_path="./test/config"
 )
 def auto_load_schema(table_mapping:TableMapping):
 
     destination = table_mapping.destination
-    source = table_mapping.source["customer_details_1"]
+    source = table_mapping.source
 
-    assert source.table == "customer_details_1"
-    assert destination.table == "customers"
+    assert source.table == "customers"
+    assert destination.table == "header_footer"
 
 
-auto_load_schema(table="customers")
+auto_load_schema(table="header_footer")
 

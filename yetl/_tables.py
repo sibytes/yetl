@@ -181,18 +181,21 @@ class Tables(BaseModel):
         )
         source = {}
 
+        tables = []
         try:
             for index in destination.depends_on:
                 do_stage, do_database, do_table = Tables.parse_index(index)
-                table = self.lookup_table(
+                tables = tables + self.lookup_table(
                     stage=do_stage,
                     table=do_table,
                     database=do_database,
-                    first_match=True,
+                    first_match=False,
                 )
-                source[table.table] = table
         except Exception as e:
             raise Exception(f"Error looking up dependencies for table {table}") from e
+
+        for tbl in tables:
+            source[tbl.table] = tbl
 
         if len(list(source.values())) == 1:
             source = list(source.values())[0]

@@ -6,6 +6,12 @@ from .._timeslice import Timeslice
 from .._stage_type import StageType
 from ._table_type import TableType
 from .._project import Project
+from enum import Enum
+
+
+class ValidationThresholdType(Enum):
+    exception = ("exception",)
+    warning = "warning"
 
 
 class ValidationThreshold(BaseModel):
@@ -16,6 +22,48 @@ class ValidationThreshold(BaseModel):
     invalid_rows: int = Field(default=None)
     max_rows: int = Field(default=None)
     min_rows: int = Field(default=None)
+
+    @classmethod
+    def default_select_sql(cls):
+        sql = """
+            struct(
+                null as invalid_ratio,
+                null as invalid_rows,
+                null as as max_rows,
+                null as min_rows
+            )
+        """
+        return sql
+
+    def select_sql(self):
+        warning_thresholds_sql = []
+        if self.invalid_ratio:
+            warning_thresholds_sql.append(f"{self.invalid_ratio} as invalid_ratio")
+        else:
+            self.append("null as invalid_ratio")
+
+        if self.invalid_rows:
+            self.append(f"{self.invalid_rows} as invalid_rows")
+        else:
+            self.append("null as invalid_rows")
+
+        if self.max_rows:
+            self.append(f"{self.max_rows} as max_rows")
+        else:
+            self.append("null as max_rows")
+
+        if self.min_rows:
+            self.append(f"{self.min_rows} as min_rows")
+        else:
+            self.append("null as min_rows")
+
+        sql = """
+            struct(
+                ",".join(warning_thresholds_sql)
+            )
+        """
+
+        return sql
 
 
 class Table(BaseModel):
@@ -45,3 +93,16 @@ class Table(BaseModel):
 
     def _render(self):
         pass
+
+    def thresholds_select_sql(self, threshold_type: ValidationThresholdType):
+        if threshold_type == ValidationThresholdType.exception:
+            if self.exception_thresholds:
+                return self.exception_thresholds.select_sql()
+            else:
+                return ValidationThreshold.default_select_sql()
+
+        if threshold_type == ValidationThresholdType.warning:
+            if self.warning_thresholds:
+                return self.warning_thresholds.select_sql()
+        else:
+            return ValidationThreshold.default_select_sql()
