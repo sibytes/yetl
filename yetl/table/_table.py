@@ -104,5 +104,5 @@ class Table(BaseModel):
         if threshold_type == ValidationThresholdType.warning:
             if self.warning_thresholds:
                 return self.warning_thresholds.select_sql()
-        else:
-            return ValidationThreshold.default_select_sql()
+            else:
+                return ValidationThreshold.default_select_sql()
