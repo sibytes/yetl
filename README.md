@@ -15,6 +15,8 @@ Define configuration and table dependencies in yaml config then get the table ma
 Define your tables.
 
 ```yaml
+version: 1.3.0
+
 audit_control:
   delta_lake:
     raw_dbx_patterns_control:
@@ -59,7 +61,7 @@ raw:
 Define you load configuration:
 
 ```yaml
-version: 1.0.0
+version: 1.3.0
 tables: ./tables.yaml
 
 audit_control:

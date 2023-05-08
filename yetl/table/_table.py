@@ -31,7 +31,9 @@ class ValidationThreshold(BaseModel):
     def select_sql(self):
         thresholds_sql = []
         if self.invalid_ratio is not None:
-            thresholds_sql.append(f"cast({self.invalid_ratio} as double) as invalid_ratio")
+            thresholds_sql.append(
+                f"cast({self.invalid_ratio} as double) as invalid_ratio"
+            )
         else:
             thresholds_sql.append("null as invalid_ratio")
 
