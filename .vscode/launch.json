@@ -9,7 +9,7 @@
             "name": "Python: Main",
             "type": "python",
             "request": "launch",
-            "program": "main.py",
+            "program": "spark_conf.py",
             "console": "integratedTerminal",
             "envFile": "${workspaceFolder}/.env",
             "args": [
@@ -22,17 +22,17 @@
                 // "landing_to_raw.yaml.j2",
                 // "./config"
 
-                "register_tables" ,
-                "demo" ,
-                "./config/project"  ,
-                "File" ,
-                "./data/landing/demo" ,
-                "--filename" ,
-                "*" ,
-                "--extract-regex",
-                "^[a-zA-Z_]+[a-zA-Z]+",
-                "--enable-exceptions",
-                "--disable-thresholds"
+                // "register_tables" ,
+                // "demo" ,
+                // "./config/project"  ,
+                // "File" ,
+                // "./data/landing/demo" ,
+                // "--filename" ,
+                // "*" ,
+                // "--extract-regex",
+                // "^[a-zA-Z_]+[a-zA-Z]+",
+                // "--enable-exceptions",
+                // "--disable-thresholds"
 
                 
                 // "build",

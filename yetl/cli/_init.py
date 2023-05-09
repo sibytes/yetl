@@ -64,7 +64,7 @@ def _make_project_dir(project_path: str, project: str):
             "spark.master": "local",
             "spark.databricks.delta.allowArbitraryProperties.enabled": True,
             "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
-            "spark.sql.catalogImplementation": "hive",
+            "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
         },
     }
 

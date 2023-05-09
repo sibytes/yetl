@@ -19,12 +19,9 @@ def get_spark_context(project: str, config: dict = None):
         if config is None:
             config = {
                 "spark.master": "local",
-                # "spark.jars.packages": io.delta:delta-core_2.12:2.1.1
-                # "spark.sql.extensions": io.delta.sql.DeltaSparkSessionExtension
+                "spark.databricks.delta.allowArbitraryProperties.enabled": True,
                 "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
-                "spark.databricks.delta.merge.repartitionBeforeWrite.enabled": True,
-                "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
-                "spark.sql.catalogImplementation": "hive",
+                "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
             }
 
         msg = json.dumps(config, indent=4, default=str)
