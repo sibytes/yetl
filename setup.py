@@ -29,13 +29,17 @@ setup(
     ],
     packages=[
         "yetl",
+        "yetl.cli",
+        "yetl.config",
+        "yetl.config.table",
         "yetl.workflow",
-        "yetl.table"
+
     ],
     install_requires=[
           'PyYAML',
           'jinja2',
-          'pydantic'
+          'pydantic',
+          'typer'
       ],
     zip_safe=False
 )
