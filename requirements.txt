@@ -49,5 +49,4 @@ typer==0.9.0
 typing_extensions==4.5.0
 urllib3==1.26.15
 webencodings==0.5.1
--e git+https://github.com/sibytes/yetl@57ce99dbe0bcdced5a6a97388e15dbb93bdf64c2#egg=yetl_framework
 zipp==3.15.0
