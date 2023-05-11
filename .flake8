@@ -1,4 +1,5 @@
 [flake8]
+; extend-ignore = D
 per-file-ignores =
     # line too long
-    yetl/*.py: E501,
+    yetl/*.py: E501
