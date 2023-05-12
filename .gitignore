@@ -137,7 +137,7 @@ dmypy.json
 /spark-standalone/delta_lake/*
 /spark-standalone/apps/*
 /spark-warehouse/*
-/data/delta_lake/*
+/test/config/test_project/data/*
 # internal spark metastore
 /metastore_db/*
 derby.log

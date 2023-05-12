@@ -28,6 +28,7 @@ class JinjaVariables(Enum):
     CONTAINER = "container"
     DELTA_PROPERTIES = "delta_properties"
     LOCATION = "location"
+    PROJECT = "project"
 
 
 def is_databricks():

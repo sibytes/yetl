@@ -14,13 +14,6 @@ from .._stage_type import StageType
 from ._table import Table
 from ..deltalake import DeltaLakeFn
 
-# from ..datallake import create_database, create_table
-
-# try:
-#     from databricks.sdk.runtime import *  # noqa F403
-# except ModuleNotFoundError:
-#     pass
-
 
 class DeltaLake(Table):
     def __init__(self, **data: Any) -> None:
@@ -60,12 +53,7 @@ class DeltaLake(Table):
         return sql
 
     def _render(self):
-        self._replacements = {
-            JinjaVariables.TABLE: self.table,
-            JinjaVariables.DATABASE: self.database,
-            JinjaVariables.CONTAINER: self.container,
-            JinjaVariables.CHECKPOINT: self.checkpoint,
-        }
+        super()._render()
         if not self._rendered:
             if self.delta_properties:
                 delta_properties_sql = self._spark.get_delta_properties_sql(

@@ -9,7 +9,7 @@
             "name": "Python: Main",
             "type": "python",
             "request": "launch",
-            "program": "spark_conf.py",
+            "program": "main.py",
             "console": "integratedTerminal",
             "envFile": "${workspaceFolder}/.env",
             "args": [

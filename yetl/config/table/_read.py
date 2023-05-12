@@ -41,18 +41,13 @@ class Read(Table):
     stage: StageType = Field(...)
 
     def _render(self):
-        self._replacements = {
-            JinjaVariables.FILENAME_DATE_FORMAT: self.timeslice.strftime(
-                self.filename_date_format
-            ),
-            JinjaVariables.PATH_DATE_FORMAT: self.timeslice.strftime(
-                self.path_date_format
-            ),
-            JinjaVariables.TABLE: self.table,
-            JinjaVariables.DATABASE: self.database,
-            JinjaVariables.CONTAINER: self.container,
-            JinjaVariables.CHECKPOINT: self.checkpoint,
-        }
+        super()._render()
+        self._replacements[
+            JinjaVariables.FILENAME_DATE_FORMAT
+        ] = self.timeslice.strftime(self.filename_date_format)
+        self._replacements[JinjaVariables.PATH_DATE_FORMAT] = self.timeslice.strftime(
+            self.path_date_format
+        )
         if not self._rendered:
             self.location = render_jinja(self.location, self._replacements)
             self.filename = render_jinja(self.filename, self._replacements)
