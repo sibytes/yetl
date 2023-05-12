@@ -87,7 +87,13 @@ class Table(BaseModel):
     config_path: str = Field(...)
 
     def _render(self):
-        pass
+        self._replacements = {
+            JinjaVariables.TABLE: self.table,
+            JinjaVariables.DATABASE: self.database,
+            JinjaVariables.CONTAINER: self.container,
+            JinjaVariables.CHECKPOINT: self.checkpoint,
+            JinjaVariables.PROJECT: self.project,
+        }
 
     def thresholds_select_sql(self, threshold_type: ValidationThresholdType):
         if threshold_type == ValidationThresholdType.exception:
