@@ -92,7 +92,7 @@ class Table(BaseModel):
             JinjaVariables.DATABASE: self.database,
             JinjaVariables.CONTAINER: self.container,
             JinjaVariables.CHECKPOINT: self.checkpoint,
-            JinjaVariables.PROJECT: self.project,
+            JinjaVariables.PROJECT: self.project.name,
         }
 
     def thresholds_select_sql(self, threshold_type: ValidationThresholdType):
