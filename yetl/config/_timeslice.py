@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Literal, Union
 from pydantic import BaseModel, Field
 from typing import Any
+import re
 
 _WILDCARD = "*"
 Wildcard = Literal["*"]
@@ -36,6 +37,22 @@ class Timeslice(BaseModel):
     minute: Union[int, Wildcard] = Field(default=0)
     second: Union[int, Wildcard] = Field(default=0)
     microsecond: Union[int, Wildcard] = Field(default=0)
+
+    @classmethod
+    def parse_iso_date(cls, iso_date: str):
+        if iso_date == "*":
+            iso_date = "*-*-*"
+        pattern = "^(([12]\d{3}|[*])-(0[1-9]|1[0-2]|[*])-(0[1-9]|[12]\d|3[01]|[*]))$"  # noqa W605
+        result = re.match(pattern, iso_date)
+
+        if result:
+            parts = iso_date.split("-")
+            args = {"year": parts[0], "month": parts[1], "day": parts[2]}
+            return cls(**args)
+        else:
+            raise Exception(
+                f"{iso_date} is an invalid iso date string. Must be the format YYYY-mm-dd"
+            )
 
     def strftime(self, format: str):
         """This will format and return the timeslice using python format codes. Only a subset of format codes are suppoered by design
