@@ -5,6 +5,7 @@ from ._tables import Tables, _INDEX_WILDCARD, KeyContants
 from ._stage_type import StageType
 from ._utils import abs_config_path, load_yaml, get_config_path, check_version
 from ._logging_config import configure_logging
+import logging
 from ._project import Project
 
 
@@ -17,6 +18,7 @@ class Config:
         config_path: str = None,
     ):
         self.config_path = get_config_path(project, config_path)
+        self._logger = logging.getLogger(self.__class__.__name__)
         configure_logging(project, self.config_path)
         if not timeslice:
             timeslice = Timeslice(
@@ -79,6 +81,10 @@ class Config:
 
         source.checkpoint = checkpoint_name
         source._render()
-        destination.checkpoint = checkpoint_name
-        destination.options["checkpointLocation"] = destination.checkpoint_location
-        destination._render()
+        if destination.checkpoint_location is not None:
+            destination.checkpoint = checkpoint_name
+            destination.options["checkpointLocation"] = destination.checkpoint_location
+            destination._render()
+            self._logger.info(f"checkpointLocation: {destination.checkpoint_location}")
+        else:
+            self._logger.info("No checkpoint configuration found")
