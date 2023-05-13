@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PrivateAttr
 from typing import Union, Any, Dict, List
 from ._stage_type import StageType
 import fnmatch
@@ -7,6 +7,7 @@ from .table import TableType
 from .table import table_factory
 from .table import Table
 from enum import Enum
+import logging
 
 _INDEX_WILDCARD = "*"
 
@@ -37,6 +38,7 @@ class PushDownProperties(Enum):
 class Tables(BaseModel):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
+        self._logger = logging.getLogger(self.__class__.__name__)
         self._parse_configuration()
         self._build_tables()
 
@@ -84,6 +86,7 @@ class Tables(BaseModel):
     table_data: dict = Field(...)
     tables_index: Dict[str, Table] = Field(default={})
     delta_properties: Dict[str, str] = Field(default=None)
+    _logger: Any = PrivateAttr(default=None)
 
     @classmethod
     def get_index(
@@ -168,9 +171,13 @@ class Tables(BaseModel):
         if first_match:
             matches = matches[0]
             table = tables_index[matches]
+            msg_tables = f"{table.database}.{table.table}"
+            self._logger.info(f"Matched tables: {msg_tables}")
             return table
         else:
             tables = [tables_index[i] for i in matches]
+            msg_tables = "\n".join([f"{t.database}.{t.table}" for t in tables])
+            self._logger.info(f"Matched tables: {msg_tables}")
             return tables
 
     def get_table_mapping(
