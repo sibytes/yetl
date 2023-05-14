@@ -1,6 +1,7 @@
 from yetl import Config, Timeslice, StageType, Read, DeltaLake, yetl_flow, TableMapping, ValidationThreshold
 from yetl.config._project import SparkLoggingLevel 
 from yetl.config.table import TableType
+from yetl.config.table._read import SliceDateFormat
 import pytest
 import os
 import shutil
@@ -22,7 +23,7 @@ def tear_down():
 
 def test_configuration_load(tear_down):
     tear_down()
-    pipeline = "auto_load_schema"
+    pipeline = "autoloader"
     config_path = "./test/config"
     project = "test_project"
     timeslice = Timeslice(day="*", month="*", year="*")
@@ -73,6 +74,9 @@ def test_configuration_load(tear_down):
     assert destination.managed == False 
     assert destination.checkpoint_location == '/mnt/{{container}}/checkpoint/{{project}}/{{checkpoint}}' 
     assert destination.sql == None
+    assert source.slice_date == SliceDateFormat.FILENAME_DATE_FORMAT
+    assert source.slice_date_column_name == "_slice_date"
+
 
 def test_decorator_configuration_load(tear_down):
     @yetl_flow(
@@ -80,11 +84,11 @@ def test_decorator_configuration_load(tear_down):
             stage=StageType.raw, 
             config_path="./test/config"
     )
-    def auto_load_schema(table_mapping:TableMapping):
+    def autoloader(table_mapping:TableMapping):
         return table_mapping
     
 
-    result = auto_load_schema(table="customers")
+    result = autoloader(table="customers")
     tear_down()
     assert result.source["customer_details_1"].table == "customer_details_1"
     assert result.destination.table == "customers"
@@ -96,11 +100,11 @@ def test_decorator_configuration_audit_load(tear_down):
             stage=StageType.audit_control, 
             config_path="./test/config"
     )
-    def auto_load_schema(table_mapping:TableMapping):
+    def autoloader(table_mapping:TableMapping):
         return table_mapping
     
 
-    result = auto_load_schema(table="header_footer")
+    result = autoloader(table="header_footer")
     tear_down()
     assert result.source.table == "customers"
     assert result.destination.table == "header_footer"

@@ -26,6 +26,11 @@ landing:
     filename: "{{table}}-{{filename_date_format}}*.csv"
     filename_date_format: "%Y%m%d"
     path_date_format: "%Y%m%d"
+    # injects the time period column into the dataset
+    # using either the path_date_format or the filename_date_format
+    # as you specify
+    slice_date: filename_date_format
+    slice_date_column_name: _slice_date
     format: cloudFiles
     spark_schema: ../schema/{{table.lower()}}.yaml
     options:

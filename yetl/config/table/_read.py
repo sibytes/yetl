@@ -15,6 +15,11 @@ class TriggerType(Enum):
     File = "file"
 
 
+class SliceDateFormat(Enum):
+    FILENAME_DATE_FORMAT = JinjaVariables.FILENAME_DATE_FORMAT.value
+    PATH_DATE_FORMAT = JinjaVariables.PATH_DATE_FORMAT.value
+
+
 class Read(Table):
     _OPTION_CF_SCHEMA_HINTS = "cloudFiles.schemaHints"
     _OPTION_CORRUPT_RECORD_NAME = "columnNameOfCorruptRecord"
@@ -39,6 +44,8 @@ class Read(Table):
     ddl: List[str] = Field(default=None)
     headerless_ddl: List[str] = Field(default=None)
     stage: StageType = Field(...)
+    slice_date: SliceDateFormat = Field(default=SliceDateFormat.FILENAME_DATE_FORMAT)
+    slice_date_column_name: str = Field(default="_slice_date")
 
     def _render(self):
         super()._render()
