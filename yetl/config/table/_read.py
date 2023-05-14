@@ -7,8 +7,10 @@ import os
 from pyspark.sql.types import StructType
 from pyspark.sql.streaming import StreamingQuery
 from pyspark.sql import DataFrame
+from pyspark.sql import functions as fn
 from .._stage_type import StageType
 from ._table import Table
+from ..deltalake import DeltaLakeFn
 
 
 class TriggerType(Enum):
@@ -23,6 +25,35 @@ class SliceDateFormat(Enum):
 class Read(Table):
     _OPTION_CF_SCHEMA_HINTS = "cloudFiles.schemaHints"
     _OPTION_CORRUPT_RECORD_NAME = "columnNameOfCorruptRecord"
+
+    def add_timeslice(
+        self, 
+        df:DataFrame,
+        filepath_column_name:str = "_metadata.file_path"
+    ):
+
+        if self.slice_date == SliceDateFormat.FILENAME_DATE_FORMAT:
+            date_format = self.path_date_format
+
+        if self.slice_date == SliceDateFormat.PATH_DATE_FORMAT:
+            date_format = self.filename_date_format
+
+        pattern = DeltaLakeFn.to_regex_search_pattern(date_format)
+        spark_format_string = DeltaLakeFn.to_spark_format_code(date_format)
+
+        df = (df
+            .withColumn(self.slice_date_column_name, fn.col(filepath_column_name))
+            .withColumn(self.slice_date_column_name, fn.regexp_extract(fn.col(self.slice_date_column_name), pattern, 0))
+            .withColumn(
+                self.slice_date_column_name,
+                fn.to_timestamp(self.slice_date_column_name, spark_format_string),
+            )
+        )
+
+        return df
+    
+
+
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
