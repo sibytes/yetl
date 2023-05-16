@@ -13,42 +13,8 @@
             "console": "integratedTerminal",
             "envFile": "${workspaceFolder}/.env",
             "args": [
-                
-                // "init", "demo", "--overwrite"
-
-                // "build",
-                // "demo",
-                // "demo_tables.yml", 
-                // "landing_to_raw.yaml.j2",
-                // "./config"
-
-                // "register_tables" ,
-                // "demo" ,
-                // "./config/project"  ,
-                // "File" ,
-                // "./data/landing/demo" ,
-                // "--filename" ,
-                // "*" ,
-                // "--extract-regex",
-                // "^[a-zA-Z_]+[a-zA-Z]+",
-                // "--enable-exceptions",
-                // "--disable-thresholds"
-
-                
-                // "build",
-                // "adworks",
-                // "." ,
-                // "adworks_tables.yml", 
-                // "landing_to_raw.yaml",
-                // "./config"
-
-                // "register_tables", 
-                // "File", 
-                // "/Users/shaunryan/AzureDevOps/yetl-patterns/data/landing/adventureworks", 
-                // "--filename", 
-                // "*", 
-                // "--extract-regex", 
-                // "(?<=_)[^_]+"
+                "import-tables",
+                "./test/config/test_project/pipelines/tables.xlsx"
             ],
             "env": {  }
         },

@@ -43,8 +43,6 @@ class DeltaLake(Table):
     location: str = Field(default=None)
     checkpoint_location: str = Field(default=None)
     stage: StageType = Field(...)
-    managed: bool = Field(default=False)
-    create_table: bool = Field(default=True)
     sql: str = Field(default=None)
 
     def _load_sql(self, path: str):

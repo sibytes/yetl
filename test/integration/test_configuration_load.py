@@ -43,7 +43,7 @@ def test_configuration_load(tear_down):
     assert destination.stage == StageType.raw
     assert destination.database =='raw_dbx_patterns' 
     assert destination.table=='customers' 
-    assert destination.id==[] 
+    assert destination.id=='id'
     assert destination.custom_properties == {'process_group': 1} 
     assert destination.table_type == TableType.DeltaLake
     assert destination.warning_thresholds == ValidationThreshold(invalid_ratio=0.1, invalid_rows=0, max_rows=100, min_rows=5) 

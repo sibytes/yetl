@@ -3,6 +3,8 @@ import pytest
 import os
 import shutil
 
+from yetl import __main__
+
 # def tear_down():
 #     shutil.rmtree("./test/config/test_project/data", ignore_errors=True)
 #     shutil.rmtree("./metastore_db", ignore_errors=True)
@@ -37,5 +39,5 @@ import shutil
 
 
 
-t:Timeslice = Timeslice.parse_iso_date("*-*-")
-print(t.strftime("%Y%m%d"))
+# t:Timeslice = Timeslice.parse_iso_date("*-*-")
+# print(t.strftime("%Y%m%d"))
