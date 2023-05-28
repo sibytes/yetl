@@ -98,10 +98,11 @@ class Read(Table):
             if isinstance(self.spark_schema, str):
                 path = self.spark_schema
                 path = render_jinja(self.spark_schema, self._replacements)
+                path = abs_config_path(self.config_path, path)
                 if os.path.exists(path):
                     self._load_schema(path)
                 else:
-                    self.spark_schema = abs_config_path(self.config_path, path)
+                    self.spark_schema = path
                     self._logger.warning(f"Schema path doesn't exist, schema has not been loaded and remains to be path {path}.")
 
             corrupt_record_name = self.options.get(
