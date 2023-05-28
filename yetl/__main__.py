@@ -4,7 +4,8 @@ from enum import Enum
 from typing_extensions import Annotated
 import pandas as pd
 import numpy as np
-
+from pyspark.sql import SparkSession
+from .config._spark_context import get_spark_context
 app = typer.Typer()
 
 
@@ -43,7 +44,6 @@ SCHEMA = {
     ColumnNames.sql: str,
     ColumnNames.ids: str,
     ColumnNames.depends_on: str,
-    ColumnNames.delta_properties: str,
     f"{ColumnNames.deltalake}.{ColumnNames.delta_properties}": str,
     f"{ColumnNames.deltalake}.{ColumnNames.identity}": str,
     f"{ColumnNames.deltalake}.{ColumnNames.partition_by}": str,
@@ -102,6 +102,7 @@ def init(project: str, directory: str = "."):
     """
     _init.init(project, directory)
 
+from pprint import pprint
 
 @app.command()
 def import_tables(
@@ -117,75 +118,14 @@ def import_tables(
     """
 
     df = pd.read_excel(location, header=[0, 1])
-    df = validate_schema(df)
+    # df = validate_schema(df)
+    def rename(col):
+        if isinstance(col, tuple):
+            col = '.'.join(str(c) for c in col if not c.startswith("Unnamed:"))
+        return col
+    df.columns = map(rename, df.columns)
+    pprint(df.to_dict(orient="records"))
 
-    table_config = {}
-
-    for index, row in df.iterrows():
-        # print(row["error_thresholds"]["invalid_ratio"])
-        # print(row[ColumnNames.stage].values[index])
-        stage = row[ColumnNames.stage].values[0]
-        table_type = row[ColumnNames.table_type].values[0]
-        database = row[ColumnNames.database].values[0]
-        table = row[ColumnNames.table].values[0]
-        sql = row[ColumnNames.sql].values[0]
-        if not pd.isna(sql):
-            # TODO: get from proect config.
-            sql = "../sql/{{database}}/{{table}}.sql"
-        ids = row[ColumnNames.ids].values[0]
-        print(pd.isna(ids))
-        depends_on = row[ColumnNames.depends_on].values[0]
-        delta_properties: str = row[ColumnNames.deltalake][
-            ColumnNames.delta_properties
-        ].values[0]
-        if not pd.isna(delta_properties):
-            delta_properties = delta_properties.split("\n")
-            delta_properties = {
-                p.split(":")[0].strip(): p.split(":")[1].strip()
-                for p in delta_properties
-            }
-        delta_constraints: str = row[ColumnNames.deltalake][
-            ColumnNames.delta_constraints
-        ].values[0]
-        if not pd.isna(delta_constraints):
-            delta_constraints = delta_constraints.split("\n")
-            delta_constraints = {
-                p.split(":")[0].strip(): p.split(":")[1].strip()
-                for p in delta_constraints
-            }
-
-        warning_thresholds_invalid_ratio = row[ColumnNames.warning_thresholds][
-            ColumnNames.invalid_ratio
-        ]
-        warning_thresholds_invalid_rows = row[ColumnNames.warning_thresholds][
-            ColumnNames.invalid_rows
-        ]
-        warning_thresholds_max_rows = row[ColumnNames.warning_thresholds][
-            ColumnNames.max_rows
-        ]
-        warning_thresholds_mins_rows = row[ColumnNames.warning_thresholds][
-            ColumnNames.mins_rows
-        ]
-        error_thresholds_invalid_ratio = row[ColumnNames.error_thresholds][
-            ColumnNames.invalid_ratio
-        ]
-        error_thresholds_invalid_rows = row[ColumnNames.error_thresholds][
-            ColumnNames.invalid_rows
-        ]
-        error_thresholds_max_rows = row[ColumnNames.error_thresholds][
-            ColumnNames.max_rows
-        ]
-        error_thresholds_mins_rows = row[ColumnNames.error_thresholds][
-            ColumnNames.mins_rows
-        ]
-        custom_properties_process_group = row[ColumnNames.custom_properties][
-            "process_group"
-        ]
-        custom_properties_rentention_days = row[ColumnNames.custom_properties][
-            "rentention_days"
-        ]
-        custom_properties_vaccum = row[ColumnNames.custom_properties]["vaccum"]
-        pass
 
 
 @app.command()
