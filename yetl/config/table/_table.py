@@ -107,3 +107,6 @@ class Table(BaseModel):
                 return self.warning_thresholds.select_sql()
             else:
                 return ValidationThreshold.default_select_sql()
+
+    def create_table(self):
+        pass

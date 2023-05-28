@@ -21,8 +21,6 @@ class DeltaLake(Table):
         self._logger = logging.getLogger(self.__class__.__name__)
         self._spark = DeltaLakeFn(project=self.project)
         self._render()
-        if self.create_table:
-            self.create_delta_table()
 
     @classmethod
     def in_allowed_stages(cls, stage: StageType):
@@ -36,15 +34,12 @@ class DeltaLake(Table):
     delta_constraints: Dict[str, str] = Field(default=None)
     partition_by: List[str] = Field(default=None)
     z_order_by: List[str] = Field(default=None)
-    create_table: bool = Field(default=True)
-    managed: bool = Field(default=False)
     options: Union[dict, None] = Field(default=None)
     timeslice: Timeslice = Field(...)
     location: str = Field(default=None)
     checkpoint_location: str = Field(default=None)
     stage: StageType = Field(...)
     managed: bool = Field(default=False)
-    create_table: bool = Field(default=True)
     sql: str = Field(default=None)
 
     def _load_sql(self, path: str):
@@ -94,7 +89,7 @@ class DeltaLake(Table):
                 )
 
     # TODO: Create or alter table
-    def create_delta_table(self):
+    def create_table(self):
         self._spark.create_database(self.database)
 
         if self.managed:

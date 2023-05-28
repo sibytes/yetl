@@ -129,12 +129,30 @@ class Tables(BaseModel):
                 table_config["table_type"], table_config
             )
 
+    def create_table(
+        self,
+        stage: Union[StageType, str] = _INDEX_WILDCARD,
+        database=_INDEX_WILDCARD,
+        table=_INDEX_WILDCARD,
+        first_match: bool = True,
+        **kwargs
+    ):
+        return self.lookup_table(
+            stage=stage,
+            database=database,
+            table=table,
+            first_match=first_match,
+            create_table=True,
+            **kwargs
+        )
+
     def lookup_table(
         self,
         stage: Union[StageType, str] = _INDEX_WILDCARD,
         database=_INDEX_WILDCARD,
         table=_INDEX_WILDCARD,
         first_match: bool = True,
+        create_table: bool = False,
         **kwargs,
     ):
         index = Tables.get_index(stage, database, table)
@@ -173,18 +191,31 @@ class Tables(BaseModel):
             table = tables_index[matches]
             msg_tables = f"{table.database}.{table.table}"
             self._logger.info(f"Matched tables: {msg_tables}")
+            if create_table:
+                table.create_table()
             return table
         else:
             tables = [tables_index[i] for i in matches]
             msg_tables = "\n".join([f"{t.database}.{t.table}" for t in tables])
             self._logger.info(f"Matched tables: {msg_tables}")
+            if create_table:
+                for t in tables:
+                    t.create_table()
             return tables
 
     def get_table_mapping(
-        self, stage: StageType, table=_INDEX_WILDCARD, database=_INDEX_WILDCARD
+        self,
+        stage: StageType,
+        table=_INDEX_WILDCARD,
+        database=_INDEX_WILDCARD,
+        create_table: bool = True
     ):
         destination = self.lookup_table(
-            stage=stage, database=database, table=table, first_match=True
+            stage=stage,
+            database=database,
+            table=table,
+            first_match=True,
+            create_table=create_table
         )
         source = {}
 
@@ -197,6 +228,7 @@ class Tables(BaseModel):
                     table=do_table,
                     database=do_database,
                     first_match=False,
+                    create_table=create_table
                 )
         except Exception as e:
             raise Exception(f"Error looking up dependencies for table {table}") from e

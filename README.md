@@ -72,7 +72,6 @@ audit_control:
         delta.autoOptimize.autoCompact: true
         delta.autoOptimize.optimizeWrite: true
     managed: false
-    create_table: true
     container: datalake
     location: /mnt/{{container}}/data/raw
     checkpoint_location: "/mnt/{{container}}/checkpoint/{{checkpoint}}"
@@ -119,7 +118,6 @@ raw:
       delta.autoOptimize.optimizeWrite: true  
       delta.enableChangeDataFeed: false
     managed: false
-    create_table: true
     container: datalake
     location: /mnt/{{container}}/data/raw
     path: "{{database}}/{{table}}"

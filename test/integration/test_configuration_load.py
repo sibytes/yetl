@@ -70,7 +70,6 @@ def test_configuration_load(tear_down):
     assert destination.delta_constraints == None 
     assert destination.partition_by == None 
     assert destination.z_order_by == None 
-    assert destination.create_table == True
     assert destination.managed == False 
     assert destination.checkpoint_location == '/mnt/{{container}}/checkpoint/{{project}}/{{checkpoint}}' 
     assert destination.sql == None

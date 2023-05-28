@@ -60,7 +60,6 @@ class Read(Table):
 
     _logger: Any = PrivateAttr(default=None)
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
-    create_table: bool = Field(default=True)
     managed: bool = Field(default=False)
     trigger: str = Field(default=None)
     trigger_type: TriggerType = Field(default=None)
@@ -147,7 +146,7 @@ class Read(Table):
                 f"Headless files with schema hints must have a fully hinted schema since it must work positionally. Datasets!=dll({columns_cnt}!={ddls}"
             )
 
-        for i, c in enumerate(columns):
+        for i, _ in enumerate(columns):
             from_name = f"_c{i}"
             to_name = self.ddl[i].split(" ")[0].strip()
             logging.info(f"rename {from_name} to {to_name}")
