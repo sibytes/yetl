@@ -81,11 +81,6 @@ class Config:
             checkpoint_name = f"{source.database}.{source.table}-{destination.database}.{destination.table}"
 
         source.checkpoint = checkpoint_name
-        source._render()
-        if destination.checkpoint_location is not None:
-            destination.checkpoint = checkpoint_name
-            destination.options["checkpointLocation"] = destination.checkpoint_location
-            destination._render()
-            self._logger.info(f"checkpointLocation: {destination.checkpoint_location}")
-        else:
-            self._logger.info("No checkpoint configuration found")
+        source.render()
+        destination.checkpoint = checkpoint_name
+        destination.render()

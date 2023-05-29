@@ -112,14 +112,13 @@ class Read(Table):
                 if corrupt_record_name not in self.spark_schema.names:
                     self.spark_schema.add(field=corrupt_record_name, data_type="string")
 
-            self._rendered = True
+            if self.options:
+                for option, value in self.options.items():
+                    if isinstance(value, str):  
+                        self.options[option] = render_jinja(value, self._replacements)
 
-        if self._rendered and self.options:
-            value = self.options.get("checkpointLocation")
-            if value:
-                self.options["checkpointLocation"] = render_jinja(
-                    value, self._replacements
-                )
+        self._rendered = True
+        
 
     def _config_schema_hints(self):
         path = self.options.get(self._OPTION_CF_SCHEMA_HINTS, None)

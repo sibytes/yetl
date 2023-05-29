@@ -37,7 +37,6 @@ class DeltaLake(Table):
     options: Union[dict, None] = Field(default=None)
     timeslice: Timeslice = Field(...)
     location: str = Field(default=None)
-    checkpoint_location: str = Field(default=None)
     stage: StageType = Field(...)
     managed: bool = Field(default=False)
     sql: str = Field(default=None)
@@ -67,10 +66,6 @@ class DeltaLake(Table):
                 self.location = os.path.abspath(self.location)
             self._replacements[JinjaVariables.LOCATION] = self.location
 
-            if self.options:
-                for option, value in self.options.items():
-                    self.options[option] = render_jinja(value, self._replacements)
-
             if self.sql:
                 # render the path
                 self.sql = render_jinja(self.sql, self._replacements)
@@ -79,14 +74,13 @@ class DeltaLake(Table):
                 # render the SQL
                 self.sql = render_jinja(self.sql, self._replacements)
 
-            self._rendered = True
+            if self.options:
+                for option, value in self.options.items():
+                    if isinstance(value, str):  
+                        self.options[option] = render_jinja(value, self._replacements)
 
-        if self._rendered and self.options:
-            value = self.options.get("checkpointLocation")
-            if value:
-                self.options["checkpointLocation"] = render_jinja(
-                    value, self._replacements
-                )
+        self._rendered = True
+
 
     # TODO: Create or alter table
     def create_table(self):

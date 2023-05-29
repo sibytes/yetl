@@ -7,7 +7,7 @@ from .._stage_type import StageType
 from ._table_type import TableType
 from .._project import Project
 from enum import Enum
-
+from .._utils import render_jinja
 
 class ValidationThresholdType(Enum):
     exception = ("exception",)
@@ -94,6 +94,16 @@ class Table(BaseModel):
             JinjaVariables.CHECKPOINT: self.checkpoint,
             JinjaVariables.PROJECT: self.project.name,
         }
+
+    def render(self):
+        self._replacements[
+            JinjaVariables.CHECKPOINT
+        ] = self.checkpoint
+        
+        if self.options:
+            for option, value in self.options.items():
+                if isinstance(value, str):  
+                    self.options[option] = render_jinja(value, self._replacements)
 
     def thresholds_select_sql(self, threshold_type: ValidationThresholdType):
         if threshold_type == ValidationThresholdType.exception:

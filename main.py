@@ -1,5 +1,4 @@
-from yetl import StageType, yetl_flow, TableMapping, Timeslice
-import pytest
+from yetl import *
 import os
 import shutil
 
@@ -14,26 +13,20 @@ def tear_down():
 
 
 tear_down()
-
-
-@yetl_flow(
-        project="test_project", 
-        stage=StageType.raw, 
-        config_path="./test/config"
+pipeline = "autoloader"
+config_path = "./test/config"
+project = "test_project"
+timeslice = Timeslice(day="*", month="*", year="*")
+config = Config(
+    project=project, pipeline=pipeline, config_path=config_path, timeslice=timeslice
 )
-def autoloader(table_mapping:TableMapping):
+table_mapping = config.get_table_mapping(
+    stage=StageType.raw, table="customers"
+)
 
-    destination = table_mapping.destination
-    source = table_mapping.source["customer_details_1"]
-
-    assert source.table == "customer_details_1"
-    assert destination.table == "customers"
-    return table_mapping
-
-
-table_maping = autoloader(table="customers")
-
-print(table_maping.destination)
+source: Read = table_mapping.source["customer_details_1"]
+destination: DeltaLake = table_mapping.destination
+config.set_checkpoint(source=source, destination=destination)
 
 
 
