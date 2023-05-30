@@ -16,18 +16,19 @@ def init(project: str, directory: str = "."):
 
 @app.command()
 def import_tables(
-    location: str,
+    source: str,
+    destination:str,
     format: Annotated[
         ImportFormat, typer.Option(case_sensitive=False)
     ] = ImportFormat.excel,
 ):
     """Import tables configuration from an external source such as a Excel.
 
-    --location:str - The uri indicator of the table metadata e.g. the file path if importing a csv
+    --source:str - The uri indicator of the table metadata e.g. the file path if importing a csv
     --format:ImportFormat -  The format of the table metadata to import e.g. excel
     """
-    metadata = XlsMetadata(location=location)
-    metadata.write()
+    metadata = XlsMetadata(source=source)
+    metadata.write(path=destination)
 
 
 
