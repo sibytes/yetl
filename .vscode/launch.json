@@ -14,7 +14,8 @@
             "envFile": "${workspaceFolder}/.env",
             "args": [
                 "import-tables",
-                "./test/config/test_project/pipelines/tables.xlsx"
+                "./test/config/test_project/pipelines/tables.xlsx",
+                "./test/config/test_project/pipelines/test_tables.yaml"
             ],
             "env": {  }
         },
