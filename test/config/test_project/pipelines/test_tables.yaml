@@ -16,18 +16,18 @@ base:
     base_dbx_patterns:
       customer_details_1:
         delta_properties:
-        - 'delta.appendOnly: true'
-        - 'delta.autoOptimize.autoCompact: true'
-        - 'delta.autoOptimize.optimizeWrite: true'
-        - 'delta.enableChangeDataFeed: false'
+          delta.appendOnly: true
+          delta.autoOptimize.autoCompact: true
+          delta.autoOptimize.optimizeWrite: true
+          delta.enableChangeDataFeed: false
         depends_on: raw.raw_dbx_patterns.customers
         ids: id
       customer_details_2:
         delta_properties:
-        - 'delta.appendOnly: true'
-        - 'delta.autoOptimize.autoCompact: true'
-        - 'delta.autoOptimize.optimizeWrite: true'
-        - 'delta.enableChangeDataFeed: false'
+          delta.appendOnly: true
+          delta.autoOptimize.autoCompact: true
+          delta.autoOptimize.optimizeWrite: true
+          delta.enableChangeDataFeed: false
         depends_on: raw.raw_dbx_patterns.customers
         ids: id
 landing:
