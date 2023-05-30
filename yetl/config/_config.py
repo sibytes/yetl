@@ -63,9 +63,10 @@ class Config:
         stage: StageType,
         table: str = _INDEX_WILDCARD,
         database: str = _INDEX_WILDCARD,
+        create_table: bool = True
     ):
         table_mapping = self.tables.get_table_mapping(
-            stage=stage, table=table, database=database
+            stage=stage, table=table, database=database, create_table=create_table
         )
 
         return table_mapping
@@ -80,11 +81,6 @@ class Config:
             checkpoint_name = f"{source.database}.{source.table}-{destination.database}.{destination.table}"
 
         source.checkpoint = checkpoint_name
-        source._render()
-        if destination.checkpoint_location is not None:
-            destination.checkpoint = checkpoint_name
-            destination.options["checkpointLocation"] = destination.checkpoint_location
-            destination._render()
-            self._logger.info(f"checkpointLocation: {destination.checkpoint_location}")
-        else:
-            self._logger.info("No checkpoint configuration found")
+        source.render()
+        destination.checkpoint = checkpoint_name
+        destination.render()

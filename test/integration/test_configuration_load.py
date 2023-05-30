@@ -20,8 +20,14 @@ def tear_down():
             pass
     return tear_down_fn
 
+@pytest.fixture()
+def root_path():
 
-def test_configuration_load(tear_down):
+    root = os.path.abspath(os.getcwd())
+    return root
+
+
+def test_configuration_load(tear_down, root_path):
     tear_down()
     pipeline = "autoloader"
     config_path = "./test/config"
@@ -48,13 +54,13 @@ def test_configuration_load(tear_down):
     assert destination.table_type == TableType.DeltaLake
     assert destination.warning_thresholds == ValidationThreshold(invalid_ratio=0.1, invalid_rows=0, max_rows=100, min_rows=5) 
     assert destination.exception_thresholds == ValidationThreshold(invalid_ratio=0.2, invalid_rows=2, max_rows=1000, min_rows=0)
-    # assert destination.project.config_path == '/Users/shaunryan/yetl/test/config/test_project'
+    assert destination.project.config_path == f'{root_path}/test/config/test_project'
     assert destination.project.name == 'test_project'
-    # assert destination.project.sql == '/Users/shaunryan/yetl/test/config/test_project/sql'
-    # assert destination.project.pipelines == '/Users/shaunryan/yetl/test/config/test_project/pipelines'
-    # assert destination.project.databricks_notebooks == '/Users/shaunryan/yetl/test/config/test_project/databricks/notebooks'
-    # assert destination.project.databricks_workflows == '/Users/shaunryan/yetl/test/config/test_project/databricks/workflows'
-    # assert destination.project.databricks_queries == '/Users/shaunryan/yetl/test/config/test_project/databricks/queries'
+    assert destination.project.sql == f'{root_path}/test/config/test_project/sql'
+    assert destination.project.pipelines == f'{root_path}/test/config/test_project/pipelines'
+    assert destination.project.databricks_notebooks == f'{root_path}/test/config/test_project/databricks/notebooks'
+    assert destination.project.databricks_workflows == f'{root_path}/test/config/test_project/databricks/workflows'
+    assert destination.project.databricks_queries == f'{root_path}/test/config/test_project/databricks/queries'
     assert destination.project.spark.config == {
         'spark.master': 'local', 'spark.databricks.delta.allowArbitraryProperties.enabled': 'True', 
         'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog', 
@@ -62,7 +68,7 @@ def test_configuration_load(tear_down):
     }
     assert destination.project.spark.logging_level == SparkLoggingLevel.ERROR
     assert destination.container == 'datalake'
-    # assert destination.location == '/Users/shaunryan/yetl/test/config/test_project/data/mnt/datalake/data/raw/raw_dbx_patterns/customers'
+    assert destination.location == f'{root_path}/test/config/test_project/data/mnt/datalake/data/raw/raw_dbx_patterns/customers'
     assert destination.path == 'raw_dbx_patterns/customers'
     assert destination.options == {'mergeSchema': True, 'checkpointLocation': '/mnt/datalake/checkpoint/test_project/landing_dbx_patterns.customer_details_1-raw_dbx_patterns.customers'}
     assert destination.timeslice == Timeslice(year='*', month='*', day='*', hour=0, minute=0, second=0, microsecond=0)
@@ -70,9 +76,7 @@ def test_configuration_load(tear_down):
     assert destination.delta_constraints == None 
     assert destination.partition_by == None 
     assert destination.z_order_by == None 
-    assert destination.create_table == True
     assert destination.managed == False 
-    assert destination.checkpoint_location == '/mnt/{{container}}/checkpoint/{{project}}/{{checkpoint}}' 
     assert destination.sql == None
     assert source.slice_date == SliceDateFormat.FILENAME_DATE_FORMAT
     assert source.slice_date_column_name == "_slice_date"

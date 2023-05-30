@@ -1,4 +1,4 @@
-version: 1.3.3
+version: 1.4.0
 tables: ./tables.yaml
 
 audit_control:
@@ -9,13 +9,11 @@ audit_control:
         delta.autoOptimize.autoCompact: true
         delta.autoOptimize.optimizeWrite: true
     managed: false
-    create_table: true
     container: datalake
     location: /mnt/{{container}}/data/raw
-    checkpoint_location: "/mnt/{{container}}/checkpoint/{{project}}/{{checkpoint}}"
     path: "{{database}}/{{table}}"
     options:
-      checkpointLocation: default
+      checkpointLocation: "/mnt/{{container}}/checkpoint/{{project}}/{{checkpoint}}"
 
 landing:
   read:
@@ -61,13 +59,12 @@ raw:
       delta.autoOptimize.optimizeWrite: true  
       delta.enableChangeDataFeed: false
     managed: false
-    create_table: true
     container: datalake
     location: /mnt/{{container}}/data/raw
     path: "{{database}}/{{table}}"
-    checkpoint_location: "/mnt/{{container}}/checkpoint/{{project}}/{{checkpoint}}"
     options:
       mergeSchema: true
+      checkpointLocation: "/mnt/{{container}}/checkpoint/{{project}}/{{checkpoint}}"
 
 base:
   delta_lake:

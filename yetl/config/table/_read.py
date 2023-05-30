@@ -60,7 +60,6 @@ class Read(Table):
 
     _logger: Any = PrivateAttr(default=None)
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
-    create_table: bool = Field(default=True)
     managed: bool = Field(default=False)
     trigger: str = Field(default=None)
     trigger_type: TriggerType = Field(default=None)
@@ -99,7 +98,12 @@ class Read(Table):
             if isinstance(self.spark_schema, str):
                 path = self.spark_schema
                 path = render_jinja(self.spark_schema, self._replacements)
-                self._load_schema(path)
+                path = abs_config_path(self.config_path, path)
+                if os.path.exists(path):
+                    self._load_schema(path)
+                else:
+                    self.spark_schema = path
+                    self._logger.warning(f"Schema path doesn't exist, schema has not been loaded and remains to be path {path}.")
 
             corrupt_record_name = self.options.get(
                 self._OPTION_CORRUPT_RECORD_NAME, None
@@ -108,14 +112,13 @@ class Read(Table):
                 if corrupt_record_name not in self.spark_schema.names:
                     self.spark_schema.add(field=corrupt_record_name, data_type="string")
 
-            self._rendered = True
+            if self.options:
+                for option, value in self.options.items():
+                    if isinstance(value, str):  
+                        self.options[option] = render_jinja(value, self._replacements)
 
-        if self._rendered and self.options:
-            value = self.options.get("checkpointLocation")
-            if value:
-                self.options["checkpointLocation"] = render_jinja(
-                    value, self._replacements
-                )
+        self._rendered = True
+        
 
     def _config_schema_hints(self):
         path = self.options.get(self._OPTION_CF_SCHEMA_HINTS, None)
@@ -147,7 +150,7 @@ class Read(Table):
                 f"Headless files with schema hints must have a fully hinted schema since it must work positionally. Datasets!=dll({columns_cnt}!={ddls}"
             )
 
-        for i, c in enumerate(columns):
+        for i, _ in enumerate(columns):
             from_name = f"_c{i}"
             to_name = self.ddl[i].split(" ")[0].strip()
             logging.info(f"rename {from_name} to {to_name}")
