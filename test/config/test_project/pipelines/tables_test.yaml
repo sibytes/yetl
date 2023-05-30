@@ -1,0 +1,56 @@
+audit_control:
+  delta_lake:
+    raw_dbx_patterns_control:
+      header_footer:
+        delta_constraints: none
+        depends_on: raw.raw_dbx_patterns.*
+        partition_by: none
+        sql: ../sql/{{database}}/{{table}}.sql
+      raw_audit:
+        depends_on:
+        - raw.raw_dbx_patterns.*
+        - audit_control.raw_dbx_patterns_control.header_footer
+        sql: ../sql/{{database}}/{{table}}.sql
+base:
+  delta_lake:
+    base_dbx_patterns:
+      customer_details_1:
+        delta_properties:
+        - 'delta.appendOnly: true'
+        - 'delta.autoOptimize.autoCompact: true'
+        - 'delta.autoOptimize.optimizeWrite: true'
+        - 'delta.enableChangeDataFeed: false'
+        depends_on: raw.raw_dbx_patterns.customers
+        ids: id
+      customer_details_2:
+        delta_properties:
+        - 'delta.appendOnly: true'
+        - 'delta.autoOptimize.autoCompact: true'
+        - 'delta.autoOptimize.optimizeWrite: true'
+        - 'delta.enableChangeDataFeed: false'
+        depends_on: raw.raw_dbx_patterns.customers
+        ids: id
+landing:
+  read:
+    landing_dbx_patterns:
+      customer_details_1: null
+      customer_details_2: null
+raw:
+  delta_lake:
+    raw_dbx_patterns:
+      customers:
+        depends_on:
+        - landing.landing_dbx_patterns.customer_details_1
+        - landing.landing_dbx_patterns.customer_details_2
+        error_thresholds:
+          invalid_ratio: 0.2
+          invalid_rows: 2.0
+          max_rows: 1000.0
+          mins_rows: 0.0
+        ids: id
+        warning_thresholds:
+          invalid_ratio: 0.1
+          invalid_rows: 0.0
+          max_rows: 100.0
+          mins_rows: 5.0
+        z_order_by: _load_date

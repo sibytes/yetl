@@ -1,6 +1,7 @@
 import typer
 from .cli import _init
-
+from typing_extensions import Annotated
+from .cli.metadata_provider import XlsMetadata, ImportFormat
 app = typer.Typer()
 
 
@@ -14,14 +15,20 @@ def init(project: str, directory: str = "."):
 
 
 @app.command()
-def import_tables(location: str, format: str = "csv"):
-    """Import tables configuration from an external source such as a CSV.
+def import_tables(
+    location: str,
+    format: Annotated[
+        ImportFormat, typer.Option(case_sensitive=False)
+    ] = ImportFormat.excel,
+):
+    """Import tables configuration from an external source such as a Excel.
 
     --location:str - The uri indicator of the table metadata e.g. the file path if importing a csv
-    --format:str -  The format of the table metadata to import e.g. CSV
+    --format:ImportFormat -  The format of the table metadata to import e.g. excel
     """
-    # TODO: implement CSV import of tables config
-    pass
+    metadata = XlsMetadata(location=location)
+    metadata.write()
+
 
 
 @app.command()

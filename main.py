@@ -2,6 +2,9 @@ from yetl import *
 import os
 import shutil
 
+
+from yetl import __main__
+
 def tear_down():
     shutil.rmtree("./test/config/test_project/data", ignore_errors=True)
     shutil.rmtree("./metastore_db", ignore_errors=True)
@@ -27,7 +30,6 @@ table_mapping = config.get_table_mapping(
 source: Read = table_mapping.source["customer_details_1"]
 destination: DeltaLake = table_mapping.destination
 config.set_checkpoint(source=source, destination=destination)
-
 
 
 # t:Timeslice = Timeslice.parse_iso_date("*-*-")

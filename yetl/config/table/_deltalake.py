@@ -39,6 +39,7 @@ class DeltaLake(Table):
     location: str = Field(default=None)
     stage: StageType = Field(...)
     managed: bool = Field(default=False)
+
     sql: str = Field(default=None)
 
     def _load_sql(self, path: str):

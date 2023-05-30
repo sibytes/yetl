@@ -60,7 +60,7 @@ raw:
   delta_lake:
     raw_dbx_patterns:
       customers:
-        ids: id
+        id: id
         depends_on:
           - landing.landing_dbx_patterns.customer_details_1
           - landing.landing_dbx_patterns.customer_details_2
@@ -87,7 +87,7 @@ base:
       delta.enableChangeDataFeed: false
     base_dbx_patterns:
       customer_details_1:
-        ids: id
+        id: id
         depends_on:
           - raw.raw_dbx_patterns.customers
         # delta table properties can be set at stage level or table level
@@ -95,7 +95,7 @@ base:
         delta_properties:
             delta.enableChangeDataFeed: true
       customer_details_2:
-        ids: id
+        id: id
         depends_on:
           - raw.raw_dbx_patterns.customers
 
