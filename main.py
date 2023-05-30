@@ -3,7 +3,7 @@ import os
 import shutil
 
 
-from yetl import __main__
+# from yetl import __main__
 
 def tear_down():
     shutil.rmtree("./test/config/test_project/data", ignore_errors=True)

@@ -75,7 +75,7 @@ def test_configuration_load(tear_down, root_path):
     assert destination.checkpoint == 'landing_dbx_patterns.customer_details_1-raw_dbx_patterns.customers'
     assert destination.delta_constraints == None 
     assert destination.partition_by == None 
-    assert destination.z_order_by == None 
+    assert destination.z_order_by == ["_load_date_1", "_load_date_2"]
     assert destination.managed == False 
     assert destination.sql == None
     assert source.slice_date == SliceDateFormat.FILENAME_DATE_FORMAT

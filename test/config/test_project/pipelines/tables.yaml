@@ -76,6 +76,10 @@ raw:
           min_rows: 0
         custom_properties:
           process_group: 1
+        z_order_by:
+          - _load_date_1
+          - _load_date_2
+
 
 base:
   delta_lake:
