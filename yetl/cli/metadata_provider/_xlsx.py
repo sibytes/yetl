@@ -109,6 +109,18 @@ class Metadata(BaseModel):
                 return datal[0]
             else:
                 return datal
+    
+    def _get_dict(self, data:str):
+        if data is None:
+            return None
+        else:
+            datad = {i.split(":")[0].strip():i.split(":")[1].strip() for i in data.split("\n")}
+            for k,v in datad.items():
+                if v == "true":
+                    datad[k] = True
+                if v == "false":
+                    datad[k] = False
+            return datad
 
     def _has_warning_thresholds(self):
         return any([
@@ -200,7 +212,7 @@ class Metadata(BaseModel):
             if self.deltalake_delta_constraints is not None:
                 table["delta_constraints"] = self._get_list(self.deltalake_delta_constraints)
             if self.deltalake_delta_properties is not None:
-                table["delta_properties"] = self._get_list(self.deltalake_delta_properties)
+                table["delta_properties"] = self._get_dict(self.deltalake_delta_properties)
             if self._has_warning_thresholds():
                 table["warning_thresholds"] = self._get_warning_thresholds()["warning_thresholds"]
             if self._has_error_thresholds():
@@ -241,7 +253,7 @@ class XlsMetadata(BaseModel):
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
-        df = pd.read_excel(self.location, header=[0, 1])
+        df = pd.read_excel(self.source, header=[0, 1])
         df = self.validate_schema(df)
 
         df = df.to_dict(orient="records")
@@ -256,14 +268,15 @@ class XlsMetadata(BaseModel):
         self.data = reduce(XlsMetadata.merge, [r for r in df])
 
 
-    location:str = Field(...)
+    source:str = Field(...)
     data:dict = Field(default=None)
 
-    def write(self):
+    def write(self, path:str = None):
         data = yaml.safe_dump(self.data, indent=2)
 
-        path = self.location.replace(os.path.basename(self.location), "")
-        path = os.path.join(path, "tables_test.yaml")
+        if path is None:
+            path = self.source.replace(os.path.basename(self.source), "")
+            path = os.path.join(path, "tables.yaml")
 
         with open(path, "w", encoding="utf-8") as f:
             f.write(data)
@@ -302,11 +315,11 @@ class XlsMetadata(BaseModel):
                     f"invalid schema column name {name} with type {data_type}"
                 )
 
-            elif file_schema[name] is not data_type:
-                this_type = file_schema[name]
-                schema_exceptions.append(
-                    f"invalid schema column name {name} type {this_type} is not {data_type}"
-                )
+            # elif file_schema[name] is not data_type:
+            #     this_type = file_schema[name]
+            #     schema_exceptions.append(
+            #         f"invalid schema column name {name} type {this_type} is not {data_type}"
+            #     )
 
         if schema_exceptions:
             msg = "\n".join(schema_exceptions)
