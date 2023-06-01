@@ -1,3 +1,5 @@
+version: 1.4.1
+
 audit_control:
   delta_lake:
     raw_dbx_patterns_control:
@@ -12,11 +14,13 @@ audit_control:
         - audit_control.raw_dbx_patterns_control.header_footer
         sql: ../sql/{{database}}/{{table}}.sql
         vacuum: 30
+
 landing:
   read:
     landing_dbx_patterns:
       customer_details_1: null
       customer_details_2: null
+
 raw:
   delta_lake:
     raw_dbx_patterns:
@@ -40,6 +44,7 @@ raw:
           max_rows: 100.0
           mins_rows: 5.0
         z_order_by: _load_date
+
 base:
   delta_lake:
     base_dbx_patterns:
@@ -61,3 +66,4 @@ base:
         depends_on: raw.raw_dbx_patterns.customers
         ids: id
         vacuum: 30
+

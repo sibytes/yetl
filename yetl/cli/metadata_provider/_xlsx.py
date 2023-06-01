@@ -7,6 +7,7 @@ import yaml
 from functools import reduce
 import os
 from typing import Any, Union, Dict
+import pkg_resources
 
 
 class ImportFormat(str, Enum):
@@ -90,6 +91,7 @@ class Metadata(BaseModel):
     error_thresholds_invalid_rows: float = Field(default=None)
     error_thresholds_max_rows: float = Field(default=None)
     error_thresholds_mins_rows: float = Field(default=None)
+    version: str = Field(default=pkg_resources.get_distribution("yetl-framework").version)
 
     def _get_list(self, data: Any):
         if data is None:
@@ -240,7 +242,7 @@ class Metadata(BaseModel):
                 table[ColumnNames.error_thresholds.name] = self._get_error_thresholds()[
                     ColumnNames.error_thresholds.name
                 ]
-
+        data["version"] = self.version
         data[self.stage.value][self.table_type.value][self.database][self.table] = table
 
         return data
@@ -316,11 +318,15 @@ class XlsMetadata(BaseModel):
             path = os.path.join(path, "tables.yaml")
 
         with open(path, "w", encoding="utf-8") as f:
+            version = self.data["version"]
+            f.write(f"version: {version}\n")
+            f.write("\n")
             for t in StageType:
                 stage_data = {t.name: self.data.get(t.name)}
                 if stage_data[t.name] is not None:
                     stage_data = yaml.safe_dump(stage_data, indent=2)
                     f.write(stage_data)
+                    f.write("\n")
 
     @classmethod
     def merge(cls, data_1: dict, data_2: dict, path=None):
