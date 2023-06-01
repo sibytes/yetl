@@ -21,6 +21,9 @@ raw:
   delta_lake:
     raw_dbx_patterns:
       customers:
+        custom_properties:
+          process_group: 1.0
+          rentention_days: 365.0
         depends_on:
         - landing.landing_dbx_patterns.customer_details_1
         - landing.landing_dbx_patterns.customer_details_2

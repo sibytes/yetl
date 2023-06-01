@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 import yaml
 from functools import reduce
 import os
-from typing import Any, Union
+from typing import Any, Union, Dict
 
 
 class ImportFormat(str, Enum):
@@ -76,12 +76,12 @@ class Metadata(BaseModel):
     ids: str = Field(default=None)
     depends_on: str = Field(default=None)
     deltalake_delta_properties: str = Field(default=None)
-    custom_properties: str = Field(default=None)
+    custom_properties: Dict[str, Any] = Field(default=None)
     deltalake_identity: str = Field(default=None)
     deltalake_partition_by: str = Field(default=None)
     deltalake_delta_constraints: str = Field(default=None)
     deltalake_z_order_by: str = Field(default=None)
-    deltalake_vacuum: Union[int, None] = Field(default=30)
+    deltalake_vacuum: Union[int, None] = Field(default=None)
     warning_thresholds_invalid_ratio: float = Field(default=None)
     warning_thresholds_invalid_rows: float = Field(default=None)
     warning_thresholds_max_rows: float = Field(default=None)
@@ -225,13 +225,13 @@ class Metadata(BaseModel):
                     self.deltalake_z_order_by
                 )
             if self.deltalake_vacuum is not None:
-                table[ColumnNames.vacuum.name] = self._get_list(
-                    self.deltalake_vacuum
-                )
+                table[ColumnNames.vacuum.name] = self._get_list(self.deltalake_vacuum)
             if self.deltalake_delta_properties is not None:
                 table[ColumnNames.delta_properties.name] = self._get_dict(
                     self.deltalake_delta_properties
                 )
+            if self.custom_properties is not None:
+                table[ColumnNames.custom_properties.name] = self.custom_properties
             if self._has_warning_thresholds():
                 table[
                     ColumnNames.warning_thresholds.name
@@ -278,28 +278,39 @@ class XlsMetadata(BaseModel):
         super().__init__(**data)
         df = pd.read_excel(self.source, header=[0, 1])
         df = self.validate_schema(df)
-
-        df = df.to_dict(orient="records")
-        df = [
-            Metadata(
-                **{
-                    "_".join([n for n in list(k) if not n.startswith("Unnamed")]): (
-                        None if pd.isna(v) else v
-                    )
-                    for k, v in r.items()
-                }
-            ).dict()
-            for r in df
-        ]
-
-        # deep merge
-        self.data = reduce(XlsMetadata.merge, [r for r in df])
+        self.data = self._deserialize(df)
 
     source: str = Field(...)
     data: dict = Field(default=None)
 
-    def write(self, path: str = None):
+    def _deserialize(self, df: pd.DataFrame):
+        df = df.to_dict(orient="records")
+        metadata = [
+            {
+                "_".join([n for n in list(k) if not n.startswith("Unnamed")]): (
+                    None if pd.isna(v) else v
+                )
+                for k, v in r.items()
+            }
+            for r in df
+        ]
+        for item in metadata:
+            custom_properties = {}
+            for k, v in item.items():
+                if k.startswith(ColumnNames.custom_properties.name) and v is not None:
+                    prop_key = k.replace(f"{ColumnNames.custom_properties.name}_", "")
+                    custom_properties[prop_key] = v
+            if custom_properties:
+                item[ColumnNames.custom_properties.name] = custom_properties
 
+        df = [Metadata(**m).dict() for m in metadata]
+
+        # deep merge
+        data = reduce(XlsMetadata.merge, [r for r in df])
+
+        return data
+
+    def write(self, path: str = None):
         if path is None:
             path = self.source.replace(os.path.basename(self.source), "")
             path = os.path.join(path, "tables.yaml")
