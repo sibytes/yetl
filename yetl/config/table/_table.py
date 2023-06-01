@@ -9,6 +9,7 @@ from .._project import Project
 from enum import Enum
 from .._utils import render_jinja
 
+
 class ValidationThresholdType(Enum):
     exception = ("exception",)
     warning = "warning"
@@ -96,13 +97,11 @@ class Table(BaseModel):
         }
 
     def render(self):
-        self._replacements[
-            JinjaVariables.CHECKPOINT
-        ] = self.checkpoint
-        
+        self._replacements[JinjaVariables.CHECKPOINT] = self.checkpoint
+
         if self.options:
             for option, value in self.options.items():
-                if isinstance(value, str):  
+                if isinstance(value, str):
                     self.options[option] = render_jinja(value, self._replacements)
 
     def thresholds_select_sql(self, threshold_type: ValidationThresholdType):

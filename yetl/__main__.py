@@ -2,6 +2,7 @@ import typer
 from .cli import _init
 from typing_extensions import Annotated
 from .cli.metadata_provider import XlsMetadata, ImportFormat
+
 app = typer.Typer()
 
 
@@ -17,7 +18,7 @@ def init(project: str, directory: str = "."):
 @app.command()
 def import_tables(
     source: str,
-    destination:str,
+    destination: str,
     format: Annotated[
         ImportFormat, typer.Option(case_sensitive=False)
     ] = ImportFormat.excel,
@@ -29,7 +30,6 @@ def import_tables(
     """
     metadata = XlsMetadata(source=source)
     metadata.write(path=destination)
-
 
 
 @app.command()

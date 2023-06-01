@@ -79,6 +79,7 @@ raw:
         z_order_by:
           - _load_date_1
           - _load_date_2
+        vacuum: 30
 
 
 base:

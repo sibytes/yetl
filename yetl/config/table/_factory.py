@@ -32,6 +32,6 @@ class TableFactory:
 
 
 factory = TableFactory()
-factory.register_table_type(TableType.Read, Read)
-factory.register_table_type(TableType.DeltaLake, DeltaLake)
-factory.register_table_type(TableType.Write, Write)
+factory.register_table_type(TableType.read, Read)
+factory.register_table_type(TableType.delta_lake, DeltaLake)
+factory.register_table_type(TableType.write, Write)

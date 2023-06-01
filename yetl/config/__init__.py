@@ -1,6 +1,6 @@
 from ._config import Config
 from ._timeslice import Timeslice, TimesliceNow, TimesliceUtcNow
-from .table import DeltaLake, Read, ValidationThreshold, ValidationThresholdType
+from .table import DeltaLake, Read, ValidationThreshold, ValidationThresholdType, TableType
 from ._tables import Tables
 from ._table_mapping import TableMapping
 from ._stage_type import StageType

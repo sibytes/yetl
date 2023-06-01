@@ -32,8 +32,9 @@ class DeltaLake(Table):
     depends_on: List[str] = Field(default=[])
     delta_properties: Dict[str, str] = Field(default=None)
     delta_constraints: Dict[str, str] = Field(default=None)
-    partition_by: Union[List[str],str] = Field(default=None)
+    partition_by: Union[List[str], str] = Field(default=None)
     z_order_by: Union[List[str], str] = Field(default=None)
+    vacuum: int = Field(default=31)
     options: Union[dict, None] = Field(default=None)
     timeslice: Timeslice = Field(...)
     location: str = Field(default=None)
@@ -77,11 +78,10 @@ class DeltaLake(Table):
 
             if self.options:
                 for option, value in self.options.items():
-                    if isinstance(value, str):  
+                    if isinstance(value, str):
                         self.options[option] = render_jinja(value, self._replacements)
 
         self._rendered = True
-
 
     # TODO: Create or alter table
     def create_table(self):

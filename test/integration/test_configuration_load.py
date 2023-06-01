@@ -45,13 +45,16 @@ def test_configuration_load(tear_down, root_path):
     config.set_checkpoint(source=source, destination=destination)
 
     assert source.table == "customer_details_1"
+    assert source.slice_date == SliceDateFormat.FILENAME_DATE_FORMAT
+    assert source.slice_date_column_name == "_slice_date"
+
     assert destination.table == "customers"
     assert destination.stage == StageType.raw
     assert destination.database =='raw_dbx_patterns' 
     assert destination.table=='customers' 
     assert destination.id=='id'
     assert destination.custom_properties == {'process_group': 1} 
-    assert destination.table_type == TableType.DeltaLake
+    assert destination.table_type == TableType.delta_lake
     assert destination.warning_thresholds == ValidationThreshold(invalid_ratio=0.1, invalid_rows=0, max_rows=100, min_rows=5) 
     assert destination.exception_thresholds == ValidationThreshold(invalid_ratio=0.2, invalid_rows=2, max_rows=1000, min_rows=0)
     assert destination.project.config_path == f'{root_path}/test/config/test_project'
@@ -78,8 +81,8 @@ def test_configuration_load(tear_down, root_path):
     assert destination.z_order_by == ["_load_date_1", "_load_date_2"]
     assert destination.managed == False 
     assert destination.sql == None
-    assert source.slice_date == SliceDateFormat.FILENAME_DATE_FORMAT
-    assert source.slice_date_column_name == "_slice_date"
+    assert destination.vacuum == 30
+
 
 
 def test_decorator_configuration_load(tear_down):

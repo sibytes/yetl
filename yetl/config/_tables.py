@@ -135,7 +135,7 @@ class Tables(BaseModel):
         database=_INDEX_WILDCARD,
         table=_INDEX_WILDCARD,
         first_match: bool = True,
-        **kwargs
+        **kwargs,
     ):
         return self.lookup_table(
             stage=stage,
@@ -143,7 +143,7 @@ class Tables(BaseModel):
             table=table,
             first_match=first_match,
             create_table=True,
-            **kwargs
+            **kwargs,
         )
 
     def lookup_table(
@@ -208,14 +208,14 @@ class Tables(BaseModel):
         stage: StageType,
         table=_INDEX_WILDCARD,
         database=_INDEX_WILDCARD,
-        create_table: bool = True
+        create_table: bool = True,
     ):
         destination = self.lookup_table(
             stage=stage,
             database=database,
             table=table,
             first_match=True,
-            create_table=create_table
+            create_table=create_table,
         )
         source = {}
 
@@ -228,7 +228,7 @@ class Tables(BaseModel):
                     table=do_table,
                     database=do_database,
                     first_match=False,
-                    create_table=create_table
+                    create_table=create_table,
                 )
         except Exception as e:
             raise Exception(f"Error looking up dependencies for table {table}") from e

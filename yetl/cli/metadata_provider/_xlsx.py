@@ -1,16 +1,17 @@
-
 from enum import Enum
 import pandas as pd
 import numpy as np
-from ...config import StageType
+from ...config import StageType, TableType
 from pydantic import BaseModel, Field
 import yaml
 from functools import reduce
 import os
-from typing import Any, Dict, List, Union
+from typing import Any, Union
+
 
 class ImportFormat(str, Enum):
     excel = "excel"
+
 
 class ColumnNames(str, Enum):
     stage = "stage"
@@ -33,22 +34,10 @@ class ColumnNames(str, Enum):
     max_rows = "max_rows"
     mins_rows = "mins_rows"
     custom_properties = "custom_properties"
+    vacuum = "vacuum"
 
 
-# def read_value(row:pd.Series, header_1:ColumnNames, header_2:ColumnNames = None):
-
-#     value = row[header_1]
-#     if header_2:
-#         value = value[header_2]
-    
-#     if pd.notna(value):
-#         value = value.values[0]
-#         return value
-#     else:
-#         return ""
-    
 class Metadata(BaseModel):
-
     SCHEMA = {
         ColumnNames.stage: str,
         ColumnNames.table_type: str,
@@ -62,6 +51,7 @@ class Metadata(BaseModel):
         f"{ColumnNames.deltalake}_{ColumnNames.partition_by}": str,
         f"{ColumnNames.deltalake}_{ColumnNames.delta_constraints}": str,
         f"{ColumnNames.deltalake}_{ColumnNames.z_order_by}": str,
+        f"{ColumnNames.deltalake}_{ColumnNames.vacuum}": int,
         f"{ColumnNames.warning_thresholds}_{ColumnNames.invalid_ratio}": np.float64,
         f"{ColumnNames.warning_thresholds}_{ColumnNames.invalid_rows}": np.float64,
         f"{ColumnNames.warning_thresholds}_{ColumnNames.max_rows}": np.float64,
@@ -78,19 +68,20 @@ class Metadata(BaseModel):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
 
-
     stage: StageType = Field(...)
-    table_type: str = Field(...)
+    table_type: TableType = Field(...)
     database: str = Field(...)
     table: str = Field(...)
     sql: str = Field(default=None)
     ids: str = Field(default=None)
     depends_on: str = Field(default=None)
     deltalake_delta_properties: str = Field(default=None)
+    custom_properties: str = Field(default=None)
     deltalake_identity: str = Field(default=None)
     deltalake_partition_by: str = Field(default=None)
     deltalake_delta_constraints: str = Field(default=None)
     deltalake_z_order_by: str = Field(default=None)
+    deltalake_vacuum: Union[int, None] = Field(default=30)
     warning_thresholds_invalid_ratio: float = Field(default=None)
     warning_thresholds_invalid_rows: float = Field(default=None)
     warning_thresholds_max_rows: float = Field(default=None)
@@ -100,22 +91,27 @@ class Metadata(BaseModel):
     error_thresholds_max_rows: float = Field(default=None)
     error_thresholds_mins_rows: float = Field(default=None)
 
-    def _get_list(self, data:str):
+    def _get_list(self, data: Any):
         if data is None:
             return None
-        else:
+        elif isinstance(data, str) and "\n" in data:
             datal = [i.strip() for i in data.split("\n")]
             if len(datal) == 1:
                 return datal[0]
             else:
                 return datal
-    
-    def _get_dict(self, data:str):
+        else:
+            return data
+
+    def _get_dict(self, data: str):
         if data is None:
             return None
         else:
-            datad = {i.split(":")[0].strip():i.split(":")[1].strip() for i in data.split("\n")}
-            for k,v in datad.items():
+            datad = {
+                i.split(":")[0].strip(): i.split(":")[1].strip()
+                for i in data.split("\n")
+            }
+            for k, v in datad.items():
                 if v == "true":
                     datad[k] = True
                 if v == "false":
@@ -123,76 +119,91 @@ class Metadata(BaseModel):
             return datad
 
     def _has_warning_thresholds(self):
-        return any([
-            self.warning_thresholds_invalid_ratio is not None,
-            self.warning_thresholds_invalid_rows is not None,
-            self.warning_thresholds_max_rows is not None,
-            self.warning_thresholds_mins_rows is not None,
-        ])
-    
+        return any(
+            [
+                self.warning_thresholds_invalid_ratio is not None,
+                self.warning_thresholds_invalid_rows is not None,
+                self.warning_thresholds_max_rows is not None,
+                self.warning_thresholds_mins_rows is not None,
+            ]
+        )
+
     def _has_error_thresholds(self):
-        return any([
-            self.error_thresholds_invalid_ratio is not None,
-            self.error_thresholds_invalid_rows is not None,
-            self.error_thresholds_max_rows is not None,
-            self.error_thresholds_mins_rows is not None,
-        ])
+        return any(
+            [
+                self.error_thresholds_invalid_ratio is not None,
+                self.error_thresholds_invalid_rows is not None,
+                self.error_thresholds_max_rows is not None,
+                self.error_thresholds_mins_rows is not None,
+            ]
+        )
 
     def _has_properties(self):
-        return any([
-            self.sql is not None,
-            self.ids is not None,
-            self.depends_on is not None,
-            self.deltalake_delta_properties is not None,
-            self.deltalake_identity is not None,
-            self.deltalake_partition_by is not None,
-            self.deltalake_delta_constraints is not None,
-            self.deltalake_z_order_by is not None,
-            self._has_warning_thresholds(),
-            self._has_error_thresholds()
-        ])
+        return any(
+            [
+                self.sql is not None,
+                self.ids is not None,
+                self.depends_on is not None,
+                self.deltalake_delta_properties is not None,
+                self.deltalake_identity is not None,
+                self.deltalake_partition_by is not None,
+                self.deltalake_delta_constraints is not None,
+                self.deltalake_z_order_by is not None,
+                self._has_warning_thresholds(),
+                self._has_error_thresholds(),
+            ]
+        )
 
     def _get_error_thresholds(self):
-
         if self._has_error_thresholds():
-            data = {"error_thresholds": {}}
+            data = {ColumnNames.error_thresholds.name: {}}
             if self.error_thresholds_invalid_ratio is not None:
-                data["error_thresholds"]["invalid_ratio"] = self.error_thresholds_invalid_ratio
+                data[ColumnNames.error_thresholds.name][
+                    ColumnNames.invalid_ratio.name
+                ] = self.error_thresholds_invalid_ratio
             if self.error_thresholds_invalid_rows is not None:
-                data["error_thresholds"]["invalid_rows"] = self.error_thresholds_invalid_rows
+                data[ColumnNames.error_thresholds.name][
+                    ColumnNames.invalid_rows.name
+                ] = self.error_thresholds_invalid_rows
             if self.error_thresholds_max_rows is not None:
-                data["error_thresholds"]["max_rows"] = self.error_thresholds_max_rows
+                data[ColumnNames.error_thresholds.name][
+                    ColumnNames.max_rows.name
+                ] = self.error_thresholds_max_rows
             if self.error_thresholds_mins_rows is not None:
-                data["error_thresholds"]["mins_rows"] = self.error_thresholds_mins_rows
+                data[ColumnNames.error_thresholds.name][
+                    ColumnNames.mins_rows.name
+                ] = self.error_thresholds_mins_rows
             return data
         else:
             return None
-        
-    def _get_warning_thresholds(self):
 
+    def _get_warning_thresholds(self):
         if self._has_warning_thresholds():
-            data = {"warning_thresholds": {}}
+            data = {ColumnNames.warning_thresholds.name: {}}
             if self.warning_thresholds_invalid_ratio is not None:
-                data["warning_thresholds"]["invalid_ratio"] = self.warning_thresholds_invalid_ratio
+                data[ColumnNames.warning_thresholds.name][
+                    ColumnNames.invalid_ratio.name
+                ] = self.warning_thresholds_invalid_ratio
             if self.warning_thresholds_invalid_rows is not None:
-                data["warning_thresholds"]["invalid_rows"] = self.warning_thresholds_invalid_rows
+                data[ColumnNames.warning_thresholds.name][
+                    ColumnNames.invalid_rows.name
+                ] = self.warning_thresholds_invalid_rows
             if self.warning_thresholds_max_rows is not None:
-                data["warning_thresholds"]["max_rows"] = self.warning_thresholds_max_rows
+                data[ColumnNames.warning_thresholds.name][
+                    ColumnNames.max_rows.name
+                ] = self.warning_thresholds_max_rows
             if self.warning_thresholds_mins_rows is not None:
-                data["warning_thresholds"]["mins_rows"] = self.warning_thresholds_mins_rows
+                data[ColumnNames.warning_thresholds.name][
+                    ColumnNames.mins_rows.name
+                ] = self.warning_thresholds_mins_rows
             return data
         else:
             return None
 
     def dict(self):
-
-        data  = {
-            str(self.stage.value) : {
-                self.table_type : {
-                    self.database: {
-                        self.table : None
-                    }
-                }
+        data = {
+            str(self.stage.value): {
+                self.table_type.value: {self.database: {self.table: None}}
             }
         }
 
@@ -200,31 +211,42 @@ class Metadata(BaseModel):
         if self._has_properties():
             table = {}
             if self.depends_on is not None:
-                table["depends_on"] = self._get_list(self.depends_on)
+                table[ColumnNames.depends_on.name] = self._get_list(self.depends_on)
             if self.ids is not None:
-                table["ids"] = self._get_list(self.ids)
+                table[ColumnNames.ids.name] = self._get_list(self.ids)
             if self.sql is not None and self.sql.lower() == "y":
                 table["sql"] = "../sql/{{database}}/{{table}}.sql"
             if self.deltalake_partition_by is not None:
-                table["partition_by"] = self._get_list(self.deltalake_partition_by)
+                table[ColumnNames.partition_by.name] = self._get_list(
+                    self.deltalake_partition_by
+                )
             if self.deltalake_z_order_by is not None:
-                table["z_order_by"] = self._get_list(self.deltalake_z_order_by)
-            if self.deltalake_delta_constraints is not None:
-                table["delta_constraints"] = self._get_list(self.deltalake_delta_constraints)
+                table[ColumnNames.z_order_by.name] = self._get_list(
+                    self.deltalake_z_order_by
+                )
+            if self.deltalake_vacuum is not None:
+                table[ColumnNames.vacuum.name] = self._get_list(
+                    self.deltalake_vacuum
+                )
             if self.deltalake_delta_properties is not None:
-                table["delta_properties"] = self._get_dict(self.deltalake_delta_properties)
+                table[ColumnNames.delta_properties.name] = self._get_dict(
+                    self.deltalake_delta_properties
+                )
             if self._has_warning_thresholds():
-                table["warning_thresholds"] = self._get_warning_thresholds()["warning_thresholds"]
+                table[
+                    ColumnNames.warning_thresholds.name
+                ] = self._get_warning_thresholds()[ColumnNames.warning_thresholds.name]
             if self._has_error_thresholds():
-                table["error_thresholds"] = self._get_error_thresholds()["error_thresholds"]
+                table[ColumnNames.error_thresholds.name] = self._get_error_thresholds()[
+                    ColumnNames.error_thresholds.name
+                ]
 
+        data[self.stage.value][self.table_type.value][self.database][self.table] = table
 
-        data[self.stage.value][self.table_type][self.database][self.table] = table
-        
         return data
 
-class XlsMetadata(BaseModel):
 
+class XlsMetadata(BaseModel):
     SCHEMA = {
         ColumnNames.stage: str,
         ColumnNames.table_type: str,
@@ -238,6 +260,7 @@ class XlsMetadata(BaseModel):
         f"{ColumnNames.deltalake}_{ColumnNames.partition_by}": str,
         f"{ColumnNames.deltalake}_{ColumnNames.delta_constraints}": str,
         f"{ColumnNames.deltalake}_{ColumnNames.z_order_by}": str,
+        f"{ColumnNames.deltalake}_{ColumnNames.vacuum}": str,
         f"{ColumnNames.warning_thresholds}_{ColumnNames.invalid_ratio}": np.float64,
         f"{ColumnNames.warning_thresholds}_{ColumnNames.invalid_rows}": np.float64,
         f"{ColumnNames.warning_thresholds}_{ColumnNames.max_rows}": np.float64,
@@ -257,48 +280,54 @@ class XlsMetadata(BaseModel):
         df = self.validate_schema(df)
 
         df = df.to_dict(orient="records")
-        df = [Metadata(
+        df = [
+            Metadata(
                 **{
-                    "_".join([n for n in list(k) if not n.startswith("Unnamed")]): (None if pd.isna(v) else v) 
-                    for k,v in r.items()
+                    "_".join([n for n in list(k) if not n.startswith("Unnamed")]): (
+                        None if pd.isna(v) else v
+                    )
+                    for k, v in r.items()
                 }
-            ).dict() for r in df]
-        
+            ).dict()
+            for r in df
+        ]
+
         # deep merge
         self.data = reduce(XlsMetadata.merge, [r for r in df])
 
+    source: str = Field(...)
+    data: dict = Field(default=None)
 
-    source:str = Field(...)
-    data:dict = Field(default=None)
-
-    def write(self, path:str = None):
-        data = yaml.safe_dump(self.data, indent=2)
+    def write(self, path: str = None):
 
         if path is None:
             path = self.source.replace(os.path.basename(self.source), "")
             path = os.path.join(path, "tables.yaml")
 
         with open(path, "w", encoding="utf-8") as f:
-            f.write(data)
+            for t in StageType:
+                stage_data = {t.name: self.data.get(t.name)}
+                if stage_data[t.name] is not None:
+                    stage_data = yaml.safe_dump(stage_data, indent=2)
+                    f.write(stage_data)
 
-    
     @classmethod
-    def merge(cls, a, b, path=None):
-        "merges b into a"
-        if path is None: path = []
-        for key in b:
-            if key in a:
-                if isinstance(a[key], dict) and isinstance(b[key], dict):
-                    XlsMetadata.merge(a[key], b[key], path + [str(key)])
-                elif a[key] == b[key]:
-                    pass # same leaf value
+    def merge(cls, data_1: dict, data_2: dict, path=None):
+        if path is None:
+            path = []
+        for key in data_2:
+            if key in data_1:
+                if isinstance(data_1[key], dict) and isinstance(data_2[key], dict):
+                    XlsMetadata.merge(data_1[key], data_2[key], path + [str(key)])
+                elif data_1[key] == data_2[key]:
+                    pass  # same leaf value
                 else:
-                    raise Exception('Conflict at %s' % '.'.join(path + [str(key)]))
+                    raise Exception("Conflict at %s" % ".".join(path + [str(key)]))
             else:
-                a[key] = b[key]
-        return a
+                data_1[key] = data_2[key]
+        return data_1
 
-    def validate_schema(self, df: pd.DataFrame):
+    def validate_schema(self, df: pd.DataFrame, validate_type: bool = False):
         schema_exceptions = []
         file_schema = {}
         for column in df:
@@ -315,11 +344,11 @@ class XlsMetadata(BaseModel):
                     f"invalid schema column name {name} with type {data_type}"
                 )
 
-            # elif file_schema[name] is not data_type:
-            #     this_type = file_schema[name]
-            #     schema_exceptions.append(
-            #         f"invalid schema column name {name} type {this_type} is not {data_type}"
-            #     )
+            if validate_type and file_schema[name] is not data_type:
+                this_type = file_schema[name]
+                schema_exceptions.append(
+                    f"invalid schema column name {name} type {this_type} is not {data_type}"
+                )
 
         if schema_exceptions:
             msg = "\n".join(schema_exceptions)

@@ -103,7 +103,9 @@ class Read(Table):
                     self._load_schema(path)
                 else:
                     self.spark_schema = path
-                    self._logger.warning(f"Schema path doesn't exist, schema has not been loaded and remains to be path {path}.")
+                    self._logger.warning(
+                        f"Schema path doesn't exist, schema has not been loaded and remains to be path {path}."
+                    )
 
             corrupt_record_name = self.options.get(
                 self._OPTION_CORRUPT_RECORD_NAME, None
@@ -114,11 +116,10 @@ class Read(Table):
 
             if self.options:
                 for option, value in self.options.items():
-                    if isinstance(value, str):  
+                    if isinstance(value, str):
                         self.options[option] = render_jinja(value, self._replacements)
 
         self._rendered = True
-        
 
     def _config_schema_hints(self):
         path = self.options.get(self._OPTION_CF_SCHEMA_HINTS, None)

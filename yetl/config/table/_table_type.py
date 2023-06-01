@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class TableType(Enum):
-    Read = "read"
-    Write = "write"
-    DeltaLake = "delta_lake"
+class TableType(str, Enum):
+    read = "read"
+    write = "write"
+    delta_lake = "delta_lake"
