@@ -289,7 +289,7 @@ class XlsMetadata(BaseModel):
     source: str = Field(...)
     data: dict = Field(default=None)
 
-    def _auto_convert(self, data:Any):
+    def _auto_convert(self, data: Any):
 
         if isinstance(data, float):
             if data.is_integer():
@@ -305,7 +305,7 @@ class XlsMetadata(BaseModel):
             except ValueError:
                 pass
 
-            if data.lower() in ["true","false"]:
+            if data.lower() in ["true", "false"]:
                 data = bool(data)
 
             return data
