@@ -83,22 +83,24 @@ class Metadata(BaseModel):
     deltalake_delta_constraints: str = Field(default=None)
     deltalake_z_order_by: str = Field(default=None)
     deltalake_vacuum: Union[int, None] = Field(default=None)
-    warning_thresholds_invalid_ratio: float = Field(default=None)
-    warning_thresholds_invalid_rows: float = Field(default=None)
-    warning_thresholds_max_rows: float = Field(default=None)
-    warning_thresholds_mins_rows: float = Field(default=None)
+    warning_thresholds_invalid_ratio: int = Field(default=None)
+    warning_thresholds_invalid_rows: int = Field(default=None)
+    warning_thresholds_max_rows: int = Field(default=None)
+    warning_thresholds_mins_rows: int = Field(default=None)
     error_thresholds_invalid_ratio: float = Field(default=None)
-    error_thresholds_invalid_rows: float = Field(default=None)
-    error_thresholds_max_rows: float = Field(default=None)
-    error_thresholds_mins_rows: float = Field(default=None)
-    version: str = Field(default=pkg_resources.get_distribution("yetl-framework").version)
+    error_thresholds_invalid_rows: int = Field(default=None)
+    error_thresholds_max_rows: int = Field(default=None)
+    error_thresholds_mins_rows: int = Field(default=None)
+    version: str = Field(
+        default=pkg_resources.get_distribution("yetl-framework").version
+    )
 
-    def _get_list(self, data: Any):
+    def _get_list(self, data: Any, default_singluar_to_str: bool = True):
         if data is None:
             return None
-        elif isinstance(data, str) and "\n" in data:
+        elif isinstance(data, str):
             datal = [i.strip() for i in data.split("\n")]
-            if len(datal) == 1:
+            if len(datal) == 1 and default_singluar_to_str:
                 return datal[0]
             else:
                 return datal
@@ -213,7 +215,9 @@ class Metadata(BaseModel):
         if self._has_properties():
             table = {}
             if self.depends_on is not None:
-                table[ColumnNames.depends_on.name] = self._get_list(self.depends_on)
+                table[ColumnNames.depends_on.name] = self._get_list(
+                    self.depends_on, default_singluar_to_str=False
+                )
             if self.ids is not None:
                 table[ColumnNames.ids.name] = self._get_list(self.ids)
             if self.sql is not None and self.sql.lower() == "y":
@@ -285,6 +289,29 @@ class XlsMetadata(BaseModel):
     source: str = Field(...)
     data: dict = Field(default=None)
 
+    def _auto_convert(self, data:Any):
+
+        if isinstance(data, float):
+            if data.is_integer():
+                return int(data)
+        if isinstance(data, str):
+            try:
+                data = float(data)
+            except ValueError:
+                pass
+
+            try:
+                data = int(data)
+            except ValueError:
+                pass
+
+            if data.lower() in ["true","false"]:
+                data = bool(data)
+
+            return data
+        else:
+            return data
+
     def _deserialize(self, df: pd.DataFrame):
         df = df.to_dict(orient="records")
         metadata = [
@@ -301,7 +328,7 @@ class XlsMetadata(BaseModel):
             for k, v in item.items():
                 if k.startswith(ColumnNames.custom_properties.name) and v is not None:
                     prop_key = k.replace(f"{ColumnNames.custom_properties.name}_", "")
-                    custom_properties[prop_key] = v
+                    custom_properties[prop_key] = self._auto_convert(v)
             if custom_properties:
                 item[ColumnNames.custom_properties.name] = custom_properties
 

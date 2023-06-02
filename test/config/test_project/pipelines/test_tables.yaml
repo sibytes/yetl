@@ -4,7 +4,8 @@ audit_control:
   delta_lake:
     raw_dbx_patterns_control:
       header_footer:
-        depends_on: raw.raw_dbx_patterns.*
+        depends_on:
+        - raw.raw_dbx_patterns.*
         partition_by: none
         sql: ../sql/{{database}}/{{table}}.sql
         vacuum: 30
@@ -26,23 +27,23 @@ raw:
     raw_dbx_patterns:
       customers:
         custom_properties:
-          process_group: 1.0
-          rentention_days: 365.0
+          process_group: 1
+          rentention_days: 365
         depends_on:
         - landing.landing_dbx_patterns.customer_details_1
         - landing.landing_dbx_patterns.customer_details_2
         error_thresholds:
           invalid_ratio: 0.2
-          invalid_rows: 2.0
-          max_rows: 1000.0
-          mins_rows: 0.0
+          invalid_rows: 2
+          max_rows: 1000
+          mins_rows: 0
         ids: id
         vacuum: 30
         warning_thresholds:
-          invalid_ratio: 0.1
-          invalid_rows: 0.0
-          max_rows: 100.0
-          mins_rows: 5.0
+          invalid_ratio: 0
+          invalid_rows: 0
+          max_rows: 100
+          mins_rows: 5
         z_order_by: _load_date
 
 base:
@@ -54,7 +55,8 @@ base:
           delta.autoOptimize.autoCompact: true
           delta.autoOptimize.optimizeWrite: true
           delta.enableChangeDataFeed: false
-        depends_on: raw.raw_dbx_patterns.customers
+        depends_on:
+        - raw.raw_dbx_patterns.customers
         ids: id
         vacuum: 30
       customer_details_2:
@@ -63,7 +65,8 @@ base:
           delta.autoOptimize.autoCompact: true
           delta.autoOptimize.optimizeWrite: true
           delta.enableChangeDataFeed: false
-        depends_on: raw.raw_dbx_patterns.customers
+        depends_on:
+        - raw.raw_dbx_patterns.customers
         ids: id
         vacuum: 30
 
