@@ -20,7 +20,7 @@ class ColumnNames(str, Enum):
     database = "database"
     table = "table"
     sql = "sql"
-    ids = "ids"
+    id = "id"
     depends_on = "depends_on"
     deltalake = "deltalake"
     identity = "identity"
@@ -45,7 +45,7 @@ class Metadata(BaseModel):
         ColumnNames.database: str,
         ColumnNames.table: str,
         ColumnNames.sql: str,
-        ColumnNames.ids: str,
+        ColumnNames.id: str,
         ColumnNames.depends_on: str,
         f"{ColumnNames.deltalake}_{ColumnNames.delta_properties}": str,
         f"{ColumnNames.deltalake}_{ColumnNames.identity}": str,
@@ -74,7 +74,7 @@ class Metadata(BaseModel):
     database: str = Field(...)
     table: str = Field(...)
     sql: str = Field(default=None)
-    ids: str = Field(default=None)
+    id: str = Field(default=None)
     depends_on: str = Field(default=None)
     deltalake_delta_properties: str = Field(default=None)
     custom_properties: Dict[str, Any] = Field(default=None)
@@ -146,7 +146,7 @@ class Metadata(BaseModel):
         return any(
             [
                 self.sql is not None,
-                self.ids is not None,
+                self.id is not None,
                 self.depends_on is not None,
                 self.deltalake_delta_properties is not None,
                 self.deltalake_identity is not None,
@@ -218,8 +218,8 @@ class Metadata(BaseModel):
                 table[ColumnNames.depends_on.name] = self._get_list(
                     self.depends_on, default_singluar_to_str=False
                 )
-            if self.ids is not None:
-                table[ColumnNames.ids.name] = self._get_list(self.ids)
+            if self.id is not None:
+                table[ColumnNames.id.name] = self._get_list(self.id)
             if self.sql is not None and self.sql.lower() == "y":
                 table["sql"] = "../sql/{{database}}/{{table}}.sql"
             if self.deltalake_partition_by is not None:
@@ -259,7 +259,7 @@ class XlsMetadata(BaseModel):
         ColumnNames.database: str,
         ColumnNames.table: str,
         ColumnNames.sql: str,
-        ColumnNames.ids: str,
+        ColumnNames.id: str,
         ColumnNames.depends_on: str,
         f"{ColumnNames.deltalake}_{ColumnNames.delta_properties}": str,
         f"{ColumnNames.deltalake}_{ColumnNames.identity}": str,
@@ -290,7 +290,6 @@ class XlsMetadata(BaseModel):
     data: dict = Field(default=None)
 
     def _auto_convert(self, data: Any):
-
         if isinstance(data, float):
             if data.is_integer():
                 return int(data)
