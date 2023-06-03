@@ -10,6 +10,11 @@ def _execute_notebook(notebook: Notebook, dbutils):
         "_message": f"Executing notebook {notebook.path} parameters {notebook.parameters}",
         "status": "executing",
         "notebook": notebook.path,
+        "job_id": dbutils.notebook.entry_point.getDbutils()
+        .notebook()
+        .getContext()
+        .jobId()
+        .toString(),
     }
     print(msg["_message"], flush=True)
 
@@ -21,6 +26,11 @@ def _execute_notebook(notebook: Notebook, dbutils):
             "_message": f"Succeeded notebook {notebook.path}",
             "status": "succeeded",
             "notebook": notebook.path,
+            "job_id": dbutils.notebook.entry_point.getDbutils()
+            .notebook()
+            .getContext()
+            .jobId()
+            .toString(),
         }
         print(msg["_message"], flush=True)
         return result
@@ -32,6 +42,11 @@ def _execute_notebook(notebook: Notebook, dbutils):
                 "status": "failed",
                 "error": str(e),
                 "notebook": notebook.path,
+                "job_id": dbutils.notebook.entry_point.getDbutils()
+                .notebook()
+                .getContext()
+                .jobId()
+                .toString(),
             }
             print(msg["_message"], flush=True)
             raise Exception(msg["_message"])
@@ -40,6 +55,11 @@ def _execute_notebook(notebook: Notebook, dbutils):
             "_message": f"Retrying notebook {notebook.path}",
             "status": "executing",
             "notebook": notebook.path,
+            "job_id": dbutils.notebook.entry_point.getDbutils()
+            .notebook()
+            .getContext()
+            .jobId()
+            .toString(),
         }
         print(msg["_message"], flush=True)
         notebook.retry -= 1
