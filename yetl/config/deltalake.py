@@ -210,7 +210,14 @@ class DeltaLakeFn(BaseModel):
         return predicate
 
     def table_exists(self, database: str, table: str):
-        table_exists = self.spark.catalog.tableExists(f"`{database}`.`{table}`")
+        table_exists = (
+            self.spark.sql(f"SHOW TABLES in {database};")
+            .where(f"tableName='{table}' AND !isTemporary")
+            .count()
+            == 1
+        )
+        # Not whitelist on databricks.
+        # table_exists = self.spark.catalog.tableExists(f"`{database}`.`{table}`")
         return table_exists
 
     def get_delta_properties_sql(self, delta_properties: Dict[str, Union[str, bool]]):
