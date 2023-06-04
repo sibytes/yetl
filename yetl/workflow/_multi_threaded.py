@@ -6,18 +6,10 @@ from typing import List
 # execute a notebook using databricks workflows
 def _execute_notebook(notebook: Notebook, dbutils):
     """Execute a notebookd using databricks workflows"""
-    job_id = (
-        dbutils.notebook.entry_point.getDbutils()
-        .notebook()
-        .getContext()
-        .jobId()
-        .toString()
-    )
     msg = {
-        "_message": f"Executing notebook {notebook.path} parameters {notebook.parameters} job_id {job_id}",
+        "_message": f"Executing notebook {notebook.path} parameters {notebook.parameters}",
         "status": "executing",
         "notebook": notebook.path,
-        "job_id": job_id,
     }
     print(msg["_message"], flush=True)
 
@@ -26,10 +18,9 @@ def _execute_notebook(notebook: Notebook, dbutils):
             notebook.path, notebook.timeout, notebook.parameters
         )
         msg = {
-            "_message": f"Succeeded notebook {notebook.path} job_id {job_id}",
+            "_message": f"Succeeded notebook {notebook.path}",
             "status": "succeeded",
             "notebook": notebook.path,
-            "job_id": job_id,
         }
         print(msg["_message"], flush=True)
         return result
@@ -37,20 +28,18 @@ def _execute_notebook(notebook: Notebook, dbutils):
     except Exception as e:
         if notebook.retry < 1:
             msg = {
-                "_message": f"notebook {notebook.path}  job_id {job_id} failed.",
+                "_message": f"notebook {notebook.path} failed.",
                 "status": "failed",
                 "error": str(e),
                 "notebook": notebook.path,
-                "job_id": job_id,
             }
             print(msg["_message"], flush=True)
             raise Exception(msg["_message"])
 
         msg = {
-            "_message": f"Retrying notebook {notebook.path} job_id {job_id}",
+            "_message": f"Retrying notebook {notebook.path}",
             "status": "executing",
             "notebook": notebook.path,
-            "job_id": job_id,
         }
         print(msg["_message"], flush=True)
         notebook.retry -= 1

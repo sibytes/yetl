@@ -21,6 +21,7 @@ class DeltaLake(Table):
         self._logger = logging.getLogger(self.__class__.__name__)
         self._spark = DeltaLakeFn(project=self.project)
         self._render()
+        self._spark.create_database(self.database)
 
     @classmethod
     def in_allowed_stages(cls, stage: StageType):
@@ -85,20 +86,22 @@ class DeltaLake(Table):
 
     # TODO: Create or alter table
     def create_table(self):
-        self._spark.create_database(self.database)
-
-        if self.managed:
-            self._spark.create_table(
-                database=self.database,
-                table=self.table,
-                delta_properties=self.delta_properties,
-                sql=self.sql,
-            )
+        if self._spark.table_exists(database=self.database, table=self.table):
+            pass
+            # TODO: alter table
         else:
-            self._spark.create_table(
-                database=self.database,
-                table=self.table,
-                delta_properties=self.delta_properties,
-                path=self.location,
-                sql=self.sql,
-            )
+            if self.managed:
+                self._spark.create_table(
+                    database=self.database,
+                    table=self.table,
+                    delta_properties=self.delta_properties,
+                    sql=self.sql,
+                )
+            else:
+                self._spark.create_table(
+                    database=self.database,
+                    table=self.table,
+                    delta_properties=self.delta_properties,
+                    path=self.location,
+                    sql=self.sql,
+                )

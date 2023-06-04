@@ -210,12 +210,7 @@ class DeltaLakeFn(BaseModel):
         return predicate
 
     def table_exists(self, database: str, table: str):
-        table_exists = (
-            self.spark.sql(f"SHOW TABLES in {database};")
-            .where(f"tableName='{table}' AND !isTemporary")
-            .count()
-            == 1
-        )
+        table_exists = self.spark.catalog.tableExists(f"`{database}`.`{table}`")
         return table_exists
 
     def get_delta_properties_sql(self, delta_properties: Dict[str, Union[str, bool]]):
@@ -234,7 +229,6 @@ class DeltaLakeFn(BaseModel):
         sql: str = None,
     ):
         _logger.debug(f"Creating table if not exists {database}.{table} at {path}")
-
         if not sql:
             sql = f"CREATE TABLE IF NOT EXISTS `{database}`.`{table}`"
 
@@ -250,8 +244,7 @@ class DeltaLakeFn(BaseModel):
 
                 sql = f"{sql}\n{sql_path}\n{sql_properties};"
 
-        _logger.debug(f"{sql}")
-        print(sql)
+        _logger.info(f"{sql}")
         self.spark.sql(sql)
 
         return sql
