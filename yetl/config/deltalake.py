@@ -5,20 +5,20 @@ from pyspark.sql.types import StructType, StructField
 import jinja2
 from typing import List, Union, Dict
 from ._spark_context import get_spark_context
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PrivateAttr
 from typing import Any
 from ._project import Project
 from pyspark.sql import SparkSession
 import re
 
-_logger = logging.getLogger(__name__)
-
 
 class DeltaLakeFn(BaseModel):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
+        self._logger = logging.getLogger(self.__class__.__name__)
         self.spark = get_spark_context(self.project.name, self.project.spark.config)
 
+    _logger: Any = PrivateAttr(default=None)
     project: Project = Field(...)
     spark: SparkSession = Field(default=None)
 
@@ -235,7 +235,7 @@ class DeltaLakeFn(BaseModel):
         delta_properties: List[str] = None,
         sql: str = None,
     ):
-        _logger.debug(f"Creating table if not exists {database}.{table} at {path}")
+        self._logger.debug(f"Creating table if not exists {database}.{table} at {path}")
         if not sql:
             sql = f"CREATE TABLE IF NOT EXISTS `{database}`.`{table}`"
 
@@ -251,15 +251,15 @@ class DeltaLakeFn(BaseModel):
 
                 sql = f"{sql}\n{sql_path}\n{sql_properties};"
 
-        _logger.info(f"{sql}")
+        self._logger.info(f"{sql}")
         self.spark.sql(sql)
 
         return sql
 
     def create_database(self, database: str):
-        _logger.debug(f"Creating database if not exists `{database}`")
+        self._logger.info(f"Creating database if not exists `{database}`")
         sql = f"CREATE DATABASE IF NOT EXISTS {database}"
-        _logger.debug(sql)
+        self._logger.info(sql)
         self.spark.sql(sql)
         return sql
 
@@ -275,7 +275,9 @@ class DeltaLakeFn(BaseModel):
         return f"ALTER TABLE `{database}`.`{table}` SET TBLPROPERTIES ({properties});"
 
     def get_table_properties(self, database: str, table: str):
-        _logger.debug(f"getting existing table properties for table {database}.{table}")
+        self._logger.debug(
+            f"getting existing table properties for table {database}.{table}"
+        )
 
         df: DataFrame = self.spark.sql(
             f"SHOW TBLPROPERTIES `{database}`.`{table}`"
@@ -298,7 +300,7 @@ class DeltaLakeFn(BaseModel):
             }
         }
         msg = json.dumps(properties, indent=4, default=str)
-        _logger.debug(msg)
+        self._logger.debug(msg)
         return properties
 
     def optimize(
@@ -315,11 +317,11 @@ class DeltaLakeFn(BaseModel):
             sql_zorderby = ",".join([f"`{z}`" for z in zorder_by])
             sql = f"{sql} ZORDER BY ({sql_zorderby})"
 
-        _logger.debug(f"optimizing table {database}.{table}\n{sql}")
+        self._logger.info(f"optimizing table {database}.{table}\n{sql}")
         self.spark.sql(sql)
 
     def get_table_details(self, database: str, table: str):
-        _logger.debug(
+        self._logger.debug(
             f"getting existing table details and partitions for table {database}.{table}"
         )
 
@@ -357,7 +359,7 @@ class DeltaLakeFn(BaseModel):
         }
 
         msg = json.dumps(details, indent=4, default=str)
-        _logger.debug(msg)
+        self._logger.debug(msg)
         return details
 
     def create_column_ddl(self, field: StructField):
