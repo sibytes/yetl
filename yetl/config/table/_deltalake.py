@@ -89,6 +89,7 @@ class DeltaLake(Table):
         if self._spark.table_exists(database=self.database, table=self.table):
             pass
             # TODO: alter table
+            self._logger.info(f"table `{self.database}`.`{self.table}` already exists.")
         else:
             if self.managed:
                 self._spark.create_table(

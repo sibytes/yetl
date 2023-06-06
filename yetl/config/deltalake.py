@@ -209,8 +209,9 @@ class DeltaLakeFn(BaseModel):
 
         return predicate
 
-    def table_exists(self, database: str, table: str):
-        table_exists = (
+    def table_exists(self, database: str, table: str, catalog: str = None):
+        database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
+        _table_exists = (
             self.spark.sql(f"SHOW TABLES in {database};")
             .where(f"tableName='{table}' AND !isTemporary")
             .count()
@@ -218,7 +219,7 @@ class DeltaLakeFn(BaseModel):
         )
         # Not whitelist on databricks.
         # table_exists = self.spark.catalog.tableExists(f"`{database}`.`{table}`")
-        return table_exists
+        return _table_exists
 
     def get_delta_properties_sql(self, delta_properties: Dict[str, Union[str, bool]]):
         sql_properties = [
@@ -234,10 +235,13 @@ class DeltaLakeFn(BaseModel):
         path: str = None,
         delta_properties: List[str] = None,
         sql: str = None,
+        catalog: str = None,
     ):
-        self._logger.debug(f"Creating table if not exists {database}.{table} at {path}")
+        database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
+        table = f"`{table}`"
+        self._logger.info(f"Creating table if not exists {database}.{table} at {path}")
         if not sql:
-            sql = f"CREATE TABLE IF NOT EXISTS `{database}`.`{table}`"
+            sql = f"CREATE TABLE IF NOT EXISTS {database}.{table}"
 
             # add in the delta properties if there are any
             sql_properties = ""
@@ -256,31 +260,40 @@ class DeltaLakeFn(BaseModel):
 
         return sql
 
-    def create_database(self, database: str):
-        self._logger.info(f"Creating database if not exists `{database}`")
+    def create_database(self, database: str, catalog: str = None):
+        database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
+        self._logger.debug(f"Creating database if not exists {database}")
         sql = f"CREATE DATABASE IF NOT EXISTS {database}"
-        self._logger.info(sql)
+        self._logger.debug(sql)
         self.spark.sql(sql)
         return sql
 
-    def alter_table_drop_constraint(self, database: str, table: str, name: str):
-        return f"ALTER TABLE `{database}`.`{table}` DROP CONSTRAINT {name};"
+    def alter_table_drop_constraint(
+        self, database: str, table: str, name: str, catalog: str = None
+    ):
+        database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
+        return f"ALTER TABLE {database}.`{table}` DROP CONSTRAINT {name};"
 
     def alter_table_add_constraint(
-        self, database: str, table: str, name: str, constraint: str
+        self, database: str, table: str, name: str, constraint: str, catalog: str = None
     ):
-        return f"ALTER TABLE `{database}`.`{table}` ADD CONSTRAINT {name} CHECK ({constraint});"
+        database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
+        return f"ALTER TABLE {database}.`{table}` ADD CONSTRAINT {name} CHECK ({constraint});"
 
-    def alter_table_set_tblproperties(self, database: str, table: str, properties: str):
-        return f"ALTER TABLE `{database}`.`{table}` SET TBLPROPERTIES ({properties});"
+    def alter_table_set_tblproperties(
+        self, database: str, table: str, properties: str, catalog: str = None
+    ):
+        database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
+        return f"ALTER TABLE {database}.`{table}` SET TBLPROPERTIES ({properties});"
 
-    def get_table_properties(self, database: str, table: str):
+    def get_table_properties(self, database: str, table: str, catalog: str = None):
+        database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
         self._logger.debug(
-            f"getting existing table properties for table {database}.{table}"
+            f"getting existing table properties for table {database}.`{table}`"
         )
 
         df: DataFrame = self.spark.sql(
-            f"SHOW TBLPROPERTIES `{database}`.`{table}`"
+            f"SHOW TBLPROPERTIES {database}.`{table}`"
         ).collect()
         tbl_properties = {
             c.asDict()["key"]: c.asDict()["value"]
@@ -304,9 +317,15 @@ class DeltaLakeFn(BaseModel):
         return properties
 
     def optimize(
-        self, database: str, table: str, partition_values: dict, zorder_by: list = []
+        self,
+        database: str,
+        table: str,
+        partition_values: dict,
+        zorder_by: list = [],
+        catalog: str = None,
     ):
-        sql = f"OPTIMIZE `{database}`.`{table}`"
+        database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
+        sql = f"OPTIMIZE {database}.`{table}`"
 
         if partition_values:
             predicate = self.get_partition_predicate(partition_values)
@@ -320,13 +339,14 @@ class DeltaLakeFn(BaseModel):
         self._logger.info(f"optimizing table {database}.{table}\n{sql}")
         self.spark.sql(sql)
 
-    def get_table_details(self, database: str, table: str):
+    def get_table_details(self, database: str, table: str, catalog: str = None):
+        database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
         self._logger.debug(
             f"getting existing table details and partitions for table {database}.{table}"
         )
 
         df: DataFrame = self.spark.sql(
-            f"DESCRIBE TABLE EXTENDED `{database}`.`{table}`"
+            f"DESCRIBE TABLE EXTENDED {database}.`{table}`"
         ).collect()
 
         # get the details into a dictionary
