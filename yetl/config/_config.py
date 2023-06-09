@@ -63,10 +63,15 @@ class Config:
         stage: StageType,
         table: str = _INDEX_WILDCARD,
         database: str = _INDEX_WILDCARD,
+        create_database: bool = True,
         create_table: bool = True,
     ):
         table_mapping = self.tables.get_table_mapping(
-            stage=stage, table=table, database=database, create_table=create_table
+            stage=stage,
+            table=table,
+            database=database,
+            create_database=create_database,
+            create_table=create_table,
         )
 
         return table_mapping

@@ -152,6 +152,7 @@ class Tables(BaseModel):
         database=_INDEX_WILDCARD,
         table=_INDEX_WILDCARD,
         first_match: bool = True,
+        create_database: bool = False,
         create_table: bool = False,
         **kwargs,
     ):
@@ -191,6 +192,8 @@ class Tables(BaseModel):
             table = tables_index[matches]
             msg_tables = f"{table.database}.{table.table}"
             self._logger.info(f"Matched tables: {msg_tables}")
+            if create_database:
+                table.create_database()
             if create_table:
                 table.create_table()
             return table
@@ -198,9 +201,14 @@ class Tables(BaseModel):
             tables = [tables_index[i] for i in matches]
             msg_tables = "\n".join([f"{t.database}.{t.table}" for t in tables])
             self._logger.info(f"Matched tables: {msg_tables}")
-            if create_table:
+            db = ""
+            if create_table or create_database:
                 for t in tables:
-                    t.create_table()
+                    if create_database and db != t.database:
+                        db = t.database
+                        t.create_database()
+                    if create_table:
+                        t.create_table()
             return tables
 
     def get_table_mapping(
@@ -208,6 +216,7 @@ class Tables(BaseModel):
         stage: StageType,
         table=_INDEX_WILDCARD,
         database=_INDEX_WILDCARD,
+        create_database: bool = True,
         create_table: bool = True,
     ):
         destination = self.lookup_table(
@@ -215,6 +224,7 @@ class Tables(BaseModel):
             database=database,
             table=table,
             first_match=True,
+            create_database=create_database,
             create_table=create_table,
         )
         source = {}
@@ -228,6 +238,7 @@ class Tables(BaseModel):
                     table=do_table,
                     database=do_database,
                     first_match=False,
+                    create_database=create_database,
                     create_table=create_table,
                 )
         except Exception as e:

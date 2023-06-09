@@ -21,7 +21,6 @@ class DeltaLake(Table):
         self._logger = logging.getLogger(self.__class__.__name__)
         self._spark = DeltaLakeFn(project=self.project)
         self._render()
-        self._spark.create_database(self.database)
 
     @classmethod
     def in_allowed_stages(cls, stage: StageType):
@@ -83,6 +82,9 @@ class DeltaLake(Table):
                         self.options[option] = render_jinja(value, self._replacements)
 
         self._rendered = True
+
+    def create_database(self):
+        self._spark.create_database(self.database)
 
     # TODO: Create or alter table
     def create_table(self):
