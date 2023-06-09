@@ -12,12 +12,12 @@ def get_spark_context(project: str, config: dict = None):
         _logger.debug("Getting databricks spark context")
         try:
             from databricks.sdk.runtime import spark
+
             return spark
-        except Exception as e:
+        except Exception:
             _logger.info("cannot create spark context, spark not found.")
             return None
 
-        
     else:
         _logger.debug("Getting local spark context")
 

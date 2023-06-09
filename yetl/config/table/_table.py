@@ -119,3 +119,6 @@ class Table(BaseModel):
 
     def create_table(self):
         pass
+
+    def create_database(self):
+        pass
