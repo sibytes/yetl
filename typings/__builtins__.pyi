@@ -1,2 +1,5 @@
 
-from databricks.sdk.runtime import *
+try:
+    from databricks.sdk.runtime import *
+except ModuleNotFoundError:
+    pass
