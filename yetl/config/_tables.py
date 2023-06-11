@@ -142,6 +142,7 @@ class Tables(BaseModel):
             database=database,
             table=table,
             first_match=first_match,
+            create_database=True,
             create_table=True,
             **kwargs,
         )
