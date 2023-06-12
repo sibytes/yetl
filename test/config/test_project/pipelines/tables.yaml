@@ -25,17 +25,6 @@ version: 1.5.0
 # captures any audit tables you may
 # want to create to capture details of the ETL process
 # such as watermarks, stats etc
-# audit_control:
-#   delta_lake:
-#     raw_dbx_patterns_control:
-#       header_footer:
-#         sql: ../sql/{{database}}/{{table}}.sql
-#         depends_on:
-#           - raw.raw_dbx_patterns.customers
-#       raw_audit:
-#         sql: ../sql/{{database}}/{{table}}.sql
-#         depends_on:
-#           - raw.raw_dbx_patterns.customers
 
 audit_control:
   delta_lake:
