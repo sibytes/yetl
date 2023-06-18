@@ -1,5 +1,6 @@
 import os
 import yaml
+import pkg_resources
 
 
 def init(project: str, directory: str = "."):
@@ -69,7 +70,7 @@ def _make_project_dir(project_path: str, project: str):
     }
 
     config = {
-        "version": "1.1.0",
+        "version": pkg_resources.get_distribution("yetl-framework").version,
         "name": project,
         "sql": sql,
         "spark_schema": spark_schema,
