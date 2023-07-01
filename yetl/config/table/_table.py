@@ -96,6 +96,7 @@ class Table(BaseModel):
             JinjaVariables.CONTAINER: self.container,
             JinjaVariables.CHECKPOINT: self.checkpoint,
             JinjaVariables.PROJECT: self.project.name,
+            JinjaVariables.CATALOG: self.catalog,
         }
 
     def render(self):
