@@ -1,96 +1,78 @@
-
-version: 1.5.0
-# deltalake table properties
-# https://docs.databricks.com/delta/table-properties.html
-
-# delta.appendOnly: false
-# delta.autoOptimize.autoCompact: none    
-# delta.autoOptimize.optimizeWrite: none    
-# delta.checkpoint.writeStatsAsJson: true
-# delta.checkpoint.writeStatsAsStruct: none
-# delta.columnMapping.mode: false
-# delta.compatibility.symlinkFormatManifest.enabled: false
-# delta.dataSkippingNumIndexedCols 32
-# delta.deletedFileRetentionDuration: interval 1 week
-# delta.enableChangeDataFeed: false
-# delta.isolationLevel:  WriteSerializable
-# delta.logRetentionDuration: interval 30 days
-# delta.minReaderVersion: 1
-# delta.minWriterVersion: 2
-# delta.randomizeFilePrefixes: false
-# delta.randomPrefixLength: 2
-# delta.setTransactionRetentionDuration: none
-# delta.tuneFileSizesForRewrites: none
-
-# captures any audit tables you may
-# want to create to capture details of the ETL process
-# such as watermarks, stats etc
+version: 1.6.0.dev1
 
 audit_control:
   delta_lake:
     raw_dbx_patterns_control:
+      catalog: hive_metastore
       header_footer:
-        sql: ../sql/{{database}}/{{table}}.sql
         depends_on:
-          - raw.raw_dbx_patterns.*
+        - raw.raw_dbx_patterns.*
+        partition_by: none
+        sql: ../sql/{{database}}/{{table}}.sql
+        vacuum: 30
       raw_audit:
-        sql: ../sql/{{database}}/{{table}}.sql
         depends_on:
-          - raw.raw_dbx_patterns.*
-          - audit_control.raw_dbx_patterns_control.header_footer
+        - raw.raw_dbx_patterns.*
+        - audit_control.raw_dbx_patterns_control.header_footer
+        sql: ../sql/{{database}}/{{table}}.sql
+        vacuum: 30
 
 landing:
   read:
     landing_dbx_patterns:
+      catalog: hive_metastore
       customer_details_1: null
       customer_details_2: null
 
 raw:
   delta_lake:
     raw_dbx_patterns:
+      catalog: hive_metastore
       customers:
-        id: id
+        custom_properties:
+          process_group: 1
+          rentention_days: 365
         depends_on:
-          - landing.landing_dbx_patterns.customer_details_1
-          - landing.landing_dbx_patterns.customer_details_2
-        warning_thresholds:
-          invalid_ratio: 0.1
-          invalid_rows: 0
-          max_rows: 100
-          min_rows: 5
+        - landing.landing_dbx_patterns.customer_details_1
+        - landing.landing_dbx_patterns.customer_details_2
         exception_thresholds:
           invalid_ratio: 0.2
           invalid_rows: 2
           max_rows: 1000
           min_rows: 0
-        custom_properties:
-          process_group: 1
-        z_order_by:
-          - _load_date_1
-          - _load_date_2
+        id: id
         vacuum: 30
-
+        warning_thresholds:
+          invalid_ratio: 0.1
+          invalid_rows: 0
+          max_rows: 100
+          min_rows: 5
+        z_order_by:
+        - _load_date_1
+        - _load_date_2
 
 base:
   delta_lake:
-    # delta table properties can be set at stage level or table level
-    delta_properties:
-      delta.appendOnly: true
-      delta.autoOptimize.autoCompact: true    
-      delta.autoOptimize.optimizeWrite: true  
-      delta.enableChangeDataFeed: false
     base_dbx_patterns:
+      catalog: hive_metastore
       customer_details_1:
-        id: id
-        depends_on:
-          - raw.raw_dbx_patterns.customers
-        # delta table properties can be set at stage level or table level
-        # table level properties will overwride stage level properties
         delta_properties:
-            delta.enableChangeDataFeed: true
-      customer_details_2:
-        id: id
+          delta.appendOnly: true
+          delta.autoOptimize.autoCompact: true
+          delta.autoOptimize.optimizeWrite: true
+          delta.enableChangeDataFeed: false
         depends_on:
-          - raw.raw_dbx_patterns.customers
-
+        - raw.raw_dbx_patterns.customers
+        id: id
+        vacuum: 30
+      customer_details_2:
+        delta_properties:
+          delta.appendOnly: true
+          delta.autoOptimize.autoCompact: true
+          delta.autoOptimize.optimizeWrite: true
+          delta.enableChangeDataFeed: false
+        depends_on:
+        - raw.raw_dbx_patterns.customers
+        id: id
+        vacuum: 30
 
