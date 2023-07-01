@@ -70,7 +70,7 @@ class Metadata(BaseModel):
 
     stage: StageType = Field(...)
     table_type: TableType = Field(...)
-    catalog: str = Field(...)
+    catalog: str = Field(default=None)
     database: str = Field(...)
     table: str = Field(...)
     sql: str = Field(default=None)
