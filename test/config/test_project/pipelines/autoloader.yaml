@@ -1,4 +1,4 @@
-version: 1.6.0
+version: 1.6.3
 tables: ./tables.yaml
 
 audit_control:
@@ -10,8 +10,8 @@ audit_control:
         delta.autoOptimize.optimizeWrite: true
     managed: false
     container: datalake
-    location: /mnt/{{container}}/data/raw
-    path: "{{database}}/{{table}}"
+    # location: /mnt/{{container}}/data/raw
+    # path: "{{database}}/{{table}}"
     options:
       checkpointLocation: "/mnt/{{container}}/checkpoint/{{project}}/{{checkpoint}}"
 

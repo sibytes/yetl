@@ -62,7 +62,8 @@ class DeltaLake(Table):
             self.table = render_jinja(self.table, self._replacements)
             self.location = render_jinja(self.location, self._replacements)
             self.path = render_jinja(self.path, self._replacements)
-            self.location = os.path.join(self.location, self.path)
+            if self.location and self.path:
+                self.location = os.path.join(self.location, self.path)
             if not is_databricks():
                 self.location = f"{self.config_path}/../data{self.location}"
                 self.location = os.path.abspath(self.location)

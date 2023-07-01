@@ -52,38 +52,38 @@ class Tables(BaseModel):
                 push_down_properties = {}
                 for database_name, table in database.items():
                     if PushDownProperties.has_not_value(database_name):
+                        catalog = table.get(PushDownProperties.CATALOG.value)
+                        del table[PushDownProperties.CATALOG.value]
                         for table_name, table_properties in table.items():
-                            if PushDownProperties.has_not_value(table_name):
-                                table_config = {
-                                    KeyContants.DATABASE.value: database_name,
-                                    KeyContants.TABLE.value: table_name,
-                                    KeyContants.STAGE.value: stage_type,
-                                    KeyContants.TABLE_TYPE.value: table_type,
-                                    KeyContants.PROJECT.value: self.table_data.get(
-                                        KeyContants.PROJECT.value
-                                    ),
-                                    KeyContants.TIMESLICE.value: self.table_data.get(
-                                        KeyContants.TIMESLICE.value
-                                    ),
-                                    KeyContants.CONFIG_PATH.value: self.table_data.get(
-                                        KeyContants.CONFIG_PATH.value
-                                    ),
-                                }
-                                if table_properties:
-                                    table_config = {**table_config, **table_properties}
-                                table_config = {**push_down_properties, **table_config}
-                                for p, v in push_down_properties.items():
-                                    if isinstance(v, dict) and table_config.get(p):
-                                        table_config[p] = {**v, **table_config[p]}
-                                    else:
-                                        table_config[p] = v
-                                stage_config = self.table_data.get(stage_type.value, {})
-                                stage_config = stage_config.get(table_type.value, {})
-                                table_config = {**stage_config, **table_config}
-                                index = f"{stage_name}.{database_name}.{table_name}"
-                                self.tables_index[index] = table_config
-                            else:
-                                push_down_properties[table_name] = table_properties
+                            table_config = {
+                                KeyContants.DATABASE.value: database_name,
+                                KeyContants.TABLE.value: table_name,
+                                KeyContants.STAGE.value: stage_type,
+                                KeyContants.TABLE_TYPE.value: table_type,
+                                KeyContants.PROJECT.value: self.table_data.get(
+                                    KeyContants.PROJECT.value
+                                ),
+                                KeyContants.TIMESLICE.value: self.table_data.get(
+                                    KeyContants.TIMESLICE.value
+                                ),
+                                KeyContants.CONFIG_PATH.value: self.table_data.get(
+                                    KeyContants.CONFIG_PATH.value
+                                ),
+                            }
+                            if table_properties:
+                                table_config = {**table_config, **table_properties}
+                            table_config = {**push_down_properties, **table_config}
+                            table_config[PushDownProperties.CATALOG.value] = catalog
+                            for p, v in push_down_properties.items():
+                                if isinstance(v, dict) and table_config.get(p):
+                                    table_config[p] = {**v, **table_config[p]}
+                                else:
+                                    table_config[p] = v
+                            stage_config = self.table_data.get(stage_type.value, {})
+                            stage_config = stage_config.get(table_type.value, {})
+                            table_config = {**stage_config, **table_config}
+                            index = f"{stage_name}.{database_name}.{table_name}"
+                            self.tables_index[index] = table_config
                     else:
                         push_down_properties[database_name] = table
 

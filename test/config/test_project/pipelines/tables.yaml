@@ -1,15 +1,15 @@
-version: 1.6.0
+version: 1.6.3
 
 audit_control:
   delta_lake:
     raw_dbx_patterns_control:
-      catalog: hive_metastore
       header_footer:
         depends_on:
         - raw.raw_dbx_patterns.*
         partition_by: none
         sql: ../sql/{{database}}/{{table}}.sql
         vacuum: 30
+      catalog: hive_metastore
       raw_audit:
         depends_on:
         - raw.raw_dbx_patterns.*
