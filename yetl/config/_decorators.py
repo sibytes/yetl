@@ -12,6 +12,8 @@ def yetl_flow(
     project: str,
     pipeline: str = None,
     config_path: str = None,
+    catalog: str = None,
+    catalog_enabled: bool = True,
 ):
     def decorate(function):
         def wrap_function(*args, **kwargs):
@@ -40,7 +42,12 @@ def yetl_flow(
                 config_path=config_path,
                 timeslice=timeslice,
             )
-            table_mapping = config.get_table_mapping(stage=stage, table=table)
+            table_mapping = config.get_table_mapping(
+                stage=stage,
+                table=table,
+                catalog=catalog,
+                catalog_enabled=catalog_enabled,
+            )
 
             destination: Table = table_mapping.destination
             sources = table_mapping.source

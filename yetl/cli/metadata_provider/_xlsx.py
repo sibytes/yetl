@@ -17,6 +17,7 @@ class ImportFormat(str, Enum):
 class ColumnNames(str, Enum):
     stage = "stage"
     table_type = "table_type"
+    catalog = "catalog"
     database = "database"
     table = "table"
     sql = "sql"
@@ -33,7 +34,7 @@ class ColumnNames(str, Enum):
     invalid_ratio = "invalid_ratio"
     invalid_rows = "invalid_rows"
     max_rows = "max_rows"
-    mins_rows = "mins_rows"
+    min_rows = "min_rows"
     custom_properties = "custom_properties"
     vacuum = "vacuum"
 
@@ -42,6 +43,7 @@ class Metadata(BaseModel):
     SCHEMA = {
         ColumnNames.stage: str,
         ColumnNames.table_type: str,
+        ColumnNames.catalog: str,
         ColumnNames.database: str,
         ColumnNames.table: str,
         ColumnNames.sql: str,
@@ -56,11 +58,11 @@ class Metadata(BaseModel):
         f"{ColumnNames.warning_thresholds}_{ColumnNames.invalid_ratio}": np.float64,
         f"{ColumnNames.warning_thresholds}_{ColumnNames.invalid_rows}": np.float64,
         f"{ColumnNames.warning_thresholds}_{ColumnNames.max_rows}": np.float64,
-        f"{ColumnNames.warning_thresholds}_{ColumnNames.mins_rows}": np.float64,
+        f"{ColumnNames.warning_thresholds}_{ColumnNames.min_rows}": np.float64,
         f"{ColumnNames.error_thresholds}_{ColumnNames.invalid_ratio}": np.float64,
         f"{ColumnNames.error_thresholds}_{ColumnNames.invalid_rows}": np.float64,
         f"{ColumnNames.error_thresholds}_{ColumnNames.max_rows}": np.float64,
-        f"{ColumnNames.error_thresholds}_{ColumnNames.mins_rows}": np.float64,
+        f"{ColumnNames.error_thresholds}_{ColumnNames.min_rows}": np.float64,
         # "custom_properties.process_group": np."float64",
         # "custom_properties.rentention_days": np."float64",
         # "custom_properties.vaccum": np."float64"
@@ -71,6 +73,7 @@ class Metadata(BaseModel):
 
     stage: StageType = Field(...)
     table_type: TableType = Field(...)
+    catalog: str = Field(...)
     database: str = Field(...)
     table: str = Field(...)
     sql: str = Field(default=None)
@@ -86,11 +89,11 @@ class Metadata(BaseModel):
     warning_thresholds_invalid_ratio: int = Field(default=None)
     warning_thresholds_invalid_rows: int = Field(default=None)
     warning_thresholds_max_rows: int = Field(default=None)
-    warning_thresholds_mins_rows: int = Field(default=None)
+    warning_thresholds_min_rows: int = Field(default=None)
     error_thresholds_invalid_ratio: float = Field(default=None)
     error_thresholds_invalid_rows: int = Field(default=None)
     error_thresholds_max_rows: int = Field(default=None)
-    error_thresholds_mins_rows: int = Field(default=None)
+    error_thresholds_min_rows: int = Field(default=None)
     version: str = Field(
         default=pkg_resources.get_distribution("yetl-framework").version
     )
@@ -128,7 +131,7 @@ class Metadata(BaseModel):
                 self.warning_thresholds_invalid_ratio is not None,
                 self.warning_thresholds_invalid_rows is not None,
                 self.warning_thresholds_max_rows is not None,
-                self.warning_thresholds_mins_rows is not None,
+                self.warning_thresholds_min_rows is not None,
             ]
         )
 
@@ -138,7 +141,7 @@ class Metadata(BaseModel):
                 self.error_thresholds_invalid_ratio is not None,
                 self.error_thresholds_invalid_rows is not None,
                 self.error_thresholds_max_rows is not None,
-                self.error_thresholds_mins_rows is not None,
+                self.error_thresholds_min_rows is not None,
             ]
         )
 
@@ -173,10 +176,10 @@ class Metadata(BaseModel):
                 data[ColumnNames.error_thresholds.name][
                     ColumnNames.max_rows.name
                 ] = self.error_thresholds_max_rows
-            if self.error_thresholds_mins_rows is not None:
+            if self.error_thresholds_min_rows is not None:
                 data[ColumnNames.error_thresholds.name][
-                    ColumnNames.mins_rows.name
-                ] = self.error_thresholds_mins_rows
+                    ColumnNames.min_rows.name
+                ] = self.error_thresholds_min_rows
             return data
         else:
             return None
@@ -196,10 +199,10 @@ class Metadata(BaseModel):
                 data[ColumnNames.warning_thresholds.name][
                     ColumnNames.max_rows.name
                 ] = self.warning_thresholds_max_rows
-            if self.warning_thresholds_mins_rows is not None:
+            if self.warning_thresholds_min_rows is not None:
                 data[ColumnNames.warning_thresholds.name][
-                    ColumnNames.mins_rows.name
-                ] = self.warning_thresholds_mins_rows
+                    ColumnNames.min_rows.name
+                ] = self.warning_thresholds_min_rows
             return data
         else:
             return None
@@ -247,6 +250,9 @@ class Metadata(BaseModel):
                     ColumnNames.error_thresholds.name
                 ]
         data["version"] = self.version
+        data[self.stage.value][self.table_type.value][self.database][
+            ColumnNames.catalog.name
+        ] = self.catalog
         data[self.stage.value][self.table_type.value][self.database][self.table] = table
 
         return data
@@ -256,6 +262,7 @@ class XlsMetadata(BaseModel):
     SCHEMA = {
         ColumnNames.stage: str,
         ColumnNames.table_type: str,
+        ColumnNames.catalog: str,
         ColumnNames.database: str,
         ColumnNames.table: str,
         ColumnNames.sql: str,
@@ -270,11 +277,11 @@ class XlsMetadata(BaseModel):
         f"{ColumnNames.warning_thresholds}_{ColumnNames.invalid_ratio}": np.float64,
         f"{ColumnNames.warning_thresholds}_{ColumnNames.invalid_rows}": np.float64,
         f"{ColumnNames.warning_thresholds}_{ColumnNames.max_rows}": np.float64,
-        f"{ColumnNames.warning_thresholds}_{ColumnNames.mins_rows}": np.float64,
+        f"{ColumnNames.warning_thresholds}_{ColumnNames.min_rows}": np.float64,
         f"{ColumnNames.error_thresholds}_{ColumnNames.invalid_ratio}": np.float64,
         f"{ColumnNames.error_thresholds}_{ColumnNames.invalid_rows}": np.float64,
         f"{ColumnNames.error_thresholds}_{ColumnNames.max_rows}": np.float64,
-        f"{ColumnNames.error_thresholds}_{ColumnNames.mins_rows}": np.float64,
+        f"{ColumnNames.error_thresholds}_{ColumnNames.min_rows}": np.float64,
         # "custom_properties.process_group": np."float64",
         # "custom_properties.rentention_days": np."float64",
         # "custom_properties.vaccum": np."float64"

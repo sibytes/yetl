@@ -1,8 +1,9 @@
-version: 1.5.0
+version: 1.6.0.dev1
 
 audit_control:
   delta_lake:
     raw_dbx_patterns_control:
+      catalog: hive_metastore
       header_footer:
         depends_on:
         - raw.raw_dbx_patterns.*
@@ -19,12 +20,14 @@ audit_control:
 landing:
   read:
     landing_dbx_patterns:
+      catalog: hive_metastore
       customer_details_1: null
       customer_details_2: null
 
 raw:
   delta_lake:
     raw_dbx_patterns:
+      catalog: hive_metastore
       customers:
         custom_properties:
           process_group: 1
@@ -36,19 +39,22 @@ raw:
           invalid_ratio: 0.2
           invalid_rows: 2
           max_rows: 1000
-          mins_rows: 0
-        ids: id
+          min_rows: 0
+        id: id
         vacuum: 30
         warning_thresholds:
           invalid_ratio: 0
           invalid_rows: 0
           max_rows: 100
-          mins_rows: 5
-        z_order_by: _load_date
+          min_rows: 5
+        z_order_by:
+        - _load_date_1
+        - _load_date_2
 
 base:
   delta_lake:
     base_dbx_patterns:
+      catalog: hive_metastore
       customer_details_1:
         delta_properties:
           delta.appendOnly: true
@@ -57,7 +63,7 @@ base:
           delta.enableChangeDataFeed: false
         depends_on:
         - raw.raw_dbx_patterns.customers
-        ids: id
+        id: id
         vacuum: 30
       customer_details_2:
         delta_properties:
@@ -67,6 +73,6 @@ base:
           delta.enableChangeDataFeed: false
         depends_on:
         - raw.raw_dbx_patterns.customers
-        ids: id
+        id: id
         vacuum: 30
 

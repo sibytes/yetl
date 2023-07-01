@@ -34,10 +34,13 @@ def test_configuration_load(tear_down, root_path):
     project = "test_project"
     timeslice = Timeslice(day="*", month="*", year="*")
     config = Config(
-        project=project, pipeline=pipeline, config_path=config_path, timeslice=timeslice
+        project=project, 
+        pipeline=pipeline, 
+        config_path=config_path, 
+        timeslice=timeslice
     )
     table_mapping = config.get_table_mapping(
-        stage=StageType.raw, table="customers"
+        stage=StageType.raw, table="customers", catalog_enabled=False
     )
 
     source: Read = table_mapping.source["customer_details_1"]
@@ -53,7 +56,8 @@ def test_configuration_load(tear_down, root_path):
     assert destination.database =='raw_dbx_patterns' 
     assert destination.table=='customers' 
     assert destination.id=='id'
-    assert destination.custom_properties == {'process_group': 1} 
+
+    assert destination.custom_properties == {'process_group': 1,'rentention_days': 365} 
     assert destination.table_type == TableType.delta_lake
     assert destination.warning_thresholds == ValidationThreshold(invalid_ratio=0.1, invalid_rows=0, max_rows=100, min_rows=5) 
     assert destination.exception_thresholds == ValidationThreshold(invalid_ratio=0.2, invalid_rows=2, max_rows=1000, min_rows=0)
@@ -82,6 +86,7 @@ def test_configuration_load(tear_down, root_path):
     assert destination.managed == False 
     assert destination.sql == None
     assert destination.vacuum == 30
+    assert destination.catalog == None
 
 
 
@@ -89,7 +94,8 @@ def test_decorator_configuration_load(tear_down):
     @yetl_flow(
             project="test_project", 
             stage=StageType.raw, 
-            config_path="./test/config"
+            config_path="./test/config",
+            catalog_enabled=False
     )
     def autoloader(table_mapping:TableMapping):
         return table_mapping
@@ -105,7 +111,8 @@ def test_decorator_configuration_audit_load(tear_down):
     @yetl_flow(
             project="test_project", 
             stage=StageType.audit_control, 
-            config_path="./test/config"
+            config_path="./test/config",
+            catalog_enabled=False
     )
     def autoloader(table_mapping:TableMapping):
         return table_mapping

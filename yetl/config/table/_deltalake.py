@@ -83,15 +83,23 @@ class DeltaLake(Table):
 
         self._rendered = True
 
-    def create_database(self):
-        self._spark.create_database(self.database)
+    def create_database(self, catalog: str = None, catalog_enabled: bool = True):
+        super().create_database(catalog=catalog, catalog_enabled=catalog_enabled)
+        self._spark.create_database(self.database, catalog=self.catalog)
 
     # TODO: Create or alter table
-    def create_table(self):
-        if self._spark.table_exists(database=self.database, table=self.table):
+    def create_table(self, catalog: str = None, catalog_enabled: bool = True):
+        super().create_table(catalog=catalog, catalog_enabled=catalog_enabled)
+        if self._spark.table_exists(
+            database=self.database, table=self.table, catalog=self.catalog
+        ):
             pass
             # TODO: alter table
-            self._logger.info(f"table `{self.database}`.`{self.table}` already exists.")
+            if self.catalog:
+                msg = f"table `{self.catalog}`.{self.database}`.`{self.table}` already exists."
+            else:
+                msg = f"table {self.database}`.`{self.table}` already exists."
+            self._logger.info(msg)
         else:
             if self.managed:
                 self._spark.create_table(
@@ -99,6 +107,7 @@ class DeltaLake(Table):
                     table=self.table,
                     delta_properties=self.delta_properties,
                     sql=self.sql,
+                    catalog=self.catalog,
                 )
             else:
                 self._spark.create_table(
@@ -107,4 +116,5 @@ class DeltaLake(Table):
                     delta_properties=self.delta_properties,
                     path=self.location,
                     sql=self.sql,
+                    catalog=self.catalog,
                 )

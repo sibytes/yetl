@@ -65,6 +65,8 @@ class Config:
         database: str = _INDEX_WILDCARD,
         create_database: bool = True,
         create_table: bool = True,
+        catalog: str = None,
+        catalog_enabled: bool = True,
     ):
         table_mapping = self.tables.get_table_mapping(
             stage=stage,
@@ -72,6 +74,8 @@ class Config:
             database=database,
             create_database=create_database,
             create_table=create_table,
+            catalog=catalog,
+            catalog_enabled=catalog_enabled,
         )
 
         return table_mapping

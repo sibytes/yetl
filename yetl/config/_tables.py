@@ -25,6 +25,7 @@ class KeyContants(Enum):
 
 class PushDownProperties(Enum):
     DELTA_PROPETIES = "delta_properties"
+    CATALOG = "catalog"
 
     @classmethod
     def has_value(cls, value):
@@ -51,35 +52,38 @@ class Tables(BaseModel):
                 push_down_properties = {}
                 for database_name, table in database.items():
                     if PushDownProperties.has_not_value(database_name):
-                        for table_name, table_propties in table.items():
-                            table_config = {
-                                KeyContants.DATABASE.value: database_name,
-                                KeyContants.TABLE.value: table_name,
-                                KeyContants.STAGE.value: stage_type,
-                                KeyContants.TABLE_TYPE.value: table_type,
-                                KeyContants.PROJECT.value: self.table_data.get(
-                                    KeyContants.PROJECT.value
-                                ),
-                                KeyContants.TIMESLICE.value: self.table_data.get(
-                                    KeyContants.TIMESLICE.value
-                                ),
-                                KeyContants.CONFIG_PATH.value: self.table_data.get(
-                                    KeyContants.CONFIG_PATH.value
-                                ),
-                            }
-                            if table_propties:
-                                table_config = {**table_config, **table_propties}
-                            table_config = {**push_down_properties, **table_config}
-                            for p, v in push_down_properties.items():
-                                if isinstance(v, dict) and table_config.get(p):
-                                    table_config[p] = {**v, **table_config[p]}
-                                else:
-                                    table_config[p] = v
-                            stage_config = self.table_data.get(stage_type.value, {})
-                            stage_config = stage_config.get(table_type.value, {})
-                            table_config = {**stage_config, **table_config}
-                            index = f"{stage_name}.{database_name}.{table_name}"
-                            self.tables_index[index] = table_config
+                        for table_name, table_properties in table.items():
+                            if PushDownProperties.has_not_value(table_name):
+                                table_config = {
+                                    KeyContants.DATABASE.value: database_name,
+                                    KeyContants.TABLE.value: table_name,
+                                    KeyContants.STAGE.value: stage_type,
+                                    KeyContants.TABLE_TYPE.value: table_type,
+                                    KeyContants.PROJECT.value: self.table_data.get(
+                                        KeyContants.PROJECT.value
+                                    ),
+                                    KeyContants.TIMESLICE.value: self.table_data.get(
+                                        KeyContants.TIMESLICE.value
+                                    ),
+                                    KeyContants.CONFIG_PATH.value: self.table_data.get(
+                                        KeyContants.CONFIG_PATH.value
+                                    ),
+                                }
+                                if table_properties:
+                                    table_config = {**table_config, **table_properties}
+                                table_config = {**push_down_properties, **table_config}
+                                for p, v in push_down_properties.items():
+                                    if isinstance(v, dict) and table_config.get(p):
+                                        table_config[p] = {**v, **table_config[p]}
+                                    else:
+                                        table_config[p] = v
+                                stage_config = self.table_data.get(stage_type.value, {})
+                                stage_config = stage_config.get(table_type.value, {})
+                                table_config = {**stage_config, **table_config}
+                                index = f"{stage_name}.{database_name}.{table_name}"
+                                self.tables_index[index] = table_config
+                            else:
+                                push_down_properties[table_name] = table_properties
                     else:
                         push_down_properties[database_name] = table
 
@@ -155,6 +159,8 @@ class Tables(BaseModel):
         first_match: bool = True,
         create_database: bool = False,
         create_table: bool = False,
+        catalog: str = None,
+        catalog_enabled: bool = True,
         **kwargs,
     ):
         index = Tables.get_index(stage, database, table)
@@ -194,9 +200,9 @@ class Tables(BaseModel):
             msg_tables = f"{table.database}.{table.table}"
             self._logger.info(f"Matched tables: {msg_tables}")
             if create_database:
-                table.create_database()
+                table.create_database(catalog=catalog, catalog_enabled=catalog_enabled)
             if create_table:
-                table.create_table()
+                table.create_table(catalog=catalog, catalog_enabled=catalog_enabled)
             return table
         else:
             tables = [tables_index[i] for i in matches]
@@ -207,7 +213,9 @@ class Tables(BaseModel):
                 for t in tables:
                     if create_database and db != t.database:
                         db = t.database
-                        t.create_database()
+                        t.create_database(
+                            catalog=catalog, catalog_enabled=catalog_enabled
+                        )
                     if create_table:
                         t.create_table()
             return tables
@@ -219,6 +227,8 @@ class Tables(BaseModel):
         database=_INDEX_WILDCARD,
         create_database: bool = True,
         create_table: bool = True,
+        catalog: str = None,
+        catalog_enabled: bool = True,
     ):
         destination = self.lookup_table(
             stage=stage,
@@ -227,6 +237,8 @@ class Tables(BaseModel):
             first_match=True,
             create_database=create_database,
             create_table=create_table,
+            catalog=catalog,
+            catalog_enabled=catalog_enabled,
         )
         source = {}
 
@@ -241,6 +253,8 @@ class Tables(BaseModel):
                     first_match=False,
                     create_database=create_database,
                     create_table=create_table,
+                    catalog=catalog,
+                    catalog_enabled=catalog_enabled,
                 )
         except Exception as e:
             raise Exception(f"Error looking up dependencies for table {table}") from e
