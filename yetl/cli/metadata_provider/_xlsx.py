@@ -63,13 +63,9 @@ class Metadata(BaseModel):
         f"{ColumnNames.exception_thresholds}_{ColumnNames.invalid_rows}": np.float64,
         f"{ColumnNames.exception_thresholds}_{ColumnNames.max_rows}": np.float64,
         f"{ColumnNames.exception_thresholds}_{ColumnNames.min_rows}": np.float64,
-        # "custom_properties.process_group": np."float64",
-        # "custom_properties.rentention_days": np."float64",
-        # "custom_properties.vaccum": np."float64"
     }
 
     def __init__(self, **data: Any) -> None:
-        _data = data
         super().__init__(**data)
 
     stage: StageType = Field(...)
@@ -254,7 +250,9 @@ class Metadata(BaseModel):
                     ColumnNames.warning_thresholds.name
                 ] = self._get_warning_thresholds()[ColumnNames.warning_thresholds.name]
             if self._has_exception_thresholds():
-                table[ColumnNames.exception_thresholds.name] = self._get_exception_thresholds()[
+                table[
+                    ColumnNames.exception_thresholds.name
+                ] = self._get_exception_thresholds()[
                     ColumnNames.exception_thresholds.name
                 ]
         data["version"] = self.version
