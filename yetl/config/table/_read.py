@@ -161,5 +161,8 @@ class Read(Table):
 
         return df
 
+    def qualified_table_name(self):
+        return self.path
+
     class Config:
         arbitrary_types_allowed = True

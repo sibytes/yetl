@@ -119,3 +119,9 @@ class DeltaLake(Table):
                     sql=self.sql,
                     catalog=self.catalog,
                 )
+
+    def qualified_table_name(self):
+        name = f"`{self.database}`.`{self.table}`"
+        if self.catalog:
+            name = f"`{self.catalog}`.{name}"
+        return name

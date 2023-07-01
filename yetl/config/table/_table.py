@@ -132,3 +132,6 @@ class Table(BaseModel):
 
     def create_database(self, catalog: str = None, catalog_enabled: bool = True):
         self._set_catalog(catalog, catalog_enabled)
+
+    def qualified_table_name(self):
+        pass
