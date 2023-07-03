@@ -139,6 +139,8 @@ class Tables(BaseModel):
         database=_INDEX_WILDCARD,
         table=_INDEX_WILDCARD,
         first_match: bool = True,
+        catalog: str = None,
+        catalog_enabled: bool = True,
         **kwargs,
     ):
         return self.lookup_table(
@@ -148,6 +150,8 @@ class Tables(BaseModel):
             first_match=first_match,
             create_database=True,
             create_table=True,
+            catalog=catalog,
+            catalog_enabled=catalog_enabled,
             **kwargs,
         )
 

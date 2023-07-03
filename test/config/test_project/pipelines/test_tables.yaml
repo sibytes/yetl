@@ -1,4 +1,4 @@
-version: 1.6.4
+version: 1.6.5
 
 audit_control:
   delta_lake:
