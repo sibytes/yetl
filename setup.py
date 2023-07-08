@@ -10,7 +10,7 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="yetl-framework",
-    version="1.6.6.dev2",
+    version="1.6.6.dev3",
     description="yet (another spark) etl framework",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -38,9 +38,9 @@ setup(
     ],
     install_requires=[
           'PyYAML',
-          'jinja2==3.1.2',
-          'pydantic==1.10.7',
-          'typer==0.9.0',
+          'jinja2',
+          'pydantic==1.10.6',
+          'typer',
           'pandas',
           'openpyxl',
           'delta-spark',
