@@ -154,7 +154,7 @@ class Metadata(BaseModel):
                 self.deltalake_delta_properties is not None,
                 self.deltalake_identity is not None,
                 self.deltalake_partition_by is not None,
-                self.deltalke_cluster_by is not None,
+                self.deltalake_cluster_by is not None,
                 self.deltalake_delta_constraints is not None,
                 self.deltalake_z_order_by is not None,
                 self._has_warning_thresholds(),
