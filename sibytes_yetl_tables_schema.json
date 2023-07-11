@@ -1,0 +1,66 @@
+{
+    "type":"object",
+    "description": "Root of the yetl tables config",
+    "properties": {
+        "version": {
+            "type": "string",
+            "description": "version of yetl that the configuration is compatible with",
+            "pattern": "^(\\d+\\.)?(\\d+\\.)?(\\*|\\d+)$"
+        },
+        "audit_control": {
+            "type": "object",
+            "description": "definition of the audit_control database and tables"
+        },
+        "landing": {
+            "type": "object",
+            "description": "definition of the landing stage and files",
+            "properties": {
+                "read": {
+                    "type": "object",
+                    "description": "read table type is used for spark read table properties, typically used for reading files in object storage",
+                    "minProperties": 1,
+                    "maxProperties": 1,
+                    "patternProperties": {
+                        "^\\S+$": { 
+                            "type": "object",
+                            "description": "name of the volume holding the files",
+                            "minProperties": 1,
+                            "patternProperties": {
+                                "^\\S+$": { 
+                                    "type": ["string", "null"],
+                                    "description": "name or partname of the file that indicates the data table e.g. customers_20201001.csv would be customers"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "required":[
+                "read"
+            ]
+        },
+        "raw": {
+            "type": "object",
+            "description": "definition of the raw database and tables",
+            "properties": {
+                "delta_lake": {
+
+                }
+            }
+        },
+        "base": {
+            "type": "object",
+            "description": "definition of the base database and tables",
+            "properties": {
+                "delta_lake": {
+
+                }
+            }
+        }
+    },
+    "required": [
+        "version",
+        "landing",
+        "raw"
+    ]
+}

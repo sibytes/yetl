@@ -1,0 +1,81 @@
+# yaml-language-server: $schema=sibytes_yetl_tables_schema.json
+
+version: 1.6.6
+
+audit_control:
+  delta_lake:
+    raw_dbx_patterns_control:
+      header_footer:
+        depends_on:
+        - raw.raw_dbx_patterns.*
+        partition_by: none
+        sql: ../sql/{{database}}/{{table}}.sql
+        vacuum: 30
+      catalog: hive_metastore
+      raw_audit:
+        depends_on:
+        - raw.raw_dbx_patterns.*
+        - audit_control.raw_dbx_patterns_control.header_footer
+        sql: ../sql/{{database}}/{{table}}.sql
+        vacuum: 30
+
+landing:
+  read:
+    landing_dbx_patterns:
+      catalog: hive_metastore
+      customer_details_1: null
+      customer_details_2: null
+
+
+raw:
+  delta_lake:
+    raw_dbx_patterns:
+      catalog: hive_metastore
+      customers:
+        custom_properties:
+          process_group: 1
+          rentention_days: 365
+        depends_on:
+        - landing.landing_dbx_patterns.customer_details_1
+        - landing.landing_dbx_patterns.customer_details_2
+        exception_thresholds:
+          invalid_ratio: 0.2
+          invalid_rows: 2
+          max_rows: 1000
+          min_rows: 0
+        id: id
+        vacuum: 30
+        warning_thresholds:
+          invalid_ratio: 0.1
+          invalid_rows: 0
+          max_rows: 100
+          min_rows: 5
+        z_order_by:
+        - _load_date_1
+        - _load_date_2
+
+base:
+  delta_lake:
+    base_dbx_patterns:
+      catalog: hive_metastore
+      customer_details_1:
+        delta_properties:
+          delta.appendOnly: true
+          delta.autoOptimize.autoCompact: true
+          delta.autoOptimize.optimizeWrite: true
+          delta.enableChangeDataFeed: false
+        depends_on:
+        - raw.raw_dbx_patterns.customers
+        id: id
+        vacuum: 30
+      customer_details_2:
+        delta_properties:
+          delta.appendOnly: true
+          delta.autoOptimize.autoCompact: true
+          delta.autoOptimize.optimizeWrite: true
+          delta.enableChangeDataFeed: false
+        depends_on:
+        - raw.raw_dbx_patterns.customers
+        id: id
+        vacuum: 30
+
