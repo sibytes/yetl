@@ -33,6 +33,7 @@ class DeltaLake(Table):
     delta_properties: Dict[str, str] = Field(default=None)
     delta_constraints: Dict[str, str] = Field(default=None)
     partition_by: Union[List[str], str] = Field(default=None)
+    cluster_by: Union[List[str], str] = Field(default=None)
     z_order_by: Union[List[str], str] = Field(default=None)
     vacuum: int = Field(default=31)
     options: Union[dict, None] = Field(default=None)

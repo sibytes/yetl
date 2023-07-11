@@ -26,6 +26,7 @@ class ColumnNames(str, Enum):
     deltalake = "deltalake"
     identity = "identity"
     partition_by = "partition_by"
+    cluster_by = "cluster_by"
     delta_constraints = "delta_constraints"
     z_order_by = "z_order_by"
     delta_properties = "delta_properties"
@@ -52,6 +53,7 @@ class Metadata(BaseModel):
         f"{ColumnNames.deltalake}_{ColumnNames.delta_properties}": str,
         f"{ColumnNames.deltalake}_{ColumnNames.identity}": str,
         f"{ColumnNames.deltalake}_{ColumnNames.partition_by}": str,
+        f"{ColumnNames.deltalake}_{ColumnNames.cluster_by}": str,
         f"{ColumnNames.deltalake}_{ColumnNames.delta_constraints}": str,
         f"{ColumnNames.deltalake}_{ColumnNames.z_order_by}": str,
         f"{ColumnNames.deltalake}_{ColumnNames.vacuum}": int,
@@ -80,6 +82,7 @@ class Metadata(BaseModel):
     custom_properties: Dict[str, Any] = Field(default=None)
     deltalake_identity: str = Field(default=None)
     deltalake_partition_by: str = Field(default=None)
+    deltalake_cluster_by: str = Field(default=None)
     deltalake_delta_constraints: str = Field(default=None)
     deltalake_z_order_by: str = Field(default=None)
     deltalake_vacuum: Union[int, None] = Field(default=None)
@@ -151,6 +154,7 @@ class Metadata(BaseModel):
                 self.deltalake_delta_properties is not None,
                 self.deltalake_identity is not None,
                 self.deltalake_partition_by is not None,
+                self.deltalke_cluster_by is not None,
                 self.deltalake_delta_constraints is not None,
                 self.deltalake_z_order_by is not None,
                 self._has_warning_thresholds(),
@@ -233,6 +237,10 @@ class Metadata(BaseModel):
                 table[ColumnNames.partition_by.name] = self._get_list(
                     self.deltalake_partition_by
                 )
+            if self.deltalake_cluster_by is not None:
+                table[ColumnNames.cluster_by.name] = self._get_list(
+                    self.deltalake_cluster_by
+                )
             if self.deltalake_z_order_by is not None:
                 table[ColumnNames.z_order_by.name] = self._get_list(
                     self.deltalake_z_order_by
@@ -277,6 +285,7 @@ class XlsMetadata(BaseModel):
         f"{ColumnNames.deltalake}_{ColumnNames.delta_properties}": str,
         f"{ColumnNames.deltalake}_{ColumnNames.identity}": str,
         f"{ColumnNames.deltalake}_{ColumnNames.partition_by}": str,
+        f"{ColumnNames.deltalake}_{ColumnNames.cluster_by}": str,
         f"{ColumnNames.deltalake}_{ColumnNames.delta_constraints}": str,
         f"{ColumnNames.deltalake}_{ColumnNames.z_order_by}": str,
         f"{ColumnNames.deltalake}_{ColumnNames.vacuum}": str,
