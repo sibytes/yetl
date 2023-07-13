@@ -16,6 +16,7 @@ def init(project: str, directory: str = "."):
     paths: dict = _make_project_dir(project_path, project)
     _create_log_file(project_path)
     _create_json_schema(project_path, paths["pipeline"])
+    _create_tables_excel(project_path, paths["pipeline"])
 
     for _, p in paths.items():
         _make_dirs(project_path, p)
@@ -48,11 +49,28 @@ def _get_default_config(name: str):
     return config
 
 
+def _get_binary_template(name: str):
+    """Get the binary template object"""
+    data = files("yetl._resources").joinpath(name).read_bytes()
+
+    return data
+
+
 def _create_log_file(project_path: str):
     config: dict = yaml.safe_load(_get_default_config("logging.yaml"))
     file_path = os.path.join(project_path, "logging.yaml")
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(yaml.safe_dump(config, indent=4))
+
+
+def _create_tables_excel(project_path: str, pipeline_dir: str):
+    data: bytes = _get_binary_template("tables.xlsx")
+
+    pipeline_path = os.path.abspath(project_path)
+    pipeline_path = os.path.join(pipeline_path, pipeline_dir)
+    file_path = os.path.join(pipeline_path, "tables.xlsx")
+    with open(file_path, "wb") as f:
+        f.write(data)
 
 
 def _make_project_dir(project_path: str, project: str):

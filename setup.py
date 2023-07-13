@@ -10,7 +10,7 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="yetl-framework",
-    version="1.7.1",
+    version="1.7.2",
     description="yet (another spark) etl framework",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -29,7 +29,7 @@ setup(
     ],
     include_package_data=True,
     package_dir={"": "."},
-    package_data={"yetl._resources": ["*.json", "*.yaml"]},
+    package_data={"yetl._resources": ["*.json", "*.yaml", "*.xsls"]},
     packages=[
         "yetl",
         "yetl._resources",
