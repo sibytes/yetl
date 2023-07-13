@@ -70,7 +70,10 @@
             "type": "object",
             "description": "defines a table object as a delta lake table",
             "properties": {
-                "delta_properties": { "$ref": "#/$defs/delta_properties" },
+                "delta_properties": { "$ref": "#/$defs/delta_properties" }
+
+            },
+            "patternProperties": {
                 "^\\S+$": { "$ref": "#/$defs/delta_lake_database" }
             }
 
@@ -80,23 +83,101 @@
             "description": "database containing tables",
             "minProperties": 1,
             "properties": {
-                "^\\S+$": { "$ref": "#/$defs/delta_lake_table" }
+                "catalog": {
+                    "type": "string",
+                    "description": "the default catalog name for the database"
+                }
+            },
+            "patternProperties": {
+                "^(?!catalog)(\\S+)$": { "$ref": "#/$defs/delta_lake_table" }
             }
         },
         "delta_lake_table": {
             "type": "object",
             "description": "defines a deltalake table and it's properties",
             "properties":{
+                "managed": {
+                    "type": "boolean",
+                    "description": "whether it's a managed table or unmanaged that requires a location"
+                },
                 "delta_properties": { "$ref": "#/$defs/delta_properties" },
                 "delta_constraints": { "$ref": "#/$defs/delta_constraints" },
                 "custom_properties": { "$ref": "#/$defs/custom_properties" },
-                "depends_on": {},
+                "depends_on": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "uniqueItems": true,
+                    "pattern": "^(\\S+\\.)(\\S+\\.)(\\*|\\S+)",
+                    "description": "use to denote dependency on other tables referenced their index this is the stage.database.table. The form stage.database.* can also be used to reference all tables"
+                },
                 "exception_thresholds": { "$ref": "#/$defs/thresholds" },
                 "warning_thresholds": { "$ref": "#/$defs/thresholds" },
-                "partition_by": {},
-                "cluster_by": {},
-                "z_order_by": {},
-                "id": {},
+                "partition_by": {
+                    "oneOf": [
+                        {
+                            "type": "string",
+                            "description": "columns on which to partition by"
+                        }, 
+                        {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "columns on which to partition by"
+                        }
+                    ]
+                },
+                "cluster_by": {
+                    "oneOf": [
+                        {
+                            "type": "string",
+                            "description": "columns on which to appply liquid clustering"
+                        }, 
+                        {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "columns on which to appply liquid clustering"
+                        }
+                    ]
+                },
+                "z_order_by": {
+                    "oneOf": [
+                        {
+                            "type": "string",
+                            "description": "column on which to appply z-ording"
+                        }, 
+                        {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "columns on which to appply z-ording"
+                        }
+                    ]
+                },
+                "id": {
+                    "oneOf": [
+                        {
+                            "type": "string",
+                            "description": "column(s) that comprise the unique identifier"
+                        }, 
+                        {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "column(s) that comprise the unique identifier"
+                        }
+                    ]
+                },
                 "vacuum": {
                     "type": "integer",
                     "description": "vacuum retention threshold in the number of hours",
@@ -121,7 +202,7 @@
             "minProperties": 1,
             "patternProperties":{
                 "^\\S+$": {
-                    "type": "string",
+                    "type": ["string","number","boolean"],
                     "description": "custom property"
                 }
             }
@@ -147,23 +228,23 @@
             "minProperties": 1,
             "properties":{
                 "delta.appendOnly": {
-                    "type": "string",
+                    "type": "boolean",
                     "description": "true for this Delta table to be append-only. If append-only, existing records cannot be deleted, and existing values cannot be updated."
                 },
                 "delta.autoOptimize.autoCompact": {
-                    "type": "string",
+                    "type": ["string","boolean"],
                     "description": "auto for Delta Lake to automatically optimize the layout of the files for this Delta table."
                 },    
                 "delta.autoOptimize.optimizeWrite": {
-                    "type": "string",
+                    "type": ["string","boolean"],
                     "description": "true for Delta Lake to automatically optimize the layout of the files for this Delta table during writes."
                 },    
                 "delta.checkpoint.writeStatsAsJson": {
-                    "type": "string",
+                    "type": ["string","boolean"],
                     "description": "true for Delta Lake to write file statistics in checkpoints in JSON format for the stats column."
                 },
                 "delta.checkpoint.writeStatsAsStruct": {
-                    "type": "string",
+                    "type": ["string","boolean"],
                     "description": "true for Delta Lake to write file statistics to checkpoints in struct format for the stats_parsed column and to write partition values as a struct for partitionValues_parsed."
                 },
                 "delta.columnMapping.mode": {
@@ -171,19 +252,19 @@
                     "description": "Whether column mapping is enabled for Delta table columns and the corresponding Parquet columns that use different names."
                 },
                 "delta.compatibility.symlinkFormatManifest.enabled": {
-                    "type": "string",
+                    "type": ["string","boolean"],
                     "description": "true for Delta Lake to configure the Delta table so that all write operations on the table automatically update the manifests."
                 },
                 "delta.dataSkippingNumIndexedCols": {
-                    "type": "string",
+                    "type": "integer",
                     "description": "The number of columns for Delta Lake to collect statistics about for data skipping. A value of -1 means to collect statistics for all columns. Updating this property does not automatically collect statistics again; instead, it redefines the statistics schema of the Delta table. Specifically, it changes the behavior of future statistics collection (such as during appends and optimizations) as well as data skipping (such as ignoring column statistics beyond this number, even when such statistics exist)."
                 },
                 "delta.deletedFileRetentionDuration": {
-                    "type": "string",
+                    "type": "integer",
                     "description": "The shortest duration for Delta Lake to keep logically deleted data files before deleting them physically. This is to prevent failures in stale readers after compactions or partition overwrites."
                 },
                 "delta.enableChangeDataFeed": {
-                    "type": "string",
+                    "type": ["string","boolean"],
                     "description": "true to enable change data feed."
                 },
                 "delta.isolationLevel":  {
@@ -195,19 +276,19 @@
                     "description": "How long the history for a Delta table is kept. VACUUM operations override this retention threshold."
                 },
                 "delta.minReaderVersion": {
-                    "type": "string",
+                    "type": "integer",
                     "description": "The minimum required protocol reader version for a reader that allows to read from this Delta table."
                 },
                 "delta.minWriterVersion": {
-                    "type": "string",
+                    "type": "integer",
                     "description": "The minimum required protocol writer version for a writer that allows to write to this Delta table."
                 },
                 "delta.randomizeFilePrefixes": {
-                    "type": "string",
+                    "type": ["string","boolean"],
                     "description": "true for Delta Lake to generate a random prefix for a file path instead of partition information."
                 },
                 "delta.randomPrefixLength": {
-                    "type": "string",
+                    "type": "integer",
                     "description": "When delta.randomizeFilePrefixes is set to true, the number of characters that Delta Lake generates for random prefixes."
                 },
                 "delta.setTransactionRetentionDuration": {
@@ -219,7 +300,7 @@
                     "description": "The target file size in bytes or higher units for file tuning. For example, 104857600 (bytes) or 100mb."
                 },
                 "delta.tuneFileSizesForRewrites": {
-                    "type": "string",
+                    "type": ["string","boolean"],
                     "description": "true to always use lower file sizes for all data layout optimization operations on the Delta table."
                 }
             }

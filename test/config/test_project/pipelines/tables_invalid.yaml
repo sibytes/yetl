@@ -1,6 +1,4 @@
-# yaml-language-server: $schema=sibytes_yetl_tables_schema.json
-
-version: 1.6.6
+# version: 1.7.0
 
 audit_control:
   delta_lake:
@@ -25,7 +23,6 @@ landing:
       catalog: hive_metastore
       customer_details_1: null
       customer_details_2: null
-
 
 raw:
   delta_lake:

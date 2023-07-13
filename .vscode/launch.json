@@ -13,6 +13,7 @@
             "console": "integratedTerminal",
             "envFile": "${workspaceFolder}/.env",
             "args": [
+                // "init", "test_yetl"
                 "import-tables",
                 "./test/config/test_project/pipelines/tables.xlsx",
                 "./test/config/test_project/pipelines/test_tables.yaml"

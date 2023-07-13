@@ -1,0 +1,90 @@
+{
+    "$id": "https://yetl.io/schemas/project",
+
+    "type":"object",
+    "description": "Root of the yetl project config",
+    "properties": {
+        "version": {
+            "type": "string",
+            "description": "version of yetl that the configuration is compatible with",
+            "pattern": "^(\\d+\\.)?(\\d+\\.)?(\\*|\\d+)$"
+        },
+        "name": {
+            "type": "string",
+            "description": "name of the project"
+        },
+        "spark_schema": {
+            "type": "string",
+            "description": "relative project path to directory containing spark schema"
+        },
+        "pipeline": {
+            "type": "string",
+            "description": "relative project path to directory containing yetl pipeline configuration"
+        },
+        "databricks_notebooks": {
+            "type": "string",
+            "description": "relative project path to directory containing databricks notebooks"
+        },
+        "databricks_workflows": {
+            "type": "string",
+            "description": "relative project path to directory containing databricks workflows"
+        },
+        "databricks_queries": {
+            "type": "string",
+            "description": "relative project path to directory containing databricks queries"
+        },
+        "spark": {
+            "$ref": "#/$defs/spark" 
+        }
+
+    },
+    "required": [
+        "version",
+        "name",
+        "spark_schema",
+        "pipeline",
+        "databricks_notebooks",
+        "databricks_workflows",
+        "databricks_queries"
+    ],
+
+    "$defs": {
+        "spark": {
+            "type": "object",
+            "description": "defines spark logging and configuration for local execution",
+            "properties": {
+                "logging_level": {
+                    "type" : "string",
+                    "enum": [
+                        "OFF",
+                        "FATAL",
+                        "ERROR",
+                        "WARN",
+                        "INFO",
+                        "DEBUG",
+                        "TRACE",
+                        "ALL"
+                      ]
+                },
+                "config": {
+                    "type": "object",
+                    "description": "spark configuration key value pairs",
+                    "minProperties": 1,
+                    "patternProperties":{
+                        "^\\S+$": {
+                            "type": ["string","number","boolean"],
+                            "description": "spark configuration properties"
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+}
+
+
+
+
+
+

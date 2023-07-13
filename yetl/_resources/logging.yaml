@@ -1,0 +1,13 @@
+version: 1
+formatters:
+  default:
+    format: "%(levelname)s : %(asctime)s : %(name)s : %(filename)s.%(funcName)s: line(%(lineno)s) : %(message)s"
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: default
+    stream: ext://sys.stdout
+root:
+  level: INFO
+  handlers: [console]
+    

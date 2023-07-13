@@ -1,86 +1,76 @@
 import os
 import yaml
 import pkg_resources
+from ..validation import (
+    SchemaFiles,
+    get_schema,
+)
+import json
+from importlib.resources import files
 
 
 def init(project: str, directory: str = "."):
     project = project.lower()
     project_path = os.path.abspath(directory)
     project_path = f"{project_path}/{project}"
-    paths = _make_project_dir(project_path, project)
+    paths: dict = _make_project_dir(project_path, project)
     _create_log_file(project_path)
+    _create_json_schema(project_path, paths["pipeline"])
 
-    for p in paths:
+    for _, p in paths.items():
         _make_dirs(project_path, p)
 
 
 def _make_dirs(project_path: str, relative_path: str):
     relative_path.replace("./", "")
     path = f"{project_path}/{relative_path}"
-    os.makedirs(path, exist_ok=False)
+    os.makedirs(path, exist_ok=True)
+
+
+def _create_json_schema(project_path: str, pipeline_dir: str):
+    """Create json schema files to assist with vscode editing and validation"""
+
+    json_schema_path = os.path.abspath(project_path)
+    json_schema_path = os.path.join(json_schema_path, pipeline_dir, "json_schema")
+    os.makedirs(json_schema_path, exist_ok=True)
+
+    for f in SchemaFiles:
+        schema = get_schema(f)
+        schema_path = os.path.join(json_schema_path, f.value)
+        with open(schema_path, "w", encoding="utf-8") as f:
+            f.write(json.dumps(schema, indent=4))
+
+
+def _get_default_config(name: str):
+    """Get the default configuration"""
+    config = files("yetl._resources").joinpath(name).read_text()
+
+    return config
 
 
 def _create_log_file(project_path: str):
-    config = {
-        "version": 1,
-        "formatters": {
-            "default": {
-                "format": '"%(levelname)s : %(asctime)s : %(name)s : %(filename)s.%(funcName)s: line(%(lineno)s) : %(message)s"'
-            }
-        },
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "formatter": "default",
-                "stream": "ext://sys.stdout",
-            }
-        },
-        "root": {"level": "DEBUG", "handlers": "[console]"},
-    }
-
+    config:dict = yaml.safe_load(_get_default_config("logging.yaml"))
     file_path = os.path.join(project_path, "logging.yaml")
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(yaml.safe_dump(config, indent=4))
 
 
 def _make_project_dir(project_path: str, project: str):
-    sql = "./sql"
-    spark_schema = "./schema"
-    pipeline = "./pipelines"
-    databricks_notebooks = "./databricks/notebooks"
-    databricks_workflows = "./databricks/workflows"
-    databricks_queries = "./databricks/queries"
-    paths = [
-        sql,
-        spark_schema,
-        pipeline,
-        databricks_notebooks,
-        databricks_workflows,
-        databricks_queries,
-    ]
+    config: dict = yaml.safe_load(_get_default_config("project.yaml"))
+    config["name"] = project
+    config["version"] = pkg_resources.get_distribution("yetl-framework").version
 
-    spark = {
-        "logging_level": "ERROR",
-        "config": {
-            "spark.master": "local",
-            "spark.databricks.delta.allowArbitraryProperties.enabled": True,
-            "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
-            "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
-        },
+    pipeline_path = config["pipeline"]
+    paths = {
+        "sql": config["sql"],
+        "spark_schema": config["spark_schema"],
+        "pipeline": pipeline_path,
+        "databricks_notebooks": config["databricks_notebooks"],
+        "databricks_workflows": config["databricks_workflows"],
+        "databricks_queries": config["databricks_queries"],
     }
 
-    config = {
-        "version": pkg_resources.get_distribution("yetl-framework").version,
-        "name": project,
-        "sql": sql,
-        "spark_schema": spark_schema,
-        "pipeline": pipeline,
-        "databricks_notebooks": databricks_notebooks,
-        "databricks_workflows": databricks_workflows,
-        "databricks_queries": databricks_queries,
-        "spark": spark,
-    }
-
+    
     try:
         os.makedirs(project_path, exist_ok=False)
     except Exception as e:
@@ -88,6 +78,7 @@ def _make_project_dir(project_path: str, project: str):
 
     project_file_path = os.path.join(project_path, f"{project}.yaml")
     with open(project_file_path, "w", encoding="utf-8") as f:
+        f.write(f"# yaml-language-server: $schema={pipeline_path}/json_schema/sibytes_yetl_project_schema.json\n\n")
         f.write(yaml.safe_dump(config, indent=4))
 
     return paths

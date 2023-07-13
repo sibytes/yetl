@@ -7,6 +7,7 @@ from ._utils import abs_config_path, load_yaml, get_config_path, check_version
 from ._logging_config import configure_logging
 import logging
 from ._project import Project
+from ..validation import validate_tables
 
 
 class Config:
@@ -48,8 +49,10 @@ class Config:
         tables_path = tables_config[KeyContants.TABLES.value]
         tables_path = abs_config_path(self.project.pipelines, tables_path)
 
-        data = load_yaml(tables_path)
+        data: dict = load_yaml(tables_path)
+        validate_tables(data)
         check_version(data)
+
         tables_config[KeyContants.TABLES.value] = data
         tables_config[KeyContants.TIMESLICE.value] = timeslice
         tables_config[KeyContants.CONFIG_PATH.value] = self.project.pipelines

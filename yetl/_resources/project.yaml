@@ -1,6 +1,6 @@
-version: 1.7.0
+version: 0.0.0
 
-name: test_project
+name: default
 sql: ./sql
 spark_schema: ./schema
 pipeline: ./pipelines

@@ -1,18 +1,17 @@
-# yaml-language-server: $schema=./json_schema/sibytes_yetl_tables_schema.json
+# yaml-language-server: $schema=sibytes_yetl_tables_schema.json
 
-version: 1.7.0.dev5
+version: 1.7.0
 
 audit_control:
   delta_lake:
     raw_dbx_patterns_control:
-      catalog: hive_metastore
       header_footer:
-        cluster_by: none
         depends_on:
         - raw.raw_dbx_patterns.*
         partition_by: none
         sql: ../sql/{{database}}/{{table}}.sql
         vacuum: 30
+      catalog: hive_metastore
       raw_audit:
         depends_on:
         - raw.raw_dbx_patterns.*
@@ -26,6 +25,7 @@ landing:
       catalog: hive_metastore
       customer_details_1: null
       customer_details_2: null
+
 
 raw:
   delta_lake:
