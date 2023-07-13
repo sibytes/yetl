@@ -27,7 +27,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.10",
     ],
-    packages=find_packages(where="yetl"),
+    packages=find_packages(where="./yetl"),
     package_dir={"": "yetl"},
     include_package_data=True,
     install_requires=[
