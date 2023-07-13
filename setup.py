@@ -29,7 +29,7 @@ setup(
     ],
     packages=find_packages(where="yetl"),
     package_dir={"": "yetl"},
-    include_package_data=True
+    include_package_data=True,
     install_requires=[
           'PyYAML',
           'jinja2',
