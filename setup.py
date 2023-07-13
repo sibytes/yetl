@@ -28,17 +28,8 @@ setup(
         "Programming Language :: Python :: 3.10",
     ],
     include_package_data=True,
-    packages=[
-        "yetl",
-        "yetl._resources",
-        "yetl.validation",
-        "yetl.cli",
-        "yetl.cli.metadata_provider",
-        "yetl.config",
-        "yetl.config.table",
-        "yetl.workflow",
-
-    ],
+    package_dir={"": "."},
+    packages=find_packages(),
     install_requires=[
           'PyYAML',
           'jinja2',

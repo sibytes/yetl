@@ -1,0 +1,2 @@
+include yetl/_resources/*.json
+include yetl/_resources/*.yaml
