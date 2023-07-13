@@ -49,7 +49,7 @@ def _get_default_config(name: str):
 
 
 def _create_log_file(project_path: str):
-    config:dict = yaml.safe_load(_get_default_config("logging.yaml"))
+    config: dict = yaml.safe_load(_get_default_config("logging.yaml"))
     file_path = os.path.join(project_path, "logging.yaml")
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(yaml.safe_dump(config, indent=4))
@@ -70,7 +70,6 @@ def _make_project_dir(project_path: str, project: str):
         "databricks_queries": config["databricks_queries"],
     }
 
-    
     try:
         os.makedirs(project_path, exist_ok=False)
     except Exception as e:
@@ -78,7 +77,9 @@ def _make_project_dir(project_path: str, project: str):
 
     project_file_path = os.path.join(project_path, f"{project}.yaml")
     with open(project_file_path, "w", encoding="utf-8") as f:
-        f.write(f"# yaml-language-server: $schema={pipeline_path}/json_schema/sibytes_yetl_project_schema.json\n\n")
+        f.write(
+            f"# yaml-language-server: $schema={pipeline_path}/json_schema/sibytes_yetl_project_schema.json\n\n"
+        )
         f.write(yaml.safe_dump(config, indent=4))
 
     return paths

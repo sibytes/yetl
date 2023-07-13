@@ -366,8 +366,10 @@ class XlsMetadata(BaseModel):
             path = os.path.join(path, "tables.yaml")
 
         with open(path, "w", encoding="utf-8") as f:
-            f.write("# yaml-language-server: $schema=./json_schema/sibytes_yetl_tables_schema.json\n\n")
-            
+            f.write(
+                "# yaml-language-server: $schema=./json_schema/sibytes_yetl_tables_schema.json\n\n"
+            )
+
             version = self.data["version"]
             f.write(f"version: {version}\n")
             f.write("\n")
