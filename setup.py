@@ -27,7 +27,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.10",
     ],
-    include_package_data=True
+    include_package_data=True,
     packages=[
         "yetl",
         "yetl._resources",
