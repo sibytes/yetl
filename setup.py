@@ -1,5 +1,5 @@
 import pathlib
-from setuptools import setup
+from setuptools import setup, find_packages
 
 # The directory containing this file
 HERE = pathlib.Path(__file__).parent
@@ -27,17 +27,9 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.10",
     ],
-    packages=[
-        "yetl",
-        "yetl._resources",
-        "yetl.validation",
-        "yetl.cli",
-        "yetl.cli.metadata_provider",
-        "yetl.config",
-        "yetl.config.table",
-        "yetl.workflow",
-
-    ],
+    packages=find_packages(where="yetl"),
+    package_dir={"": "yetl"},
+    include_package_data=True
     install_requires=[
           'PyYAML',
           'jinja2',
