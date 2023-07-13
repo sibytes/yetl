@@ -27,9 +27,9 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.10",
     ],
-    include_package_data=True,
     package_dir={"": "."},
     packages=find_packages(),
+    package_data={"yetl._resources": ["*.json", "*.yaml"]},
     install_requires=[
           'PyYAML',
           'jinja2',
