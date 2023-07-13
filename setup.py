@@ -1,5 +1,5 @@
 import pathlib
-from setuptools import setup, find_packages
+from setuptools import setup
 
 # The directory containing this file
 HERE = pathlib.Path(__file__).parent
@@ -10,7 +10,7 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="yetl-framework",
-    version="1.7.0",
+    version="1.7.1",
     description="yet (another spark) etl framework",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -27,9 +27,20 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.10",
     ],
+    include_package_data=True,
     package_dir={"": "."},
-    packages=find_packages(),
     package_data={"yetl._resources": ["*.json", "*.yaml"]},
+    packages=[
+        "yetl",
+        "yetl._resources",
+        "yetl.validation",
+        "yetl.cli",
+        "yetl.cli.metadata_provider",
+        "yetl.config",
+        "yetl.config.table",
+        "yetl.workflow",
+
+    ],
     install_requires=[
           'PyYAML',
           'jinja2',
