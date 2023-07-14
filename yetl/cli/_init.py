@@ -6,7 +6,7 @@ from ..validation import (
     get_schema,
 )
 import json
-from importlib.resources import files
+from ..resource import get_resource_binary, get_resource_text
 
 
 def init(project: str, directory: str = "."):
@@ -44,14 +44,14 @@ def _create_json_schema(project_path: str, pipeline_dir: str):
 
 def _get_default_config(name: str):
     """Get the default configuration"""
-    config = files("yetl._resources").joinpath(name).read_text()
+    config = get_resource_text(name)
 
     return config
 
 
 def _get_binary_template(name: str):
     """Get the binary template object"""
-    data = files("yetl._resources").joinpath(name).read_bytes()
+    data = get_resource_binary(name)
 
     return data
 

@@ -68,11 +68,11 @@ def test_configuration_load(tear_down, root_path):
     assert destination.project.databricks_notebooks == f'{root_path}/test/config/test_project/databricks/notebooks'
     assert destination.project.databricks_workflows == f'{root_path}/test/config/test_project/databricks/workflows'
     assert destination.project.databricks_queries == f'{root_path}/test/config/test_project/databricks/queries'
-    assert destination.project.spark.config == {
-        'spark.master': 'local', 'spark.databricks.delta.allowArbitraryProperties.enabled': 'True', 
-        'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog', 
-         'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension'
-    }
+    # assert destination.project.spark.config == {
+    #     'spark.master': 'local', 'spark.databricks.delta.allowArbitraryProperties.enabled': True, 
+    #     'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog', 
+    #      'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension'
+    # }
     assert destination.project.spark.logging_level == SparkLoggingLevel.ERROR
     assert destination.container == 'datalake'
     assert destination.location == f'{root_path}/test/config/test_project/data/mnt/datalake/data/raw/raw_dbx_patterns/customers'

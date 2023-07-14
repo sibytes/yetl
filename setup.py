@@ -32,7 +32,7 @@ setup(
     package_data={"yetl._resources": ["*.json", "*.yaml", "*.xsls"]},
     packages=[
         "yetl",
-        "yetl._resources",
+        "yetl.resource",
         "yetl.validation",
         "yetl.cli",
         "yetl.cli.metadata_provider",
@@ -44,8 +44,8 @@ setup(
     install_requires=[
           'PyYAML',
           'jinja2',
-          'pydantic==1.10.6',
-          'jsonschema==4.16.0',
+          'pydantic',
+          'jsonschema',
           'typer',
           'pandas',
           'openpyxl',

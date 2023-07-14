@@ -41,31 +41,33 @@ class ColumnNames(str, Enum):
 
 
 class Metadata(BaseModel):
-    SCHEMA = {
-        ColumnNames.stage: str,
-        ColumnNames.table_type: str,
-        ColumnNames.catalog: str,
-        ColumnNames.database: str,
-        ColumnNames.table: str,
-        ColumnNames.sql: str,
-        ColumnNames.id: str,
-        ColumnNames.depends_on: str,
-        f"{ColumnNames.deltalake}_{ColumnNames.delta_properties}": str,
-        f"{ColumnNames.deltalake}_{ColumnNames.identity}": str,
-        f"{ColumnNames.deltalake}_{ColumnNames.partition_by}": str,
-        f"{ColumnNames.deltalake}_{ColumnNames.cluster_by}": str,
-        f"{ColumnNames.deltalake}_{ColumnNames.delta_constraints}": str,
-        f"{ColumnNames.deltalake}_{ColumnNames.z_order_by}": str,
-        f"{ColumnNames.deltalake}_{ColumnNames.vacuum}": int,
-        f"{ColumnNames.warning_thresholds}_{ColumnNames.invalid_ratio}": np.float64,
-        f"{ColumnNames.warning_thresholds}_{ColumnNames.invalid_rows}": np.float64,
-        f"{ColumnNames.warning_thresholds}_{ColumnNames.max_rows}": np.float64,
-        f"{ColumnNames.warning_thresholds}_{ColumnNames.min_rows}": np.float64,
-        f"{ColumnNames.exception_thresholds}_{ColumnNames.invalid_ratio}": np.float64,
-        f"{ColumnNames.exception_thresholds}_{ColumnNames.invalid_rows}": np.float64,
-        f"{ColumnNames.exception_thresholds}_{ColumnNames.max_rows}": np.float64,
-        f"{ColumnNames.exception_thresholds}_{ColumnNames.min_rows}": np.float64,
-    }
+    SCHEMA: dict = Field(
+        default={
+            ColumnNames.stage: str,
+            ColumnNames.table_type: str,
+            ColumnNames.catalog: str,
+            ColumnNames.database: str,
+            ColumnNames.table: str,
+            ColumnNames.sql: str,
+            ColumnNames.id: str,
+            ColumnNames.depends_on: str,
+            f"{ColumnNames.deltalake}_{ColumnNames.delta_properties}": str,
+            f"{ColumnNames.deltalake}_{ColumnNames.identity}": str,
+            f"{ColumnNames.deltalake}_{ColumnNames.partition_by}": str,
+            f"{ColumnNames.deltalake}_{ColumnNames.cluster_by}": str,
+            f"{ColumnNames.deltalake}_{ColumnNames.delta_constraints}": str,
+            f"{ColumnNames.deltalake}_{ColumnNames.z_order_by}": str,
+            f"{ColumnNames.deltalake}_{ColumnNames.vacuum}": int,
+            f"{ColumnNames.warning_thresholds}_{ColumnNames.invalid_ratio}": np.float64,
+            f"{ColumnNames.warning_thresholds}_{ColumnNames.invalid_rows}": np.float64,
+            f"{ColumnNames.warning_thresholds}_{ColumnNames.max_rows}": np.float64,
+            f"{ColumnNames.warning_thresholds}_{ColumnNames.min_rows}": np.float64,
+            f"{ColumnNames.exception_thresholds}_{ColumnNames.invalid_ratio}": np.float64,
+            f"{ColumnNames.exception_thresholds}_{ColumnNames.invalid_rows}": np.float64,
+            f"{ColumnNames.exception_thresholds}_{ColumnNames.max_rows}": np.float64,
+            f"{ColumnNames.exception_thresholds}_{ColumnNames.min_rows}": np.float64,
+        }
+    )
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
@@ -273,34 +275,36 @@ class Metadata(BaseModel):
 
 
 class XlsMetadata(BaseModel):
-    SCHEMA = {
-        ColumnNames.stage: str,
-        ColumnNames.table_type: str,
-        ColumnNames.catalog: str,
-        ColumnNames.database: str,
-        ColumnNames.table: str,
-        ColumnNames.sql: str,
-        ColumnNames.id: str,
-        ColumnNames.depends_on: str,
-        f"{ColumnNames.deltalake}_{ColumnNames.delta_properties}": str,
-        f"{ColumnNames.deltalake}_{ColumnNames.identity}": str,
-        f"{ColumnNames.deltalake}_{ColumnNames.partition_by}": str,
-        f"{ColumnNames.deltalake}_{ColumnNames.cluster_by}": str,
-        f"{ColumnNames.deltalake}_{ColumnNames.delta_constraints}": str,
-        f"{ColumnNames.deltalake}_{ColumnNames.z_order_by}": str,
-        f"{ColumnNames.deltalake}_{ColumnNames.vacuum}": str,
-        f"{ColumnNames.warning_thresholds}_{ColumnNames.invalid_ratio}": np.float64,
-        f"{ColumnNames.warning_thresholds}_{ColumnNames.invalid_rows}": np.float64,
-        f"{ColumnNames.warning_thresholds}_{ColumnNames.max_rows}": np.float64,
-        f"{ColumnNames.warning_thresholds}_{ColumnNames.min_rows}": np.float64,
-        f"{ColumnNames.exception_thresholds}_{ColumnNames.invalid_ratio}": np.float64,
-        f"{ColumnNames.exception_thresholds}_{ColumnNames.invalid_rows}": np.float64,
-        f"{ColumnNames.exception_thresholds}_{ColumnNames.max_rows}": np.float64,
-        f"{ColumnNames.exception_thresholds}_{ColumnNames.min_rows}": np.float64,
-        # "custom_properties.process_group": np."float64",
-        # "custom_properties.rentention_days": np."float64",
-        # "custom_properties.vaccum": np."float64"
-    }
+    SCHEMA: dict = Field(
+        default={
+            ColumnNames.stage: str,
+            ColumnNames.table_type: str,
+            ColumnNames.catalog: str,
+            ColumnNames.database: str,
+            ColumnNames.table: str,
+            ColumnNames.sql: str,
+            ColumnNames.id: str,
+            ColumnNames.depends_on: str,
+            f"{ColumnNames.deltalake}_{ColumnNames.delta_properties}": str,
+            f"{ColumnNames.deltalake}_{ColumnNames.identity}": str,
+            f"{ColumnNames.deltalake}_{ColumnNames.partition_by}": str,
+            f"{ColumnNames.deltalake}_{ColumnNames.cluster_by}": str,
+            f"{ColumnNames.deltalake}_{ColumnNames.delta_constraints}": str,
+            f"{ColumnNames.deltalake}_{ColumnNames.z_order_by}": str,
+            f"{ColumnNames.deltalake}_{ColumnNames.vacuum}": str,
+            f"{ColumnNames.warning_thresholds}_{ColumnNames.invalid_ratio}": np.float64,
+            f"{ColumnNames.warning_thresholds}_{ColumnNames.invalid_rows}": np.float64,
+            f"{ColumnNames.warning_thresholds}_{ColumnNames.max_rows}": np.float64,
+            f"{ColumnNames.warning_thresholds}_{ColumnNames.min_rows}": np.float64,
+            f"{ColumnNames.exception_thresholds}_{ColumnNames.invalid_ratio}": np.float64,
+            f"{ColumnNames.exception_thresholds}_{ColumnNames.invalid_rows}": np.float64,
+            f"{ColumnNames.exception_thresholds}_{ColumnNames.max_rows}": np.float64,
+            f"{ColumnNames.exception_thresholds}_{ColumnNames.min_rows}": np.float64,
+            # "custom_properties.process_group": np."float64",
+            # "custom_properties.rentention_days": np."float64",
+            # "custom_properties.vaccum": np."float64"
+        }
+    )
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)

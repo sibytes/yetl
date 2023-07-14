@@ -1,5 +1,5 @@
-from importlib.resources import files
 import json
+from ..resource import get_resource_text
 import jsonschema as js
 from enum import Enum
 
@@ -12,9 +12,7 @@ class SchemaFiles(Enum):
 
 def get_table_schema():
     """Get the tables json schema from the package resources"""
-    schema = (
-        files("yetl._resources").joinpath(SchemaFiles.tables_schema.value).read_text()
-    )
+    schema = get_resource_text(SchemaFiles.tables_schema.value)
     json_schema = json.loads(schema)
 
     return json_schema
@@ -22,9 +20,7 @@ def get_table_schema():
 
 def get_pipeline_schema():
     """Get the pipeline json schema from the package resources"""
-    schema = (
-        files("yetl._resources").joinpath(SchemaFiles.pipeline_schema.value).read_text()
-    )
+    schema = get_resource_text(SchemaFiles.pipeline_schema.value)
     json_schema = json.loads(schema)
 
     return json_schema
@@ -32,9 +28,7 @@ def get_pipeline_schema():
 
 def get_project_schema():
     """Get the project json schema from the package resources"""
-    schema = (
-        files("yetl._resources").joinpath(SchemaFiles.project_schema.value).read_text()
-    )
+    schema = get_resource_text(SchemaFiles.project_schema.value)
     json_schema = json.loads(schema)
 
     return json_schema

@@ -223,7 +223,7 @@ class DeltaLakeFn(BaseModel):
 
     def get_delta_properties_sql(self, delta_properties: Dict[str, Union[str, bool]]):
         sql_properties = [
-            f"{k.lower()} = {v.lower()}" for k, v in delta_properties.items()
+            f"{k.lower()} = {str(v).lower()}" for k, v in delta_properties.items()
         ]
         sql_properties = ", ".join(sql_properties)
         return sql_properties
