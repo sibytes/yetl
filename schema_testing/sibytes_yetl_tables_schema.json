@@ -59,10 +59,10 @@
             }
         }
     },
-    "required": [
-        "version",
-        "landing",
-        "raw"
+    "anyOf": [
+        {"required": ["version","landing","raw","base"]},
+        {"required": ["version","landing","raw"]},
+        {"required": ["version","landing","base"]}
     ],
 
     "$defs": {
