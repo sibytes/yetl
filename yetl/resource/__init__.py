@@ -1,5 +1,6 @@
 # try:
-from importlib.resources import files # as resources
+from importlib.resources import files  # as resources
+
 # except Exception:
 #     from importlib import resources
 
