@@ -11,7 +11,7 @@ class SchemaFiles(Enum):
 
 
 def get_table_schema():
-    """Get the tables json schema from the package resources"""
+    """Get the tables json schema from the package resource"""
     schema = get_resource_text(SchemaFiles.tables_schema.value)
     json_schema = json.loads(schema)
 
@@ -19,7 +19,7 @@ def get_table_schema():
 
 
 def get_pipeline_schema():
-    """Get the pipeline json schema from the package resources"""
+    """Get the pipeline json schema from the package resource"""
     schema = get_resource_text(SchemaFiles.pipeline_schema.value)
     json_schema = json.loads(schema)
 
@@ -27,7 +27,7 @@ def get_pipeline_schema():
 
 
 def get_project_schema():
-    """Get the project json schema from the package resources"""
+    """Get the project json schema from the package resource"""
     schema = get_resource_text(SchemaFiles.project_schema.value)
     json_schema = json.loads(schema)
 
