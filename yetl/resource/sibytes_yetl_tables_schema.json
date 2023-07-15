@@ -61,7 +61,7 @@
     },
     "required": [
         "version"
-    ],b/
+    ],
 
     "$defs": {
         "delta_lake": {

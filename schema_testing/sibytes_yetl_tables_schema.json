@@ -59,10 +59,8 @@
             }
         }
     },
-    "anyOf": [
-        {"required": ["version","landing","raw","base"]},
-        {"required": ["version","landing","raw"]},
-        {"required": ["version","landing","base"]}
+    "required": [
+        "version"
     ],
 
     "$defs": {
@@ -84,7 +82,7 @@
             "minProperties": 1,
             "properties": {
                 "catalog": {
-                    "type": "string",
+                    "type": ["string", "null"],
                     "description": "the default catalog name for the database"
                 }
             },
