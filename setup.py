@@ -31,7 +31,7 @@ setup(
     ],
     include_package_data=True,
     package_dir={"": "."},
-    package_data={"yetl._resources": ["*.json", "*.yaml", "*.xsls"]},
+    package_data={"yetl.resources": ["*.json", "*.yaml", "*.xsls"]},
     packages=[
         "yetl",
         "yetl.resource",
