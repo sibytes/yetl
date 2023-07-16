@@ -39,13 +39,13 @@ def import_tables(
 def validate(
     project: Annotated[str, typer.Argument()],
     pipeline: Annotated[str, typer.Argument()],
-    config_path: Annotated[Optional[str], typer.Argument()] = None
-    ):
+    config_path: Annotated[Optional[str], typer.Argument()] = None,
+):
     """Validate that configuration meets the schema and deserialises.
 
-        projec:str - Name of the project to validate \n
-        pipeline:str - Name of the pipeline config to validate \n
-        config_path:str - Path to the project configuration root \n
+    projec:str - Name of the project to validate \n
+    pipeline:str - Name of the pipeline config to validate \n
+    config_path:str - Path to the project configuration root \n
 
     """
     _logger = logging.getLogger(__name__)

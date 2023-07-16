@@ -49,4 +49,5 @@ def validate_tables(data: dict) -> bool:
 
 
 def validate_pipeline(data: dict) -> bool:
-    pass
+    schema = get_pipeline_schema()
+    js.validate(instance=data, schema=schema)

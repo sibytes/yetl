@@ -1,5 +1,5 @@
 {
-    "$id": "https://yetl.io/schemas/tables",
+    "$id": "https://yetl.io/schemas/pipeline",
 
     "type":"object",
     "description": "Root of the yetl tables config",
@@ -23,20 +23,50 @@
                 "read": {
                     "type": "object",
                     "description": "read table type is used for spark read table properties, typically used for reading files in object storage",
-                    "minProperties": 1,
-                    "maxProperties": 1,
-                    "patternProperties": {
-                        "^\\S+$": { 
-                            "type": "object",
-                            "description": "name of the volume holding the files",
-                            "minProperties": 1,
-                            "patternProperties": {
-                                "^\\S+$": { 
-                                    "type": ["string", "null"],
-                                    "description": "name or partname of the file that indicates the data table e.g. customers_20201001.csv would be customers"
-                                }
-                            }
-                        }
+                    "properties": {
+                        "trigger": {
+                            "type": ["string", "null"],
+                            "description": "filemask patter to use as a trgger"
+                        },
+                        "trigger_type": {
+                            "type": ["string", "null"],
+                            "description": "type of trgger"
+                        },
+                        "container": {
+                            "type": ["string", "null"],
+                            "description": "type of trgger"
+                        },
+                        "location": {
+                            "type": ["string", "null"],
+                            "description": "file directory location"
+                        },
+                        "filename": {
+                            "type": ["string", "null"],
+                            "description": "filename mask"
+                        },
+                        "filename_date_format": {
+                            "type": ["string", "null"],
+                            "description": "define a date format jinja variable for filename dates"
+                        },
+                        "path_date_format": {
+                            "type": ["string", "null"],
+                            "description": "define a date format jinja variable for file paths"
+                        },
+                        "slice_date": {
+                            "type": "string",
+                            "enum": ["filename_date_format", "path_date_format"],
+                            "description": "either the filename_date_format or the path_date_format used to shred the time period from the filename or path respectively"
+                        },
+                        "format": {
+                            "type": "string",
+                            "enum": ["cloudFiles", "csv", "json", "parquet"],
+                            "description": "format of the landing file"
+                        },
+                        "spark_schema": {
+                            "type": "string",
+                            "description": "relative path to where the spark definition is held"
+                        },
+                        "options": { "$ref": "#/$defs/options" }
                     }
                 }
             },
@@ -44,6 +74,7 @@
                 "read"
             ]
         },
+
         "raw": {
             "type": "object",
             "description": "definition of the raw database and tables",
@@ -61,149 +92,52 @@
     },
     "required": [
         "version",
-        "landing",
-        "raw"
+        "landing"
     ],
 
     "$defs": {
         "delta_lake": {
             "type": "object",
-            "description": "defines a table object as a delta lake table",
+            "description": "defines a stage as a delta lake table stage",
             "properties": {
-                "delta_properties": { "$ref": "#/$defs/delta_properties" }
-
-            },
-            "patternProperties": {
-                "^\\S+$": { "$ref": "#/$defs/delta_lake_database" }
-            }
-
-        },
-        "delta_lake_database": {
-            "type": "object",
-            "description": "database containing tables",
-            "minProperties": 1,
-            "properties": {
-                "catalog": {
-                    "type": "string",
-                    "description": "the default catalog name for the database"
-                }
-            },
-            "patternProperties": {
-                "^(?!catalog)(\\S+)$": { "$ref": "#/$defs/delta_lake_table" }
-            }
-        },
-        "delta_lake_table": {
-            "type": "object",
-            "description": "defines a deltalake table and it's properties",
-            "properties":{
                 "managed": {
                     "type": "boolean",
                     "description": "whether it's a managed table or unmanaged that requires a location"
                 },
                 "delta_properties": { "$ref": "#/$defs/delta_properties" },
-                "delta_constraints": { "$ref": "#/$defs/delta_constraints" },
-                "custom_properties": { "$ref": "#/$defs/custom_properties" },
-                "depends_on": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "uniqueItems": true,
-                    "pattern": "^(\\S+\\.)(\\S+\\.)(\\*|\\S+)",
-                    "description": "use to denote dependency on other tables referenced their index this is the stage.database.table. The form stage.database.* can also be used to reference all tables"
-                },
                 "exception_thresholds": { "$ref": "#/$defs/thresholds" },
                 "warning_thresholds": { "$ref": "#/$defs/thresholds" },
-                "partition_by": {
-                    "oneOf": [
-                        {
-                            "type": "string",
-                            "description": "columns on which to partition by"
-                        }, 
-                        {
-                            "type": "array",
-                            "uniqueItems": true,
-                            "items": {
-                              "type": "string"
-                            },
-                            "description": "columns on which to partition by"
-                        }
-                    ]
+                "container": {
+                    "type": ["string", "null"],
+                    "description": "type of trgger"
                 },
-                "cluster_by": {
-                    "oneOf": [
-                        {
-                            "type": "string",
-                            "description": "columns on which to appply liquid clustering"
-                        }, 
-                        {
-                            "type": "array",
-                            "uniqueItems": true,
-                            "items": {
-                              "type": "string"
-                            },
-                            "description": "columns on which to appply liquid clustering"
-                        }
-                    ]
+                "location": {
+                    "type": ["string", "null"],
+                    "description": "file location of managed tables for the stage"
                 },
-                "z_order_by": {
-                    "oneOf": [
-                        {
-                            "type": "string",
-                            "description": "column on which to appply z-ording"
-                        }, 
-                        {
-                            "type": "array",
-                            "uniqueItems": true,
-                            "items": {
-                              "type": "string"
-                            },
-                            "description": "columns on which to appply z-ording"
-                        }
-                    ]
+                "path": {
+                    "type": ["string", "null"],
+                    "description": "path of the table appended to the location of the stage"
                 },
-                "id": {
-                    "oneOf": [
-                        {
-                            "type": "string",
-                            "description": "column(s) that comprise the unique identifier"
-                        }, 
-                        {
-                            "type": "array",
-                            "uniqueItems": true,
-                            "items": {
-                              "type": "string"
-                            },
-                            "description": "column(s) that comprise the unique identifier"
-                        }
-                    ]
-                },
-                "vacuum": {
-                    "type": "integer",
-                    "description": "vacuum retention threshold in the number of hours",
-                    "minimum": 0
-                }
-            }
-        },
-        "delta_constraints": {
-            "type": "object",
-            "description": "holds key value pairs of delta constraints",
-            "minProperties": 1,
-            "patternProperties":{
-                "^\\S+$": {
+                "options": { "$ref": "#/$defs/options" },
+                "database": {
                     "type": "string",
-                    "description": "check constraint logic"
+                    "description": "name of the database, {{ database }} variable will inherit the database name from table configuration"
+                },
+                "table": {
+                    "type": "string",
+                    "description": "name of the database table, {{ table }} variable will inherit the database name from table configuration"
                 }
             }
         },
-        "custom_properties": {
-            "type": "object",
+        "options": {
+            "type": ["object","null"],
             "description": "holds key value pairs of custom properties",
             "minProperties": 1,
             "patternProperties":{
                 "^\\S+$": {
                     "type": ["string","number","boolean"],
-                    "description": "custom property"
+                    "description": "value kay pairs of the spark DSL read options"
                 }
             }
         },

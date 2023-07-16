@@ -7,7 +7,7 @@ from ._utils import abs_config_path, load_yaml, get_config_path, check_version
 from ._logging_config import configure_logging
 import logging
 from ._project import Project
-from ..validation import validate_tables
+from ..validation import validate_tables, validate_pipeline
 
 
 class Config:
@@ -41,6 +41,7 @@ class Config:
         pipeline_file = f"{pipeline}.yaml"
         config_file_path = os.path.join(self.project.pipelines, pipeline_file)
         pipeline = load_yaml(config_file_path)
+        validate_pipeline(pipeline)
         check_version(pipeline)
         return pipeline
 
