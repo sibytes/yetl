@@ -266,9 +266,10 @@ class Metadata(BaseModel):
                     ColumnNames.exception_thresholds.name
                 ]
         data["version"] = self.version
-        data[self.stage.value][self.table_type.value][self.database][
-            ColumnNames.catalog.name
-        ] = self.catalog
+        if self.catalog:
+            data[self.stage.value][self.table_type.value][self.database][
+                ColumnNames.catalog.name
+            ] = self.catalog
         data[self.stage.value][self.table_type.value][self.database][self.table] = table
 
         return data
