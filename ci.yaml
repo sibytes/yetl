@@ -36,7 +36,7 @@ steps:
 
 - script: |    
     pip install .
-    pytest test/ --junitxml=junit/test-results.xml --cov=yetl --cov-report=xml --cov-report=html
+    pytest test/ --junitxml=junit/test-results.xml --cov=yetl --cov-report=xml
   displayName: 'Unit & Integration Tests'
 
 
