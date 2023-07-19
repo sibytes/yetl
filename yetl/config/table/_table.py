@@ -1,7 +1,7 @@
 import logging
 from pydantic import BaseModel, Field, PrivateAttr
 from .._utils import JinjaVariables
-from typing import Any, Dict, Union, List
+from typing import Any, Dict, Union, List, Optional
 from .._timeslice import Timeslice
 from .._stage_type import StageType
 from ._table_type import TableType
@@ -19,10 +19,10 @@ class ValidationThreshold(BaseModel):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
 
-    invalid_ratio: float = Field(default=None)
-    invalid_rows: int = Field(default=None)
-    max_rows: int = Field(default=None)
-    min_rows: int = Field(default=None)
+    invalid_ratio: Optional[float] = Field(default=None)
+    invalid_rows: Optional[int] = Field(default=None)
+    max_rows: Optional[int] = Field(default=None)
+    min_rows: Optional[int] = Field(default=None)
 
     @classmethod
     def default_select_sql(cls):
@@ -74,20 +74,20 @@ class Table(BaseModel):
     database: str = Field(...)
     table: str = Field(...)
     id: Union[str, List[str]] = Field(default=[])
-    custom_properties: Dict[str, Any] = Field(default=None)
+    custom_properties: Optional[Dict[str, Any]] = Field(default=None)
     table_type: TableType = Field(...)
-    warning_thresholds: ValidationThreshold = Field(default=None)
-    exception_thresholds: ValidationThreshold = Field(default=None)
+    warning_thresholds: Optional[ValidationThreshold] = Field(default=None)
+    exception_thresholds: Optional[ValidationThreshold] = Field(default=None)
     project: Project = Field(...)
     container: str = Field(...)
     location: str = Field(...)
-    path: str = Field(default=None)
+    path: Optional[str] = Field(default=None)
     options: dict = Field(...)
     timeslice: Timeslice = Field(...)
-    checkpoint: str = Field(default=None)
+    checkpoint: Optional[str] = Field(default=None)
     config_path: str = Field(...)
-    catalog: str = Field(default=None)
-    catalog_enabled: bool = Field(default=True)
+    catalog: Optional[str] = Field(default=None)
+    catalog_enabled: Optional[bool] = Field(default=True)
 
     def _render(self):
         self._replacements = {

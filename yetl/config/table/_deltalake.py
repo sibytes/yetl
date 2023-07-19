@@ -7,7 +7,7 @@ from .._utils import (
     abs_config_path,
     load_text,
 )
-from typing import Any, Dict, Union, List
+from typing import Any, Dict, Union, List, Optional
 from .._timeslice import Timeslice
 import os
 from .._stage_type import StageType
@@ -29,20 +29,20 @@ class DeltaLake(Table):
     _logger: Any = PrivateAttr(default=None)
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
     _spark: DeltaLakeFn = PrivateAttr(default=None)
-    depends_on: List[str] = Field(default=[])
-    delta_properties: Dict[str, Union[str, bool, int, float]] = Field(default=None)
-    delta_constraints: Dict[str, str] = Field(default=None)
-    partition_by: Union[List[str], str] = Field(default=None)
-    cluster_by: Union[List[str], str] = Field(default=None)
-    z_order_by: Union[List[str], str] = Field(default=None)
-    vacuum: int = Field(default=31)
-    options: Union[dict, None] = Field(default=None)
+    depends_on: Optional[List[str]] = Field(default=[])
+    delta_properties: Optional[Dict[str, Union[str, bool, int, float]]] = Field(default=None)
+    delta_constraints: Optional[Dict[str, str]] = Field(default=None)
+    partition_by: Optional[Union[List[str], str]] = Field(default=None)
+    cluster_by: Optional[Union[List[str], str]] = Field(default=None)
+    z_order_by: Optional[Union[List[str], str]] = Field(default=None)
+    vacuum: Optional[int] = Field(default=31)
+    options: Optional[Union[dict, None]] = Field(default=None)
     timeslice: Timeslice = Field(...)
-    location: str = Field(default=None)
+    location: Optional[str] = Field(default=None)
     stage: StageType = Field(...)
-    managed: bool = Field(default=False)
+    managed: Optional[bool] = Field(default=False)
 
-    sql: str = Field(default=None)
+    sql: Optional[str] = Field(default=None)
 
     def _load_sql(self, path: str):
         path = abs_config_path(self.config_path, path)

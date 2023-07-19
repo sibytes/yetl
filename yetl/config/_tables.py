@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, PrivateAttr
-from typing import Union, Any, Dict, List
+from typing import Union, Any, Dict, List, Optional
 from ._stage_type import StageType
 import fnmatch
 from ._table_mapping import TableMapping
@@ -89,7 +89,7 @@ class Tables(BaseModel):
 
     table_data: dict = Field(...)
     tables_index: Dict[str, Table] = Field(default={})
-    delta_properties: Dict[str, str] = Field(default=None)
+    delta_properties: Optional[Dict[str, str]] = Field(default=None)
     _logger: Any = PrivateAttr(default=None)
 
     @classmethod

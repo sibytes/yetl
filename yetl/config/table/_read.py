@@ -1,7 +1,7 @@
 import logging
 from pydantic import Field, PrivateAttr
 from .._utils import JinjaVariables, render_jinja, get_ddl, load_schema, abs_config_path
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Optional
 from enum import Enum
 import os
 from pyspark.sql.types import StructType
@@ -60,19 +60,19 @@ class Read(Table):
 
     _logger: Any = PrivateAttr(default=None)
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
-    managed: bool = Field(default=False)
-    trigger: str = Field(default=None)
-    trigger_type: TriggerType = Field(default=None)
+    managed: Optional[bool] = Field(default=False)
+    trigger: Optional[str] = Field(default=None)
+    trigger_type: Optional[TriggerType] = Field(default=None)
     filename: str = Field(...)
     filename_date_format: str = Field(...)
     path_date_format: str = Field(...)
     format: str = Field(...)
-    spark_schema: Union[StructType, str] = Field(default=None)
-    ddl: List[str] = Field(default=None)
-    headerless_ddl: List[str] = Field(default=None)
+    spark_schema: Optional[Union[StructType, str]] = Field(default=None)
+    ddl: Optional[List[str]] = Field(default=None)
+    headerless_ddl: Optional[List[str]] = Field(default=None)
     stage: StageType = Field(...)
-    slice_date: SliceDateFormat = Field(default=SliceDateFormat.FILENAME_DATE_FORMAT)
-    slice_date_column_name: str = Field(default="_slice_date")
+    slice_date: Optional[SliceDateFormat] = Field(default=SliceDateFormat.FILENAME_DATE_FORMAT)
+    slice_date_column_name: Optional[str] = Field(default="_slice_date")
 
     def _render(self):
         super()._render()

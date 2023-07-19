@@ -3,7 +3,7 @@ from pyspark.sql import DataFrame
 import logging
 from pyspark.sql.types import StructType, StructField
 import jinja2
-from typing import List, Union, Dict
+from typing import List, Union, Dict, Optional
 from ._spark_context import get_spark_context
 from pydantic import BaseModel, Field, PrivateAttr
 from typing import Any
@@ -20,7 +20,7 @@ class DeltaLakeFn(BaseModel):
 
     _logger: Any = PrivateAttr(default=None)
     project: Project = Field(...)
-    spark: SparkSession = Field(default=None)
+    spark: Optional[SparkSession] = Field(default=None)
 
     @classmethod
     def to_regex_search_pattern(cls, py_format: str):

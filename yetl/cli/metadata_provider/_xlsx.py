@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 import yaml
 from functools import reduce
 import os
-from typing import Any, Union, Dict
+from typing import Any, Union, Dict, Optional
 import pkg_resources
 
 
@@ -74,28 +74,28 @@ class Metadata(BaseModel):
 
     stage: StageType = Field(...)
     table_type: TableType = Field(...)
-    catalog: str = Field(default=None)
+    catalog: Optional[str] = Field(default=None)
     database: str = Field(...)
     table: str = Field(...)
-    sql: str = Field(default=None)
-    id: str = Field(default=None)
-    depends_on: str = Field(default=None)
-    deltalake_delta_properties: str = Field(default=None)
+    sql: Optional[str] = Field(default=None)
+    id: Optional[str] = Field(default=None)
+    depends_on: Optional[str] = Field(default=None)
+    deltalake_delta_properties: Optional[str] = Field(default=None)
     custom_properties: Dict[str, Any] = Field(default=None)
-    deltalake_identity: str = Field(default=None)
-    deltalake_partition_by: str = Field(default=None)
-    deltalake_cluster_by: str = Field(default=None)
-    deltalake_delta_constraints: str = Field(default=None)
-    deltalake_z_order_by: str = Field(default=None)
-    deltalake_vacuum: Union[int, None] = Field(default=None)
-    warning_thresholds_invalid_ratio: float = Field(default=None)
-    warning_thresholds_invalid_rows: int = Field(default=None)
-    warning_thresholds_max_rows: int = Field(default=None)
-    warning_thresholds_min_rows: int = Field(default=None)
-    exception_thresholds_invalid_ratio: float = Field(default=None)
-    exception_thresholds_invalid_rows: int = Field(default=None)
-    exception_thresholds_max_rows: int = Field(default=None)
-    exception_thresholds_min_rows: int = Field(default=None)
+    deltalake_identity: Optional[str] = Field(default=None)
+    deltalake_partition_by: Optional[str] = Field(default=None)
+    deltalake_cluster_by: Optional[str] = Field(default=None)
+    deltalake_delta_constraints: Optional[str] = Field(default=None)
+    deltalake_z_order_by: Optional[str] = Field(default=None)
+    deltalake_vacuum: Optional[Union[int, None]] = Field(default=None)
+    warning_thresholds_invalid_ratio: Optional[float] = Field(default=None)
+    warning_thresholds_invalid_rows: Optional[int] = Field(default=None)
+    warning_thresholds_max_rows: Optional[int] = Field(default=None)
+    warning_thresholds_min_rows: Optional[int] = Field(default=None)
+    exception_thresholds_invalid_ratio: Optional[float] = Field(default=None)
+    exception_thresholds_invalid_rows: Optional[int] = Field(default=None)
+    exception_thresholds_max_rows: Optional[int] = Field(default=None)
+    exception_thresholds_min_rows: Optional[int] = Field(default=None)
     version: str = Field(
         default=pkg_resources.get_distribution("yetl-framework").version
     )
@@ -314,7 +314,7 @@ class XlsMetadata(BaseModel):
         self.data = self._deserialize(df)
 
     source: str = Field(...)
-    data: dict = Field(default=None)
+    data: Optional[dict] = Field(default=None)
 
     def _auto_convert(self, data: Any):
         if isinstance(data, float):

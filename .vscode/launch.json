@@ -13,16 +13,20 @@
             "console": "integratedTerminal",
             "envFile": "${workspaceFolder}/.env",
             "args": [
-                "validate", 
-                "test_project", 
-                "autoloader", 
-                "./test/config"
+                // "validate", 
+                // "test_project", 
+                // "autoloader", 
+                // "./test/config"
                 
                 // "init", "test_yetl"
                 
                 // "import-tables",
                 // "./test/config/test_project/pipelines/tables.xlsx",
                 // "./test/config/test_project/pipelines/test_tables.yaml"
+
+                "import-tables",
+                "./test/config/fnz_pb/pipelines/tables.xlsx",
+                "./test/config/fnz_pb/pipelines/tables.yaml"
             ],
             "env": {  }
         },
