@@ -8,6 +8,7 @@ from ._logging_config import configure_logging
 import logging
 from ._project import Project
 from ..validation import validate_tables, validate_pipeline
+from typing import Union
 
 
 class Config:
@@ -62,11 +63,48 @@ class Config:
         tables = Tables(table_data=tables_config)
         return tables
 
+    def create_tables(
+        self,
+        stage: Union[StageType, str] = _INDEX_WILDCARD,
+        database=_INDEX_WILDCARD,
+        catalog: str = None,
+        catalog_enabled: bool = True,
+        **kwargs,
+    ):
+        return self.tables.create_table(
+            stage=stage,
+            database=database,
+            first_match=False,
+            catalog=catalog,
+            catalog_enabled=catalog_enabled,
+            **kwargs
+        )
+    
+
+    def create_table(
+        self,
+        stage: Union[StageType, str] = _INDEX_WILDCARD,
+        database=_INDEX_WILDCARD,
+        table=_INDEX_WILDCARD,
+        catalog: str = None,
+        catalog_enabled: bool = True,
+        **kwargs,
+    ):
+        return self.tables.create_table(
+            stage=stage,
+            database=database,
+            table=table,
+            first_match=True,
+            catalog=catalog,
+            catalog_enabled=catalog_enabled,
+            **kwargs
+        )
+
     def get_table_mapping(
         self,
         stage: StageType,
-        table: str = _INDEX_WILDCARD,
         database: str = _INDEX_WILDCARD,
+        table: str = _INDEX_WILDCARD,
         create_database: bool = True,
         create_table: bool = True,
         catalog: str = None,
@@ -79,7 +117,7 @@ class Config:
             create_database=create_database,
             create_table=create_table,
             catalog=catalog,
-            catalog_enabled=catalog_enabled,
+            catalog_enabled=catalog_enabled
         )
 
         return table_mapping
@@ -97,3 +135,28 @@ class Config:
         source.render()
         destination.checkpoint = checkpoint_name
         destination.render()
+
+
+    def lookup_table(
+        self,
+        stage: Union[StageType, str] = _INDEX_WILDCARD,
+        database=_INDEX_WILDCARD,
+        table=_INDEX_WILDCARD,
+        first_match: bool = True,
+        create_database: bool = False,
+        create_table: bool = False,
+        catalog: str = None,
+        catalog_enabled: bool = True,
+        **kwargs,
+    ):
+        self.tables.lookup_table(
+            stage=stage,
+            database=database,
+            table=table,
+            first_match=first_match,
+            create_database=create_database,
+            create_table=create_table,
+            catalog=catalog,
+            catalog_enabled=catalog_enabled,
+            **kwargs,
+        )

@@ -3,29 +3,37 @@ import os
 import shutil
 
 
-from yetl import __main__
+# from yetl import __main__
 
-# def tear_down():
-#     shutil.rmtree("./test/config/test_project/data", ignore_errors=True)
-#     shutil.rmtree("./metastore_db", ignore_errors=True)
-#     shutil.rmtree("./spark-warehouse", ignore_errors=True)
-#     try:
-#         os.remove("./derby.log")
-#     except Exception:
-#         pass
+def tear_down():
+    shutil.rmtree("./test/config/test_project/data", ignore_errors=True)
+    shutil.rmtree("./metastore_db", ignore_errors=True)
+    shutil.rmtree("./spark-warehouse", ignore_errors=True)
+    try:
+        os.remove("./derby.log")
+    except Exception:
+        pass
 
 
-# tear_down()
-# pipeline = "autoloader"
-# config_path = "./test/config"
-# project = "test_project"
-# timeslice = Timeslice(day="*", month="*", year="*")
-# config = Config(
-#     project=project, 
-#     pipeline=pipeline, 
-#     config_path=config_path, 
-#     timeslice=timeslice,
-# )
+tear_down()
+pipeline = "autoloader"
+config_path = "./test/config"
+project = "test_project"
+timeslice = Timeslice(day="*", month="*", year="*")
+config = Config(
+    project=project, 
+    pipeline=pipeline, 
+    config_path=config_path, 
+    timeslice=timeslice,
+)
+
+tables = config.tables.create_table(
+    stage=StageType.audit_control,
+    first_match=False,
+    catalog="development",
+    catalog_enabled=True
+)
+
 # table_mapping = config.get_table_mapping(
 #     stage=StageType.raw, table="customers", catalog_enabled=False
 # )
