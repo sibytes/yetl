@@ -30,7 +30,9 @@ class DeltaLake(Table):
     _replacements: Dict[JinjaVariables, str] = PrivateAttr(default=None)
     _spark: DeltaLakeFn = PrivateAttr(default=None)
     depends_on: Optional[List[str]] = Field(default=[])
-    delta_properties: Optional[Dict[str, Union[str, bool, int, float]]] = Field(default=None)
+    delta_properties: Optional[Dict[str, Union[str, bool, int, float]]] = Field(
+        default=None
+    )
     delta_constraints: Optional[Dict[str, str]] = Field(default=None)
     partition_by: Optional[Union[List[str], str]] = Field(default=None)
     cluster_by: Optional[Union[List[str], str]] = Field(default=None)

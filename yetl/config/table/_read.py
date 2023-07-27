@@ -71,7 +71,9 @@ class Read(Table):
     ddl: Optional[List[str]] = Field(default=None)
     headerless_ddl: Optional[List[str]] = Field(default=None)
     stage: StageType = Field(...)
-    slice_date: Optional[SliceDateFormat] = Field(default=SliceDateFormat.FILENAME_DATE_FORMAT)
+    slice_date: Optional[SliceDateFormat] = Field(
+        default=SliceDateFormat.FILENAME_DATE_FORMAT
+    )
     slice_date_column_name: Optional[str] = Field(default="_slice_date")
 
     def _render(self):

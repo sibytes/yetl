@@ -77,9 +77,8 @@ class Config:
             first_match=False,
             catalog=catalog,
             catalog_enabled=catalog_enabled,
-            **kwargs
+            **kwargs,
         )
-    
 
     def create_table(
         self,
@@ -97,7 +96,7 @@ class Config:
             first_match=True,
             catalog=catalog,
             catalog_enabled=catalog_enabled,
-            **kwargs
+            **kwargs,
         )
 
     def get_table_mapping(
@@ -117,7 +116,7 @@ class Config:
             create_database=create_database,
             create_table=create_table,
             catalog=catalog,
-            catalog_enabled=catalog_enabled
+            catalog_enabled=catalog_enabled,
         )
 
         return table_mapping
@@ -135,7 +134,6 @@ class Config:
         source.render()
         destination.checkpoint = checkpoint_name
         destination.render()
-
 
     def lookup_table(
         self,
