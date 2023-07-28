@@ -147,7 +147,7 @@ class Config:
         catalog_enabled: bool = True,
         **kwargs,
     ):
-        self.tables.lookup_table(
+        return self.tables.lookup_table(
             stage=stage,
             database=database,
             table=table,
