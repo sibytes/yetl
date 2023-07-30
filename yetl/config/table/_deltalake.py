@@ -6,6 +6,7 @@ from .._utils import (
     is_databricks,
     abs_config_path,
     load_text,
+    DEFAULT_CATALOG,
 )
 from typing import Any, Dict, Union, List, Optional
 from .._timeslice import Timeslice
@@ -87,13 +88,13 @@ class DeltaLake(Table):
 
         self._rendered = True
 
-    def create_database(self, catalog: str = None, catalog_enabled: bool = True):
-        super().create_database(catalog=catalog, catalog_enabled=catalog_enabled)
+    def create_database(self, catalog: str = DEFAULT_CATALOG):
+        super().create_database(catalog=catalog)
         self._spark.create_database(self.database, catalog=self.catalog)
 
     # TODO: Create or alter table
-    def create_table(self, catalog: str = None, catalog_enabled: bool = True):
-        super().create_table(catalog=catalog, catalog_enabled=catalog_enabled)
+    def create_table(self, catalog: str = DEFAULT_CATALOG):
+        super().create_table(catalog=catalog)
         if self._spark.table_exists(
             database=self.database, table=self.table, catalog=self.catalog
         ):

@@ -40,7 +40,7 @@ def test_configuration_load(tear_down, root_path):
         timeslice=timeslice
     )
     table_mapping = config.get_table_mapping(
-        stage=StageType.raw, table="customers", catalog_enabled=False
+        stage=StageType.raw, table="customers", catalog=None
     )
 
     source: Read = table_mapping.source["customer_details_1"]
@@ -95,7 +95,7 @@ def test_decorator_configuration_load(tear_down):
             project="test_project", 
             stage=StageType.raw, 
             config_path="./test/config",
-            catalog_enabled=False
+            catalog=None
     )
     def autoloader(table_mapping:TableMapping):
         return table_mapping
@@ -112,7 +112,7 @@ def test_decorator_configuration_audit_load(tear_down):
             project="test_project", 
             stage=StageType.audit_control, 
             config_path="./test/config",
-            catalog_enabled=False
+            catalog=None
     )
     def autoloader(table_mapping:TableMapping):
         return table_mapping

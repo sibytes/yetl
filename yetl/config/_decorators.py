@@ -5,6 +5,7 @@ from ._config import Config
 from ._timeslice import Timeslice
 from ._stage_type import StageType
 from .table import Table
+from ._utils import DEFAULT_CATALOG
 
 
 def yetl_flow(
@@ -12,8 +13,7 @@ def yetl_flow(
     project: str,
     pipeline: str = None,
     config_path: str = None,
-    catalog: str = None,
-    catalog_enabled: bool = True,
+    catalog: str = DEFAULT_CATALOG,
 ):
     def decorate(function):
         def wrap_function(*args, **kwargs):
@@ -46,7 +46,6 @@ def yetl_flow(
                 stage=stage,
                 table=table,
                 catalog=catalog,
-                catalog_enabled=catalog_enabled,
             )
 
             destination: Table = table_mapping.destination

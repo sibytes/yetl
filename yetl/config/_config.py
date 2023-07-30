@@ -3,7 +3,13 @@ from .table import Table
 from ._timeslice import Timeslice
 from ._tables import Tables, _INDEX_WILDCARD, KeyContants
 from ._stage_type import StageType
-from ._utils import abs_config_path, load_yaml, get_config_path, check_version
+from ._utils import (
+    abs_config_path,
+    load_yaml,
+    get_config_path,
+    check_version,
+    DEFAULT_CATALOG,
+)
 from ._logging_config import configure_logging
 import logging
 from ._project import Project
@@ -67,8 +73,7 @@ class Config:
         self,
         stage: Union[StageType, str] = _INDEX_WILDCARD,
         database=_INDEX_WILDCARD,
-        catalog: str = None,
-        catalog_enabled: bool = True,
+        catalog: str = DEFAULT_CATALOG,
         **kwargs,
     ):
         return self.tables.create_table(
@@ -76,7 +81,6 @@ class Config:
             database=database,
             first_match=False,
             catalog=catalog,
-            catalog_enabled=catalog_enabled,
             **kwargs,
         )
 
@@ -85,8 +89,7 @@ class Config:
         stage: Union[StageType, str] = _INDEX_WILDCARD,
         database=_INDEX_WILDCARD,
         table=_INDEX_WILDCARD,
-        catalog: str = None,
-        catalog_enabled: bool = True,
+        catalog: str = DEFAULT_CATALOG,
         **kwargs,
     ):
         return self.tables.create_table(
@@ -95,7 +98,6 @@ class Config:
             table=table,
             first_match=True,
             catalog=catalog,
-            catalog_enabled=catalog_enabled,
             **kwargs,
         )
 
@@ -106,8 +108,7 @@ class Config:
         table: str = _INDEX_WILDCARD,
         create_database: bool = True,
         create_table: bool = True,
-        catalog: str = None,
-        catalog_enabled: bool = True,
+        catalog: str = DEFAULT_CATALOG,
     ):
         table_mapping = self.tables.get_table_mapping(
             stage=stage,
@@ -116,7 +117,6 @@ class Config:
             create_database=create_database,
             create_table=create_table,
             catalog=catalog,
-            catalog_enabled=catalog_enabled,
         )
 
         return table_mapping
@@ -143,8 +143,7 @@ class Config:
         first_match: bool = True,
         create_database: bool = False,
         create_table: bool = False,
-        catalog: str = None,
-        catalog_enabled: bool = True,
+        catalog: str = DEFAULT_CATALOG,
         **kwargs,
     ):
         return self.tables.lookup_table(
@@ -155,6 +154,5 @@ class Config:
             create_database=create_database,
             create_table=create_table,
             catalog=catalog,
-            catalog_enabled=catalog_enabled,
             **kwargs,
         )

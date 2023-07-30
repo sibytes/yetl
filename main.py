@@ -16,26 +16,25 @@ def tear_down():
 
 
 tear_down()
-pipeline = "autoloader"
-config_path = "./test/config"
-project = "test_project"
-timeslice = Timeslice(day="*", month="*", year="*")
-config = Config(
-    project=project, 
-    pipeline=pipeline, 
-    config_path=config_path, 
-    timeslice=timeslice,
-)
+# pipeline = "autoloader"
+# config_path = "./test/config"
+# project = "test_project"
+# timeslice = Timeslice(day="*", month="*", year="*")
+# config = Config(
+#     project=project, 
+#     pipeline=pipeline, 
+#     config_path=config_path, 
+#     timeslice=timeslice,
+# )
 
-tables = config.tables.create_table(
-    stage=StageType.audit_control,
-    first_match=False,
-    catalog="development",
-    catalog_enabled=True
-)
+# tables = config.tables.create_table(
+#     stage=StageType.audit_control,
+#     first_match=False,
+#     catalog="development"
+# )
 
 # table_mapping = config.get_table_mapping(
-#     stage=StageType.raw, table="customers", catalog_enabled=False
+#     stage=StageType.raw, table="customers", catalog=None
 # )
 
 # source: Read = table_mapping.source["customer_details_1"]
@@ -45,3 +44,19 @@ tables = config.tables.create_table(
 
 # t:Timeslice = Timeslice.parse_iso_date("*-*-")
 # print(t.strftime("%Y%m%d"))
+
+
+
+@yetl_flow(
+        project="test_project", 
+        stage=StageType.audit_control, 
+        config_path="./test/config",
+        catalog=None
+)
+def autoloader(table_mapping:TableMapping):
+    return table_mapping
+
+
+result = autoloader(table="header_footer")
+tear_down()
+

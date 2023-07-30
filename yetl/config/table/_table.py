@@ -1,6 +1,6 @@
 import logging
 from pydantic import BaseModel, Field, PrivateAttr
-from .._utils import JinjaVariables
+from .._utils import JinjaVariables, DEFAULT_CATALOG
 from typing import Any, Dict, Union, List, Optional
 from .._timeslice import Timeslice
 from .._stage_type import StageType
@@ -87,7 +87,6 @@ class Table(BaseModel):
     checkpoint: Optional[str] = Field(default=None)
     config_path: str = Field(...)
     catalog: Optional[str] = Field(default=None)
-    catalog_enabled: Optional[bool] = Field(default=True)
 
     def _render(self):
         self._replacements = {
@@ -120,18 +119,14 @@ class Table(BaseModel):
             else:
                 return ValidationThreshold.default_select_sql()
 
-    def _set_catalog(self, catalog: str = None, catalog_enabled: bool = True):
-        if catalog:
-            self.catalog = catalog
-        self.catalog_enabled = catalog_enabled
-        if not self.catalog_enabled:
-            self.catalog = None
+    def _set_catalog(self, catalog: str = DEFAULT_CATALOG):
+        self.catalog = catalog
 
-    def create_table(self, catalog: str = None, catalog_enabled: bool = True):
-        self._set_catalog(catalog, catalog_enabled)
+    def create_table(self, catalog: str = DEFAULT_CATALOG):
+        self._set_catalog(catalog)
 
-    def create_database(self, catalog: str = None, catalog_enabled: bool = True):
-        self._set_catalog(catalog, catalog_enabled)
+    def create_database(self, catalog: str = DEFAULT_CATALOG):
+        self._set_catalog(catalog)
 
     def qualified_table_name(self):
         pass

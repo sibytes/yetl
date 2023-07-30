@@ -6,6 +6,7 @@ from ._table_mapping import TableMapping
 from .table import TableType
 from .table import table_factory
 from .table import Table
+from ._utils import DEFAULT_CATALOG
 from enum import Enum
 import logging
 
@@ -139,8 +140,7 @@ class Tables(BaseModel):
         database=_INDEX_WILDCARD,
         table=_INDEX_WILDCARD,
         first_match: bool = True,
-        catalog: str = None,
-        catalog_enabled: bool = True,
+        catalog: str = DEFAULT_CATALOG,
         **kwargs,
     ):
         return self.lookup_table(
@@ -151,7 +151,6 @@ class Tables(BaseModel):
             create_database=True,
             create_table=True,
             catalog=catalog,
-            catalog_enabled=catalog_enabled,
             **kwargs,
         )
 
@@ -163,8 +162,7 @@ class Tables(BaseModel):
         first_match: bool = True,
         create_database: bool = False,
         create_table: bool = False,
-        catalog: str = None,
-        catalog_enabled: bool = True,
+        catalog: str = DEFAULT_CATALOG,
         **kwargs,
     ):
         index = Tables.get_index(stage, database, table)
@@ -204,9 +202,9 @@ class Tables(BaseModel):
             msg_tables = f"{table.database}.{table.table}"
             self._logger.info(f"Matched tables: {msg_tables}")
             if create_database:
-                table.create_database(catalog=catalog, catalog_enabled=catalog_enabled)
+                table.create_database(catalog=catalog)
             if create_table:
-                table.create_table(catalog=catalog, catalog_enabled=catalog_enabled)
+                table.create_table(catalog=catalog)
             return table
         else:
             tables = [tables_index[i] for i in matches]
@@ -217,11 +215,9 @@ class Tables(BaseModel):
                 for t in tables:
                     if create_database and db != t.database:
                         db = t.database
-                        t.create_database(
-                            catalog=catalog, catalog_enabled=catalog_enabled
-                        )
+                        t.create_database(catalog=catalog)
                     if create_table:
-                        t.create_table()
+                        t.create_table(catalog=catalog)
             return tables
 
     def get_table_mapping(
@@ -231,8 +227,7 @@ class Tables(BaseModel):
         database=_INDEX_WILDCARD,
         create_database: bool = True,
         create_table: bool = True,
-        catalog: str = None,
-        catalog_enabled: bool = True,
+        catalog: str = DEFAULT_CATALOG,
     ):
         destination = self.lookup_table(
             stage=stage,
@@ -242,7 +237,6 @@ class Tables(BaseModel):
             create_database=create_database,
             create_table=create_table,
             catalog=catalog,
-            catalog_enabled=catalog_enabled,
         )
         source = {}
 
@@ -258,7 +252,6 @@ class Tables(BaseModel):
                     create_database=create_database,
                     create_table=create_table,
                     catalog=catalog,
-                    catalog_enabled=catalog_enabled,
                 )
         except Exception as e:
             raise Exception(f"Error looking up dependencies for table {table}") from e
