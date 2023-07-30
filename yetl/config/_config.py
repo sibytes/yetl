@@ -3,13 +3,7 @@ from .table import Table
 from ._timeslice import Timeslice
 from ._tables import Tables, _INDEX_WILDCARD, KeyContants
 from ._stage_type import StageType
-from ._utils import (
-    abs_config_path,
-    load_yaml,
-    get_config_path,
-    check_version,
-    DEFAULT_CATALOG,
-)
+from ._utils import abs_config_path, load_yaml, get_config_path, check_version
 from ._logging_config import configure_logging
 import logging
 from ._project import Project

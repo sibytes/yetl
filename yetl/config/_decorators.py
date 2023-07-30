@@ -5,7 +5,6 @@ from ._config import Config
 from ._timeslice import Timeslice
 from ._stage_type import StageType
 from .table import Table
-from ._utils import DEFAULT_CATALOG
 
 
 def yetl_flow(

@@ -6,7 +6,6 @@ from ._table_mapping import TableMapping
 from .table import TableType
 from .table import table_factory
 from .table import Table
-from ._utils import DEFAULT_CATALOG
 from enum import Enum
 import logging
 

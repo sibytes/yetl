@@ -1,6 +1,6 @@
 import logging
 from pydantic import BaseModel, Field, PrivateAttr
-from .._utils import JinjaVariables, DEFAULT_CATALOG
+from .._utils import JinjaVariables
 from typing import Any, Dict, Union, List, Optional
 from .._timeslice import Timeslice
 from .._stage_type import StageType

@@ -6,7 +6,6 @@ from .._utils import (
     is_databricks,
     abs_config_path,
     load_text,
-    DEFAULT_CATALOG,
 )
 from typing import Any, Dict, Union, List, Optional
 from .._timeslice import Timeslice

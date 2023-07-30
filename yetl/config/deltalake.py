@@ -8,7 +8,6 @@ from ._spark_context import get_spark_context
 from pydantic import BaseModel, Field, PrivateAttr
 from typing import Any
 from ._project import Project
-from ._utils import DEFAULT_CATALOG
 from pyspark.sql import SparkSession
 import re
 
@@ -296,9 +295,7 @@ class DeltaLakeFn(BaseModel):
         database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
         return f"ALTER TABLE {database}.`{table}` SET TBLPROPERTIES ({properties});"
 
-    def get_table_properties(
-        self, database: str, table: str, catalog: str = None
-    ):
+    def get_table_properties(self, database: str, table: str, catalog: str = None):
         database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
         self._logger.debug(
             f"getting existing table properties for table {database}.`{table}`"
@@ -351,9 +348,7 @@ class DeltaLakeFn(BaseModel):
         self._logger.info(f"optimizing table {database}.{table}\n{sql}")
         self.spark.sql(sql)
 
-    def get_table_details(
-        self, database: str, table: str, catalog: str = None
-    ):
+    def get_table_details(self, database: str, table: str, catalog: str = None):
         database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
         self._logger.debug(
             f"getting existing table details and partitions for table {database}.{table}"

@@ -12,7 +12,6 @@ YETL_CONFIG = "YETL_CONFIG"
 _ENCODING = "utf-8"
 _DBX_WORKSPACE_PATH = "/Workspace"
 _DBX_REPO_PATH = "/Workspace/Repos"
-DEFAULT_CATALOG = "hive_metastore"
 
 
 class VersionNotFoundException(Exception):
