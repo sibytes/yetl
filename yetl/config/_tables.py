@@ -54,7 +54,8 @@ class Tables(BaseModel):
                 for database_name, table in database.items():
                     if PushDownProperties.has_not_value(database_name):
                         catalog = table.get(PushDownProperties.CATALOG.value)
-                        del table[PushDownProperties.CATALOG.value]
+                        if PushDownProperties.CATALOG.value in table:
+                            del table[PushDownProperties.CATALOG.value]
                         for table_name, table_properties in table.items():
                             table_config = {
                                 KeyContants.DATABASE.value: database_name,
@@ -140,7 +141,7 @@ class Tables(BaseModel):
         database=_INDEX_WILDCARD,
         table=_INDEX_WILDCARD,
         first_match: bool = True,
-        catalog: str = DEFAULT_CATALOG,
+        catalog: str = None,
         **kwargs,
     ):
         return self.lookup_table(
@@ -162,7 +163,7 @@ class Tables(BaseModel):
         first_match: bool = True,
         create_database: bool = False,
         create_table: bool = False,
-        catalog: str = DEFAULT_CATALOG,
+        catalog: str = None,
         **kwargs,
     ):
         index = Tables.get_index(stage, database, table)
@@ -227,7 +228,7 @@ class Tables(BaseModel):
         database=_INDEX_WILDCARD,
         create_database: bool = True,
         create_table: bool = True,
-        catalog: str = DEFAULT_CATALOG,
+        catalog: str = None,
     ):
         destination = self.lookup_table(
             stage=stage,

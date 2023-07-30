@@ -9,7 +9,7 @@ audit_control:
         partition_by: none
         sql: ../sql/{{database}}/{{table}}.sql
         vacuum: 30
-      catalog: hive_metastore
+      catalog: null
       raw_audit:
         depends_on:
         - raw.raw_dbx_patterns.*
@@ -27,7 +27,7 @@ landing:
 raw:
   delta_lake:
     raw_dbx_patterns:
-      catalog: hive_metastore
+      catalog: null
       customers:
         custom_properties:
           process_group: 1
@@ -54,7 +54,7 @@ raw:
 base:
   delta_lake:
     base_dbx_patterns:
-      catalog: hive_metastore
+      catalog: null
       customer_details_1:
         delta_properties:
           delta.appendOnly: true

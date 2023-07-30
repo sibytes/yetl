@@ -210,7 +210,7 @@ class DeltaLakeFn(BaseModel):
 
         return predicate
 
-    def table_exists(self, database: str, table: str, catalog: str = DEFAULT_CATALOG):
+    def table_exists(self, database: str, table: str, catalog: str = None):
         database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
         _table_exists = (
             self.spark.sql(f"SHOW TABLES in {database};")
@@ -236,7 +236,7 @@ class DeltaLakeFn(BaseModel):
         path: str = None,
         delta_properties: List[str] = None,
         sql: str = None,
-        catalog: str = DEFAULT_CATALOG,
+        catalog: str = None,
     ):
         database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
         table = f"`{table}`"
@@ -264,7 +264,7 @@ class DeltaLakeFn(BaseModel):
     def create_database(
         self,
         database: str,
-        catalog: str = DEFAULT_CATALOG,
+        catalog: str = None,
     ):
         database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
         self._logger.debug(f"Creating database if not exists {database}")
@@ -274,7 +274,7 @@ class DeltaLakeFn(BaseModel):
         return sql
 
     def alter_table_drop_constraint(
-        self, database: str, table: str, name: str, catalog: str = DEFAULT_CATALOG
+        self, database: str, table: str, name: str, catalog: str = None
     ):
         database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
         return f"ALTER TABLE {database}.`{table}` DROP CONSTRAINT {name};"
@@ -285,19 +285,19 @@ class DeltaLakeFn(BaseModel):
         table: str,
         name: str,
         constraint: str,
-        catalog: str = DEFAULT_CATALOG,
+        catalog: str = None,
     ):
         database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
         return f"ALTER TABLE {database}.`{table}` ADD CONSTRAINT {name} CHECK ({constraint});"
 
     def alter_table_set_tblproperties(
-        self, database: str, table: str, properties: str, catalog: str = DEFAULT_CATALOG
+        self, database: str, table: str, properties: str, catalog: str = None
     ):
         database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
         return f"ALTER TABLE {database}.`{table}` SET TBLPROPERTIES ({properties});"
 
     def get_table_properties(
-        self, database: str, table: str, catalog: str = DEFAULT_CATALOG
+        self, database: str, table: str, catalog: str = None
     ):
         database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
         self._logger.debug(
@@ -334,7 +334,7 @@ class DeltaLakeFn(BaseModel):
         table: str,
         partition_values: dict,
         zorder_by: list = [],
-        catalog: str = DEFAULT_CATALOG,
+        catalog: str = None,
     ):
         database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
         sql = f"OPTIMIZE {database}.`{table}`"
@@ -352,7 +352,7 @@ class DeltaLakeFn(BaseModel):
         self.spark.sql(sql)
 
     def get_table_details(
-        self, database: str, table: str, catalog: str = DEFAULT_CATALOG
+        self, database: str, table: str, catalog: str = None
     ):
         database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
         self._logger.debug(

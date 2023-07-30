@@ -119,13 +119,14 @@ class Table(BaseModel):
             else:
                 return ValidationThreshold.default_select_sql()
 
-    def _set_catalog(self, catalog: str = DEFAULT_CATALOG):
-        self.catalog = catalog
+    def _set_catalog(self, catalog: str = None):
+        if catalog:
+            self.catalog = catalog
 
-    def create_table(self, catalog: str = DEFAULT_CATALOG):
+    def create_table(self, catalog: str = None):
         self._set_catalog(catalog)
 
-    def create_database(self, catalog: str = DEFAULT_CATALOG):
+    def create_database(self, catalog: str = None):
         self._set_catalog(catalog)
 
     def qualified_table_name(self):

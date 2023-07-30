@@ -40,7 +40,7 @@ def test_configuration_load(tear_down, root_path):
         timeslice=timeslice
     )
     table_mapping = config.get_table_mapping(
-        stage=StageType.raw, table="customers", catalog=None
+        stage=StageType.raw, table="customers"
     )
 
     source: Read = table_mapping.source["customer_details_1"]

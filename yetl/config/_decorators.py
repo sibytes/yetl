@@ -13,7 +13,7 @@ def yetl_flow(
     project: str,
     pipeline: str = None,
     config_path: str = None,
-    catalog: str = DEFAULT_CATALOG,
+    catalog: str = None,
 ):
     def decorate(function):
         def wrap_function(*args, **kwargs):

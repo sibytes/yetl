@@ -73,7 +73,7 @@ class Config:
         self,
         stage: Union[StageType, str] = _INDEX_WILDCARD,
         database=_INDEX_WILDCARD,
-        catalog: str = DEFAULT_CATALOG,
+        catalog: str = None,
         **kwargs,
     ):
         return self.tables.create_table(
@@ -89,7 +89,7 @@ class Config:
         stage: Union[StageType, str] = _INDEX_WILDCARD,
         database=_INDEX_WILDCARD,
         table=_INDEX_WILDCARD,
-        catalog: str = DEFAULT_CATALOG,
+        catalog: str = None,
         **kwargs,
     ):
         return self.tables.create_table(
@@ -108,7 +108,7 @@ class Config:
         table: str = _INDEX_WILDCARD,
         create_database: bool = True,
         create_table: bool = True,
-        catalog: str = DEFAULT_CATALOG,
+        catalog: str = None,
     ):
         table_mapping = self.tables.get_table_mapping(
             stage=stage,
@@ -143,7 +143,7 @@ class Config:
         first_match: bool = True,
         create_database: bool = False,
         create_table: bool = False,
-        catalog: str = DEFAULT_CATALOG,
+        catalog: str = None,
         **kwargs,
     ):
         return self.tables.lookup_table(
