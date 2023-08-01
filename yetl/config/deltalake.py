@@ -9,7 +9,13 @@ from pydantic import BaseModel, Field, PrivateAttr
 from typing import Any
 from ._project import Project
 from pyspark.sql import SparkSession
+from enum import Enum
 import re
+
+
+class PartitionType(Enum):
+    CLUSTER = "CLUSTER"
+    PARTITIONED = "PARTITIONED"
 
 
 class DeltaLakeFn(BaseModel):
@@ -399,10 +405,22 @@ class DeltaLakeFn(BaseModel):
 
         return f"\t{field_name} {field_type} {nullable} {comment}"
 
+    def partition_by_ddl(self, fields: list, partition_type: PartitionType):
+        template_cluster_by = jinja2.Template(f"{partition_type.value} BY ({{fields}})")
+        if fields:
+            fields = [f"`{f}`" for f in fields]
+            fields = ",".join(fields)
+            ddl: str = template_cluster_by.render(fields=fields)
+        else:
+            ddl = ""
+
+        return ddl
+
     def create_table_dll(
         self,
         schema: StructType,
         partition_fields: list = [],
+        cluster_by_fields: list = [],
         format: str = "DELTA",
         always_identity_column: str = None,
     ):
@@ -415,29 +433,32 @@ class DeltaLakeFn(BaseModel):
 
         field_ddl = ",\n".join(field_ddl)
 
-        template_partition = jinja2.Template("PARTITIONED BY ({{partition_fields}})")
         template_ddl = jinja2.Template(
             """CREATE TABLE {{database_name}}.{{table_name}}
     (
     {{field_ddl}}
     )
     USING {{format}} LOCATION '{{path}}'
-    {{partition_ddl}}""",
+    {{partition_ddl}}
+    {{cluster_by_ddl}}""",
             undefined=jinja2.DebugUndefined,
         )
 
-        if partition_fields:
-            partition_fields = [f"`{p}`" for p in partition_fields]
-            partition_fields = ",".join(partition_fields)
-            partition_ddl: str = template_partition.render(
-                partition_fields=partition_fields
+        partition_ddl = ""
+        cluster_by_ddl = ""
+        if cluster_by_fields:
+            cluster_by_ddl = self.partition_by_ddl(
+                cluster_by_fields, PartitionType.CLUSTER
             )
-        else:
-            partition_ddl = ""
+        elif partition_fields:
+            partition_ddl = self.partition_by_ddl(
+                partition_fields, PartitionType.PARTITIONED
+            )
 
         replace = {
             "field_ddl": field_ddl,
             "partition_ddl": partition_ddl,
+            "cluster_by_ddl": cluster_by_ddl,
             "format": format,
         }
 
