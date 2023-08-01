@@ -455,7 +455,6 @@ class DeltaLakeFn(BaseModel):
         )
         create_table_ddl = f"CREATE TABLE {create_table_ddl}"
 
-        field_ddl = self.field_ddl(schema, always_identity_column)
         if delta_properties:
             delta_properties_ddl = self.get_delta_properties_sql(delta_properties)
             delta_properties_ddl = f"\nTBLPROPERTIES({delta_properties_ddl})"
@@ -464,19 +463,25 @@ class DeltaLakeFn(BaseModel):
 
         partition_ddl = ""
         cluster_by_ddl = ""
-        if cluster_by:
-            cluster_by_ddl = self.partition_by_ddl(cluster_by, PartitionType.CLUSTER)
-            cluster_by_ddl = f"\n{cluster_by_ddl}"
-        elif partition_by:
-            partition_ddl = self.partition_by_ddl(
-                partition_by, PartitionType.PARTITIONED
-            )
-            partition_ddl = f"\n{partition_ddl}"
 
+        field_ddl = self.field_ddl(schema, always_identity_column)
+        if field_ddl:
+            field_ddl = f"\n{field_ddl}"
+            if cluster_by:
+                cluster_by_ddl = self.partition_by_ddl(
+                    cluster_by, PartitionType.CLUSTER
+                )
+                cluster_by_ddl = f"\n{cluster_by_ddl}"
+            elif partition_by:
+                partition_ddl = self.partition_by_ddl(
+                    partition_by, PartitionType.PARTITIONED
+                )
+                partition_ddl = f"\n{partition_ddl}"
+            field_ddl = f"{field_ddl}{cluster_by_ddl}{partition_ddl}"
+
+        template_ddl = "{{create_table_ddl}}{{field_ddl}}\nUSING {{format}}{{location_ddl}}{{delta_properties_ddl}}"
         template_ddl = jinja2.Template(
-            """{{create_table_ddl}}
-    {{field_ddl}}{{partition_ddl}}{{cluster_by_ddl}}
-    USING {{format}}{{location_ddl}}{{delta_properties_ddl}}""",
+            template_ddl,
             undefined=jinja2.DebugUndefined,
         )
 
