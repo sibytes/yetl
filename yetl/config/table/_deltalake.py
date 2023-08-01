@@ -112,6 +112,8 @@ class DeltaLake(Table):
                     delta_properties=self.delta_properties,
                     sql=self.sql,
                     catalog=self.catalog,
+                    cluster_by=self.cluster_by,
+                    partition_by=self.partition_by,
                 )
             else:
                 self._spark.create_table(
@@ -121,6 +123,8 @@ class DeltaLake(Table):
                     path=self.location,
                     sql=self.sql,
                     catalog=self.catalog,
+                    cluster_by=self.cluster_by,
+                    partition_by=self.partition_by,
                 )
 
     def qualified_table_name(self):

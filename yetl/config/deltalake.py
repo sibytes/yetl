@@ -239,27 +239,28 @@ class DeltaLakeFn(BaseModel):
         database: str,
         table: str,
         path: str = None,
-        delta_properties: List[str] = None,
+        delta_properties: Optional[List[str]] = None,
         sql: str = None,
         catalog: str = None,
+        schema: Optional[StructType] = None,
+        always_identity_column: Optional[str] = None,
+        partition_by: Optional[List[str]] = None,
+        cluster_by: Optional[List[str]] = None,
     ):
-        database = f"`{catalog}`.`{database}`" if catalog else f"`{database}`"
-        table = f"`{table}`"
-        self._logger.info(f"Creating table if not exists {database}.{table} at {path}")
+
+        self._logger.info(f"Creating table if not exists {catalog}.{database}.{table} at {path}")
         if not sql:
-            sql = f"CREATE TABLE IF NOT EXISTS {database}.{table}"
-
-            # add in the delta properties if there are any
-            sql_properties = ""
-            if delta_properties:
-                sql_properties = self.get_delta_properties_sql(delta_properties)
-                sql_properties = f"TBLPROPERTIES({sql_properties})"
-
-            sql_path = ""
-            if path:
-                sql_path = f"USING DELTA LOCATION '{path}'"
-
-                sql = f"{sql}\n{sql_path}\n{sql_properties};"
+            sql = self.create_table_dll(
+                database=database,
+                table=table,
+                catalog=catalog,
+                schema=schema,
+                always_identity_column=always_identity_column,
+                partition_by=partition_by,
+                cluster_by=cluster_by,
+                delta_properties=delta_properties,
+                location=path,
+            )
 
         self._logger.info(f"{sql}")
         self.spark.sql(sql)
@@ -416,50 +417,78 @@ class DeltaLakeFn(BaseModel):
 
         return ddl
 
+    def field_ddl(
+        self, schema: StructType, always_identity_column: Optional[str] = None
+    ):
+        if schema is not None:
+            ddl = [self.create_column_ddl(f) for f in schema.fields]
+            if always_identity_column:
+                always_identity_column = (
+                    f"\t`{always_identity_column}` GENERATED ALWAYS AS IDENTITY"
+                )
+                ddl = [always_identity_column] + ddl
+
+            ddl = ",\n".join(ddl)
+
+            return ddl
+        else:
+            return ""
+
     def create_table_dll(
         self,
-        schema: StructType,
-        partition_fields: list = [],
-        cluster_by_fields: list = [],
+        database: str,
+        table: str,
+        catalog: Optional[str] = None,
+        schema: Optional[StructType] = None,
+        always_identity_column: Optional[str] = None,
+        partition_by: Optional[List[str]] = None,
+        cluster_by: Optional[List[str]] = None,
+        delta_properties: Optional[List[str]] = None,
         format: str = "DELTA",
-        always_identity_column: str = None,
+        location: Optional[str] = None,
     ):
-        field_ddl = [self.create_column_ddl(f) for f in schema.fields]
-        if always_identity_column:
-            always_identity_column = (
-                f"\t`{always_identity_column}` GENERATED ALWAYS AS IDENTITY"
-            )
-            field_ddl = [always_identity_column] + field_ddl
-
-        field_ddl = ",\n".join(field_ddl)
-
-        template_ddl = jinja2.Template(
-            """CREATE TABLE {{database_name}}.{{table_name}}
-    (
-    {{field_ddl}}
-    )
-    USING {{format}} LOCATION '{{path}}'
-    {{partition_ddl}}
-    {{cluster_by_ddl}}""",
-            undefined=jinja2.DebugUndefined,
+        create_table_ddl = (
+            f"`{catalog}`.`{database}`.`{table}`"
+            if catalog
+            else f"`{database}`.`{table}`"
         )
+        create_table_ddl = f"CREATE TABLE {create_table_ddl}"
+
+        field_ddl = self.field_ddl(schema, always_identity_column)
+        if delta_properties:
+            delta_properties_ddl = self.get_delta_properties_sql(delta_properties)
+            delta_properties_ddl = f"TBLPROPERTIES({delta_properties_ddl})"
+
+        location_ddl = f"LOCATION '{location}'" if location else ""
 
         partition_ddl = ""
         cluster_by_ddl = ""
-        if cluster_by_fields:
-            cluster_by_ddl = self.partition_by_ddl(
-                cluster_by_fields, PartitionType.CLUSTER
-            )
-        elif partition_fields:
+        if cluster_by:
+            cluster_by_ddl = self.partition_by_ddl(cluster_by, PartitionType.CLUSTER)
+        elif partition_by:
             partition_ddl = self.partition_by_ddl(
-                partition_fields, PartitionType.PARTITIONED
+                partition_by, PartitionType.PARTITIONED
             )
 
+        template_ddl = jinja2.Template(
+            """{{create_table_ddl}}
+    {{field_ddl}}
+    {{partition_ddl}}
+    {{cluster_by_ddl}}
+    USING {{format}}
+    {{location_ddl}}
+    {{delta_properties_ddl}}""",
+            undefined=jinja2.DebugUndefined,
+        )
+
         replace = {
+            "create_table_ddl": create_table_ddl,
             "field_ddl": field_ddl,
             "partition_ddl": partition_ddl,
             "cluster_by_ddl": cluster_by_ddl,
             "format": format,
+            "location_ddl": location_ddl,
+            "delta_properties_ddl": delta_properties_ddl,
         }
 
         table_ddl = template_ddl.render(replace)
