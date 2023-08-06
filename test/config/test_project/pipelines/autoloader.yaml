@@ -17,6 +17,20 @@ audit_control:
     options:
       checkpointLocation: "/mnt/{{container}}/checkpoint/{{project}}/{{checkpoint}}"
 
+source:
+  delta_lake:
+    # delta table properties can be set at stage level or table level
+    delta_properties:
+      delta.appendOnly: true
+      delta.autoOptimize.autoCompact: true    
+      delta.autoOptimize.optimizeWrite: true  
+      delta.enableChangeDataFeed: false
+    managed: false
+    container: datalake
+    location: /mnt/{{container}}/data/source
+    path: "{{database}}/{{table}}"
+    options: null
+
 landing:
   read:
     trigger: customerdetailscomplete-{{filename_date_format}}*.flg
