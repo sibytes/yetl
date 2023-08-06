@@ -110,7 +110,7 @@
             }
         },
         "delta_lake_table": {
-            "type": "object",
+            "type": ["object", "null"],
             "description": "defines a deltalake table and it's properties",
             "properties":{
                 "managed": {

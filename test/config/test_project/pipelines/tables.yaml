@@ -21,12 +21,8 @@ source:
   delta_lake:
     source_dbx_patterns:
       catalog: hive_metastore
-      customer_details_1: 
-        custom_properties:
-          process_group: 1
-      customer_details_2: 
-        custom_properties:
-          process_group: 1
+      customer_details_1: null
+      customer_details_2: null
 
 landing:
   read:
