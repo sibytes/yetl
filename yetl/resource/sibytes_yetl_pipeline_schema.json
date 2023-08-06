@@ -20,8 +20,21 @@
             "type": "object",
             "description": "definition of the landing stage and files",
             "properties": {
-                "delta_lake": { "$ref": "#/$defs/delta_lake" }
-            }
+                "delta_lake": { "$ref": "#/$defs/delta_lake" },
+                "read": { "$ref": "#/$defs/read" }
+            },
+            "oneOf": [
+                {
+                    "required":[
+                        "read"
+                    ]
+                },
+                {
+                    "required":[
+                        "delta_lake"
+                    ]
+                }
+            ]
         },
         "landing": {
             "type": "object",
