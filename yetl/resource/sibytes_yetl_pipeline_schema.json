@@ -16,59 +16,18 @@
                 "delta_lake": { "$ref": "#/$defs/delta_lake" }
             }
         },
+        "source": {
+            "type": "object",
+            "description": "definition of the landing stage and files",
+            "properties": {
+                "delta_lake": { "$ref": "#/$defs/delta_lake" }
+            }
+        },
         "landing": {
             "type": "object",
             "description": "definition of the landing stage and files",
             "properties": {
-                "read": {
-                    "type": "object",
-                    "description": "read table type is used for spark read table properties, typically used for reading files in object storage",
-                    "properties": {
-                        "trigger": {
-                            "type": ["string", "null"],
-                            "description": "filemask patter to use as a trgger"
-                        },
-                        "trigger_type": {
-                            "type": ["string", "null"],
-                            "description": "type of trgger"
-                        },
-                        "container": {
-                            "type": ["string", "null"],
-                            "description": "type of trgger"
-                        },
-                        "location": {
-                            "type": ["string", "null"],
-                            "description": "file directory location"
-                        },
-                        "filename": {
-                            "type": ["string", "null"],
-                            "description": "filename mask"
-                        },
-                        "filename_date_format": {
-                            "type": ["string", "null"],
-                            "description": "define a date format jinja variable for filename dates"
-                        },
-                        "path_date_format": {
-                            "type": ["string", "null"],
-                            "description": "define a date format jinja variable for file paths"
-                        },
-                        "slice_date": {
-                            "type": "string",
-                            "enum": ["filename_date_format", "path_date_format"],
-                            "description": "either the filename_date_format or the path_date_format used to shred the time period from the filename or path respectively"
-                        },
-                        "format": {
-                            "type": "string",
-                            "enum": ["cloudFiles", "csv", "json", "parquet"],
-                            "description": "format of the landing file"
-                        },
-                        "spark_schema": {
-                            "type": "string",
-                            "description": "relative path to where the spark definition is held"
-                        },
-                        "options": { "$ref": "#/$defs/options" }
-                    }
-                }
+                "read": { "$ref": "#/$defs/read" }
             },
             "required":[
                 "read"
@@ -96,6 +55,56 @@
     ],
 
     "$defs": {
+        "read": {
+            "type": "object",
+            "description": "read table type is used for spark read table properties, typically used for reading files in object storage",
+            "properties": {
+                "trigger": {
+                    "type": ["string", "null"],
+                    "description": "filemask patter to use as a trgger"
+                },
+                "trigger_type": {
+                    "type": ["string", "null"],
+                    "description": "type of trgger"
+                },
+                "container": {
+                    "type": ["string", "null"],
+                    "description": "type of trgger"
+                },
+                "location": {
+                    "type": ["string", "null"],
+                    "description": "file directory location"
+                },
+                "filename": {
+                    "type": ["string", "null"],
+                    "description": "filename mask"
+                },
+                "filename_date_format": {
+                    "type": ["string", "null"],
+                    "description": "define a date format jinja variable for filename dates"
+                },
+                "path_date_format": {
+                    "type": ["string", "null"],
+                    "description": "define a date format jinja variable for file paths"
+                },
+                "slice_date": {
+                    "type": "string",
+                    "enum": ["filename_date_format", "path_date_format"],
+                    "description": "either the filename_date_format or the path_date_format used to shred the time period from the filename or path respectively"
+                },
+                "format": {
+                    "type": "string",
+                    "enum": ["cloudFiles", "csv", "json", "parquet"],
+                    "description": "format of the landing file"
+                },
+                "spark_schema": {
+                    "type": "string",
+                    "description": "relative path to where the spark definition is held"
+                },
+                "options": { "$ref": "#/$defs/options" }
+            }
+        },
+
         "delta_lake": {
             "type": "object",
             "description": "defines a stage as a delta lake table stage",
