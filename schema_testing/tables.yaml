@@ -19,6 +19,7 @@ audit_control:
         sql: ../sql/{{database}}/{{table}}.sql
         vacuum: 30
 
+
 landing:
   read:
     landing_dbx_patterns:

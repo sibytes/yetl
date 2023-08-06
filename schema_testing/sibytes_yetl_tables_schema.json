@@ -16,33 +16,33 @@
                 "delta_lake": { "$ref": "#/$defs/delta_lake" }
             }
         },
+        "source": {
+            "type": "object",
+            "description": "definition of the source stage",
+            "properties": {
+                "read": { "$ref": "#/$defs/read" },
+                "delta_lake": { "$ref": "#/$defs/delta_lake" }
+            },
+            "oneOf": [
+                {
+                    "required":[
+                        "read"
+                    ]
+                },
+                {
+                    "required":[
+                        "delta_lake"
+                    ]
+                }
+            ]
+        },
         "landing": {
             "type": "object",
             "description": "definition of the landing stage and files",
             "properties": {
-                "read": {
-                    "type": "object",
-                    "description": "read table type is used for spark read table properties, typically used for reading files in object storage",
-                    "minProperties": 1,
-                    "maxProperties": 1,
-                    "patternProperties": {
-                        "^\\S+$": { 
-                            "type": "object",
-                            "description": "name of the volume holding the files",
-                            "minProperties": 1,
-                            "patternProperties": {
-                                "^\\S+$": { 
-                                    "type": ["string", "null"],
-                                    "description": "name or partname of the file that indicates the data table e.g. customers_20201001.csv would be customers"
-                                }
-                            }
-                        }
-                    }
-                }
+                "read": { "$ref": "#/$defs/read" }
             },
-            "required":[
-                "read"
-            ]
+            "required": ["read"]
         },
         "raw": {
             "type": "object",
@@ -64,6 +64,25 @@
     ],
 
     "$defs": {
+        "read": {
+            "type": "object",
+            "description": "read table type is used for spark read table properties, typically used for reading files in object storage",
+            "minProperties": 1,
+            "maxProperties": 1,
+            "patternProperties": {
+                "^\\S+$": { 
+                    "type": "object",
+                    "description": "name of the volume holding the files",
+                    "minProperties": 1,
+                    "patternProperties": {
+                        "^\\S+$": { 
+                            "type": ["string", "null"],
+                            "description": "name or partname of the file that indicates the data table e.g. customers_20201001.csv would be customers"
+                        }
+                    }
+                }
+            }
+        },
         "delta_lake": {
             "type": "object",
             "description": "defines a table object as a delta lake table",
