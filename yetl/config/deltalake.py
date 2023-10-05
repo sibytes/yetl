@@ -455,6 +455,7 @@ class DeltaLakeFn(BaseModel):
         )
         create_table_ddl = f"CREATE TABLE {create_table_ddl}"
 
+        delta_properties_ddl = ""
         if delta_properties:
             delta_properties_ddl = self.get_delta_properties_sql(delta_properties)
             delta_properties_ddl = f"\nTBLPROPERTIES({delta_properties_ddl})"
