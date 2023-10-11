@@ -125,6 +125,7 @@ class DeltaLake(Table):
                     path=self.location,
                     sql=self.sql,
                     catalog=self.catalog,
+                    schema=schema,
                     cluster_by=self.cluster_by,
                     partition_by=self.partition_by,
                 )
