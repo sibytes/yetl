@@ -13,7 +13,7 @@ import os
 from .._stage_type import StageType
 from ._table import Table
 from ..deltalake import DeltaLakeFn
-
+from pyspark.sql.types import StructType
 
 class DeltaLake(Table):
     def __init__(self, **data: Any) -> None:
@@ -91,8 +91,11 @@ class DeltaLake(Table):
         super().create_database(catalog=catalog)
         self._spark.create_database(self.database, catalog=self.catalog)
 
-    # TODO: Create or alter table
-    def create_table(self, catalog: str = None):
+    # TODO: alter table
+    def create_table(self, 
+        catalog: str = None,
+        schema: StructType = None
+    ):
         super().create_table(catalog=catalog)
         if self._spark.table_exists(
             database=self.database, table=self.table, catalog=self.catalog
@@ -112,6 +115,7 @@ class DeltaLake(Table):
                     delta_properties=self.delta_properties,
                     sql=self.sql,
                     catalog=self.catalog,
+                    schema=schema,
                     cluster_by=self.cluster_by,
                     partition_by=self.partition_by,
                 )

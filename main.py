@@ -34,7 +34,10 @@ config = Config(
 # )
 
 table_mapping = config.get_table_mapping(
-    stage=StageType.audit_control, table="header_footer", catalog=None
+    stage=StageType.raw, 
+    table="header_footer", 
+    catalog=None,
+    create_table=True
 )
 
 # source: Read = table_mapping.source["customer_details_1"]
