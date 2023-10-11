@@ -430,6 +430,7 @@ class DeltaLakeFn(BaseModel):
                 ddl = [always_identity_column] + ddl
 
             ddl = ",\n".join(ddl)
+            ddl = "\n(\n" + ddl + "\n(\n"
 
             return ddl
         else:
