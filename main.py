@@ -37,8 +37,9 @@ table_mapping = config.get_table_mapping(
     stage=StageType.raw, 
     table="header_footer", 
     catalog=None,
-    create_table=True
+    create_table=False
 )
+
 
 # source: Read = table_mapping.source["customer_details_1"]
 # destination: DeltaLake = table_mapping.destination

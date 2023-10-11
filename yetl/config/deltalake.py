@@ -401,7 +401,7 @@ class DeltaLakeFn(BaseModel):
 
     def create_column_ddl(self, field: StructField):
         nullable = "" if field.nullable else "NOT NULL"
-        comment = f"COMMENT {field.metadata}" if field.metadata else ""
+        comment = f"COMMENT '{field.metadata}'" if field.metadata else ""
         field_type = field.dataType.typeName()
         field_name = f"`{field.name}`"
 
@@ -431,7 +431,7 @@ class DeltaLakeFn(BaseModel):
                 ddl = [always_identity_column] + ddl
 
             ddl = ",\n".join(ddl)
-            ddl = "\n(\n" + ddl + "\n(\n"
+            ddl = "(\n" + ddl + ")\n"
 
             return ddl
         else:
