@@ -463,6 +463,11 @@ class DeltaLakeFn(BaseModel):
             self.create_column_ddl(field, is_complex, indent) for field in schema.fields
         ]
         if indent == -1:
+            if always_identity_column:
+                always_identity_column = (
+                    f"\t`{always_identity_column}` GENERATED ALWAYS AS IDENTITY"
+                )
+                ddl = [always_identity_column] + ddl
             return ",\n".join(ddl)
         else:
             return ddl
