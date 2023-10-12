@@ -399,14 +399,6 @@ class DeltaLakeFn(BaseModel):
         self._logger.debug(msg)
         return details
 
-    def create_column_ddl(self, field: StructField):
-        nullable = "" if field.nullable else "NOT NULL"
-        comment = f"COMMENT '{field.metadata}'" if field.metadata else ""
-        field_type = field.dataType.typeName()
-        field_name = f"`{field.name}`"
-
-        return f"\t{field_name} {field_type} {nullable} {comment}"
-
     def partition_by_ddl(self, fields: list, partition_type: PartitionType):
         template_cluster_by = "{} BY ({{fields}})".format(partition_type.value)
         template_cluster_by = jinja2.Template(template_cluster_by)
@@ -419,23 +411,53 @@ class DeltaLakeFn(BaseModel):
 
         return ddl
 
-    def field_ddl(
-        self, schema: StructType, always_identity_column: Optional[str] = None
-    ):
-        if schema is not None:
-            ddl = [self.create_column_ddl(f) for f in schema.fields]
-            if always_identity_column:
-                always_identity_column = (
-                    f"\t`{always_identity_column}` GENERATED ALWAYS AS IDENTITY"
-                )
-                ddl = [always_identity_column] + ddl
+    # def field_ddl(
+    #     self, schema: StructType, always_identity_column: Optional[str] = None
+    # ):
+    #     if schema is not None:
+    #         ddl = [self.create_column_ddl(f) for f in schema.fields]
+    #         if always_identity_column:
+    #             always_identity_column = (
+    #                 f"\t`{always_identity_column}` GENERATED ALWAYS AS IDENTITY"
+    #             )
+    #             ddl = [always_identity_column] + ddl
 
-            ddl = ",\n".join(ddl)
-            ddl = "(\n" + ddl + ")\n"
+    #         ddl = ",\n".join(ddl)
+    #         ddl = "(\n" + ddl + ")\n"
 
-            return ddl
+    #         return ddl
+    #     else:
+    #         return ""
+
+    def create_column_ddl(self, field: StructField, is_complex: bool = False, indent=-1):
+        indent += 1
+        tab_in = "\t" * indent
+        nullable = "" if field.nullable else " NOT NULL"
+        comment = f" COMMENT '{field.metadata}'" if field.metadata else ""
+
+        if isinstance(field.dataType, StructType):
+            ddl = self.field_ddl(field.dataType, is_complex=True, indent=indent)
+            ddl = ",".join(ddl)
+            sep = " "
+            if is_complex:
+                sep = ":"
+            ddl = f"\n{tab_in}`{field.name}`{sep}struct<{ddl}>{nullable}{comment}"
+        elif is_complex:
+            ddl = f"\n{tab_in}`{field.name}`:{field.dataType.typeName()}"
         else:
-            return ""
+            field_type = field.dataType.typeName()
+        field_name = f"`{field.name}`"
+        ddl = f"{tab_in}{field_name} {field_type}{nullable}{comment}"
+        return ddl
+ 
+
+    def field_ddl(self, schema: StructType, always_identity_column: Optional[str] = None, is_complex = False, indent=-1):
+        ddl = [self.create_column_ddl(field, is_complex, indent) for field in schema.fields]
+        if indent == -1:
+            return ",\n".join(ddl)
+        else:
+            return ddl
+
 
     def create_table_dll(
         self,
