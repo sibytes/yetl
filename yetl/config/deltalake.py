@@ -429,7 +429,9 @@ class DeltaLakeFn(BaseModel):
     #     else:
     #         return ""
 
-    def create_column_ddl(self, field: StructField, is_complex: bool = False, indent=-1):
+    def create_column_ddl(
+        self, field: StructField, is_complex: bool = False, indent=-1
+    ):
         indent += 1
         tab_in = "\t" * indent
         nullable = "" if field.nullable else " NOT NULL"
@@ -449,15 +451,21 @@ class DeltaLakeFn(BaseModel):
         field_name = f"`{field.name}`"
         ddl = f"{tab_in}{field_name} {field_type}{nullable}{comment}"
         return ddl
- 
 
-    def field_ddl(self, schema: StructType, always_identity_column: Optional[str] = None, is_complex = False, indent=-1):
-        ddl = [self.create_column_ddl(field, is_complex, indent) for field in schema.fields]
+    def field_ddl(
+        self,
+        schema: StructType,
+        always_identity_column: Optional[str] = None,
+        is_complex=False,
+        indent=-1,
+    ):
+        ddl = [
+            self.create_column_ddl(field, is_complex, indent) for field in schema.fields
+        ]
         if indent == -1:
             return ",\n".join(ddl)
         else:
             return ddl
-
 
     def create_table_dll(
         self,
@@ -488,8 +496,9 @@ class DeltaLakeFn(BaseModel):
 
         partition_ddl = ""
         cluster_by_ddl = ""
-
-        field_ddl = self.field_ddl(schema, always_identity_column)
+        field_ddl = ""
+        if schema:
+            field_ddl = self.field_ddl(schema, always_identity_column)
         if field_ddl:
             field_ddl = f"\n{field_ddl}"
             if cluster_by:
