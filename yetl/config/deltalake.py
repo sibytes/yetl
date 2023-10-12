@@ -448,8 +448,8 @@ class DeltaLakeFn(BaseModel):
             ddl = f"\n{tab_in}`{field.name}`:{field.dataType.typeName()}"
         else:
             field_type = field.dataType.typeName()
-        field_name = f"`{field.name}`"
-        ddl = f"{tab_in}{field_name} {field_type}{nullable}{comment}"
+            field_name = f"`{field.name}`"
+            ddl = f"{tab_in}{field_name} {field_type}{nullable}{comment}"
         return ddl
 
     def field_ddl(
