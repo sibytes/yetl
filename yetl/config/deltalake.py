@@ -435,7 +435,7 @@ class DeltaLakeFn(BaseModel):
         indent += 1
         tab_in = "\t" * indent
         nullable = "" if field.nullable else " NOT NULL"
-        comment = f" COMMENT '{field.metadata}'" if field.metadata else ""
+        comment = f' COMMENT "{field.metadata}"' if field.metadata else ""
 
         if isinstance(field.dataType, StructType):
             ddl = self.field_ddl(field.dataType, is_complex=True, indent=indent)
