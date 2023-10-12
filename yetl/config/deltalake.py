@@ -500,7 +500,7 @@ class DeltaLakeFn(BaseModel):
         if schema:
             field_ddl = self.field_ddl(schema, always_identity_column)
         if field_ddl:
-            field_ddl = f"\n{field_ddl}"
+            field_ddl = f"\n(\n{field_ddl}\n)"
             if cluster_by:
                 cluster_by_ddl = self.partition_by_ddl(
                     cluster_by, PartitionType.CLUSTER
