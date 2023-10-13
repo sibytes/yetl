@@ -421,11 +421,11 @@ class DeltaLakeFn(BaseModel):
 
         if isinstance(field.dataType, StructType):
             ddl = self.field_ddl(field.dataType, is_complex=True, indent=indent)
-            ddl = ",".join(ddl)
+            ddl = ",\n".join(ddl)
             sep = " "
             if isinstance(parent_type, StructType):
                 sep = ":"
-            ddl = f"\n{tab_in}`{field.name}`{sep}struct<{ddl}>{nullable}{comment}"
+            ddl = f"{tab_in}`{field.name}`{sep}struct<\n{ddl}>{nullable}{comment}"
         # if isinstance(field.dataType, ArrayType):
         #     ddl =
         elif isinstance(parent_type, StructType):
