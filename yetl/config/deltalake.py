@@ -1,7 +1,7 @@
 import json
 from pyspark.sql import DataFrame
 import logging
-from pyspark.sql.types import StructType, StructField
+from pyspark.sql.types import StructType, StructField, ArrayType
 import jinja2
 from typing import List, Union, Dict, Optional
 from ._spark_context import get_spark_context
@@ -411,26 +411,8 @@ class DeltaLakeFn(BaseModel):
 
         return ddl
 
-    # def field_ddl(
-    #     self, schema: StructType, always_identity_column: Optional[str] = None
-    # ):
-    #     if schema is not None:
-    #         ddl = [self.create_column_ddl(f) for f in schema.fields]
-    #         if always_identity_column:
-    #             always_identity_column = (
-    #                 f"\t`{always_identity_column}` GENERATED ALWAYS AS IDENTITY"
-    #             )
-    #             ddl = [always_identity_column] + ddl
-
-    #         ddl = ",\n".join(ddl)
-    #         ddl = "(\n" + ddl + ")\n"
-
-    #         return ddl
-    #     else:
-    #         return ""
-
     def create_column_ddl(
-        self, field: StructField, is_complex: bool = False, indent=-1
+        self, field: StructField, parent_type: Union[StructType, ArrayType], indent=-1
     ):
         indent += 1
         tab_in = "\t" * indent
@@ -441,10 +423,12 @@ class DeltaLakeFn(BaseModel):
             ddl = self.field_ddl(field.dataType, is_complex=True, indent=indent)
             ddl = ",".join(ddl)
             sep = " "
-            if is_complex:
+            if isinstance(parent_type, StructType):
                 sep = ":"
             ddl = f"\n{tab_in}`{field.name}`{sep}struct<{ddl}>{nullable}{comment}"
-        elif is_complex:
+        # if isinstance(field.dataType, ArrayType):
+        #     ddl =
+        elif isinstance(parent_type, StructType):
             ddl = f"\n{tab_in}`{field.name}`:{field.dataType.typeName()}"
         else:
             field_type = field.dataType.typeName()
@@ -516,8 +500,8 @@ class DeltaLakeFn(BaseModel):
                     partition_by, PartitionType.PARTITIONED
                 )
                 partition_ddl = f"\n{partition_ddl}"
-            field_ddl = f"{field_ddl}{cluster_by_ddl}{partition_ddl}"
 
+        field_ddl = f"{field_ddl}{cluster_by_ddl}{partition_ddl}"
         template_ddl = "{{create_table_ddl}}{{field_ddl}}\nUSING {{format}}{{location_ddl}}{{delta_properties_ddl}}"
         template_ddl = jinja2.Template(
             template_ddl,
