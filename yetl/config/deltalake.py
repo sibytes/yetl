@@ -518,7 +518,11 @@ class DeltaLakeFn(BaseModel):
                 partition_ddl = f"\n{partition_ddl}"
 
         field_ddl = f"{field_ddl}{cluster_by_ddl}{partition_ddl}"
-        template_ddl = "{{create_table_ddl}}{{field_ddl}}\nUSING {{format}}{{location_ddl}}{{delta_properties_ddl}}"
+        if location_ddl:
+            template_ddl = "{{create_table_ddl}}{{field_ddl}}\nUSING {{format}}{{location_ddl}}{{delta_properties_ddl}}"
+        else:
+            template_ddl = "{{create_table_ddl}}{{field_ddl}}{{delta_properties_ddl}}"
+
         template_ddl = jinja2.Template(
             template_ddl,
             undefined=jinja2.DebugUndefined,
