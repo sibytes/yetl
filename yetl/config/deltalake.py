@@ -399,12 +399,16 @@ class DeltaLakeFn(BaseModel):
         self._logger.debug(msg)
         return details
 
-    def partition_by_ddl(self, fields: list, partition_type: PartitionType):
+    def partition_by_ddl(
+        self, fields: Optional[Union[list, str]], partition_type: PartitionType
+    ):
         template_cluster_by = partition_type.value + " BY ({{ fields }})"
         template_cluster_by = jinja2.Template(template_cluster_by)
-        if fields:
+        if isinstance(fields, list):
             fields = [f"`{f}`" for f in fields]
             fields = ",".join(fields)
+            ddl: str = template_cluster_by.render(fields=fields)
+        elif isinstance(fields, str):
             ddl: str = template_cluster_by.render(fields=fields)
         else:
             ddl = ""
