@@ -225,8 +225,8 @@ class Tables(BaseModel):
         stage: StageType,
         table=_INDEX_WILDCARD,
         database=_INDEX_WILDCARD,
-        create_database: bool = True,
-        create_table: bool = True,
+        create_database: bool = False,
+        create_table: bool = False,
         catalog: str = None,
     ):
         destination = self.lookup_table(

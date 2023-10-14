@@ -100,8 +100,8 @@ class Config:
         stage: StageType,
         database: str = _INDEX_WILDCARD,
         table: str = _INDEX_WILDCARD,
-        create_database: bool = True,
-        create_table: bool = True,
+        create_database: bool = False,
+        create_table: bool = False,
         catalog: str = None,
     ):
         table_mapping = self.tables.get_table_mapping(
