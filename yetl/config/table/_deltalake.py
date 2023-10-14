@@ -93,7 +93,9 @@ class DeltaLake(Table):
         self._spark.create_database(self.database, catalog=self.catalog)
 
     # TODO: alter table
-    def create_table(self, catalog: str = None, schema: StructType = None):
+    def create_table(self, catalog: str = None, schema: StructType = None, create_database = False):
+        if create_database:
+            self.create_database(catalog=catalog)
         super().create_table(catalog=catalog)
         if self._spark.table_exists(
             database=self.database, table=self.table, catalog=self.catalog
