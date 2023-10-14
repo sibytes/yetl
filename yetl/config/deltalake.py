@@ -400,7 +400,7 @@ class DeltaLakeFn(BaseModel):
         return details
 
     def partition_by_ddl(self, fields: list, partition_type: PartitionType):
-        template_cluster_by = "{} BY ({{fields}})".format(partition_type.value)
+        template_cluster_by = partition_type.value + " BY ({{ fields }})"
         template_cluster_by = jinja2.Template(template_cluster_by)
         if fields:
             fields = [f"`{f}`" for f in fields]
