@@ -1,7 +1,7 @@
 import json
 from pyspark.sql import DataFrame
 import logging
-from pyspark.sql.types import StructType, StructField, ArrayType
+from pyspark.sql.types import StructType, StructField, ArrayType, DecimalType
 import jinja2
 from typing import List, Union, Dict, Optional
 from ._spark_context import get_spark_context
@@ -411,27 +411,39 @@ class DeltaLakeFn(BaseModel):
 
         return ddl
 
-    def create_column_ddl(
-        self, field: StructField, parent_type: Union[StructType, ArrayType], indent=-1
-    ):
+    def field_type_ddl(self, dataType):
+        ddl = dataType.typeName()
+        if isinstance(dataType, DecimalType):
+            ddl = f"{ddl}({dataType.precision}, {dataType.scale})"
+        if isinstance(dataType, ArrayType):
+            ddl = f"{ddl}<{self.field_type_ddl(dataType.elementType)}>"
+        return ddl
+
+    def create_column_ddl(self, field: StructField, is_complex=False, indent=-1):
         indent += 1
         tab_in = "\t" * indent
         nullable = "" if field.nullable else " NOT NULL"
         comment = f' COMMENT "{field.metadata}"' if field.metadata else ""
 
-        if isinstance(field.dataType, StructType):
-            ddl = self.field_ddl(field.dataType, is_complex=True, indent=indent)
+        data_type = field.dataType
+        if isinstance(field.dataType, ArrayType) and isinstance(
+            field.dataType.elementType, StructType
+        ):
+            data_type = field.dataType.elementType
+
+        if isinstance(data_type, StructType):
+            ddl = self.field_ddl(data_type, is_complex=True, indent=indent)
             ddl = ",\n".join(ddl)
             sep = " "
-            if isinstance(parent_type, StructType):
+            if is_complex:
                 sep = ":"
             ddl = f"{tab_in}`{field.name}`{sep}struct<\n{ddl}>{nullable}{comment}"
-        # if isinstance(field.dataType, ArrayType):
-        #     ddl =
-        elif isinstance(parent_type, StructType):
-            ddl = f"\n{tab_in}`{field.name}`:{field.dataType.typeName()}"
+
+        elif is_complex:
+            ddl = f"{tab_in}`{field.name}`:{self.field_type_ddl(field.dataType)}"
+
         else:
-            field_type = field.dataType.typeName()
+            field_type = self.field_type_ddl(field.dataType)
             field_name = f"`{field.name}`"
             ddl = f"{tab_in}{field_name} {field_type}{nullable}{comment}"
         return ddl
@@ -449,7 +461,7 @@ class DeltaLakeFn(BaseModel):
         if indent == -1:
             if always_identity_column:
                 always_identity_column = (
-                    f"\t`{always_identity_column}` GENERATED ALWAYS AS IDENTITY"
+                    f"\t`{always_identity_column}` bigint GENERATED ALWAYS AS IDENTITY"
                 )
                 ddl = [always_identity_column] + ddl
             return ",\n".join(ddl)
