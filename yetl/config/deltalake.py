@@ -442,14 +442,10 @@ class DeltaLakeFn(BaseModel):
             if is_complex:
                 sep = ":"
             ddl = f"{tab_in}`{field.name}`{sep}struct<\n{ddl}>{nullable}{comment}"
-
         elif is_complex:
             ddl = f"{tab_in}`{field.name}`:{self.field_type_ddl(field.dataType)}"
-
         else:
-            field_type = self.field_type_ddl(field.dataType)
-            field_name = f"`{field.name}`"
-            ddl = f"{tab_in}{field_name} {field_type}{nullable}{comment}"
+            ddl = f"{tab_in}{field.name} {self.field_type_ddl(field.dataType)}{nullable}{comment}"
         return ddl
 
     def field_ddl(
